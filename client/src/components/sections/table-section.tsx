@@ -1,11 +1,11 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
-import { useQuery } from "@tanstack/react-query";
+import { useTableSummary } from "@/hooks/use-table-summary";
 import DOMPurify from "dompurify";
 
 
@@ -30,26 +30,20 @@ export default function TableSection() {
   // Gift of Chatzos state
   const [giftExpanded, setGiftExpanded] = useState(false);
   
-  // Get current day of week (0 = Sunday, 6 = Saturday)
-  const currentDayOfWeek = new Date().getDay();
+  // Fetch all Table content in a single batched request (5 API calls → 1)
+  const { data: tableSummary } = useTableSummary();
   
-  const { data: giftOfChatzos } = useQuery<{
-    title?: string;
-    subtitle?: string;
-    imageUrl?: string;
-    contentEnglish?: string;
-    contentHebrew?: string;
-    linkTitle?: string;
-    url?: string;
-    thankYouMessage?: string;
-  }>({
-    queryKey: ['/api/life/gift-of-chatzos', currentDayOfWeek],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
+  // Extract data from the batched response
+  const giftOfChatzos = tableSummary?.giftOfChatzos;
+  const lifeClasses = tableSummary?.lifeClasses || [];
+  const inspirationContent = tableSummary?.inspiration;
+  const recipeContent = tableSummary?.recipe;
 
   // Check if Gift of Chatzos has content
   const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
+
+  // Get the first available Life class for display
+  const currentLifeClass = lifeClasses?.[0];
 
   const formatGiftMarkdown = (text: string | null | undefined): string => {
     if (!text) return '';
@@ -57,45 +51,6 @@ export default function TableSection() {
     const withLineBreaks = withBold.replace(/\n/g, '<br>');
     return DOMPurify.sanitize(withLineBreaks);
   };
-
-  // Fetch today's table inspiration content
-  const today = new Date().toISOString().split('T')[0];
-  const { data: inspirationContent } = useQuery<Record<string, any>>({
-    queryKey: [`/api/table/inspiration/${today}`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/inspiration/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 1 hour
-  });
-
-
-
-  // Fetch daily recipe content
-  const { data: recipeContent } = useQuery<Record<string, any>>({
-    queryKey: [`/api/table/recipe`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/table/recipe`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
-  });
-
-  // Fetch shop items
-  useQuery<Record<string, any>[]>({
-    queryKey: ['/api/shop'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/shop`);
-      if (!response.ok) return [];
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000,
-    gcTime: 60 * 60 * 1000
-  });
 
   // Calculate days until Shabbat using Jewish day (tzait to tzait)
   const getDaysUntilShabbat = (tzaitTime?: string) => {
@@ -200,6 +155,7 @@ export default function TableSection() {
                   src={customCandleIcon} 
                   alt="Candle lighting" 
                   className="w-5 h-4 object-contain"
+                  loading="lazy"
                 />
                 <p className="platypi-bold text-base text-black platypi-medium">
                   {showShabbosError ? "--:--" : 
@@ -234,19 +190,13 @@ export default function TableSection() {
               data-testid="button-gift-of-chatzos-toggle"
             >
               <div className="flex items-center gap-3">
-                {/* Image */}
-                {giftOfChatzos.imageUrl && (
-                  <img 
-                    src={giftOfChatzos.imageUrl} 
-                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
-                    className="w-10 h-10 rounded-xl object-cover"
-                  />
-                )}
-                {!giftOfChatzos.imageUrl && (
-                  <div className="bg-gradient-feminine p-2 rounded-full">
-                    <Sparkles className="text-white" size={16} />
-                  </div>
-                )}
+                {/* Static thumbnail image for collapsed state */}
+                <img 
+                  src="https://static.wixstatic.com/media/3b5ba3_483913622d834e2593a165e13fe65ab1~mv2.png/v1/fill/w_102,h_102,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Group%2017%20(1).png" 
+                  alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
+                />
                 
                 {/* Title and Subtitle */}
                 <div className="flex-grow">
@@ -276,6 +226,7 @@ export default function TableSection() {
                     src={giftOfChatzos.imageUrl} 
                     alt={giftOfChatzos.title || "The Gift of Chatzos"} 
                     className="w-full rounded-xl object-cover mb-3"
+                    loading="lazy"
                   />
                 )}
                 
@@ -324,6 +275,43 @@ export default function TableSection() {
               </div>
             )}
           </div>
+        )}
+
+        {/* Life Classes Bar - Only shown when content exists */}
+        {currentLifeClass && (
+          <button 
+            onClick={() => openModal('life-class', 'table')}
+            className="w-full bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+            data-testid="button-life-class"
+          >
+            <div className="flex items-center gap-3">
+              {/* Image */}
+              {currentLifeClass.imageUrl ? (
+                <img 
+                  src={currentLifeClass.imageUrl} 
+                  alt={currentLifeClass.title} 
+                  className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="bg-gradient-feminine p-2 rounded-full">
+                  <GraduationCap className="text-white" size={16} />
+                </div>
+              )}
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">{currentLifeClass.title}</h3>
+                {currentLifeClass.subtitle && (
+                  <p className="platypi-regular text-xs text-black/70">{currentLifeClass.subtitle}</p>
+                )}
+              </div>
+              
+              {/* Arrow indicator */}
+              <ChevronRight className="text-black/40" size={18} />
+            </div>
+          </button>
         )}
       </div>
 

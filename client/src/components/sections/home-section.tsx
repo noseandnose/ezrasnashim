@@ -1,6 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -119,7 +118,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     };
     
     // Helper to add a flower position with collision avoidance
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', _index: number) => {
       const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
       const flipped = seededRandom() > 0.5;
       
@@ -182,30 +181,16 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     return "Good Evening";
   };
 
-  // Use batched home summary for better performance
+  // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
   const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
   const sponsor = homeSummary?.sponsor;
+  const todaysSpecial = homeSummary?.todaysSpecial;
 
-  // Today's Special state and data
-  const today = new Date().toISOString().split('T')[0];
+  // Today's Special state
   const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
   const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
-
-  const { data: todaysSpecial } = useQuery<{
-    title?: string;
-    subtitle?: string;
-    imageUrl?: string;
-    contentEnglish?: string;
-    contentHebrew?: string;
-    linkTitle?: string;
-    url?: string;
-  }>({
-    queryKey: ['/api/home/todays-special', today],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
 
   // Check if Today's Special has content
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
@@ -472,6 +457,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                     src={todaysSpecial.imageUrl} 
                     alt={todaysSpecial.title || "Today's Special"} 
                     className="w-10 h-10 rounded-xl object-cover"
+                    loading="lazy"
                   />
                 )}
                 {!todaysSpecial.imageUrl && (
@@ -680,6 +666,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
             alt="" 
             className="absolute inset-0 w-full h-full z-[1]"
             style={{ objectFit: 'cover' }}
+            loading="lazy"
           />
           
           {/* Flowers - scattered ON TOP of grass */}
@@ -700,6 +687,7 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
                 bottom: `${flower.bottom}%`,
                 transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
               }}
+              loading="lazy"
             />
           ))}
           

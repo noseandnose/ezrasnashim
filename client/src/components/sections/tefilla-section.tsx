@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, ArrowRight, Sunrise, Sun, Moon, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -8,6 +8,7 @@ interface TefillaSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 import { useJewishTimes } from "@/hooks/use-jewish-times";
+import { useTefillaStats } from "@/hooks/use-tefilla-stats";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -222,23 +223,12 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     setChainView(prev => prev === 'find' ? 'none' : 'find');
   }, []);
 
-  // Fetch total tehillim from all chains
-  const { data: chainTotalData } = useQuery<{ total: number }>({
-    queryKey: ['/api/tehillim-chains/stats/total'],
-    staleTime: 60000,
-    refetchOnWindowFocus: true,
-    refetchOnMount: 'always', // Always get fresh data when section mounts
-  });
-  const chainTotal = chainTotalData?.total || 0;
-
-  // Fetch global tehillim stats
-  const { data: globalStats, isLoading: isLoadingGlobalStats } = useQuery<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>({
-    queryKey: ['/api/tehillim-chains/stats/global'],
-    staleTime: 300000, // 5 minutes - data doesn't change often
-    gcTime: 600000, // Keep in cache for 10 minutes
-    refetchOnWindowFocus: false, // Don't refetch on every focus
-    refetchOnMount: 'always', // Always get fresh data when section mounts
-  });
+  // Fetch all Tehillim stats in a single batched request (2 API calls → 1)
+  const { data: tefillaStats, isLoading: isLoadingGlobalStats } = useTefillaStats();
+  
+  // Extract data from the batched response
+  const chainTotal = tefillaStats?.total || 0;
+  const globalStats = tefillaStats?.globalStats;
 
 
   // Reason options for the dropdown

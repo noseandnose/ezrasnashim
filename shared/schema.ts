@@ -21,7 +21,9 @@ export const dailyRecipes = pgTable("daily_recipes", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("daily_recipes_date_idx").on(table.date),
+}));
 
 export const parshaVorts = pgTable("parsha_vorts", {
   id: serial("id").primaryKey(),
@@ -38,7 +40,9 @@ export const parshaVorts = pgTable("parsha_vorts", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("parsha_vorts_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const torahClasses = pgTable("torah_classes", {
   id: serial("id").primaryKey(),
@@ -56,7 +60,29 @@ export const torahClasses = pgTable("torah_classes", {
   attributionLogoUrl: text("attribution_logo_url"),
   attributionAboutText: text("attribution_about_text"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("torah_classes_date_range_idx").on(table.fromDate, table.untilDate),
+}));
+
+export const lifeClasses = pgTable("life_classes", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(), // Start date for display
+  untilDate: date("until_date").notNull(), // End date for display
+  title: text("title").notNull(),
+  subtitle: text("subtitle"), // Subtitle for the bar display
+  content: text("content"),
+  audioUrl: text("audio_url"),
+  videoUrl: text("video_url"),
+  imageUrl: text("image_url"), // Graphic for the bar
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
+  thankYouMessage: text("thank_you_message"),
+  attributionLogoUrl: text("attribution_logo_url"),
+  attributionAboutText: text("attribution_about_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateRangeIdx: index("life_classes_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const tableInspirations = pgTable("table_inspirations", {
   id: serial("id").primaryKey(),
@@ -78,7 +104,9 @@ export const tableInspirations = pgTable("table_inspirations", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("table_inspirations_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const marriageInsights = pgTable("marriage_insights", {
   id: serial("id").primaryKey(),
@@ -106,7 +134,9 @@ export const communityImpact = pgTable("community_impact", {
   imageUrl: text("image_url"),
   videoUrl: text("video_url"), // Optional: video content URL
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("community_impact_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 // Push notification tables
 export const pushSubscriptions = pgTable("push_subscriptions", {
@@ -229,7 +259,9 @@ export const sponsors = pgTable("sponsors", {
   message: text("message"), // Short message about the person
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("sponsors_date_idx").on(table.sponsorshipDate),
+}));
 
 export const nishmasText = pgTable("nishmas_text", {
   id: serial("id").primaryKey(),
@@ -277,7 +309,9 @@ export const donations = pgTable("donations", {
   campaignId: text("campaign_id"), // Reference to campaign
   stripeSessionId: text("stripe_session_id"), // Stripe checkout session ID
   metadata: jsonb("metadata"), // Additional metadata from Stripe
-});
+}, (table) => ({
+  createdAtIdx: index("donations_created_at_idx").on(table.createdAt),
+}));
 
 export const inspirationalQuotes = pgTable("inspirational_quotes", {
   id: serial("id").primaryKey(),
@@ -333,7 +367,9 @@ export const dailyHalacha = pgTable("daily_halacha", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateIdx: index("daily_halacha_date_idx").on(table.date),
+}));
 
 export const dailyEmuna = pgTable("daily_emuna", {
   id: serial("id").primaryKey(),
@@ -379,7 +415,9 @@ export const featuredContent = pgTable("featured_content", {
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("featured_content_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 // Today's Special - expandable content bar for home page
 export const todaysSpecial = pgTable("todays_special", {
@@ -394,7 +432,9 @@ export const todaysSpecial = pgTable("todays_special", {
   linkTitle: text("link_title"),
   url: text("url"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dateRangeIdx: index("todays_special_date_range_idx").on(table.fromDate, table.untilDate),
+}));
 
 export const insertTodaysSpecialSchema = createInsertSchema(todaysSpecial).omit({ id: true, createdAt: true });
 export type InsertTodaysSpecial = z.infer<typeof insertTodaysSpecialSchema>;
@@ -626,6 +666,11 @@ export const insertTorahClassSchema = createInsertSchema(torahClasses).omit({
   createdAt: true,
 });
 
+export const insertLifeClassSchema = createInsertSchema(lifeClasses).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMarriageInsightSchema = createInsertSchema(marriageInsights).omit({
   id: true,
   createdAt: true,
@@ -722,6 +767,8 @@ export type ParshaVort = typeof parshaVorts.$inferSelect;
 export type InsertParshaVort = z.infer<typeof insertParshaVortSchema>;
 export type TorahClass = typeof torahClasses.$inferSelect;
 export type InsertTorahClass = z.infer<typeof insertTorahClassSchema>;
+export type LifeClass = typeof lifeClasses.$inferSelect;
+export type InsertLifeClass = z.infer<typeof insertLifeClassSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
 

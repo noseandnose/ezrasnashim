@@ -96,6 +96,7 @@ const expensiveLimiter = rateLimit({
 
 // Apply rate limiting with different tiers
 app.use('/api/auth/', authLimiter);
+app.use('/api/admin/login', authLimiter); // Strict limit for admin login (brute-force protection)
 app.use('/api/tehillim/complete', expensiveLimiter);
 app.use('/api/analytics/track', expensiveLimiter);
 app.use('/api/', generalApiLimiter);

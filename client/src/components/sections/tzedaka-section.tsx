@@ -1,34 +1,23 @@
 import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
 import { useAnalytics } from "@/hooks/use-analytics";
-import type { Campaign } from "@shared/schema";
 import type { Section } from "@/pages/home";
+import { useTzedakaSummary } from "@/hooks/use-tzedaka-summary";
+
+interface CommunityImpact {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+}
 
 // Community Impact Blog-Style Button Component
-function CommunityImpactButton() {
-  const today = new Date().toISOString().split('T')[0];
+function CommunityImpactButton({ impactContent, isLoading }: { impactContent: CommunityImpact | null | undefined; isLoading: boolean }) {
   const { openModal } = useModalStore();
-  
-  const { data: impactContent, isLoading } = useQuery<{
-    id: number;
-    title: string;
-    description: string;
-    imageUrl: string;
-  }>({
-    queryKey: [`/api/community/impact/${today}`],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/community/impact/${today}`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 60 minutes
-  });
 
   if (isLoading) {
     return (
@@ -74,6 +63,7 @@ function CommunityImpactButton() {
             src={impactContent.imageUrl} 
             alt={impactContent.title}
             className="w-full h-full rounded-full object-cover"
+            loading="lazy"
           />
         </div>
         <div className="flex-grow">
@@ -205,17 +195,12 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
   };
 
 
-  // Fetch active campaign data
-  const { data: campaign, isLoading } = useQuery<Campaign>({
-    queryKey: ['/api/campaigns/active'],
-    queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/campaigns/active`);
-      if (!response.ok) return null;
-      return response.json();
-    },
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000 // 60 minutes
-  });
+  // Fetch all Tzedaka content in a single batched request (2 API calls → 1)
+  const { data: tzedakaSummary, isLoading } = useTzedakaSummary();
+  
+  // Extract data from the batched response
+  const campaign = tzedakaSummary?.campaign;
+  const communityImpact = tzedakaSummary?.communityImpact;
 
   // Only calculate progress when campaign data is loaded
   const progressPercentage = campaign ? Math.round((campaign.currentAmount / campaign.goalAmount) * 100) : 0;
@@ -376,7 +361,7 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
         </div>
 
         {/* Community Impact */}
-        <CommunityImpactButton />
+        <CommunityImpactButton impactContent={communityImpact} isLoading={isLoading} />
 
         {/* Bottom padding */}
         <div className="h-16"></div>

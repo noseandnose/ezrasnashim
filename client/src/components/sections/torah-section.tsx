@@ -1,26 +1,11 @@
 import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
-import { useQuery } from "@tanstack/react-query";
 import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
-import type { TorahClass } from "@shared/schema";
-
-// Calculate reading time based on word count (average 200 words per minute)
-const calculateReadingTime = (text: string): string => {
-  if (!text) return "0 min";
-  
-  const wordCount = text.trim().split(/\s+/).length;
-  const readingTimeMinutes = Math.ceil(wordCount / 200);
-  
-  if (readingTimeMinutes === 1) {
-    return "1 min";
-  } else {
-    return `${readingTimeMinutes} min`;
-  }
-};
+import { useTorahSummary } from "@/hooks/use-torah-summary";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -52,80 +37,20 @@ export default function TorahSection({}: TorahSectionProps) {
     setPirkeiAvotExpanded(prev => !prev);
   }, []);
   
-  // Fetch today's Pirkei Avot for daily inspiration
-  const today = new Date().toISOString().split('T')[0];
-  const { data: pirkeiAvot, isError: pirkeiError } = useQuery<{text: string; chapter: number; source: string}>({
-    queryKey: ['/api/torah/pirkei-avot', today],
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
-  });
-
-  // Fetch all weekly Parsha vorts to support multiple shiurim
-  const { data: parshaVorts, isError: parshaVortsError, isLoading: parshaVortsLoading } = useQuery<Array<{
-    id: number;
-    parsha?: string; 
-    hebrew_parsha?: string; 
-    title?: string; 
-    speaker?: string;
-    content?: string;
-    audioUrl?: string;
-    videoUrl?: string;
-    imageUrl?: string;
-    speakerWebsite?: string;
-    thankYouMessage?: string;
-    fromDate?: string;
-    untilDate?: string;
-  }>>({
-    queryKey: ['/api/table/vort'],
-    staleTime: 60 * 60 * 1000, // 1 hour
-    gcTime: 4 * 60 * 60 * 1000 // 4 hours
-    // No select - keep all vorts for multiple shiurim support
-  });
-
-  // Fetch today's Halacha content for reading time calculation
-  const { data: halachaContent, isError: halachaError, isLoading: halachaLoading } = useQuery<{title?: string; content?: string; footnotes?: string}>({
-    queryKey: ['/api/torah/halacha', today],
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 30 * 60 * 1000, // 30 minutes
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
-  });
-
-  // Fetch today's Chizuk content
-  const { data: chizukContent, isError: chizukError, isLoading: chizukLoading } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
-    queryKey: ['/api/torah/chizuk', today],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
-  });
-
-  // Fetch today's Emuna content
-  const { data: emunaContent, isError: emunaError, isLoading: emunaLoading } = useQuery<{title?: string; audioUrl?: string; speaker?: string}>({
-    queryKey: ['/api/torah/emuna', today],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
-  });
-
-  // Fetch today's Featured content
-  const { data: featuredContent, isError: featuredError, isLoading: featuredLoading } = useQuery<{title?: string; content?: string; audioUrl?: string; videoUrl?: string; imageUrl?: string; speaker?: string; speakerWebsite?: string; footnotes?: string}>({
-    queryKey: ['/api/torah/featured', today],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-    retry: 3,
-    retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000)
-  });
-
-  // Fetch today's Torah Classes
-  const { data: torahClasses } = useQuery<TorahClass[]>({
-    queryKey: ['/api/torah-classes'],
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
-  });
+  // Fetch all Torah content in a single batched request
+  const { data: torahSummary, isLoading: torahLoading } = useTorahSummary();
+  
+  // Extract data from the batched response
+  const pirkeiAvot = torahSummary?.pirkeiAvot;
+  const parshaVorts = torahSummary?.parshaVorts || [];
+  const halachaContent = torahSummary?.halacha;
+  const chizukContent = torahSummary?.chizuk;
+  const emunaContent = torahSummary?.emuna;
+  const featuredContent = torahSummary?.featured;
+  const torahClasses = torahSummary?.torahClasses || [];
+  
+  // Extract per-section errors for UI fallbacks
+  const sectionErrors = torahSummary?.errors || {};
 
   // Get the first available Torah class for display
   const currentTorahClass = torahClasses?.[0];
@@ -227,7 +152,7 @@ export default function TorahSection({}: TorahSectionProps) {
         }}
       >
         {/* Daily Inspiration - Pirkei Avot */}
-        {(pirkeiAvot || pirkeiError) && (
+        {(pirkeiAvot || sectionErrors.pirkeiAvot || (!torahLoading && torahSummary)) && (
           <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10 relative"
                style={{
                  animation: 'gentle-glow-pink 3s ease-in-out infinite'
@@ -264,7 +189,7 @@ export default function TorahSection({}: TorahSectionProps) {
                 )}
               </button>
             </div>
-            {pirkeiError ? (
+            {sectionErrors.pirkeiAvot || (!pirkeiAvot && !torahLoading) ? (
               <p className="text-sm text-black/60 platypi-regular">Daily inspiration temporarily unavailable. Please check back later.</p>
             ) : (
               <div className="relative">
@@ -322,6 +247,7 @@ export default function TorahSection({}: TorahSectionProps) {
                   src={currentTorahClass.imageUrl} 
                   alt={currentTorahClass.title} 
                   className="w-10 h-10 rounded-xl object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="bg-gradient-feminine p-2 rounded-full">
@@ -360,8 +286,8 @@ export default function TorahSection({}: TorahSectionProps) {
             
             switch(id) {
               case 'halacha':
-                isError = halachaError;
-                isLoading = halachaLoading;
+                isError = !!sectionErrors.halacha;
+                isLoading = torahLoading;
                 hasContent = !!halachaContent?.content && !isError;
                 if (hasContent && !isCompleted && halachaContent) {
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
@@ -373,8 +299,8 @@ export default function TorahSection({}: TorahSectionProps) {
                 }
                 break;
               case 'chizuk':
-                isError = chizukError;
-                isLoading = chizukLoading;
+                isError = !!sectionErrors.chizuk;
+                isLoading = torahLoading;
                 hasContent = !!chizukContent?.audioUrl && !isError;
                 if (hasContent && !isCompleted && chizukContent) {
                   displaySubtitle = toCamelCase(chizukContent.title || '') || subtitle;
@@ -385,8 +311,8 @@ export default function TorahSection({}: TorahSectionProps) {
                 }
                 break;
               case 'emuna':
-                isError = emunaError;
-                isLoading = emunaLoading;
+                isError = !!sectionErrors.emuna;
+                isLoading = torahLoading;
                 hasContent = !!emunaContent?.audioUrl && !isError;
                 if (hasContent && !isCompleted && emunaContent) {
                   displaySubtitle = toCamelCase(emunaContent.title || '') || subtitle;
@@ -405,9 +331,9 @@ export default function TorahSection({}: TorahSectionProps) {
                 }) : []) || [];
                 const firstVort = activeVortsForButton[0];
                 
-                isError = parshaVortsError;
-                isLoading = parshaVortsLoading;
-                hasContent = activeVortsForButton.length > 0;
+                isError = !!sectionErrors.parshaVorts;
+                isLoading = torahLoading;
+                hasContent = activeVortsForButton.length > 0 && !isError;
                 if (hasContent && !isCompleted && firstVort) {
                   displaySubtitle = firstVort.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom';
                 } else if (isError) {
@@ -492,6 +418,7 @@ export default function TorahSection({}: TorahSectionProps) {
                       src={customCandleIcon} 
                       alt="Learn Shabbos" 
                       className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
+                      loading="lazy"
                     />
                   ) : (
                     <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />

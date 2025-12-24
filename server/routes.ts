@@ -2,8 +2,6 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import Stripe from "stripe";
 import { storage } from "./storage";
-import { db } from "./db";
-import { and, eq, gt } from "drizzle-orm";
 import serverAxiosClient from "./axiosClient";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,6 +11,14 @@ import { ObjectStorageService, ObjectNotFoundError } from "./objectStorage";
 import { pushRetryQueue, PushRetryQueue } from "./pushRetryQueue";
 import { cacheMiddleware } from "./middleware/cache";
 import { CACHE_TTL, cache } from "./cache/categoryCache";
+import { validateAdminLogin, verifyAdminToken, isJwtConfigured, isAdminConfigured } from "./auth";
+import { registerUtilityRoutes } from "./routes/utility";
+import { registerAnalyticsRoutes } from "./routes/analytics";
+import { registerPushRoutes } from "./routes/push";
+import { registerLocationRoutes } from "./routes/location";
+import { registerTehillimRoutes } from "./routes/tehillim";
+import { registerPrayerRoutes } from "./routes/prayers";
+import { registerContentRoutes } from "./routes/content";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -143,6 +149,7 @@ import {
   baseParshaVortSchema,
   insertParshaVortSchema,
   insertTorahClassSchema,
+  insertLifeClassSchema,
   insertTableInspirationSchema,
   insertMarriageInsightSchema,
   insertNishmasTextSchema,
@@ -150,11 +157,9 @@ import {
 } from "../shared/schema";
 import { z } from "zod";
 
-// Admin authentication middleware
+// Admin authentication middleware - JWT only (legacy password fallback removed)
 function requireAdminAuth(req: any, res: any, next: any) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  
-  if (!adminPassword) {
+  if (!isAdminConfigured()) {
     return res.status(500).json({ 
       message: "Admin authentication not configured" 
     });
@@ -165,13 +170,32 @@ function requireAdminAuth(req: any, res: any, next: any) {
     ? authHeader.slice(7) 
     : null;
   
-  if (!token || token !== adminPassword) {
+  if (!token) {
     return res.status(401).json({ 
-      message: "Unauthorized: Invalid admin credentials" 
+      message: "Unauthorized: No credentials provided" 
     });
   }
   
-  next();
+  // JWT verification required
+  if (!isJwtConfigured()) {
+    return res.status(500).json({ 
+      message: "JWT authentication not configured. Please set JWT_SECRET." 
+    });
+  }
+  
+  const jwtResult = verifyAdminToken(token);
+  if (jwtResult.valid) {
+    return next();
+  }
+  if (jwtResult.expired) {
+    return res.status(401).json({ 
+      message: "Unauthorized: Token expired, please login again" 
+    });
+  }
+  
+  return res.status(401).json({ 
+    message: "Unauthorized: Invalid admin credentials" 
+  });
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -184,6 +208,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Error cleaning up expired names
     }
   }, 60 * 60 * 1000); // Run every hour
+
+  // Register utility routes (healthcheck, version, root handler)
+  registerUtilityRoutes(app, { requireAdminAuth });
+
+  // Register analytics routes
+  registerAnalyticsRoutes(app, { requireAdminAuth, storage });
+
+  // Register push notification routes
+  registerPushRoutes(app, { requireAdminAuth, storage, pushRetryQueue, VAPID_PUBLIC_KEY });
+
+  // Register location routes (IP detection, geocoding, Hebrew date)
+  registerLocationRoutes(app);
+
+  // Register Tehillim routes
+  registerTehillimRoutes(app, { storage });
+
+  // Register prayer routes (Mincha, Maariv, Morning, Brochas)
+  registerPrayerRoutes(app, { storage, requireAdminAuth });
+
+  // Register content routes (Torah, Table Inspiration, Marriage Insights, etc.)
+  registerContentRoutes(app, { storage, requireAdminAuth });
+
+  // Admin login endpoint - returns JWT token on successful authentication
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      if (!password || typeof password !== 'string') {
+        return res.status(400).json({ 
+          success: false, 
+          message: "Password is required" 
+        });
+      }
+      
+      const result = await validateAdminLogin(password);
+      
+      if (result.success && result.token) {
+        return res.json({ 
+          success: true, 
+          token: result.token,
+          expiresIn: '24h'
+        });
+      }
+      
+      return res.status(401).json({ 
+        success: false, 
+        message: result.error || "Invalid credentials" 
+      });
+    } catch (error) {
+      console.error('Admin login error:', error);
+      return res.status(500).json({ 
+        success: false, 
+        message: "Login failed" 
+      });
+    }
+  });
+
+  // Admin auth status check - verifies if current token is valid
+  app.get("/api/admin/auth-status", requireAdminAuth, (req, res) => {
+    res.json({ authenticated: true });
+  });
 
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
@@ -1120,30 +1205,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Shop routes
-  app.get("/api/shop", async (req, res) => {
-    try {
-      const items = await storage.getAllShopItems();
-      res.json(items);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch shop items" });
+  app.get("/api/shop", 
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'shop-items' }),
+    async (req, res) => {
+      try {
+        const items = await storage.getAllShopItems();
+        res.json(items);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch shop items" });
+      }
     }
-  });
+  );
 
-  app.get("/api/shop/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (isNaN(id)) {
-        return res.status(400).json({ message: "Invalid shop item ID" });
+  app.get("/api/shop/:id", 
+    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'shop-item' }),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+          return res.status(400).json({ message: "Invalid shop item ID" });
+        }
+        const item = await storage.getShopItemById(id);
+        if (!item) {
+          return res.status(404).json({ message: "Shop item not found" });
+        }
+        res.json(item);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch shop item" });
       }
-      const item = await storage.getShopItemById(id);
-      if (!item) {
-        return res.status(404).json({ message: "Shop item not found" });
-      }
-      res.json(item);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch shop item" });
     }
-  });
+  );
 
   // Hebcal API proxy
   app.get("/api/hebcal/:location?", async (req, res) => {
@@ -1164,152 +1255,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(data);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch from Hebcal API" });
-    }
-  });
-
-  // Table inspiration routes
-  app.get("/api/table/inspiration/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const inspiration = await storage.getTableInspirationByDate(date);
-      res.json(inspiration || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch table inspiration" });
-    }
-  });
-
-  app.post("/api/table/inspiration", requireAdminAuth, async (req, res) => {
-    try {
-      if (process.env.NODE_ENV === 'development') {
-        console.log("Inspiration creation request body:", req.body);
-      }
-      const validatedData = insertTableInspirationSchema.parse(req.body);
-      if (process.env.NODE_ENV === 'development') {
-        console.log("Inspiration validated data:", validatedData);
-      }
-      const inspiration = await storage.createTableInspiration(validatedData);
-      res.json(inspiration);
-    } catch (error) {
-      console.error("Failed to create table inspiration:", error);
-      if (error instanceof Error) {
-        return res.status(500).json({ message: "Failed to create table inspiration", error: error.message });
-      } else {
-        return res.status(500).json({ message: "Failed to create table inspiration", error: String(error) });
-      }
-    }
-  });
-
-  // Get all table inspirations
-  app.get("/api/table/inspirations", requireAdminAuth, async (req, res) => {
-    try {
-      const inspirations = await storage.getAllTableInspirations();
-      res.json(inspirations);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch table inspirations" });
-    }
-  });
-
-  // Update table inspiration
-  app.put("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      if (process.env.NODE_ENV === 'development') {
-        console.log("Inspiration update request body:", req.body);
-      }
-      const validatedData = insertTableInspirationSchema.parse(req.body);
-      if (process.env.NODE_ENV === 'development') {
-        console.log("Inspiration validated data:", validatedData);
-      }
-      const inspiration = await storage.updateTableInspiration(id, validatedData);
-      if (!inspiration) {
-        return res.status(404).json({ message: "Table inspiration not found" });
-      }
-      res.json(inspiration);
-    } catch (error) {
-      console.error("Failed to update table inspiration:", error);
-      if (error instanceof Error) {
-        return res.status(500).json({ message: "Failed to update table inspiration", error: error.message });
-      } else {
-        return res.status(500).json({ message: "Failed to update table inspiration", error: String(error) });
-      }
-    }
-  });
-
-  // Delete table inspiration
-  app.delete("/api/table/inspiration/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteTableInspiration(id);
-      if (!success) {
-        return res.status(404).json({ message: "Table inspiration not found" });
-      }
-      res.json({ message: "Table inspiration deleted successfully" });
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to delete table inspiration" });
-    }
-  });
-
-  // Marriage Insights routes
-  app.get("/api/marriage-insights/:date", 
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'marriage-insights' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const insight = await storage.getMarriageInsightByDate(date);
-        res.json(insight || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch marriage insight" });
-      }
-    }
-  );
-
-  app.post("/api/marriage-insights", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertMarriageInsightSchema.parse(req.body);
-      const insight = await storage.createMarriageInsight(validatedData);
-      cache.clearCategory('marriage-insights');
-      res.json(insight);
-    } catch (error) {
-      console.error("Failed to create marriage insight:", error);
-      return res.status(500).json({ message: "Failed to create marriage insight" });
-    }
-  });
-
-  app.get("/api/marriage-insights", requireAdminAuth, async (req, res) => {
-    try {
-      const insights = await storage.getAllMarriageInsights();
-      res.json(insights);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch marriage insights" });
-    }
-  });
-
-  app.patch("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const validatedData = insertMarriageInsightSchema.partial().parse(req.body);
-      const insight = await storage.updateMarriageInsight(id, validatedData);
-      if (!insight) {
-        return res.status(404).json({ message: "Marriage insight not found" });
-      }
-      cache.clearCategory('marriage-insights');
-      res.json(insight);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to update marriage insight" });
-    }
-  });
-
-  app.delete("/api/marriage-insights/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const success = await storage.deleteMarriageInsight(id);
-      if (!success) {
-        return res.status(404).json({ message: "Marriage insight not found" });
-      }
-      cache.clearCategory('marriage-insights');
-      res.json({ message: "Marriage insight deleted successfully" });
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to delete marriage insight" });
     }
   });
 
@@ -1409,131 +1354,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Community impact routes
-  app.get("/api/community/impact/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const impact = await storage.getCommunityImpactByDate(date);
-      res.json(impact || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch community impact" });
-    }
-  });
-
-  // Mincha routes
-  app.get("/api/mincha/prayers",
-    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-mincha' }),
+  app.get("/api/community/impact/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'community-impact' }),
     async (req, res) => {
       try {
-        const prayers = await storage.getMinchaPrayers();
-        res.json(prayers);
+        const { date } = req.params;
+        const impact = await storage.getCommunityImpactByDate(date);
+        res.json(impact || null);
       } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
+        return res.status(500).json({ message: "Failed to fetch community impact" });
       }
     }
   );
-
-  app.get("/api/mincha/prayer", async (req, res) => {
-    try {
-      const prayers = await storage.getMinchaPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Mincha prayers" });
-    }
-  });
-
-  // Morning prayer routes
-  app.get("/api/morning/prayers",
-    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-morning' }),
-    async (req, res) => {
-      try {
-        const prayers = await storage.getMorningPrayers();
-        res.json(prayers);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch Morning prayers" });
-      }
-    }
-  );
-
-  // Maariv routes
-  app.get("/api/maariv/prayers",
-    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'prayers-maariv' }),
-    async (req, res) => {
-      try {
-        const prayers = await storage.getMaarivPrayers();
-        res.json(prayers);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
-      }
-    }
-  );
-
-  app.get("/api/maariv/prayer", async (req, res) => {
-    try {
-      const prayers = await storage.getMaarivPrayers();
-      res.json(prayers);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Maariv prayers" });
-    }
-  });
-
-  // Brochas routes
-  app.get("/api/brochas", async (req, res) => {
-    try {
-      const brochas = await storage.getBrochas();
-      res.json(brochas);
-    } catch (error) {
-      console.error("Error fetching brochas:", error);
-      return res.status(500).json({ message: "Failed to fetch brochas" });
-    }
-  });
-
-  app.get("/api/brochas/daily", async (req, res) => {
-    try {
-      const brochas = await storage.getBrochasByType(false); // false = daily (not special)
-      res.json(brochas);
-    } catch (error) {
-      console.error("Error fetching daily brochas:", error);
-      return res.status(500).json({ message: "Failed to fetch daily brochas" });
-    }
-  });
-
-  app.get("/api/brochas/special", async (req, res) => {
-    try {
-      const brochas = await storage.getBrochasByType(true); // true = special occasions
-      res.json(brochas);
-    } catch (error) {
-      console.error("Error fetching special brochas:", error);
-      return res.status(500).json({ message: "Failed to fetch special brochas" });
-    }
-  });
-
-  // Get individual brocha by ID
-  app.get("/api/brochas/:id", async (req, res) => {
-    try {
-      const brochaId = parseInt(req.params.id);
-      if (isNaN(brochaId)) {
-        return res.status(400).json({ message: "Invalid brocha ID" });
-      }
-      const brocha = await storage.getBrochaById(brochaId);
-      if (!brocha) {
-        return res.status(404).json({ message: "Brocha not found" });
-      }
-      res.json(brocha);
-    } catch (error) {
-      console.error("Error fetching brocha:", error);
-      return res.status(500).json({ message: "Failed to fetch brocha" });
-    }
-  });
-
-  app.post("/api/brochas", requireAdminAuth, async (req, res) => {
-    try {
-      const brocha = await storage.createBrocha(req.body);
-      res.json(brocha);
-    } catch (error) {
-      console.error("Error creating brocha:", error);
-      return res.status(500).json({ message: "Failed to create brocha" });
-    }
-  });
 
   // Sponsor routes
   app.get("/api/sponsors/:contentType/:date", async (req, res) => {
@@ -1640,14 +1472,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Campaign routes
-  app.get("/api/campaigns/active", async (req, res) => {
-    try {
-      const campaign = await storage.getActiveCampaign();
-      res.json(campaign || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch active campaign" });
+  app.get("/api/campaigns/active", 
+    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'campaigns-active' }),
+    async (req, res) => {
+      try {
+        const campaign = await storage.getActiveCampaign();
+        res.json(campaign || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch active campaign" });
+      }
     }
-  });
+  );
 
   app.get("/api/campaigns", async (req, res) => {
     try {
@@ -1667,267 +1502,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Daily Torah content routes
-  app.get("/api/torah/halacha/:date", 
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-halacha' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const halacha = await storage.getDailyHalachaByDate(date);
-        res.json(halacha || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch daily halacha" });
-      }
-    }
-  );
-
-  app.post("/api/torah/halacha", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertDailyHalachaSchema.parse(req.body);
-      const halacha = await storage.createDailyHalacha(validatedData);
-      cache.clearCategory('torah-halacha');
-      res.json(halacha);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create daily halacha" });
-    }
-  });
-
-  app.get("/api/torah/emuna/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-emuna' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const emuna = await storage.getDailyEmunaByDate(date);
-        res.json(emuna || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch daily emuna" });
-      }
-    }
-  );
-
-  app.post("/api/torah/emuna", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertDailyEmunaSchema.parse(req.body);
-      const emuna = await storage.createDailyEmuna(validatedData);
-      cache.clearCategory('torah-emuna');
-      res.json(emuna);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create daily emuna" });
-    }
-  });
-
-  app.get("/api/torah/chizuk/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-chizuk' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const chizuk = await storage.getDailyChizukByDate(date);
-        res.json(chizuk || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch daily chizuk" });
-      }
-    }
-  );
-
-  app.post("/api/torah/chizuk", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertDailyChizukSchema.parse(req.body);
-      const chizuk = await storage.createDailyChizuk(validatedData);
-      cache.clearCategory('torah-chizuk');
-      res.json(chizuk);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create daily chizuk" });
-    }
-  });
-
-  app.get("/api/torah/featured/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-featured' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const featured = await storage.getFeaturedContentByDate(date);
-        res.json(featured || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch featured content" });
-      }
-    }
-  );
-
-  app.post("/api/torah/featured", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertFeaturedContentSchema.parse(req.body);
-      const featured = await storage.createFeaturedContent(validatedData);
-      cache.clearCategory('torah-featured');
-      res.json(featured);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create featured content" });
-    }
-  });
-
-  // Today's Special routes - short cache since content may be edited frequently
-  app.get("/api/home/todays-special/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'todays-special' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        const special = await storage.getTodaysSpecialByDate(date);
-        res.json(special || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch today's special" });
-      }
-    }
-  );
-
-  app.post("/api/home/todays-special", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertTodaysSpecialSchema.parse(req.body);
-      const special = await storage.createTodaysSpecial(validatedData);
-      cache.clearCategory('todays-special');
-      res.json(special);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create today's special" });
-    }
-  });
-
-  // Gift of Chatzos routes - day-of-week based content for life page
-  app.get("/api/life/gift-of-chatzos/:dayOfWeek",
-    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'gift-of-chatzos' }),
-    async (req, res) => {
-      try {
-        const dayOfWeek = parseInt(req.params.dayOfWeek);
-        if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
-          return res.status(400).json({ message: "Invalid day of week (0-6)" });
-        }
-        const gift = await storage.getGiftOfChatzosByDayOfWeek(dayOfWeek);
-        res.json(gift || null);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch gift of chatzos" });
-      }
-    }
-  );
-
-  app.get("/api/life/gift-of-chatzos",
-    cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'gift-of-chatzos-all' }),
-    async (req, res) => {
-      try {
-        const allGifts = await storage.getAllGiftOfChatzos();
-        res.json(allGifts);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch all gift of chatzos" });
-      }
-    }
-  );
-
-  app.post("/api/life/gift-of-chatzos", requireAdminAuth, async (req, res) => {
-    try {
-      const validatedData = insertGiftOfChatzosSchema.parse(req.body);
-      const gift = await storage.createGiftOfChatzos(validatedData);
-      cache.clearCategory('gift-of-chatzos');
-      cache.clearCategory('gift-of-chatzos-all');
-      res.json(gift);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create gift of chatzos" });
-    }
-  });
-
-  app.patch("/api/life/gift-of-chatzos/:id", requireAdminAuth, async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const gift = await storage.updateGiftOfChatzos(id, req.body);
-      cache.clearCategory('gift-of-chatzos');
-      cache.clearCategory('gift-of-chatzos-all');
-      res.json(gift);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to update gift of chatzos" });
-    }
-  });
-
-  app.get("/api/torah/pirkei-avot/:date",
-    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot' }),
-    async (req, res) => {
-      try {
-        const { date } = req.params;
-        // Get the current Pirkei Avot content from the database
-        const currentPirkeiAvot = await storage.getCurrentPirkeiAvot();
-        
-        if (currentPirkeiAvot) {
-          // Return formatted response similar to other Torah content
-          res.json({
-            text: currentPirkeiAvot.content,
-            chapter: currentPirkeiAvot.chapter,
-            source: `${currentPirkeiAvot.chapter}.${currentPirkeiAvot.perek}`
-          });
-        } else {
-          res.json(null);
-        }
-      } catch (error) {
-        console.error('Error fetching Pirkei Avot:', error);
-        return res.status(500).json({ message: "Failed to fetch Pirkei Avot content" });
-      }
-    }
-  );
-
-  app.post("/api/torah/pirkei-avot/advance", requireAdminAuth, async (req, res) => {
-    try {
-      const progress = await storage.advancePirkeiAvotProgress();
-      cache.clearCategory('pirkei-avot');
-      cache.clearCategory('pirkei-avot-all');
-      res.json(progress);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to advance Pirkei Avot progress" });
-    }
-  });
-
-  // New routes for Pirkei Avot management
-  app.get("/api/pirkei-avot",
-    cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'pirkei-avot-all' }),
-    async (req, res) => {
-      try {
-        const allPirkeiAvot = await storage.getAllPirkeiAvot();
-        res.json(allPirkeiAvot);
-      } catch (error) {
-        return res.status(500).json({ message: "Failed to fetch all Pirkei Avot content" });
-      }
-    }
-  );
-
-  app.post("/api/pirkei-avot", requireAdminAuth, async (req, res) => {
-    try {
-      const newPirkeiAvot = await storage.createPirkeiAvot(req.body);
-      res.json(newPirkeiAvot);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to create Pirkei Avot content" });
-    }
-  });
-
   // Daily recipe routes
-  app.get("/api/table/recipe/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const recipe = await storage.getDailyRecipeByDate(date);
-      res.json(recipe || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily recipe" });
-    }
-  });
-
-  app.get("/api/table/recipe", async (req, res) => {
-    try {
-      // Get current date
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/table/recipe/:date", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes' }),
+    async (req, res) => {
+      try {
+        const { date } = req.params;
+        const recipe = await storage.getDailyRecipeByDate(date);
+        res.json(recipe || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily recipe" });
       }
-      const today = now.toISOString().split('T')[0];
-      
-      const recipe = await storage.getDailyRecipeByDate(today);
-      res.json(recipe || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch daily recipe" });
     }
-  });
+  );
+
+  app.get("/api/table/recipe", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes-today' }),
+    async (req, res) => {
+      try {
+        // Get current date
+        // Day starts at 02:00 local time for analytics
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        
+        const recipe = await storage.getDailyRecipeByDate(today);
+        res.json(recipe || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch daily recipe" });
+      }
+    }
+  );
 
   app.post("/api/table/recipe", requireAdminAuth, async (req, res) => {
     try {
@@ -1960,32 +1568,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/table/vort/:week", async (req, res) => {
-    try {
-      const { week } = req.params;
-      const vort = await storage.getParshaVortByWeek(week);
-      res.json(vort || null);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Parsha vort" });
-    }
-  });
-
-  app.get("/api/table/vort", async (req, res) => {
-    try {
-      // Day starts at 02:00 local time for analytics
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/table/vort/:week", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'parsha-vorts' }),
+    async (req, res) => {
+      try {
+        const { week } = req.params;
+        const vort = await storage.getParshaVortByWeek(week);
+        res.json(vort || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Parsha vort" });
       }
-      const today = now.toISOString().split('T')[0];
-      const vorts = await storage.getParshaVortsByDate(today);
-      res.json(vorts);
-    } catch (error) {
-      console.error('Error fetching Parsha vorts:', error);
-      return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
     }
-  });
+  );
+
+  app.get("/api/table/vort", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'parsha-vorts-today' }),
+    async (req, res) => {
+      try {
+        // Day starts at 02:00 local time for analytics
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        const vorts = await storage.getParshaVortsByDate(today);
+        res.json(vorts);
+      } catch (error) {
+        console.error('Error fetching Parsha vorts:', error);
+        return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
+      }
+    }
+  );
 
   app.post("/api/table/vort", requireAdminAuth, async (req, res) => {
     try {
@@ -2070,21 +1684,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Torah Classes routes
-  app.get("/api/torah-classes", async (req, res) => {
-    try {
-      const now = new Date();
-      const hours = now.getHours();
-      if (hours < 2) {
-        now.setDate(now.getDate() - 1);
+  app.get("/api/torah-classes", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-classes-today' }),
+    async (req, res) => {
+      try {
+        const now = new Date();
+        const hours = now.getHours();
+        if (hours < 2) {
+          now.setDate(now.getDate() - 1);
+        }
+        const today = now.toISOString().split('T')[0];
+        const classes = await storage.getTorahClassesByDate(today);
+        res.json(classes);
+      } catch (error) {
+        console.error('Error fetching Torah classes:', error);
+        return res.status(500).json({ message: "Failed to fetch Torah classes" });
       }
-      const today = now.toISOString().split('T')[0];
-      const classes = await storage.getTorahClassesByDate(today);
-      res.json(classes);
-    } catch (error) {
-      console.error('Error fetching Torah classes:', error);
-      return res.status(500).json({ message: "Failed to fetch Torah classes" });
     }
-  });
+  );
 
   app.get("/api/torah-classes/all", requireAdminAuth, async (req, res) => {
     try {
@@ -2145,6 +1762,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting Torah class:', error);
       return res.status(500).json({ message: "Failed to delete Torah class" });
+    }
+  });
+
+  // Life Classes routes
+  app.get("/api/life-classes", async (req, res) => {
+    try {
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours < 2) {
+        now.setDate(now.getDate() - 1);
+      }
+      const today = now.toISOString().split('T')[0];
+      const classes = await storage.getLifeClassesByDate(today);
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching Life classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Life classes" });
+    }
+  });
+
+  app.get("/api/life-classes/all", requireAdminAuth, async (req, res) => {
+    try {
+      const classes = await storage.getAllLifeClasses();
+      res.json(classes);
+    } catch (error) {
+      console.error('Error fetching all Life classes:', error);
+      return res.status(500).json({ message: "Failed to fetch Life classes" });
+    }
+  });
+
+  app.post("/api/life-classes", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertLifeClassSchema.parse(req.body);
+      const lifeClass = await storage.createLifeClass(validatedData);
+      res.json(lifeClass);
+    } catch (error) {
+      console.error('Error creating Life class:', error);
+      return res.status(500).json({ message: "Failed to create Life class" });
+    }
+  });
+
+  app.put("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const validatedData = insertLifeClassSchema.partial().parse(req.body);
+      const lifeClass = await storage.updateLifeClass(id, validatedData);
+      
+      if (!lifeClass) {
+        return res.status(404).json({ message: "Life class not found" });
+      }
+      
+      res.json(lifeClass);
+    } catch (error) {
+      console.error('Error updating Life class:', error);
+      return res.status(500).json({ message: "Failed to update Life class" });
+    }
+  });
+
+  app.delete("/api/life-classes/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteLifeClass(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Life class not found" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Life class:', error);
+      return res.status(500).json({ message: "Failed to delete Life class" });
     }
   });
 
@@ -2209,727 +1905,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(times);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch zmanim data" });
-    }
-  });
-
-  // Tehillim routes - Optimized for faster response
-  app.get("/api/tehillim/progress", async (req, res) => {
-    try {
-      // Get progress with assigned name in a single optimized call
-      const progressWithName = await storage.getProgressWithAssignedName();
-      
-      res.json(progressWithName);
-    } catch (error) {
-      console.error('Error fetching Tehillim progress:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim progress" });
-    }
-  });
-
-  app.post("/api/tehillim/complete", async (req, res) => {
-    try {
-      const { currentPerek, language, completedBy } = req.body;
-      
-      // Accept IDs up to 171 (Psalm 119 has 22 parts, making the max ID 171)
-      if (!currentPerek || currentPerek < 1 || currentPerek > 171) {
-        return res.status(400).json({ error: "Invalid perek ID" });
-      }
-      
-      if (!language || !['english', 'hebrew'].includes(language)) {
-        return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-      }
-      
-      const updatedProgress = await storage.updateGlobalTehillimProgress(currentPerek, language, completedBy);
-      res.json(updatedProgress);
-    } catch (error) {
-      console.error('Error completing Tehillim:', error);
-      return res.status(500).json({ error: "Failed to complete Tehillim" });
-    }
-  });
-
-  app.get("/api/tehillim/current-name", async (req, res) => {
-    try {
-      // Get the progress with the currently assigned name
-      const progressWithName = await storage.getProgressWithAssignedName();
-      
-      // If there's an assigned name ID, fetch the full name details
-      if (progressWithName.currentNameId) {
-        const names = await storage.getActiveNames();
-        const assignedName = names.find(n => n.id === progressWithName.currentNameId);
-        res.json(assignedName || null);
-      } else {
-        res.json(null);
-      }
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch current name" });
-    }
-  });
-
-  app.get("/api/tehillim/names", async (req, res) => {
-    try {
-      const names = await storage.getActiveNames();
-      res.json(names);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Tehillim names" });
-    }
-  });
-
-  // Global Tehillim Progress endpoint
-  app.get("/api/tehillim/global-progress", async (_req, res) => {
-    try {
-      const progress = await storage.getGlobalTehillimProgress();
-      res.json(progress);
-    } catch (error) {
-      console.error("Error fetching global tehillim progress:", error);
-      return res.status(500).json({ message: "Failed to fetch global tehillim progress" });
-    }
-  });
-
-  // Get Tehillim info by ID for Global display
-  app.get("/api/tehillim/info/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      
-      if (isNaN(id) || id < 1) {
-        return res.status(400).json({ error: "Invalid ID" });
-      }
-      
-      const tehillimInfo = await storage.getSupabaseTehillimById(id);
-      if (!tehillimInfo) {
-        return res.status(404).json({ error: "Tehillim not found" });
-      }
-      
-      res.json(tehillimInfo);
-    } catch (error) {
-      console.error('Error fetching Tehillim info:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim info" });
-    }
-  });
-
-  // Get Tehillim text from Supabase
-  app.get("/api/tehillim/text/:perek",
-    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text' }),
-    async (req, res) => {
-      try {
-        const perek = parseInt(req.params.perek);
-        const language = req.query.language as string || 'english';
-        
-        if (isNaN(perek) || perek < 1 || perek > 171) {
-          return res.status(400).json({ error: "Perek must be between 1 and 171" });
-        }
-        
-        if (!['english', 'hebrew'].includes(language)) {
-          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-        }
-        
-        // Use new Supabase method instead of Sefaria
-        const tehillimData = await storage.getSupabaseTehillim(perek, language);
-        res.json(tehillimData);
-      } catch (error) {
-        console.error('Error fetching Tehillim text:', error);
-        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
-      }
-    }
-  );
-
-  // Get Tehillim text by ID (for proper part handling of Psalm 119)
-  app.get("/api/tehillim/text/by-id/:id",
-    cacheMiddleware({ ttl: CACHE_TTL.TEHILLIM, category: 'tehillim-text-by-id' }),
-    async (req, res) => {
-      try {
-        const id = parseInt(req.params.id);
-        const language = req.query.language as string || 'english';
-        
-        if (isNaN(id) || id < 1 || id > 171) {
-          return res.status(400).json({ error: "Invalid ID" });
-        }
-        
-        if (!['english', 'hebrew'].includes(language)) {
-          return res.status(400).json({ error: "Language must be 'english' or 'hebrew'" });
-        }
-        
-        // Get the specific part by ID
-        const tehillimData = await storage.getTehillimById(id, language);
-        res.json(tehillimData);
-      } catch (error) {
-        console.error('Error fetching Tehillim text by ID:', error);
-        return res.status(500).json({ error: "Failed to fetch Tehillim text" });
-    }
-  });
-
-  // Get next Tehillim part ID for navigation (handles Psalm 119 parts properly)
-  app.get("/api/tehillim/next-part/:id", async (req, res) => {
-    try {
-      const currentId = parseInt(req.params.id);
-      
-      if (isNaN(currentId) || currentId < 1) {
-        return res.status(400).json({ error: "Invalid ID" });
-      }
-      
-      // Get current tehillim info to determine what's next
-      const currentTehillim = await storage.getSupabaseTehillimById(currentId);
-      
-      if (!currentTehillim) {
-        return res.status(404).json({ error: "Tehillim not found" });
-      }
-      
-      // If this is Psalm 119, find the next part
-      if (currentTehillim.englishNumber === 119) {
-        const nextPartNumber = currentTehillim.partNumber + 1;
-        
-        // Find the next part of 119
-        const nextPart = await storage.getSupabaseTehillimByEnglishAndPart(119, nextPartNumber);
-        if (nextPart) {
-          return res.json({ 
-            id: nextPart.id,
-            englishNumber: 119,
-            partNumber: nextPartNumber,
-            hebrewNumber: nextPart.hebrewNumber
-          });
-        }
-        
-        // If there's no next part, we're at the last part - move to psalm 120
-        const psalm120 = await storage.getSupabaseTehillimByEnglishAndPart(120, 1);
-        if (psalm120) {
-          return res.json({
-            id: psalm120.id,
-            englishNumber: 120,
-            partNumber: 1,
-            hebrewNumber: psalm120.hebrewNumber
-          });
-        }
-      }
-      
-      // For other psalms, move to the next English number
-      const nextEnglishNumber = currentTehillim.englishNumber + 1;
-      
-      // Handle wrap around from 150 to 1
-      if (nextEnglishNumber > 150) {
-        const psalm1 = await storage.getSupabaseTehillimByEnglishAndPart(1, 1);
-        if (psalm1) {
-          return res.json({
-            id: psalm1.id,
-            englishNumber: 1,
-            partNumber: 1,
-            hebrewNumber: psalm1.hebrewNumber
-          });
-        }
-      }
-      
-      // Handle transition from 118 to 119 (should go to 119 part 1)
-      if (nextEnglishNumber === 119) {
-        const psalm119Part1 = await storage.getSupabaseTehillimByEnglishAndPart(119, 1);
-        if (psalm119Part1) {
-          return res.json({
-            id: psalm119Part1.id,
-            englishNumber: 119,
-            partNumber: 1,
-            hebrewNumber: psalm119Part1.hebrewNumber
-          });
-        }
-      }
-      
-      // For other psalms or if 119 part 1 not found, use regular logic
-      const nextPsalm = await storage.getSupabaseTehillimByEnglishAndPart(nextEnglishNumber, 1);
-      if (nextPsalm) {
-        return res.json({
-          id: nextPsalm.id,
-          englishNumber: nextEnglishNumber,
-          partNumber: 1,
-          hebrewNumber: nextPsalm.hebrewNumber
-        });
-      }
-      
-      // Fallback
-      return res.status(404).json({ error: "Could not determine next Tehillim" });
-      
-    } catch (error) {
-      console.error("Error getting next Tehillim part:", error);
-      return res.status(500).json({ message: "Failed to get next Tehillim part" });
-    }
-  });
-
-  // Get Tehillim preview (first line) from Sefaria API
-  app.get("/api/tehillim/preview/:perek", async (req, res) => {
-    try {
-      const perek = parseInt(req.params.perek);
-      const language = req.query.language as string || 'hebrew';
-      
-      if (isNaN(perek) || perek < 1 || perek > 171) {
-        return res.status(400).json({ error: 'Perek must be between 1 and 171' });
-      }
-      
-      const tehillimText = await storage.getSefariaTehillim(perek, language);
-      // Extract first line for preview
-      const firstLine = tehillimText.text.split('\n')[0] || tehillimText.text.substring(0, 100) + '...';
-      
-      res.json({
-        preview: firstLine,
-        perek: tehillimText.perek,
-        language: tehillimText.language
-      });
-    } catch (error) {
-      console.error('Error fetching Tehillim preview:', error);
-      return res.status(500).json({ error: 'Failed to fetch Tehillim preview' });
-    }
-  });
-
-  app.post("/api/tehillim/names", async (req, res) => {
-    try {
-      const validatedData = insertTehillimNameSchema.parse(req.body);
-      const name = await storage.createTehillimName(validatedData);
-      res.json(name);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid name data", errors: error.errors });
-      } else {
-        res.status(500).json({ message: "Failed to create Tehillim name" });
-      }
-    }
-  });
-
-  // Get Tehillim text by tehillim id (1-171 for chain reading) - MUST be after all specific routes
-  // Psalm 119 has 22 parts (ids 119-140), giving 171 total units
-  app.get("/api/tehillim/:tehillimId", async (req, res) => {
-    try {
-      const tehillimId = parseInt(req.params.tehillimId);
-      
-      // 171 total tehillim units (150 psalms, but psalm 119 has 22 parts)
-      if (isNaN(tehillimId) || tehillimId < 1 || tehillimId > 171) {
-        return res.status(400).json({ error: "Tehillim ID must be between 1 and 171" });
-      }
-      
-      // Fetch by tehillim table id - this handles psalm 119 parts correctly
-      const tehillimRow = await storage.getSupabaseTehillimById(tehillimId);
-      
-      if (!tehillimRow) {
-        return res.status(404).json({ error: "Tehillim not found" });
-      }
-      
-      // Build display title: "Tehillim X" or "Tehillim 119 (Part Y)"
-      let displayTitle = `Tehillim ${tehillimRow.englishNumber}`;
-      if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber > 1) {
-        // Show part number for psalm 119 parts 2-22
-        displayTitle = `Tehillim 119 (Part ${tehillimRow.partNumber})`;
-      } else if (tehillimRow.englishNumber === 119 && tehillimRow.partNumber === 1) {
-        displayTitle = `Tehillim 119 (Part 1)`;
-      }
-      
-      res.json({
-        tehillimId,
-        psalmNumber: tehillimRow.englishNumber,
-        partNumber: tehillimRow.partNumber,
-        displayTitle,
-        hebrewNumber: tehillimRow.hebrewNumber,
-        hebrewText: tehillimRow.hebrewText || '',
-        englishText: tehillimRow.englishText || ''
-      });
-    } catch (error) {
-      console.error('Error fetching Tehillim:', error);
-      return res.status(500).json({ error: "Failed to fetch Tehillim" });
-    }
-  });
-
-  // =====================
-  // Tehillim Chains Routes
-  // =====================
-
-  // Helper function to generate URL slug from name
-  function generateSlug(name: string): string {
-    // Check if name has Latin characters
-    const latinChars = name.replace(/[^a-zA-Z0-9\s-]/g, '').trim();
-    if (latinChars.length >= 2) {
-      // Create URL-friendly slug from Latin characters
-      return latinChars
-        .toLowerCase()
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .substring(0, 50) + '-' + Date.now().toString(36);
-    }
-    // Fallback to numeric ID for Hebrew names
-    return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-  }
-
-  // Create a new Tehillim Chain
-  app.post("/api/tehillim-chains", async (req, res) => {
-    try {
-      const { name, reason, deviceId } = req.body;
-      
-      if (!name || !reason) {
-        return res.status(400).json({ error: "Name and reason are required" });
-      }
-
-      // Generate unique slug
-      let slug = generateSlug(name);
-      
-      // Ensure slug is unique by checking database
-      let existingChain = await storage.getTehillimChainBySlug(slug);
-      let attempts = 0;
-      while (existingChain && attempts < 5) {
-        slug = generateSlug(name);
-        existingChain = await storage.getTehillimChainBySlug(slug);
-        attempts++;
-      }
-
-      const chain = await storage.createTehillimChain({
-        name,
-        reason,
-        slug,
-        creatorDeviceId: deviceId || null,
-        isActive: true,
-      });
-
-      res.json(chain);
-    } catch (error) {
-      console.error("Error creating Tehillim chain:", error);
-      res.status(500).json({ error: "Failed to create Tehillim chain" });
-    }
-  });
-
-  // Search Tehillim Chains by name
-  app.get("/api/tehillim-chains/search", async (req, res) => {
-    try {
-      const query = (req.query.q as string) || '';
-      const chains = await storage.searchTehillimChains(query);
-      res.json(chains);
-    } catch (error) {
-      // Return empty array if database tables don't exist yet
-      console.error("Error searching Tehillim chains (returning empty):", error);
-      res.json([]);
-    }
-  });
-
-  // Get all-time total tehillim completed across all chains
-  // NOTE: This must be BEFORE the :slug route to avoid "stats" being matched as a slug
-  app.get("/api/tehillim-chains/stats/total", async (req, res) => {
-    try {
-      const total = await storage.getTotalChainTehillimCompleted();
-      res.json({ total });
-    } catch (error) {
-      // Return 0 if database tables don't exist yet or query fails
-      console.error("Error fetching total chains tehillim (returning 0):", error);
-      res.json({ total: 0 });
-    }
-  });
-
-  // Get global tehillim stats (total read, books completed, unique readers)
-  // Cached for 5 minutes to avoid repeated expensive queries
-  let globalStatsCache: { data: any; timestamp: number } | null = null;
-  const GLOBAL_STATS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
-  
-  app.get("/api/tehillim-chains/stats/global", async (req, res) => {
-    try {
-      // Check cache first
-      if (globalStatsCache && Date.now() - globalStatsCache.timestamp < GLOBAL_STATS_CACHE_TTL) {
-        return res.json(globalStatsCache.data);
-      }
-      
-      const stats = await storage.getTehillimGlobalStats();
-      
-      // Update cache
-      globalStatsCache = { data: stats, timestamp: Date.now() };
-      
-      res.json(stats);
-    } catch (error) {
-      console.error("Error fetching global tehillim stats:", error);
-      res.json({ totalRead: 0, booksCompleted: 0, uniqueReaders: 0 });
-    }
-  });
-
-  // Get active campaign (chain) count
-  app.get("/api/tehillim-chains/stats/active-count", async (req, res) => {
-    try {
-      const count = await storage.getActiveTehillimChainCount();
-      res.json({ count });
-    } catch (error) {
-      console.error("Error fetching active chain count:", error);
-      res.json({ count: 0 });
-    }
-  });
-
-  // Get a random Tehillim Chain
-  app.get("/api/tehillim-chains/random", async (req, res) => {
-    try {
-      const randomChain = await storage.getRandomTehillimChain();
-      if (!randomChain) {
-        return res.status(404).json({ error: "No chains found" });
-      }
-      res.json(randomChain);
-    } catch (error) {
-      console.error("Error getting random chain:", error);
-      res.status(500).json({ error: "Failed to get random chain" });
-    }
-  });
-
-  // Generate ICS calendar file for a Tehillim Chain reminder (v2 - WebView compatible)
-  app.get("/api/tehillim-chains/:slug/reminder.ics", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { time } = req.query;
-      
-      const chain = await storage.getTehillimChainBySlug(slug);
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-      
-      const reminderTime = (time as string) || '09:00';
-      const [hours, minutes] = reminderTime.split(':').map(Number);
-      
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() + 1);
-      startDate.setHours(hours, minutes, 0, 0);
-      const endDate = new Date(startDate.getTime() + 15 * 60 * 1000);
-      
-      const formatLocalICSDate = (date: Date) => {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const h = String(date.getHours()).padStart(2, '0');
-        const m = String(date.getMinutes()).padStart(2, '0');
-        const s = String(date.getSeconds()).padStart(2, '0');
-        return `${year}${month}${day}T${h}${m}${s}`;
-      };
-      
-      const chainUrl = `${req.protocol}://${req.get('host')}/c/${slug}`;
-      const eventTitle = `Daven for ${chain.name}`;
-      
-      const icsContent = [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//Ezras Nashim//Tehillim Chain//EN',
-        'METHOD:PUBLISH',
-        'BEGIN:VEVENT',
-        `UID:${slug}-${Date.now()}@ezrasnashim.app`,
-        `DTSTAMP:${formatLocalICSDate(new Date())}`,
-        `DTSTART:${formatLocalICSDate(startDate)}`,
-        `DTEND:${formatLocalICSDate(endDate)}`,
-        'RRULE:FREQ=WEEKLY;BYDAY=SU,MO,TU,WE,TH,FR',
-        `SUMMARY:${eventTitle}`,
-        `LOCATION:${chainUrl}`,
-        `DESCRIPTION:Time to say Tehillim for ${chain.name}. Open your Tehillim chain: ${chainUrl}`,
-        'END:VEVENT',
-        'END:VCALENDAR'
-      ].join('\r\n');
-      
-      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
-      res.setHeader('Content-Disposition', `attachment; filename="tehillim-reminder-${slug}.ics"`);
-      res.send(icsContent);
-    } catch (error) {
-      console.error("Error generating ICS file:", error);
-      res.status(500).json({ error: "Failed to generate calendar file" });
-    }
-  });
-
-  // Get a specific Tehillim Chain by slug (includes stats and next psalm for fast loading)
-  app.get("/api/tehillim-chains/:slug", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { deviceId } = req.query;
-      const chain = await storage.getTehillimChainBySlug(slug);
-      
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      // Check if device has an active reading first (for returning users)
-      let activeReading: number | null = null;
-      if (deviceId) {
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-        const readings = await db.select({ psalmNumber: tehillimChainReadings.psalmNumber })
-          .from(tehillimChainReadings)
-          .where(and(
-            eq(tehillimChainReadings.chainId, chain.id),
-            eq(tehillimChainReadings.deviceId, deviceId as string),
-            eq(tehillimChainReadings.status, 'reading'),
-            gt(tehillimChainReadings.startedAt, tenMinutesAgo)
-          ))
-          .limit(1);
-        if (readings.length > 0) {
-          activeReading = readings[0].psalmNumber;
-        }
-      }
-
-      // Fetch stats and next psalm in parallel to eliminate waterfall
-      const [stats, nextAvailable] = await Promise.all([
-        storage.getTehillimChainStats(chain.id),
-        storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string | undefined)
-      ]);
-
-      // Return active reading if exists, otherwise next available
-      const nextPsalm = activeReading || nextAvailable;
-
-      // Prevent browser caching for real-time stats
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      // Return raw stats without pre-adjustment for consistency across all endpoints
-      // The progress bar now uses totalCompleted directly instead of deriving from available
-      res.json({
-        ...chain,
-        stats: {
-          totalCompleted: stats.totalSaid,
-          booksCompleted: stats.booksCompleted,
-          currentlyReading: stats.currentlyReading,
-          available: stats.available
-        },
-        nextPsalm: nextPsalm || null,
-        hasActiveReading: !!activeReading
-      });
-    } catch (error) {
-      console.error("Error fetching Tehillim chain:", error);
-      res.status(500).json({ error: "Failed to fetch Tehillim chain" });
-    }
-  });
-
-  // Get chain stats (total said, books completed, currently reading, available)
-  // No caching - stats must be fresh for real-time feedback
-  app.get("/api/tehillim-chains/:slug/stats", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const chain = await storage.getTehillimChainBySlug(slug);
-      
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      const stats = await storage.getTehillimChainStats(chain.id);
-      // Prevent browser caching for real-time stats
-      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
-      res.setHeader('Pragma', 'no-cache');
-      res.setHeader('Expires', '0');
-      // Map totalSaid to totalCompleted for frontend compatibility
-      res.json({
-        totalCompleted: stats.totalSaid,
-        booksCompleted: stats.booksCompleted,
-        currentlyReading: stats.currentlyReading,
-        available: stats.available
-      });
-    } catch (error) {
-      console.error("Error fetching chain stats:", error);
-      res.status(500).json({ error: "Failed to fetch chain stats" });
-    }
-  });
-
-  // Start reading a psalm on a chain
-  app.post("/api/tehillim-chains/:slug/start-reading", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { deviceId, psalmNumber } = req.body;
-
-      if (!deviceId) {
-        return res.status(400).json({ error: "Device ID is required" });
-      }
-
-      const chain = await storage.getTehillimChainBySlug(slug);
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      // If no psalm specified, get a random available one
-      let psalm = psalmNumber;
-      if (!psalm) {
-        psalm = await storage.getRandomAvailablePsalmForChain(chain.id);
-        if (!psalm) {
-          return res.status(404).json({ error: "No psalms available - all have been completed or are being read" });
-        }
-      }
-
-      const reading = await storage.startChainReading(chain.id, psalm, deviceId);
-      res.json(reading);
-    } catch (error) {
-      console.error("Error starting chain reading:", error);
-      res.status(500).json({ error: "Failed to start reading" });
-    }
-  });
-
-  // Complete a psalm on a chain
-  app.post("/api/tehillim-chains/:slug/complete", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { deviceId, psalmNumber } = req.body;
-
-      if (!deviceId || !psalmNumber) {
-        return res.status(400).json({ error: "Device ID and psalm number are required" });
-      }
-
-      const chain = await storage.getTehillimChainBySlug(slug);
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      const reading = await storage.completeChainReading(chain.id, psalmNumber, deviceId);
-      
-      // Invalidate global stats cache so next request gets fresh data
-      globalStatsCache = null;
-      
-      // Return updated stats so client uses authoritative data
-      const stats = await storage.getTehillimChainStats(chain.id);
-      res.json({ 
-        reading, 
-        stats: {
-          totalCompleted: stats.totalSaid,
-          booksCompleted: stats.booksCompleted,
-          currentlyReading: stats.currentlyReading,
-          available: stats.available,
-        }
-      });
-    } catch (error) {
-      console.error("Error completing chain reading:", error);
-      res.status(500).json({ error: "Failed to complete reading" });
-    }
-  });
-
-  // Get next random available psalm for a chain (default on page load)
-  app.get("/api/tehillim-chains/:slug/next-available", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { deviceId } = req.query;
-
-      const chain = await storage.getTehillimChainBySlug(slug);
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string);
-      if (!psalm) {
-        return res.status(404).json({ error: "No psalms available" });
-      }
-
-      res.json({ psalmNumber: psalm });
-    } catch (error) {
-      console.error("Error getting next psalm:", error);
-      res.status(500).json({ error: "Failed to get next psalm" });
-    }
-  });
-
-  // Get a random available psalm for a chain (for "Find me another" button)
-  app.get("/api/tehillim-chains/:slug/random-available", async (req, res) => {
-    try {
-      const { slug } = req.params;
-      const { deviceId, excludePsalm } = req.query;
-
-      const chain = await storage.getTehillimChainBySlug(slug);
-      if (!chain) {
-        return res.status(404).json({ error: "Chain not found" });
-      }
-
-      // Parse excludePsalm and ensure it's a valid number
-      let excludePsalmNum: number | undefined;
-      if (excludePsalm) {
-        const parsed = parseInt(excludePsalm as string, 10);
-        if (!isNaN(parsed) && parsed >= 1 && parsed <= 171) {
-          excludePsalmNum = parsed;
-        }
-      }
-      
-      const psalm = await storage.getRandomAvailablePsalmForChain(chain.id, deviceId as string, excludePsalmNum);
-      if (!psalm) {
-        return res.status(404).json({ error: "No psalms available" });
-      }
-
-      res.json({ psalmNumber: psalm });
-    } catch (error) {
-      console.error("Error getting random psalm:", error);
-      res.status(500).json({ error: "Failed to get random psalm" });
     }
   });
 
@@ -4132,419 +3107,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Analytics routes
-  // Only track essential completion events (not page views)
-  app.post("/api/analytics/track", async (req, res) => {
-    try {
-      const { eventType, eventData, sessionId, idempotencyKey, date } = req.body;
-      
-      // Only allow completion events, reject high-volume events like page_view
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
-      if (!allowedEvents.includes(eventType)) {
-        return res.status(400).json({ message: "Event type not tracked" });
-      }
-      
-      const event = await storage.trackEvent({
-        eventType,
-        eventData,
-        sessionId,
-        idempotencyKey,
-        analyticsDate: date // Store client-provided date for accurate timezone-aware aggregation
-      });
-      
-      res.json(event);
-    } catch (error) {
-      console.error('Error tracking analytics event:', error);
-      return res.status(500).json({ message: "Failed to track event" });
-    }
-  });
-  
-  // Sync endpoint for offline queued analytics events
-  app.post("/api/analytics/sync", async (req, res) => {
-    try {
-      const { events } = req.body;
-      
-      if (!events || !Array.isArray(events)) {
-        return res.status(400).json({ message: "Events array required" });
-      }
-      
-      // Filter to only allowed event types
-      const allowedEvents = ['modal_complete', 'tehillim_complete', 'name_prayed', 'tehillim_book_complete', 'tzedaka_completion', 'meditation_complete', 'feature_usage'];
-      const validEvents = events.filter((e: any) => allowedEvents.includes(e.eventType));
-      
-      const result = await storage.syncAnalyticsEvents(validEvents);
-      
-      res.json(result);
-    } catch (error) {
-      console.error('Error syncing analytics events:', error);
-      return res.status(500).json({ message: "Failed to sync events" });
-    }
-  });
-
-  // Feature usage tracking endpoint
-  app.post("/api/feature-usage", async (req, res) => {
-    try {
-      const { featureName, category } = req.body;
-      
-      if (!featureName) {
-        return res.status(400).json({ message: "Feature name required" });
-      }
-      
-      const event = await storage.trackEvent({
-        eventType: 'feature_usage',
-        eventData: {
-          feature: featureName,
-          category: category || 'general'
-        },
-        sessionId: null
-      });
-      
-      res.json({ success: true, event });
-    } catch (error) {
-      console.error('Error tracking feature usage:', error);
-      return res.status(500).json({ message: "Failed to track feature usage" });
-    }
-  });
-
-  // Efficient session tracking - updates daily stats only once per session
-  app.post("/api/analytics/session", async (req, res) => {
-    try {
-      const { sessionId } = req.body;
-      
-      if (!sessionId) {
-        return res.status(400).json({ message: "Session ID required" });
-      }
-      
-      await storage.recordActiveSession(sessionId);
-      res.json({ success: true });
-    } catch (error) {
-      console.error('Error recording session:', error);
-      return res.status(500).json({ message: "Failed to record session" });
-    }
-  });
-
-  // Data cleanup endpoint - remove old analytics data
-  app.post("/api/analytics/cleanup", requireAdminAuth, async (req, res) => {
-    try {
-      await storage.cleanupOldAnalytics();
-      res.json({ success: true, message: "Old analytics data cleaned up" });
-    } catch (error) {
-      console.error('Error cleaning up analytics:', error);
-      return res.status(500).json({ message: "Failed to cleanup analytics" });
-    }
-  });
-
-  app.get("/api/analytics/stats/today", async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-      
-      // Accept client-provided date parameter for proper timezone handling
-      let today: string;
-      if (req.query.date && typeof req.query.date === 'string') {
-        today = req.query.date;
-      } else {
-        const now = new Date();
-        const hours = now.getHours();
-        if (hours < 2) {
-          now.setDate(now.getDate() - 1);
-        }
-        today = now.toISOString().split('T')[0];
-      }
-      
-      // Read pre-calculated stats (trackEvent already updates stats when events are added)
-      // Only recalculate if no stats exist for today
-      let stats = await storage.getDailyStats(today);
-      if (!stats) {
-        stats = await storage.recalculateDailyStats(today);
-      }
-      
-      res.json(stats || {
-        date: today,
-        uniqueUsers: 0,
-        pageViews: 0,
-        tehillimCompleted: 0,
-        namesProcessed: 0,
-        modalCompletions: {}
-      });
-    } catch (error) {
-      console.error('Error fetching today stats:', error);
-      return res.status(500).json({ message: "Failed to fetch today's stats" });
-    }
-  });
-
-  app.get("/api/analytics/stats/week", async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-      
-      // Accept client-provided start date parameter for proper timezone handling
-      // The client should send the start of the current week (Sunday 2 AM in their timezone)
-      let weekStart: string;
-      if (req.query.startDate && typeof req.query.startDate === 'string') {
-        // Client provides the correct week start date accounting for their local 2 AM boundary
-        weekStart = req.query.startDate;
-      } else {
-        // Fallback: calculate using server time (may be incorrect for users in different timezones)
-        const now = new Date();
-        const hours = now.getHours();
-        const currentDate = new Date(now);
-        
-        // Adjust for 2 AM boundary
-        if (hours < 2) {
-          currentDate.setDate(currentDate.getDate() - 1);
-        }
-        
-        // Find the most recent Sunday
-        const dayOfWeek = currentDate.getDay();
-        const daysToSubtract = dayOfWeek; // 0 for Sunday, 1 for Monday, etc.
-        currentDate.setDate(currentDate.getDate() - daysToSubtract);
-        
-        weekStart = currentDate.toISOString().split('T')[0];
-      }
-      
-      const weeklyStats = await storage.getWeeklyStats(weekStart);
-      res.json(weeklyStats);
-    } catch (error) {
-      console.error('Error fetching weekly stats:', error);
-      return res.status(500).json({ message: "Failed to fetch weekly stats" });
-    }
-  });
-
-  app.get("/api/analytics/stats/month", async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-      
-      const now = new Date();
-      const year = parseInt(req.query.year as string) || now.getFullYear();
-      const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
-      
-      const monthlyStats = await storage.getMonthlyStats(year, month);
-      res.json(monthlyStats);
-    } catch (error) {
-      console.error('Error fetching monthly stats:', error);
-      return res.status(500).json({ message: "Failed to fetch monthly stats" });
-    }
-  });
-
-  app.get("/api/analytics/stats/total", async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-      
-      const totals = await storage.getTotalStats();
-      res.json(totals);
-    } catch (error) {
-      console.error('Error fetching total stats:', error);
-      return res.status(500).json({ message: "Failed to fetch total stats" });
-    }
-  });
-
-  // Recalculate all historical analytics to fix brocha counting
-  app.post("/api/analytics/recalculate-all", requireAdminAuth, async (req, res) => {
-    try {
-      console.log('Starting recalculation of all historical analytics...');
-      const result = await storage.recalculateAllHistoricalStats();
-      console.log(`Completed: Updated ${result.updated} dates`);
-      
-      res.json({ 
-        success: true, 
-        message: `Successfully recalculated analytics for ${result.updated} dates`,
-        datesUpdated: result.updated,
-        dates: result.dates
-      });
-    } catch (error) {
-      console.error('Error recalculating all analytics:', error);
-      return res.status(500).json({ message: "Failed to recalculate all analytics" });
-    }
-  });
-
-  app.get("/api/analytics/stats/daily", async (req, res) => {
-    try {
-      // Get stats for the last 30 days
-      const dailyStats = [];
-      const today = new Date();
-      
-      for (let i = 0; i < 30; i++) {
-        const date = new Date(today);
-        date.setDate(date.getDate() - i);
-        const dateStr = date.toISOString().split('T')[0];
-        
-        const stats = await storage.getDailyStats(dateStr);
-        if (stats) {
-          dailyStats.push(stats);
-        }
-      }
-      
-      res.json(dailyStats);
-    } catch (error) {
-      console.error('Error fetching daily stats:', error);
-      return res.status(500).json({ message: "Failed to fetch daily stats" });
-    }
-  });
-
-  app.get("/api/analytics/stats/range", requireAdminAuth, async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-
-      const startDate = req.query.startDate as string;
-      const endDate = req.query.endDate as string;
-
-      if (!startDate || !endDate) {
-        return res.status(400).json({ message: "startDate and endDate are required" });
-      }
-
-      const rangeStats = await storage.getDateRangeStats(startDate, endDate);
-      res.json(rangeStats);
-    } catch (error) {
-      console.error('Error fetching date range stats:', error);
-      return res.status(500).json({ message: "Failed to fetch date range stats" });
-    }
-  });
-
-  app.get("/api/analytics/stats/compare", requireAdminAuth, async (req, res) => {
-    try {
-      // Force no caching for real-time analytics
-      res.set({
-        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Surrogate-Control': 'no-store'
-      });
-
-      const period = req.query.period as 'week' | 'month';
-
-      if (!period || (period !== 'week' && period !== 'month')) {
-        return res.status(400).json({ message: "period must be 'week' or 'month'" });
-      }
-
-      const comparisonStats = await storage.getComparisonStats(period);
-      res.json(comparisonStats);
-    } catch (error) {
-      console.error('Error fetching comparison stats:', error);
-      return res.status(500).json({ message: "Failed to fetch comparison stats" });
-    }
-  });
-
-  app.get("/api/analytics/community-impact", async (req, res) => {
-    try {
-      const period = req.query.period as string || 'alltime';
-      const impact = await storage.getCommunityImpact(period);
-      res.json(impact);
-    } catch (error) {
-      console.error('Error fetching community impact:', error);
-      return res.status(500).json({ message: "Failed to fetch community impact" });
-    }
-  });
-
-  // IP-based location detection (works with VPN)
-  app.get("/api/location/ip", async (req, res) => {
-    try {
-      // Get client IP address - handle multiple IPs by taking the first one
-      let clientIP = req.headers['x-forwarded-for'] || 
-                      req.headers['x-real-ip'] || 
-                      req.connection.remoteAddress || 
-                      req.socket.remoteAddress ||
-                      (req.connection as any)?.socket?.remoteAddress ||
-                      '127.0.0.1';
-      
-      // If x-forwarded-for contains multiple IPs, take the first one
-      if (typeof clientIP === 'string' && clientIP.includes(',')) {
-        clientIP = clientIP.split(',')[0].trim();
-      }
-      
-      // Remove IPv6 prefix if present
-      if (typeof clientIP === 'string' && clientIP.startsWith('::ffff:')) {
-        clientIP = clientIP.replace('::ffff:', '');
-      }
-      
-      console.log('IP-based location detection for IP:', clientIP);
-      
-      // Use ip-api.com for IP-based geolocation (free, no API key needed)
-      const ipResponse = await serverAxiosClient.get(`http://ip-api.com/json/${clientIP}?fields=status,message,country,regionName,city,lat,lon,timezone`);
-      
-      if (ipResponse.data.status === 'success') {
-        const locationData = {
-          coordinates: {
-            lat: ipResponse.data.lat,
-            lng: ipResponse.data.lon
-          },
-          location: `${ipResponse.data.city}, ${ipResponse.data.regionName}, ${ipResponse.data.country}`,
-          timezone: ipResponse.data.timezone,
-          source: 'ip'
-        };
-        
-        console.log('IP-based location detected:', locationData);
-        res.json(locationData);
-      } else {
-        console.log('IP-based location failed:', ipResponse.data.message);
-        res.status(400).json({ error: 'Could not determine location from IP address' });
-      }
-    } catch (error) {
-      console.error('IP-based location detection error:', error);
-      return res.status(500).json({ error: 'Failed to detect location from IP' });
-    }
-  });
-
-  // Location API endpoint for Tefilla conditional processing
-  app.get("/api/location/:lat/:lon", async (req, res) => {
-    try {
-      const { lat, lon } = req.params;
-      const latitude = parseFloat(lat);
-      const longitude = parseFloat(lon);
-
-      if (isNaN(latitude) || isNaN(longitude)) {
-        return res.status(400).json({ message: "Invalid coordinates" });
-      }
-
-      // Use OpenStreetMap Nominatim for reverse geocoding
-      const response = await serverAxiosClient.get(
-        `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
-      );
-
-      if (response.data) {
-        res.json({
-          country: response.data.address?.country || 'Unknown',
-          city: response.data.address?.city || response.data.address?.town || response.data.address?.village || 'Unknown',
-          state: response.data.address?.state || response.data.address?.province || null,
-          coordinates: { latitude, longitude }
-        });
-      } else {
-        res.status(404).json({ message: "Location not found" });
-      }
-    } catch (error) {
-      console.error('Error fetching location:', error);
-      return res.status(500).json({ message: "Failed to fetch location data" });
-    }
-  });
-
   // Jewish events API endpoint for Events page
   app.get("/api/events/:lat/:lng", async (req, res) => {
     try {
@@ -4620,244 +3182,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Hebrew date API endpoint for Tefilla conditional processing
-  app.get("/api/hebrew-date/:date", async (req, res) => {
-    try {
-      const { date } = req.params;
-      const inputDate = new Date(date);
-      
-      if (isNaN(inputDate.getTime())) {
-        return res.status(400).json({ message: "Invalid date format" });
-      }
-
-      const year = inputDate.getFullYear();
-      const month = inputDate.getMonth() + 1;
-      const day = inputDate.getDate();
-
-      // Get Hebrew date conversion
-      const hebrewResponse = await serverAxiosClient.get(
-        `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1`
-      );
-
-      // Get events and holidays for this date
-      const eventsResponse = await serverAxiosClient.get(
-        `https://www.hebcal.com/hebcal?v=1&cfg=json&year=${year}&month=${month}&maj=on&min=on&nx=on`
-      );
-
-      let isRoshChodesh = false;
-      let events: string[] = [];
-
-      if (eventsResponse.data && eventsResponse.data.items) {
-        // Filter events for the specific date
-        const dateString = inputDate.toISOString().split('T')[0];
-        const dayEvents = eventsResponse.data.items.filter((item: any) => {
-          if (item.date) {
-            const eventDate = new Date(item.date).toISOString().split('T')[0];
-            return eventDate === dateString;
-          }
-          return false;
-        });
-
-        events = dayEvents.map((item: any) => item.title || item.hebrew || '');
-        isRoshChodesh = events.some(event => 
-          event.toLowerCase().includes('rosh chodesh') ||
-          event.toLowerCase().includes('ראש חודש')
-        );
-      }
-
-      if (hebrewResponse.data) {
-        // Calculate Hebrew month length
-        // Some months always have 30 days, some 29, and Cheshvan/Kislev vary by year
-        // Hebcal API might return it, or we default based on common patterns
-        let monthLength = 30; // Default to 30
-        
-        const hebrewMonth = hebrewResponse.data.hm || '';
-        
-        // Hebrew months that always have 29 days
-        const shortMonths = ['Tevet', 'Adar I', 'Adar', 'Iyyar', 'Tammuz', 'Elul'];
-        if (shortMonths.includes(hebrewMonth)) {
-          monthLength = 29;
-        }
-        
-        // Check if Hebcal provides the length
-        if (hebrewResponse.data.monthLength) {
-          monthLength = hebrewResponse.data.monthLength;
-        }
-        
-        // Note: Cheshvan and Kislev can be either 29 or 30 days depending on the year
-        // Without additional calendar calculation, we default to 30 for these
-        // The actual length would require more complex Hebrew calendar calculations
-        
-        res.json({
-          hebrew: hebrewResponse.data.hebrew || '',
-          date: date,
-          isRoshChodesh,
-          events,
-          hebrewDay: hebrewResponse.data.hd,
-          hebrewMonth: hebrewResponse.data.hm,
-          hebrewYear: hebrewResponse.data.hy,
-          monthLength: monthLength,
-          dd: hebrewResponse.data.hd, // Alias for compatibility
-          hm: hebrewResponse.data.hm  // Alias for compatibility
-        });
-      } else {
-        res.status(404).json({ message: "Hebrew date not found" });
-      }
-    } catch (error) {
-      console.error('Error fetching Hebrew date:', error);
-      return res.status(500).json({ message: "Failed to fetch Hebrew date data" });
-    }
-  });
-
-  // Enhanced health check with configuration status
-  app.get("/healthcheck", (req, res) => {
-    const isProduction = process.env.NODE_ENV === 'production';
-    
-    // Check critical services
-    const health = {
-      status: "OK",
-      timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV || 'development',
-      services: {
-        database: !!process.env.DATABASE_URL,
-        stripe: !!process.env.STRIPE_SECRET_KEY,
-        pushNotifications: !!(process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY),
-        admin: !!process.env.ADMIN_PASSWORD
-      }
-    };
-    
-    // In production, include a warnings array for missing optional services
-    if (isProduction) {
-      const warnings: string[] = [];
-      if (!health.services.stripe) warnings.push('Stripe not configured - donations disabled');
-      if (!health.services.pushNotifications) warnings.push('Push notifications not configured');
-      if (!health.services.admin) warnings.push('Admin panel not configured');
-      
-      if (warnings.length > 0) {
-        (health as any).warnings = warnings;
-      }
-    }
-    
-    res.json(health);
-  })
-
-  // Development: Inform about frontend port  
-  if (process.env.NODE_ENV === 'development') {
-    app.get("/", (req, res) => {
-      res.send(`
-        <html>
-          <head>
-            <title>Ezras Nashim API Server</title>
-            <style>
-              body { font-family: Platypi, serif; text-align: center; padding: 50px; background: #f5f5f5; }
-              .container { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-              h1 { color: #333; margin-bottom: 20px; }
-              p { color: #666; line-height: 1.6; margin-bottom: 15px; }
-              .frontend-link { display: inline-block; padding: 12px 24px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-              .frontend-link:hover { background: #0056b3; }
-              .api-status { color: #28a745; font-weight: bold; }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>🌺 Ezras Nashim API Server</h1>
-              <p class="api-status">✅ API Server Running (Port 5000)</p>
-              <p>This is the backend API server. To access the Ezras Nashim application interface, please use:</p>
-              <a href="https://${req.get('host')?.replace(':5000', ':5173')}" class="frontend-link">
-                Access Frontend Application (Port 5173)
-              </a>
-              <p><small>The frontend runs on port 5173 during development.</small></p>
-            </div>
-          </body>
-        </html>
-      `);
-    });
-  } else {
-    // Production: Serve API status  
-    app.get("/", (req, res) => {
-      res.json({ status: "OK" });
-    });
-  }
-  
-  // Version endpoint for PWA update checking - AUTOMATIC VERSIONING
-  // Automatically generate version based on deployment time
-  const SERVER_START_TIME = Date.now();
-  const DEPLOYMENT_DATE = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-  const DEPLOYMENT_TIME = Math.floor(SERVER_START_TIME / 1000); // Unix timestamp in seconds
-  
-  // Generate automatic version: date + time-based
-  const generateAutoVersion = (): string => {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2); // Last 2 digits of year
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hour = String(date.getHours()).padStart(2, '0');
-    const minute = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${year}.${month}.${day}.${hour}${minute}`;
-  };
-  
-  const APP_VERSION = process.env.APP_VERSION || generateAutoVersion();
-  
-  // Use deployment timestamp as version timestamp for automatic updates
-  const getVersionTimestamp = (): number => {
-    // In production, use server start time as deployment timestamp
-    // This ensures each deployment gets a unique timestamp
-    return SERVER_START_TIME;
-  };
-  
-  app.get("/api/version", (req, res) => {
-    // Aggressive no-cache headers to ensure users always get fresh version info
-    res.set({
-      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-      'Pragma': 'no-cache',
-      'Expires': '0',
-      'Surrogate-Control': 'no-store'
-    });
-    
-    const versionTimestamp = getVersionTimestamp();
-    const version = {
-      timestamp: versionTimestamp,
-      version: APP_VERSION,
-      buildDate: new Date(versionTimestamp).toISOString(),
-      serverUptime: Date.now() - SERVER_START_TIME,
-      // Support for critical updates - set these env vars when deploying urgent fixes
-      isCritical: process.env.CRITICAL_UPDATE === 'true',
-      releaseNotes: process.env.RELEASE_NOTES || undefined
-    };
-    res.json(version);
-  });
-
-  // Admin endpoint to regenerate cache version - Forces PWA update
-  app.post("/api/regenerate-cache-version", requireAdminAuth, async (req, res) => {
-    try {
-      const { execSync } = await import('child_process');
-      const __dirname = path.dirname(fileURLToPath(import.meta.url));
-      const scriptPath = path.join(__dirname, '../scripts/generate-version.js');
-      
-      // Execute the version generation script
-      const output = execSync(`node ${scriptPath}`, { encoding: 'utf-8' });
-      
-      console.log('[Admin] Cache version regenerated:', output);
-      
-      res.status(200).json({
-        success: true,
-        message: 'Cache version regenerated successfully',
-        output: output.trim(),
-        newVersion: `v1.0.0-${Date.now()}`,
-        note: 'Users will receive update prompt on next app focus'
-      });
-    } catch (error: any) {
-      console.error('[Admin] Failed to regenerate cache version:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Failed to regenerate cache version',
-        error: error.message
-      });
-    }
-  });
-
-  // Batched homepage data endpoint - reduces initial load requests from 2+ to 1
+  // Batched homepage data endpoint - reduces initial load requests
+  // Now includes: message, sponsor, todaysSpecial (3 calls → 1)
   app.get("/api/home-summary", async (req, res) => {
     try {
       const date = req.query.date as string;
@@ -4869,9 +3195,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const errors: { field: string; error: string }[] = [];
       
       // Fetch all data in parallel with individual error handling
-      const [message, sponsor] = await Promise.allSettled([
+      const [message, sponsor, todaysSpecial] = await Promise.allSettled([
         storage.getMessageByDate(date),
-        storage.getDailySponsor(date)
+        storage.getDailySponsor(date),
+        storage.getTodaysSpecialByDate(date)
       ]);
 
       // Track any errors
@@ -4881,15 +3208,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (sponsor.status === 'rejected') {
         errors.push({ field: 'sponsor', error: sponsor.reason?.message || 'Failed to fetch sponsor' });
       }
+      if (todaysSpecial.status === 'rejected') {
+        errors.push({ field: 'todaysSpecial', error: todaysSpecial.reason?.message || 'Failed to fetch today\'s special' });
+      }
 
       const summary = {
         message: message.status === 'fulfilled' ? message.value : null,
         sponsor: sponsor.status === 'fulfilled' ? sponsor.value : null,
+        todaysSpecial: todaysSpecial.status === 'fulfilled' ? todaysSpecial.value : null,
         errors: errors.length > 0 ? errors : undefined,
         fetchedAt: new Date().toISOString()
       };
 
-      // Set caching: 2 minutes for messages (check frequently), 15 minutes for sponsors
+      // Set caching: 2 minutes for messages (check frequently)
       res.set({
         'Cache-Control': 'public, max-age=120', // 2 minutes
       });
@@ -4898,6 +3229,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching home summary:', error);
       return res.status(500).json({ error: "Failed to fetch home summary" });
+    }
+  });
+
+  // Torah Summary - Batched endpoint for all Torah section data
+  app.get("/api/torah-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `torah-summary:${date}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
+      // Fetch all Torah data in parallel with individual error tracking
+      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses] = await Promise.allSettled([
+        storage.getDailyHalachaByDate(date),
+        storage.getDailyChizukByDate(date),
+        storage.getDailyEmunaByDate(date),
+        storage.getFeaturedContentByDate(date),
+        storage.getCurrentPirkeiAvot(),
+        storage.getParshaVortsByDate(date),
+        storage.getTorahClassesByDate(date)
+      ]);
+
+      // Track per-section errors for UI fallback messages
+      const errors: Record<string, boolean> = {};
+      if (halacha.status === 'rejected') errors.halacha = true;
+      if (chizuk.status === 'rejected') errors.chizuk = true;
+      if (emuna.status === 'rejected') errors.emuna = true;
+      if (featured.status === 'rejected') errors.featured = true;
+      if (pirkeiAvot.status === 'rejected') errors.pirkeiAvot = true;
+      if (parshaVorts.status === 'rejected') errors.parshaVorts = true;
+      if (torahClasses.status === 'rejected') errors.torahClasses = true;
+
+      // Format Pirkei Avot response to match existing /api/torah/pirkei-avot/:date API
+      let formattedPirkeiAvot = null;
+      if (pirkeiAvot.status === 'fulfilled' && pirkeiAvot.value) {
+        formattedPirkeiAvot = {
+          text: pirkeiAvot.value.content,
+          chapter: pirkeiAvot.value.chapter,
+          source: `${pirkeiAvot.value.chapter}.${pirkeiAvot.value.perek}`
+        };
+      }
+
+      const summary = {
+        halacha: halacha.status === 'fulfilled' ? halacha.value : null,
+        chizuk: chizuk.status === 'fulfilled' ? chizuk.value : null,
+        emuna: emuna.status === 'fulfilled' ? emuna.value : null,
+        featured: featured.status === 'fulfilled' ? featured.value : null,
+        pirkeiAvot: formattedPirkeiAvot,
+        parshaVorts: parshaVorts.status === 'fulfilled' ? parshaVorts.value : [],
+        torahClasses: torahClasses.status === 'fulfilled' ? torahClasses.value : [],
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      // Set HTTP caching: 5 minutes for Torah content
+      res.set({
+        'Cache-Control': 'public, max-age=300', // 5 minutes
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching torah summary:', error);
+      return res.status(500).json({ error: "Failed to fetch torah summary" });
+    }
+  });
+
+  // Tzedaka Summary - Batched endpoint for all Tzedaka section data
+  app.get("/api/tzedaka-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `tzedaka-summary:${date}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
+      // Fetch all Tzedaka data in parallel
+      const [campaign, communityImpact] = await Promise.allSettled([
+        storage.getActiveCampaign(),
+        storage.getCommunityImpactByDate(date)
+      ]);
+
+      // Track per-section errors
+      const errors: Record<string, boolean> = {};
+      if (campaign.status === 'rejected') errors.campaign = true;
+      if (communityImpact.status === 'rejected') errors.communityImpact = true;
+
+      const summary = {
+        campaign: campaign.status === 'fulfilled' ? campaign.value : null,
+        communityImpact: communityImpact.status === 'fulfilled' ? communityImpact.value : null,
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      res.set({ 'Cache-Control': 'public, max-age=300' });
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching tzedaka summary:', error);
+      return res.status(500).json({ error: "Failed to fetch tzedaka summary" });
+    }
+  });
+
+  // Tefilla Stats Summary - Batched endpoint for Tehillim chain statistics
+  app.get("/api/tefilla-stats", async (req, res) => {
+    try {
+      // Check server-side cache first (1 minute TTL for stats)
+      const cacheKey = 'tefilla-stats';
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=60' });
+        return res.json(cached);
+      }
+
+      // Fetch all stats in parallel
+      const [totalStats, globalStats] = await Promise.allSettled([
+        storage.getTotalChainTehillimCompleted(),
+        storage.getTehillimGlobalStats()
+      ]);
+
+      // Track per-section errors
+      const errors: Record<string, boolean> = {};
+      if (totalStats.status === 'rejected') errors.totalStats = true;
+      if (globalStats.status === 'rejected') errors.globalStats = true;
+
+      const summary = {
+        total: totalStats.status === 'fulfilled' ? totalStats.value || 0 : 0,
+        globalStats: globalStats.status === 'fulfilled' ? globalStats.value : null,
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 1 minute (stats update more frequently)
+      cache.set(cacheKey, summary, { ttl: 60 });
+
+      res.set({ 'Cache-Control': 'public, max-age=60' });
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching tefilla stats:', error);
+      return res.status(500).json({ error: "Failed to fetch tefilla stats" });
+    }
+  });
+
+  // Table Summary - Batched endpoint for all Table section data
+  app.get("/api/table-summary", async (req, res) => {
+    try {
+      const date = req.query.date as string;
+      const dayOfWeek = parseInt(req.query.dayOfWeek as string);
+      
+      if (!date) {
+        return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
+      }
+      if (isNaN(dayOfWeek) || dayOfWeek < 0 || dayOfWeek > 6) {
+        return res.status(400).json({ error: "dayOfWeek parameter required (0-6)" });
+      }
+
+      // Check server-side cache first (5 minute TTL)
+      const cacheKey = `table-summary:${date}:${dayOfWeek}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=300' });
+        return res.json(cached);
+      }
+
+      // Fetch all Table data in parallel with individual error tracking
+      const [giftOfChatzos, lifeClasses, inspiration, recipe, shopItems] = await Promise.allSettled([
+        storage.getGiftOfChatzosByDayOfWeek(dayOfWeek),
+        storage.getLifeClassesByDate(date),
+        storage.getTableInspirationByDate(date),
+        storage.getDailyRecipeByDate(date),
+        storage.getAllShopItems()
+      ]);
+
+      // Track per-section errors for UI fallback messages
+      const errors: Record<string, boolean> = {};
+      if (giftOfChatzos.status === 'rejected') errors.giftOfChatzos = true;
+      if (lifeClasses.status === 'rejected') errors.lifeClasses = true;
+      if (inspiration.status === 'rejected') errors.inspiration = true;
+      if (recipe.status === 'rejected') errors.recipe = true;
+      if (shopItems.status === 'rejected') errors.shopItems = true;
+
+      const summary = {
+        giftOfChatzos: giftOfChatzos.status === 'fulfilled' ? giftOfChatzos.value : null,
+        lifeClasses: lifeClasses.status === 'fulfilled' ? lifeClasses.value : [],
+        inspiration: inspiration.status === 'fulfilled' ? inspiration.value : null,
+        recipe: recipe.status === 'fulfilled' ? recipe.value : null,
+        shopItems: shopItems.status === 'fulfilled' ? shopItems.value : [],
+        errors: Object.keys(errors).length > 0 ? errors : undefined,
+        fetchedAt: new Date().toISOString()
+      };
+
+      // Cache the result for 5 minutes
+      cache.set(cacheKey, summary, { ttl: 300 });
+
+      // Set HTTP caching: 5 minutes for Table content
+      res.set({
+        'Cache-Control': 'public, max-age=300',
+      });
+
+      res.json(summary);
+    } catch (error) {
+      console.error('Error fetching table summary:', error);
+      return res.status(500).json({ error: "Failed to fetch table summary" });
     }
   });
 
@@ -5062,427 +3617,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error deleting scheduled notification:", error);
       return res.status(500).json({ message: "Failed to delete scheduled notification" });
     }
-  });
-
-  // Push notification endpoints
-  app.get("/api/push/vapid-public-key", (req, res) => {
-    res.json({ publicKey: VAPID_PUBLIC_KEY || null });
-  });
-
-  app.post("/api/push/subscribe", async (req, res) => {
-    try {
-      const { subscription, sessionId } = req.body;
-      
-      // Validate subscription structure
-      if (!subscription || !subscription.endpoint || !subscription.keys || !subscription.keys.p256dh || !subscription.keys.auth) {
-        return res.status(400).json({ error: "Invalid subscription object - missing required fields" });
-      }
-
-      const savedSubscription = await storage.subscribeToPush({
-        endpoint: subscription.endpoint,
-        p256dh: subscription.keys.p256dh,
-        auth: subscription.keys.auth,
-        sessionId: sessionId || null
-      });
-
-      res.json({ 
-        success: true, 
-        message: "Successfully subscribed to push notifications",
-        subscriptionId: savedSubscription.id 
-      });
-    } catch (error) {
-      console.error("Error subscribing to push:", error);
-      return res.status(500).json({ error: "Failed to subscribe to push notifications" });
-    }
-  });
-
-  app.post("/api/push/unsubscribe", async (req, res) => {
-    try {
-      const { endpoint } = req.body;
-      
-      if (!endpoint) {
-        return res.status(400).json({ error: "Endpoint required" });
-      }
-
-      await storage.unsubscribeFromPush(endpoint);
-      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
-    } catch (error) {
-      console.error("Error unsubscribing from push:", error);
-      return res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
-    }
-  });
-
-  // Admin endpoint to send push notifications
-  app.post("/api/push/send", requireAdminAuth, async (req, res) => {
-    try {
-      const { title, body, icon, badge, url, requireInteraction } = req.body;
-      
-      if (!title || !body) {
-        return res.status(400).json({ error: "Title and body are required" });
-      }
-
-      // Get all active subscriptions
-      const subscriptions = await storage.getActiveSubscriptions();
-      
-      if (subscriptions.length === 0) {
-        return res.json({ 
-          success: false, 
-          message: "No active subscriptions found",
-          sentCount: 0 
-        });
-      }
-
-      // Create notification record
-      const notification = await storage.createNotification({
-        title,
-        body,
-        icon: icon || '/icon-192x192.png',
-        badge: badge || '/badge-72x72.png',
-        url: url || '/',
-        data: { timestamp: Date.now() },
-        sentCount: 0,
-        successCount: 0,
-        failureCount: 0,
-        createdBy: 'admin'
-      });
-
-      // Send to all subscriptions
-      const payload = JSON.stringify({
-        title,
-        body,
-        icon: icon || '/icon-192x192.png',
-        badge: badge || '/badge-72x72.png',
-        url: url || '/',
-        requireInteraction: requireInteraction || false,
-        timestamp: Date.now()
-      });
-
-      let successCount = 0;
-      let failureCount = 0;
-
-      const sendPromises = subscriptions.map(async (sub) => {
-        try {
-          // Validate subscription before sending
-          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
-            await storage.markSubscriptionInvalid(sub.endpoint, 400, "Invalid subscription structure");
-            failureCount++;
-            return;
-          }
-          
-          await webpush.sendNotification({
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth
-            }
-          }, payload);
-          
-          // Success - mark as valid
-          await storage.markSubscriptionValid(sub.endpoint);
-          successCount++;
-        } catch (error: any) {
-          const statusCode = error.statusCode || error.status;
-          const errorCategory = PushRetryQueue.categorizeError(statusCode);
-          
-          console.error(`Push notification failed for ${sub.endpoint.substring(0, 50)}...`, {
-            statusCode,
-            message: error.message,
-            category: errorCategory.type,
-            action: errorCategory.action
-          });
-          
-          // Handle based on error category
-          if (errorCategory.action === 'remove') {
-            // Terminal error - mark as invalid and will auto-unsubscribe after 3 failures
-            await storage.markSubscriptionInvalid(sub.endpoint, statusCode, error.message);
-            failureCount++;
-          } else if (errorCategory.action === 'retry') {
-            // Temporary error - add to retry queue
-            pushRetryQueue.add(sub, payload, notification.id);
-            failureCount++; // Count as failure for now, will be retried
-          } else if (errorCategory.action === 'keep') {
-            // Config error - keep subscription, log for admin
-            console.error(`Configuration issue: ${errorCategory.description}`);
-            failureCount++;
-          } else {
-            // Unknown - add to retry queue to be safe
-            pushRetryQueue.add(sub, payload, notification.id);
-            failureCount++;
-          }
-        }
-      });
-
-      await Promise.all(sendPromises);
-
-      // Update notification stats
-      await storage.updateNotificationStats(notification.id, successCount, failureCount);
-
-      res.json({ 
-        success: true, 
-        message: `Sent to ${successCount} users`,
-        sentCount: successCount + failureCount,
-        successCount,
-        failureCount
-      });
-    } catch (error) {
-      console.error("Error sending push notification:", error);
-      return res.status(500).json({ error: "Failed to send push notification" });
-    }
-  });
-
-  // Get notification history (admin)
-  app.get("/api/push/history", requireAdminAuth, async (req, res) => {
-    try {
-      const history = await storage.getNotificationHistory(50);
-      res.json(history);
-    } catch (error) {
-      console.error("Error fetching notification history:", error);
-      return res.status(500).json({ error: "Failed to fetch notification history" });
-    }
-  });
-
-  // Simple test push - minimal payload
-  app.post("/api/push/simple-test", async (req, res) => {
-    try {
-      const subscriptions = await storage.getActiveSubscriptions();
-      
-      if (subscriptions.length === 0) {
-        return res.json({ success: false, message: "No subscriptions" });
-      }
-
-      // Extremely simple payload - just title
-      const payload = JSON.stringify({
-        title: "Test Push"
-      });
-
-      console.log('[Simple Test] Sending minimal payload:', payload);
-      
-      let sent = 0;
-      for (const sub of subscriptions) {
-        try {
-          // Validate subscription before sending
-          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
-            await storage.unsubscribeFromPush(sub.endpoint);
-            continue;
-          }
-          
-          await webpush.sendNotification({
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth
-            }
-          }, payload);
-          sent++;
-          console.log('[Simple Test] Sent successfully');
-        } catch (error: any) {
-          console.error('[Simple Test] Error:', error.statusCode, error.message);
-          // Remove invalid subscriptions
-          if (error.statusCode === 410 || error.statusCode === 404 || error.statusCode === 400) {
-            await storage.unsubscribeFromPush(sub.endpoint);
-          }
-        }
-      }
-
-      res.json({ success: sent > 0, sent });
-    } catch (error) {
-      console.error("[Simple Test] Error:", error);
-      return res.status(500).json({ error: "Failed" });
-    }
-  });
-
-  // Test push notification endpoint (for debugging)
-  app.post("/api/push/test", async (req, res) => {
-    try {
-      const { title, body } = req.body;
-      
-      if (!title || !body) {
-        return res.status(400).json({ error: "Title and body are required" });
-      }
-
-      // Get all active subscriptions
-      const subscriptions = await storage.getActiveSubscriptions();
-      
-      if (subscriptions.length === 0) {
-        return res.json({ 
-          success: false, 
-          message: "No active subscriptions found",
-          sentCount: 0 
-        });
-      }
-
-      // Send test notification
-      const payload = JSON.stringify({
-        title,
-        body,
-        icon: '/icon-192x192.png',
-        badge: '/badge-72x72.png',
-        timestamp: Date.now()
-      });
-
-      console.log('[Test Push] Sending to', subscriptions.length, 'subscription(s)');
-      console.log('[Test Push] Payload:', payload);
-
-      let successCount = 0;
-      let failureCount = 0;
-      const errors: string[] = [];
-
-      const sendPromises = subscriptions.map(async (sub) => {
-        try {
-          // Validate subscription before sending
-          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
-            await storage.unsubscribeFromPush(sub.endpoint);
-            failureCount++;
-            errors.push(`Invalid subscription structure`);
-            return;
-          }
-          
-          console.log('[Test Push] Sending to endpoint:', sub.endpoint.substring(0, 50) + '...');
-          await webpush.sendNotification({
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth
-            }
-          }, payload);
-          successCount++;
-          console.log('[Test Push] Success for endpoint:', sub.endpoint.substring(0, 50) + '...');
-        } catch (error: any) {
-          failureCount++;
-          const errorMsg = `Endpoint ${sub.endpoint.substring(0, 50)}...: ${error.message}`;
-          errors.push(errorMsg);
-          console.error('[Test Push] Failed:', errorMsg);
-          
-          // If subscription is invalid/expired (terminal errors), mark it as unsubscribed
-          const statusCode = error.statusCode || error.status;
-          if (statusCode === 410 || statusCode === 404 || statusCode === 400) {
-            await storage.unsubscribeFromPush(sub.endpoint);
-            console.log('[Test Push] Removed invalid subscription (', statusCode, ')');
-          } else if (statusCode === 401 || statusCode === 403) {
-            console.error('[Test Push] Auth error - check VAPID configuration');
-          }
-        }
-      });
-
-      await Promise.all(sendPromises);
-
-      res.json({ 
-        success: successCount > 0, 
-        message: `Sent to ${successCount} users, ${failureCount} failed`,
-        successCount,
-        failureCount,
-        errors: errors.length > 0 ? errors : undefined
-      });
-    } catch (error) {
-      console.error("[Test Push] Error:", error);
-      return res.status(500).json({ error: "Failed to send test push notification" });
-    }
-  });
-
-  // Subscription validation endpoint (admin only)
-  app.post("/api/push/validate-subscriptions", requireAdminAuth, async (req, res) => {
-    try {
-      const subscriptions = await storage.getSubscriptionsNeedingValidation(24);
-      
-      if (subscriptions.length === 0) {
-        return res.json({ 
-          success: true, 
-          message: "All subscriptions are up to date",
-          validated: 0
-        });
-      }
-
-      // Send lightweight validation ping
-      const validationPayload = JSON.stringify({
-        title: "Connection Check",
-        body: "",
-        tag: "validation-ping",
-        silent: true,
-        data: { type: "validation" }
-      });
-
-      let validCount = 0;
-      let invalidCount = 0;
-      const errors: Array<{ endpoint: string; error: string }> = [];
-
-      for (const sub of subscriptions) {
-        try {
-          if (!sub.endpoint || !sub.p256dh || !sub.auth) {
-            await storage.markSubscriptionInvalid(sub.endpoint, 400, "Invalid subscription structure");
-            invalidCount++;
-            continue;
-          }
-
-          await webpush.sendNotification({
-            endpoint: sub.endpoint,
-            keys: {
-              p256dh: sub.p256dh,
-              auth: sub.auth
-            }
-          }, validationPayload);
-
-          // Success - mark as valid
-          await storage.markSubscriptionValid(sub.endpoint);
-          validCount++;
-        } catch (error: any) {
-          const statusCode = error.statusCode || error.status;
-          const errorMessage = error.message;
-          
-          // Mark as invalid with error details
-          await storage.markSubscriptionInvalid(sub.endpoint, statusCode, errorMessage);
-          invalidCount++;
-          
-          errors.push({
-            endpoint: sub.endpoint.substring(0, 50) + "...",
-            error: `${statusCode || 'Unknown'}: ${errorMessage}`
-          });
-        }
-      }
-
-      res.json({
-        success: true,
-        message: `Validated ${subscriptions.length} subscriptions`,
-        validCount,
-        invalidCount,
-        totalChecked: subscriptions.length,
-        errors: errors.length > 0 ? errors : undefined
-      });
-    } catch (error) {
-      console.error("Error validating subscriptions:", error);
-      return res.status(500).json({ error: "Failed to validate subscriptions" });
-    }
-  });
-
-  // Get all subscriptions with health status (admin only)
-  app.get("/api/push/subscriptions", requireAdminAuth, async (req, res) => {
-    try {
-      const subscriptions = await storage.getAllSubscriptions();
-      
-      // Return sanitized subscription data with health metrics
-      const sanitized = subscriptions.map(sub => ({
-        id: sub.id,
-        endpoint: sub.endpoint.substring(0, 50) + "...",
-        sessionId: sub.sessionId,
-        subscribed: sub.subscribed,
-        lastValidatedAt: sub.lastValidatedAt,
-        validationFailures: sub.validationFailures,
-        lastErrorCode: sub.lastErrorCode,
-        lastErrorMessage: sub.lastErrorMessage,
-        createdAt: sub.createdAt,
-        updatedAt: sub.updatedAt
-      }));
-
-      res.json(sanitized);
-    } catch (error) {
-      console.error("Error fetching subscriptions:", error);
-      return res.status(500).json({ error: "Failed to fetch subscriptions" });
-    }
-  });
-
-  // Get retry queue status (admin only)
-  app.get("/api/push/queue-status", requireAdminAuth, (req, res) => {
-    const status = pushRetryQueue.getStatus();
-    res.json(status);
   });
 
   const httpServer = createServer(app);
