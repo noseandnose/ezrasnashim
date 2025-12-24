@@ -88,54 +88,38 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   }, [tzedakaCompleted]);
 
   // Generate stable but randomized positions for flowers - like a natural garden
-  // Flowers have stems that go behind grass, heads appear above
+  // Each flower has a fixed position based on its type and index (stable across re-renders)
   const flowerPositions = useMemo(() => {
     const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
     
-    // Seeded random for consistent but varied positions
-    let seed = 42;
-    const seededRandom = () => {
-      seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
+    // Create a seeded random generator for a specific flower
+    const getFlowerRandom = (type: string, index: number) => {
+      // Unique seed per flower type and index
+      const baseSeed = type === 'torah' ? 100 : type === 'tefilla' ? 200 : 300;
+      let seed = baseSeed + index * 17;
+      return () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
     };
     
-    // Flower spacing in percentage units
-    const FLOWER_SPACING = 12;
+    // Predefined horizontal slots to ensure flowers don't overlap
+    const slots = [15, 35, 55, 75, 90];
+    let slotIndex = 0;
     
-    // Check if a position is too close to existing flowers
-    const checkCollision = (left: number) => {
-      for (const existing of positions) {
-        const distance = Math.abs(left - existing.left);
-        if (distance < FLOWER_SPACING) {
-          return true;
-        }
-      }
-      return false;
-    };
-    
-    // Helper to add a flower position with collision avoidance
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', _index: number) => {
-      // Random scale for size variation (0.7 to 1.2)
-      const scale = 0.7 + (seededRandom() * 0.5);
-      const flipped = seededRandom() > 0.5;
-      // Random height offset - stems start near bottom (0-10% from bottom)
-      // Flowers grow up with heads peeking out above grass
-      const bottom = seededRandom() * 10;
+    // Helper to add a flower with stable position
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+      const random = getFlowerRandom(type, index);
+      // Random scale for size variation (0.6 to 1.0) - 10% smaller
+      const scale = 0.6 + (random() * 0.4);
+      const flipped = random() > 0.5;
+      // Stems start at very bottom (-5 to 5% from bottom)
+      const bottom = -5 + random() * 10;
+      // Use slot position with small random offset for natural look
+      const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
+      slotIndex++;
       
-      // Try up to 20 times to find a non-colliding horizontal position
-      for (let attempt = 0; attempt < 20; attempt++) {
-        // Spread flowers across the width (10-90%)
-        const left = 10 + seededRandom() * 80;
-        
-        if (!checkCollision(left)) {
-          positions.push({ type, left, bottom, flipped, scale });
-          return;
-        }
-      }
-      
-      // Fallback: just place it
-      const left = 10 + seededRandom() * 80;
-      positions.push({ type, left, bottom, flipped, scale: scale * 0.8 });
+      positions.push({ type, left, bottom, flipped, scale });
     };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
@@ -680,7 +664,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: `${70 * flower.scale}px`,
+                width: `${63 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
