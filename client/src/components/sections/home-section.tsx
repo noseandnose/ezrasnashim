@@ -13,9 +13,9 @@ import grassImage from "@assets/Daily_Progress_Garden_(6)_1766582926462.png";
 import torahFlower from "@assets/Torah_1766581824736.png";
 import tefillaFlower from "@assets/Tefilla_1766581824746.png";
 import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
-import morningBackground from "@assets/Morning_1766581829382.png";
-import afternoonBackground from "@assets/Afternoon_1766581829381.png";
-import nightBackground from "@assets/Night_1766581829380.png";
+import morningBackground from "@assets/Morning_1766585201516.png";
+import afternoonBackground from "@assets/Afternoon_1766585201516.png";
+import nightBackground from "@assets/Evening_1766585201513.png";
 import milestone10Flower from "@assets/10_1766583559373.png";
 import milestone20Flower from "@assets/20_1766583559368.png";
 
