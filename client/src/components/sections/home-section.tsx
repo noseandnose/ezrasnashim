@@ -22,7 +22,7 @@ import prayerMorningBg from "@assets/Morning_1766585505566.png";
 import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
 import prayerNightBg from "@assets/Night_1766585505565.png";
 import shkiaMorningBg from "@assets/Morning_1766586713115.png";
-import shkiaAfternoonBg from "@assets/Afternoon_1766586713114.png";
+import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
 import shkiaNightBg from "@assets/Night_1766586713110.png";
 
 interface HomeSectionProps {
