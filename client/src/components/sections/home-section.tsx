@@ -150,36 +150,58 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
 
-  // Get time-appropriate greeting
+  // Helper to check if current time is after tzais hakochavim (nightfall)
+  const isAfterTzais = (): boolean => {
+    const tzaisStr = jewishTimesQuery.data?.tzaitHakochavim;
+    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM if no data
+    
+    const now = new Date();
+    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return now.getHours() >= 18;
+    
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    const tzaisTime = new Date(now);
+    tzaisTime.setHours(hours, minutes, 0, 0);
+    
+    return now >= tzaisTime;
+  };
+
+  // Get time-appropriate greeting (evening starts at tzais hakochavim)
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
-    if (hour < 18) return "Good Afternoon";
-    return "Good Evening";
+    if (isAfterTzais()) return "Good Evening";
+    return "Good Afternoon";
   };
 
   // Get time-appropriate background for garden
   const getGardenBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return morningBackground;
-    if (hour < 18) return afternoonBackground;
-    return nightBackground;
+    if (isAfterTzais()) return nightBackground;
+    return afternoonBackground;
   };
 
   // Get time-appropriate background for prayer button
   const getPrayerButtonBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return prayerMorningBg;
-    if (hour < 18) return prayerAfternoonBg;
-    return prayerNightBg;
+    if (isAfterTzais()) return prayerNightBg;
+    return prayerAfternoonBg;
   };
 
   // Get time-appropriate background for shkia button
   const getShkiaButtonBackground = () => {
     const hour = new Date().getHours();
     if (hour < 12) return shkiaMorningBg;
-    if (hour < 18) return shkiaAfternoonBg;
-    return shkiaNightBg;
+    if (isAfterTzais()) return shkiaNightBg;
+    return shkiaAfternoonBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
