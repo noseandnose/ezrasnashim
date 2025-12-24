@@ -94,14 +94,12 @@ export class PerformanceMonitor {
  * Virtual scrolling utility for large lists
  */
 export class VirtualScroller {
-  private container: HTMLElement;
   private itemHeight: number;
   private visibleCount: number;
   private scrollTop: number = 0;
   private totalItems: number = 0;
 
   constructor(container: HTMLElement, itemHeight: number) {
-    this.container = container;
     this.itemHeight = itemHeight;
     this.visibleCount = Math.ceil(container.clientHeight / itemHeight) + 2;
   }

@@ -310,7 +310,7 @@ function validateEnvironment() {
 // Initialize server configuration
 async function initializeServer() {
   // Validate environment before starting
-  const envStatus = validateEnvironment();
+  validateEnvironment();
   
   const server = await registerRoutes(app);
 

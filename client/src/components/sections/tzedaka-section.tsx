@@ -1,7 +1,7 @@
 import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
 import { useAnalytics } from "@/hooks/use-analytics";
@@ -82,11 +82,10 @@ interface TzedakaSectionProps {
 // Individual tzedaka button types
 type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | 'sponsor_a_day';
 
-export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps) {
+function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const { openModal, activeModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { resetDaily } = useDonationCompletionStore();
-  const [, ] = useLocation();
   const [showExplosion, setShowExplosion] = useState(false);
   const { trackEvent } = useAnalytics();
 
@@ -369,3 +368,5 @@ export default function TzedakaSection({ onSectionChange }: TzedakaSectionProps)
     </div>
   );
 }
+
+export default memo(TzedakaSectionComponent);

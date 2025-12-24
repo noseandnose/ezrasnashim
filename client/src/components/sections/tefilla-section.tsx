@@ -3,19 +3,21 @@ import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRig
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 import { useLocation } from "wouter";
-
-interface TefillaSectionProps {
-  onSectionChange?: (section: Section) => void;
-}
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useTefillaStats } from "@/hooks/use-tefilla-stats";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, memo } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+
 import { toast } from "@/hooks/use-toast";
 import type { TehillimChain } from "@shared/schema";
+
+interface TefillaSectionProps {
+  onSectionChange?: (section: Section) => void;
+}
 
 const toTitleCase = (str: string) => {
   return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase());
@@ -33,7 +35,7 @@ const getReasonIcon = (reason: string) => {
   return Sparkles;
 };
 
-export default function TefillaSection({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
+function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaSectionProps) {
   const { openModal } = useModalStore();
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
@@ -86,27 +88,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     return false;
   };
 
-  // Count total individual tehillim completions (today)
-  const countIndividualTehillim = () => {
-    const today = new Date().toISOString().split('T')[0];
-    const todaysCompletions = completedModals[today];
-    if (!todaysCompletions) return 0;
-    
-    let count = 0;
-    // Count from singles
-    for (const modalId of Array.from(todaysCompletions.singles)) {
-      if (modalId.startsWith('individual-tehillim-')) {
-        count++;
-      }
-    }
-    // Count from repeatables
-    for (const [modalId, repeatCount] of Object.entries(todaysCompletions.repeatables)) {
-      if (modalId.startsWith('individual-tehillim-')) {
-        count += repeatCount;
-      }
-    }
-    return count;
-  };
 
   // Time-based prayer logic
   const getCurrentPrayer = () => {
@@ -202,7 +183,7 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     }
   };
 
-  const currentPrayer = getCurrentPrayer();
+  getCurrentPrayer(); // Call to compute current prayer for time-based logic
 
   // Tehillim Chains state
   const [chainView, setChainView] = useState<'none' | 'create' | 'find'>('none');
@@ -227,7 +208,6 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
   const { data: tefillaStats, isLoading: isLoadingGlobalStats } = useTefillaStats();
   
   // Extract data from the batched response
-  const chainTotal = tefillaStats?.total || 0;
   const globalStats = tefillaStats?.globalStats;
 
 
@@ -686,3 +666,5 @@ export default function TefillaSection({ onSectionChange: _onSectionChange }: Te
     </div>
   );
 }
+
+export default memo(TefillaSectionComponent);

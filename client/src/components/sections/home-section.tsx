@@ -1,5 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -18,7 +18,7 @@ interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 
-export default function HomeSection({ onSectionChange }: HomeSectionProps) {
+function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   // Subscribe to completedModals to trigger re-renders when completions change
@@ -710,3 +710,5 @@ export default function HomeSection({ onSectionChange }: HomeSectionProps) {
     </div>
   );
 }
+
+export default memo(HomeSectionComponent);

@@ -2,7 +2,7 @@ import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, Ch
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
@@ -19,7 +19,7 @@ interface TorahSectionProps {
   onSectionChange?: (section: Section) => void;
 }
 
-export default function TorahSection({}: TorahSectionProps) {
+function TorahSectionComponent({}: TorahSectionProps) {
   const { openModal } = useModalStore();
   const markModalComplete = useModalCompletionStore(state => state.markModalComplete);
   const isModalComplete = useModalCompletionStore(state => state.isModalComplete);
@@ -496,3 +496,5 @@ export default function TorahSection({}: TorahSectionProps) {
     </div>
   );
 }
+
+export default memo(TorahSectionComponent);
