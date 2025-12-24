@@ -6,7 +6,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, Sunrise, Sun } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
@@ -2726,51 +2726,52 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
+  // Handler for closing fullscreen modal - navigates back appropriately based on content type
+  const handleFullscreenClose = useCallback(() => {
+    const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
+    const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
+    
+    setFullscreenContent({ isOpen: false, title: '', content: null });
+    // Close any active modal to reset state properly
+    closeModal();
+    
+    if (wasIndividualBrocha) {
+      // Go back to Siddur selector instead of home
+      setTimeout(() => {
+        setFullscreenContent({
+          isOpen: true,
+          title: 'Siddur',
+          contentType: 'brochas',
+          content: null
+        });
+      }, 100);
+    } else if (wasIndividualTehillim) {
+      // Go back to Tehillim selector instead of home
+      setTimeout(() => {
+        openModal('special-tehillim', 'tefilla');
+      }, 100);
+    } else {
+      // Navigate to home section and show flower growth for other types
+      if (onSectionChange) {
+        onSectionChange('home');
+        setTimeout(() => {
+          const progressElement = document.getElementById('daily-progress-garden');
+          if (progressElement) {
+            progressElement.scrollIntoView({ 
+              behavior: 'smooth', 
+              block: 'center' 
+            });
+          }
+        }, 300);
+      }
+    }
+  }, [fullscreenContent.contentType, closeModal, openModal, onSectionChange]);
+
   // Listen for custom close fullscreen events
   useEffect(() => {
-    const handleCloseFullscreen = () => {
-      const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
-      const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
-      
-      setFullscreenContent({ isOpen: false, title: '', content: null });
-      // Close any active modal to reset state properly
-      closeModal();
-      
-      if (wasIndividualBrocha) {
-        // Go back to Siddur selector instead of home
-        setTimeout(() => {
-          setFullscreenContent({
-            isOpen: true,
-            title: 'Siddur',
-            contentType: 'brochas',
-            content: null
-          });
-        }, 100);
-      } else if (wasIndividualTehillim) {
-        // Go back to Tehillim selector instead of home
-        setTimeout(() => {
-          openModal('special-tehillim', 'tefilla');
-        }, 100);
-      } else {
-        // Navigate to home section and show flower growth for other types
-        if (onSectionChange) {
-          onSectionChange('home');
-          setTimeout(() => {
-            const progressElement = document.getElementById('daily-progress-garden');
-            if (progressElement) {
-              progressElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-              });
-            }
-          }, 300);
-        }
-      }
-    };
-
-    window.addEventListener('closeFullscreen', handleCloseFullscreen);
-    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
-  }, [onSectionChange, openModal]);
+    window.addEventListener('closeFullscreen', handleFullscreenClose);
+    return () => window.removeEventListener('closeFullscreen', handleFullscreenClose);
+  }, [handleFullscreenClose]);
 
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
@@ -3703,7 +3704,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => window.dispatchEvent(new CustomEvent('closeFullscreen'))}
+        onClose={handleFullscreenClose}
         title={fullscreenContent.title}
         showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas' && fullscreenContent.contentType !== 'compass'}
         showLanguageControls={
