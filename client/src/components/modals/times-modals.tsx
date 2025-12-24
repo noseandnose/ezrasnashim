@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import WheelDatePicker from "@/components/ui/wheel-date-picker";
-import { Calendar } from "lucide-react";
+import { Calendar, X, Gift } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -25,6 +25,8 @@ export default function TimesModals() {
   const [isMobile, setIsMobile] = useState(false);
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
+  const [nextBirthday, setNextBirthday] = useState<string | null>(null);
+  const [nextBirthdayLoading, setNextBirthdayLoading] = useState(false);
   const { toast } = useToast();
   useQueryClient();
   
@@ -103,16 +105,27 @@ export default function TimesModals() {
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      // Use hidden iframe for iOS compatibility - this forces download instead of inline display
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = downloadUrl;
-      document.body.appendChild(iframe);
+      // Fetch the ICS content as a blob and trigger download
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error('Failed to generate calendar file');
+      }
       
-      // Clean up iframe after download starts
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
       setTimeout(() => {
-        document.body.removeChild(iframe);
-      }, 5000);
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
       
       return { success: true };
       
@@ -133,6 +146,7 @@ export default function TimesModals() {
       setConvertedHebrewDate("");
       setAfterNightfall(false);
       setYearDuration(10);
+      setNextBirthday(null);
       closeModal();
       // Navigate to home and scroll to progress
       window.location.hash = '#/?section=home&scrollToProgress=true';
@@ -186,6 +200,9 @@ export default function TimesModals() {
             hm: data.hm,
             hy: data.hy
           });
+          
+          // Calculate next occurrence of this Hebrew date
+          calculateNextBirthday(data.hd, data.hm);
         }
         
         // Keep existing toggle state - don't reset to Hebrew
@@ -201,8 +218,49 @@ export default function TimesModals() {
       setConvertedHebrewDate('');
       setHebrewDateParts(null);
       setDateObject(null);
+      setNextBirthday(null);
       // Keep existing toggle state on clear
     }
+  };
+  
+  // Calculate the next occurrence of this Hebrew date in the Gregorian calendar
+  const calculateNextBirthday = async (hebrewDay: number, hebrewMonth: string) => {
+    setNextBirthdayLoading(true);
+    try {
+      // Get current Hebrew year
+      const now = new Date();
+      const currentYearResponse = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${now.getMonth() + 1}&gd=${now.getDate()}&g2h=1`);
+      const currentData = await currentYearResponse.json();
+      const currentHebrewYear = currentData.hy;
+      
+      // Try this year first, then next year
+      for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
+        const targetYear = currentHebrewYear + yearOffset;
+        const response = await fetch(`https://www.hebcal.com/converter?cfg=json&hy=${targetYear}&hm=${hebrewMonth}&hd=${hebrewDay}&h2g=1`);
+        const data = await response.json();
+        
+        if (data.gy && data.gm && data.gd) {
+          const nextDate = new Date(data.gy, data.gm - 1, data.gd);
+          // Check if this date is today or in the future (compare by date only, not time)
+          const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          if (nextDate >= todayMidnight) {
+            const options: Intl.DateTimeFormatOptions = { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            };
+            setNextBirthday(nextDate.toLocaleDateString('en-US', options));
+            setNextBirthdayLoading(false);
+            return;
+          }
+        }
+      }
+      setNextBirthday(null);
+    } catch {
+      setNextBirthday(null);
+    }
+    setNextBirthdayLoading(false);
   };
 
   // Format date in English with weekday and Hebrew components
@@ -257,7 +315,19 @@ export default function TimesModals() {
         hideHeader={true}
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 0.75rem)' }}>
+        <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 1rem)' }}>
+          {/* Header */}
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-lg platypi-bold text-black">Hebrew Date Calculator</h1>
+            <button
+              onClick={() => closeModal()}
+              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+              data-testid="button-close-date-calculator"
+            >
+              <X className="w-4 h-4 text-gray-600" />
+            </button>
+          </div>
+          
           {/* Form Sections */}
           <div className="space-y-3">
             {/* Event Title */}
@@ -289,16 +359,19 @@ export default function TimesModals() {
                     role="checkbox"
                     aria-checked={afterNightfall}
                     onClick={() => handleNightfallChange(!afterNightfall)}
-                    className={`rounded-full border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
-                      afterNightfall 
-                        ? 'bg-blush border-blush' 
-                        : 'bg-white border-blush/30'
-                    }`}
-                    style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
+                    className="rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      minWidth: '16px', 
+                      minHeight: '16px',
+                      backgroundColor: afterNightfall ? '#D4A5A5' : '#ffffff',
+                      border: afterNightfall ? '2px solid #D4A5A5' : '2px solid rgba(212, 165, 165, 0.3)'
+                    }}
                     data-testid="checkbox-nightfall"
                   >
                     {afterNightfall && (
-                      <div className="rounded-full bg-white" style={{ width: '8px', height: '8px' }} />
+                      <div className="rounded-full" style={{ width: '6px', height: '6px', backgroundColor: '#ffffff' }} />
                     )}
                   </button>
                   <Label 
@@ -352,6 +425,31 @@ export default function TimesModals() {
               </div>
             )}
 
+            {/* Next Birthday/Anniversary Section */}
+            {convertedHebrewDate && (
+              <div 
+                className="bg-gradient-to-r from-lavender/10 to-blush/10 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-lavender/20 animate-in slide-in-from-bottom duration-300"
+                data-testid="next-birthday-display"
+              >
+                <div className="flex items-center">
+                  <Gift className="w-4 h-4 text-lavender mr-2" />
+                  <div className="flex-1">
+                    <Label className="text-xs platypi-semibold text-black flex items-center">
+                      Next Occurrence
+                    </Label>
+                    <div className="text-sm platypi-semibold text-lavender mt-0.5">
+                      {nextBirthdayLoading ? (
+                        <span className="text-gray-400">Calculating...</span>
+                      ) : nextBirthday ? (
+                        nextBirthday
+                      ) : (
+                        <span className="text-gray-400">Unable to calculate</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Duration Selection */}
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
