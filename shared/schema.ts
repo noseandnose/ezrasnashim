@@ -186,7 +186,7 @@ export const tehillimNames = pgTable("tehillim_names", {
   reason: text("reason").notNull(),
   reasonEnglish: text("reason_english"),
   dateAdded: timestamp("date_added").defaultNow(),
-  expiresAt: timestamp("expires_at"), // 18 days from dateAdded
+  expiresAt: timestamp("expires_at"), // 18 days from dateAdded - indexed via idx_tehillim_names_expires_at
   userId: integer("user_id"), // Future: link to user accounts
 });
 
@@ -247,7 +247,9 @@ export const brochas = pgTable("brochas", {
   description: text("description"),
   specialOccasions: boolean("special_occasions").default(false),
   orderIndex: integer("order_index").default(0),
-});
+}, (table) => ({
+  specialOccasionsIdx: index("brochas_special_occasions_idx").on(table.specialOccasions),
+}));
 
 export const sponsors = pgTable("sponsors", {
   id: serial("id").primaryKey(),
@@ -329,7 +331,9 @@ export const womensPrayers = pgTable("womens_prayers", {
   englishTranslation: text("english_translation"),
   description: text("description"),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  categoryIdx: index("womens_prayers_category_idx").on(table.category),
+}));
 
 export const meditations = pgTable("meditations", {
   id: serial("id").primaryKey(),
@@ -373,7 +377,7 @@ export const dailyHalacha = pgTable("daily_halacha", {
 
 export const dailyEmuna = pgTable("daily_emuna", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(),
+  date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: text("title").notNull(),
   content: text("content"),
   audioUrl: text("audio_url").notNull(),
@@ -387,7 +391,7 @@ export const dailyEmuna = pgTable("daily_emuna", {
 
 export const dailyChizuk = pgTable("daily_chizuk", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(),
+  date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: text("title").notNull(),
   content: text("content"),
   audioUrl: text("audio_url").notNull(),
@@ -453,7 +457,9 @@ export const giftOfChatzos = pgTable("gift_of_chatzos", {
   url: text("url"),
   thankYouMessage: text("thank_you_message"), // Appears under content, linked to URL
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => ({
+  dayOfWeekIdx: index("gift_of_chatzos_day_of_week_idx").on(table.dayOfWeek),
+}));
 
 export const insertGiftOfChatzosSchema = createInsertSchema(giftOfChatzos).omit({ id: true, createdAt: true });
 export type InsertGiftOfChatzos = z.infer<typeof insertGiftOfChatzosSchema>;
@@ -872,7 +878,7 @@ export type InsertTehillimChainReading = z.infer<typeof insertTehillimChainReadi
 // Messages table for daily messages to users
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
-  date: date("date").notNull().unique(),
+  date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
@@ -894,7 +900,10 @@ export const scheduledNotifications = pgTable("scheduled_notifications", {
   sentAt: timestamp("sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => ({
+  scheduledDateIdx: index("scheduled_notifications_date_idx").on(table.scheduledDate),
+  sentIdx: index("scheduled_notifications_sent_idx").on(table.sent),
+}));
 
 export const insertScheduledNotificationSchema = createInsertSchema(scheduledNotifications).omit({ id: true, sent: true, sentAt: true, createdAt: true, updatedAt: true });
 export type ScheduledNotification = typeof scheduledNotifications.$inferSelect;
