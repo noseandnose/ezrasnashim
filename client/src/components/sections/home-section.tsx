@@ -88,7 +88,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   }, [tzedakaCompleted]);
 
   // Generate stable but randomized positions for flowers - like a natural garden
-  // Torah and Tzedaka flowers get priority slots so Tefilla flowers don't cover them
+  // Flowers have stems that go behind grass, heads appear above
   const flowerPositions = useMemo(() => {
     const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
     
@@ -99,22 +99,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       return seed / 233280;
     };
     
-    // Flower radius in percentage units (based on w-12 = 48px in ~350px container ≈ 14%)
-    const FLOWER_RADIUS = 7;
-    // Minimum distance between flower centers (95% of combined radii = max 5% overlap)
-    const MIN_DISTANCE_FACTOR = 0.95;
+    // Flower spacing in percentage units
+    const FLOWER_SPACING = 12;
     
-    // Check if a position collides with existing flowers (more than 5% overlap)
-    const checkCollision = (left: number, bottom: number, scale: number) => {
-      const newRadius = FLOWER_RADIUS * scale;
+    // Check if a position is too close to existing flowers
+    const checkCollision = (left: number) => {
       for (const existing of positions) {
-        const existingRadius = FLOWER_RADIUS * existing.scale;
-        const minDistance = (newRadius + existingRadius) * MIN_DISTANCE_FACTOR;
-        const dx = left - existing.left;
-        const dy = bottom - existing.bottom;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < minDistance) {
-          return true; // Collision detected
+        const distance = Math.abs(left - existing.left);
+        if (distance < FLOWER_SPACING) {
+          return true;
         }
       }
       return false;
@@ -122,36 +115,26 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     
     // Helper to add a flower position with collision avoidance
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', _index: number) => {
-      const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
+      // Random scale for size variation (0.6 to 1.1)
+      const scale = 0.6 + (seededRandom() * 0.5);
       const flipped = seededRandom() > 0.5;
+      // Random height offset for natural variation (40-70% from bottom)
+      const bottom = 40 + seededRandom() * 30;
       
-      // Try up to 30 times to find a non-colliding position
-      for (let attempt = 0; attempt < 30; attempt++) {
-        // Scatter across entire width and height, but avoid top-left title area
-        // Title is roughly in top 60% height and left 55% width
-        let left: number;
-        let bottom: number;
+      // Try up to 20 times to find a non-colliding horizontal position
+      for (let attempt = 0; attempt < 20; attempt++) {
+        // Spread flowers across the width (10-90%)
+        const left = 10 + seededRandom() * 80;
         
-        // Generate random position across full area
-        left = 5 + seededRandom() * 87; // 5-92% (full width with margins)
-        bottom = 5 + seededRandom() * 55; // 5-60% (use more vertical space)
-        
-        // Avoid title area: if in top portion (bottom > 40%), stay away from left side
-        if (bottom > 40 && left < 55) {
-          // Skip this position - it would overlap with title
-          continue;
-        }
-        
-        if (!checkCollision(left, bottom, scale)) {
+        if (!checkCollision(left)) {
           positions.push({ type, left, bottom, flipped, scale });
           return;
         }
       }
       
-      // Fallback: place on right side with smaller scale to fit
-      const left = 50 + seededRandom() * 42;
-      const bottom = 5 + seededRandom() * 35;
-      positions.push({ type, left, bottom, flipped, scale: scale * 0.7 });
+      // Fallback: just place it
+      const left = 10 + seededRandom() * 80;
+      positions.push({ type, left, bottom, flipped, scale: scale * 0.8 });
     };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
@@ -182,6 +165,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return "Good Morning";
     if (hour < 18) return "Good Afternoon";
     return "Good Evening";
+  };
+
+  // Get time-appropriate background for garden
+  const getGardenBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return morningBackground;
+    if (hour < 18) return afternoonBackground;
+    return nightBackground;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -658,25 +649,25 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           />
         </button>
 
-        {/* Daily Progress Tracker - Compact Version */}
+        {/* Daily Progress Tracker - Redesigned Garden */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
+          className="rounded-2xl shadow-lg border border-blush/10 mt-4 min-h-[120px] relative overflow-hidden"
         >
-          {/* Grass - covers entire section, BEHIND flowers */}
+          {/* Time-based background - Layer 0 */}
           <img 
-            src={grassImage} 
+            src={getGardenBackground()} 
             alt="" 
-            className="absolute inset-0 w-full h-full z-[1]"
+            className="absolute inset-0 w-full h-full z-0"
             style={{ objectFit: 'cover' }}
             loading="lazy"
           />
           
-          {/* Flowers - scattered ON TOP of grass */}
+          {/* Flowers with stems - Layer 1 (behind grass) */}
           {flowerPositions
             .slice()
             .sort((a, b) => {
-              // Flowers further back (higher bottom %) render first, closer ones render on top
+              // Flowers further back (lower in garden) render first
               return a.bottom - b.bottom;
             })
             .map((flower, index) => (
@@ -684,16 +675,33 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               key={`${flower.type}-${index}`}
               src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
               alt={`${flower.type} flower`} 
-              className="absolute w-12 h-12 z-[2]"
+              className="absolute z-[1]"
               style={{ 
                 left: `${flower.left}%`,
-                bottom: `${flower.bottom}%`,
-                transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
+                bottom: `${flower.bottom - 15}%`,
+                width: `${60 * flower.scale}px`,
+                height: 'auto',
+                transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
+                transformOrigin: 'bottom center'
               }}
               loading="lazy"
             />
           ))}
           
+          {/* Grass overlay - Layer 2 (covers flower stems) */}
+          <img 
+            src={grassImage} 
+            alt="" 
+            className="absolute bottom-0 left-0 w-full z-[2]"
+            style={{ 
+              height: '50%',
+              objectFit: 'cover',
+              objectPosition: 'bottom'
+            }}
+            loading="lazy"
+          />
+          
+          {/* Title - Layer 3 (topmost) */}
           <div className="absolute top-2 left-2 z-10">
             <div 
               className="px-2 py-1 rounded-lg"
