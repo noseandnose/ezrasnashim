@@ -428,7 +428,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 src={getPrayerButtonBackground()} 
                 alt="" 
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.5 }}
+                style={{ zIndex: 0, opacity: 0.4 }}
               />
               {/* Content overlay */}
               <div className="relative z-10">
@@ -465,7 +465,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 src={getShkiaButtonBackground()} 
                 alt="" 
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.5 }}
+                style={{ zIndex: 0, opacity: 0.4 }}
               />
               {/* Content overlay */}
               <div className="relative z-10">
@@ -708,7 +708,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             src={getGardenBackground()} 
             alt="" 
             className="absolute inset-0 w-full h-full z-0"
-            style={{ objectFit: 'cover', opacity: 0.5 }}
+            style={{ objectFit: 'cover', opacity: 0.4 }}
             loading="lazy"
           />
           
