@@ -18,6 +18,9 @@ import afternoonBackground from "@assets/Afternoon_1766585201516.png";
 import nightBackground from "@assets/Evening_1766585201513.png";
 import milestone10Flower from "@assets/10_1766583559373.png";
 import milestone20Flower from "@assets/20_1766583559368.png";
+import prayerMorningBg from "@assets/Morning_1766585505566.png";
+import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
+import prayerNightBg from "@assets/Night_1766585505565.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -162,6 +165,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return morningBackground;
     if (hour < 18) return afternoonBackground;
     return nightBackground;
+  };
+
+  // Get time-appropriate background for prayer button
+  const getPrayerButtonBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return prayerMorningBg;
+    if (hour < 18) return prayerAfternoonBg;
+    return prayerNightBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -374,30 +385,40 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <button 
               onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
               disabled={currentPrayer.disabled}
-              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 ${
+              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 overflow-hidden relative ${
                 currentPrayer.disabled 
-                  ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed' 
-                  : 'bg-white/80 border-blush/20 hover:scale-105 hover:bg-white/95'
+                  ? 'border-gray-200 opacity-60 cursor-not-allowed' 
+                  : 'border-blush/20 hover:scale-105'
               }`}
               data-modal-type={currentPrayer.modal}
               data-modal-section="tefilla"
               data-testid="button-home-prayer"
             >
-              <div className="flex items-center justify-center mb-1">
-                <div className={`p-1.5 rounded-full mr-1 ${
-                  currentPrayer.disabled 
-                    ? 'bg-gray-300' 
-                    : 'bg-gradient-feminine'
-                }`}>
-                  <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={12} />
+              {/* Background image */}
+              <img 
+                src={getPrayerButtonBackground()} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 0 }}
+              />
+              {/* Content overlay */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-1">
+                  <div className={`p-1.5 rounded-full mr-1 ${
+                    currentPrayer.disabled 
+                      ? 'bg-gray-300' 
+                      : 'bg-white/60'
+                  }`}>
+                    <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
+                  </div>
                 </div>
+                <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+                  {currentPrayer.title}
+                </p>
+                <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+                  {currentPrayer.subtitle}
+                </p>
               </div>
-              <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-                {currentPrayer.title}
-              </p>
-              <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
-                {currentPrayer.subtitle}
-              </p>
             </button>
           </div>
 
