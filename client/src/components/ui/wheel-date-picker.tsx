@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 
 interface WheelDatePickerProps {
   value: string; // ISO format YYYY-MM-DD
@@ -31,6 +31,8 @@ const parseInitialValue = (value: string) => {
   };
 };
 
+const ITEM_HEIGHT = 44;
+
 const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 241 }, (_, i) => currentYear - 120 + i); // ±120 years
@@ -44,26 +46,22 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const monthRef = useRef<HTMLDivElement>(null);
   const dayRef = useRef<HTMLDivElement>(null);
   const yearRef = useRef<HTMLDivElement>(null);
-  const suppressScrollHandlers = useRef(true);
-  const isFirstRender = useRef(true);
+  const isInitialized = useRef(false);
+  const scrollTimeouts = useRef<{ month?: NodeJS.Timeout; day?: NodeJS.Timeout; year?: NodeJS.Timeout }>({});
 
-  // Update from value prop only when it actually changes
+  // Update from value prop only when it actually changes from outside
   useEffect(() => {
-    if (value) {
+    if (value && isInitialized.current) {
       const parsed = parseInitialValue(value);
-      // Only update if different to avoid triggering re-scroll
       if (parsed.month !== selectedMonth) setSelectedMonth(parsed.month);
       if (parsed.day !== selectedDay) setSelectedDay(parsed.day);
       if (parsed.year !== selectedYear) setSelectedYear(parsed.year);
     }
   }, [value]);
 
-  // Update parent when selection changes, but skip first render
+  // Update parent when selection changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
+    if (!isInitialized.current) return;
     const dateString = `${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     onChange(dateString);
   }, [selectedMonth, selectedDay, selectedYear, onChange]);
@@ -76,154 +74,217 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     }
   }, [selectedMonth, selectedYear, selectedDay]);
 
-  const handleMonthScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
-    const scrollTop = e.currentTarget.scrollTop;
-    const itemHeight = 40;
-    const index = Math.round(scrollTop / itemHeight);
-    const monthIndex = Math.max(0, Math.min(11, index));
-    setSelectedMonth(monthIndex + 1);
-  };
-
-  const handleDayScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
-    const scrollTop = e.currentTarget.scrollTop;
-    const itemHeight = 40;
-    const maxDays = getDaysInMonth(selectedYear, selectedMonth);
-    const index = Math.round(scrollTop / itemHeight);
-    const dayIndex = Math.max(0, Math.min(maxDays - 1, index));
-    setSelectedDay(dayIndex + 1);
-  };
-
-  const handleYearScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    if (suppressScrollHandlers.current) return; // Suppress during programmatic scrolling
-    const scrollTop = e.currentTarget.scrollTop;
-    const itemHeight = 40;
-    const index = Math.round(scrollTop / itemHeight);
-    const yearIndex = Math.max(0, Math.min(years.length - 1, index));
-    setSelectedYear(years[yearIndex]);
-  };
-
-  // Use useLayoutEffect to scroll BEFORE paint - prevents visible jump
-  useLayoutEffect(() => {
-    const itemHeight = 40; // Match the h-10 class (40px)
-    
-    // Scroll all wheels to their initial positions synchronously
-    if (monthRef.current) {
-      monthRef.current.scrollTop = (selectedMonth - 1) * itemHeight;
-    }
-    if (dayRef.current) {
-      dayRef.current.scrollTop = (selectedDay - 1) * itemHeight;
-    }
-    if (yearRef.current) {
-      yearRef.current.scrollTop = years.indexOf(selectedYear) * itemHeight;
-    }
-    
-    // Enable scroll handlers after a small delay
-    setTimeout(() => {
-      suppressScrollHandlers.current = false;
-    }, 100);
+  // Debounced scroll handler factory
+  const createScrollHandler = useCallback((
+    type: 'month' | 'day' | 'year',
+    setter: (val: number) => void,
+    getIndex: (scrollTop: number) => number
+  ) => {
+    return (e: React.UIEvent<HTMLDivElement>) => {
+      if (!isInitialized.current) return;
+      
+      const scrollTop = e.currentTarget.scrollTop;
+      const index = getIndex(scrollTop);
+      
+      // Clear existing timeout
+      if (scrollTimeouts.current[type]) {
+        clearTimeout(scrollTimeouts.current[type]);
+      }
+      
+      // Debounce the state update
+      scrollTimeouts.current[type] = setTimeout(() => {
+        setter(index);
+      }, 50);
+    };
   }, []);
+
+  const handleMonthScroll = createScrollHandler(
+    'month',
+    (idx) => setSelectedMonth(idx),
+    (scrollTop) => Math.max(1, Math.min(12, Math.round(scrollTop / ITEM_HEIGHT) + 1))
+  );
+
+  const handleDayScroll = createScrollHandler(
+    'day',
+    (idx) => setSelectedDay(idx),
+    (scrollTop) => {
+      const maxDays = getDaysInMonth(selectedYear, selectedMonth);
+      return Math.max(1, Math.min(maxDays, Math.round(scrollTop / ITEM_HEIGHT) + 1));
+    }
+  );
+
+  const handleYearScroll = createScrollHandler(
+    'year',
+    (idx) => setSelectedYear(idx),
+    (scrollTop) => {
+      const yearIndex = Math.max(0, Math.min(years.length - 1, Math.round(scrollTop / ITEM_HEIGHT)));
+      return years[yearIndex];
+    }
+  );
+
+  // Scroll to position helper
+  const scrollToPosition = useCallback((ref: React.RefObject<HTMLDivElement>, index: number) => {
+    if (ref.current) {
+      ref.current.scrollTo({
+        top: index * ITEM_HEIGHT,
+        behavior: 'instant'
+      });
+    }
+  }, []);
+
+  // Initialize scroll positions on mount
+  useLayoutEffect(() => {
+    scrollToPosition(monthRef, selectedMonth - 1);
+    scrollToPosition(dayRef, selectedDay - 1);
+    scrollToPosition(yearRef, years.indexOf(selectedYear));
+    
+    // Enable scroll handlers after positions are set
+    requestAnimationFrame(() => {
+      isInitialized.current = true;
+    });
+  }, []);
+
+  // Update scroll position when state changes from clicking
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    // Only scroll if the position is off
+    if (monthRef.current) {
+      const expectedScroll = (selectedMonth - 1) * ITEM_HEIGHT;
+      if (Math.abs(monthRef.current.scrollTop - expectedScroll) > ITEM_HEIGHT / 2) {
+        scrollToPosition(monthRef, selectedMonth - 1);
+      }
+    }
+  }, [selectedMonth, scrollToPosition]);
+
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    if (dayRef.current) {
+      const expectedScroll = (selectedDay - 1) * ITEM_HEIGHT;
+      if (Math.abs(dayRef.current.scrollTop - expectedScroll) > ITEM_HEIGHT / 2) {
+        scrollToPosition(dayRef, selectedDay - 1);
+      }
+    }
+  }, [selectedDay, scrollToPosition]);
+
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    if (yearRef.current) {
+      const yearIndex = years.indexOf(selectedYear);
+      const expectedScroll = yearIndex * ITEM_HEIGHT;
+      if (Math.abs(yearRef.current.scrollTop - expectedScroll) > ITEM_HEIGHT / 2) {
+        scrollToPosition(yearRef, yearIndex);
+      }
+    }
+  }, [selectedYear, years, scrollToPosition]);
 
   const maxDays = getDaysInMonth(selectedYear, selectedMonth);
   const days = Array.from({ length: maxDays }, (_, i) => i + 1);
 
-  return (
-    <div className="flex justify-center items-center bg-white rounded-lg p-4 border border-blush/20 shadow-soft">
-      <div className="flex items-center space-x-4">
-        {/* Month Wheel */}
-        <div className="relative">
-          <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Month</div>
-          <div 
-            ref={monthRef}
-            className="h-32 w-24 overflow-y-scroll scrollbar-hide"
-            style={{ scrollSnapType: 'y mandatory' }}
-            onScroll={handleMonthScroll}
-            data-testid="wheel-month"
-          >
-            <div className="py-12"> {/* Padding to center items */}
-              {months.map((month, index) => (
-                <div
-                  key={month}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
-                    selectedMonth === index + 1
-                      ? 'text-blush font-semibold'
-                      : 'text-gray-600'
-                  }`}
-                  style={{ scrollSnapAlign: 'center' }}
-                >
-                  {month}
-                </div>
-              ))}
-            </div>
-          </div>
+  // Wheel component with selection highlight
+  const Wheel = ({ 
+    items, 
+    selectedValue, 
+    refProp, 
+    onScroll, 
+    width,
+    testId,
+    label,
+    getValue
+  }: { 
+    items: (string | number)[];
+    selectedValue: number | string;
+    refProp: React.RefObject<HTMLDivElement>;
+    onScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+    width: string;
+    testId: string;
+    label: string;
+    getValue: (item: string | number) => number | string;
+  }) => (
+    <div className="relative flex flex-col items-center">
+      <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">{label}</div>
+      <div className="relative">
+        {/* Selection highlight box */}
+        <div 
+          className="absolute left-0 right-0 pointer-events-none z-10"
+          style={{ 
+            top: '50%', 
+            transform: 'translateY(-50%)',
+            height: `${ITEM_HEIGHT}px`
+          }}
+        >
+          <div className="w-full h-full bg-blush/15 rounded-lg border-2 border-blush/40" />
         </div>
-
-        {/* Day Wheel */}
-        <div className="relative">
-          <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Day</div>
-          <div 
-            ref={dayRef}
-            className="h-32 w-16 overflow-y-scroll scrollbar-hide"
-            style={{ scrollSnapType: 'y mandatory' }}
-            onScroll={handleDayScroll}
-            data-testid="wheel-day"
-          >
-            <div className="py-12">
-              {days.map((day) => (
-                <div
-                  key={day}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
-                    selectedDay === day
-                      ? 'text-blush font-semibold'
-                      : 'text-gray-600'
-                  }`}
-                  style={{ scrollSnapAlign: 'center' }}
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Year Wheel */}
-        <div className="relative">
-          <div className="text-xs text-gray-500 text-center mb-2 platypi-medium">Year</div>
-          <div 
-            ref={yearRef}
-            className="h-32 w-20 overflow-y-scroll scrollbar-hide"
-            style={{ scrollSnapType: 'y mandatory' }}
-            onScroll={handleYearScroll}
-            data-testid="wheel-year"
-          >
-            <div className="py-12">
-              {years.map((year) => (
-                <div
-                  key={year}
-                  className={`h-10 flex items-center justify-center text-sm platypi-medium ${
-                    selectedYear === year
-                      ? 'text-blush font-semibold'
-                      : 'text-gray-600'
-                  }`}
-                  style={{ scrollSnapAlign: 'center' }}
-                >
-                  {year}
-                </div>
-              ))}
-            </div>
-          </div>
+        
+        {/* Scroll container */}
+        <div 
+          ref={refProp}
+          className={`h-[132px] ${width} overflow-y-auto scrollbar-hide relative`}
+          onScroll={onScroll}
+          data-testid={testId}
+        >
+          {/* Top padding to center first item */}
+          <div style={{ height: `${ITEM_HEIGHT}px` }} />
+          
+          {items.map((item, index) => {
+            const itemValue = getValue(item);
+            const isSelected = itemValue === selectedValue;
+            return (
+              <div
+                key={`${item}-${index}`}
+                className={`flex items-center justify-center text-sm platypi-medium transition-all duration-150 ${
+                  isSelected
+                    ? 'text-blush font-bold scale-110'
+                    : 'text-gray-500'
+                }`}
+                style={{ height: `${ITEM_HEIGHT}px` }}
+              >
+                {item}
+              </div>
+            );
+          })}
+          
+          {/* Bottom padding to center last item */}
+          <div style={{ height: `${ITEM_HEIGHT}px` }} />
         </div>
       </div>
+    </div>
+  );
 
-      {/* Selection indicator lines */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="relative w-full h-full">
-          <div className="absolute top-1/2 left-0 right-0 h-10 -translate-y-1/2">
-            <div className="h-px bg-blush/30 absolute top-0 left-4 right-4"></div>
-            <div className="h-px bg-blush/30 absolute bottom-0 left-4 right-4"></div>
-          </div>
-        </div>
+  return (
+    <div className="flex justify-center items-center bg-white rounded-lg p-4 border border-blush/20 shadow-soft">
+      <div className="flex items-center space-x-3">
+        <Wheel
+          items={months}
+          selectedValue={selectedMonth}
+          refProp={monthRef}
+          onScroll={handleMonthScroll}
+          width="w-24"
+          testId="wheel-month"
+          label="Month"
+          getValue={(item) => months.indexOf(item as string) + 1}
+        />
+        
+        <Wheel
+          items={days}
+          selectedValue={selectedDay}
+          refProp={dayRef}
+          onScroll={handleDayScroll}
+          width="w-14"
+          testId="wheel-day"
+          label="Day"
+          getValue={(item) => item as number}
+        />
+        
+        <Wheel
+          items={years}
+          selectedValue={selectedYear}
+          refProp={yearRef}
+          onScroll={handleYearScroll}
+          width="w-20"
+          testId="wheel-year"
+          label="Year"
+          getValue={(item) => item as number}
+        />
       </div>
     </div>
   );
