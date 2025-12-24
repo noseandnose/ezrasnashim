@@ -137,7 +137,7 @@ export default function TableSection() {
                 </span>
               </div>
               <h3 className="platypi-bold text-lg text-black">
-                Days Until Shabbas {shabbosData?.parsha ? (
+                Days Until Shabbos {shabbosData?.parsha ? (
                   <span className="text-lavender"> {shabbosData.parsha.replace("Parashat ", "").replace("Parashah ", "")}</span>
                 ) : ""}
               </h3>
