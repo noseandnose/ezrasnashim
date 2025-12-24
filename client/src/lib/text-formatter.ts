@@ -295,6 +295,10 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Use negative lookahead to avoid matching --- (line breaks)
   formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em; font-family: inherit;">$1</span>');
   
+  // Process markdown-style links [text](url)
+  formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
+    '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">$1</a>');
+  
   let result = formatted;
   
   // Clean up excessive whitespace and empty lines BEFORE converting to HTML
