@@ -9,10 +9,21 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Daily_Progress_Garden_(5)_1766474472398.png";
-import torahFlower from "@assets/Torah_1766474274420.png";
-import tefillaFlower from "@assets/Tefilla_1766474274425.png";
-import tzedakaFlower from "@assets/Tzedaka_1766474274426.png";
+import grassImage from "@assets/Grass2_1766588526836.png";
+import torahFlower from "@assets/Torah_1766581824736.png";
+import tefillaFlower from "@assets/Tefilla_1766581824746.png";
+import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
+import morningBackground from "@assets/Morning_1766585201516.png";
+import afternoonBackground from "@assets/Afternoon_1766585201516.png";
+import nightBackground from "@assets/Evening_1766585201513.png";
+import milestone10Flower from "@assets/10_1766583559373.png";
+import milestone20Flower from "@assets/20_1766583559368.png";
+import prayerMorningBg from "@assets/Morning_1766585505566.png";
+import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
+import prayerNightBg from "@assets/Night_1766585505565.png";
+import shkiaMorningBg from "@assets/Morning_1766586713115.png";
+import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
+import shkiaNightBg from "@assets/Night_1766586713110.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -85,70 +96,40 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   }, [tzedakaCompleted]);
 
   // Generate stable but randomized positions for flowers - like a natural garden
-  // Torah and Tzedaka flowers get priority slots so Tefilla flowers don't cover them
+  // Each flower has a fixed position based on its type and index (stable across re-renders)
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number; overallIndex: number }[] = [];
     
-    // Seeded random for consistent but varied positions
-    let seed = 42;
-    const seededRandom = () => {
-      seed = (seed * 9301 + 49297) % 233280;
-      return seed / 233280;
+    // Create a seeded random generator for a specific flower
+    const getFlowerRandom = (type: string, index: number) => {
+      // Unique seed per flower type and index
+      const baseSeed = type === 'torah' ? 100 : type === 'tefilla' ? 200 : 300;
+      let seed = baseSeed + index * 17;
+      return () => {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      };
     };
     
-    // Flower radius in percentage units (based on w-12 = 48px in ~350px container ≈ 14%)
-    const FLOWER_RADIUS = 7;
-    // Minimum distance between flower centers (95% of combined radii = max 5% overlap)
-    const MIN_DISTANCE_FACTOR = 0.95;
+    // Predefined horizontal slots to ensure flowers don't overlap
+    const slots = [15, 35, 55, 75, 90];
+    let slotIndex = 0;
+    let overallFlowerIndex = 1; // 1-based overall index for milestone tracking
     
-    // Check if a position collides with existing flowers (more than 5% overlap)
-    const checkCollision = (left: number, bottom: number, scale: number) => {
-      const newRadius = FLOWER_RADIUS * scale;
-      for (const existing of positions) {
-        const existingRadius = FLOWER_RADIUS * existing.scale;
-        const minDistance = (newRadius + existingRadius) * MIN_DISTANCE_FACTOR;
-        const dx = left - existing.left;
-        const dy = bottom - existing.bottom;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance < minDistance) {
-          return true; // Collision detected
-        }
-      }
-      return false;
-    };
-    
-    // Helper to add a flower position with collision avoidance
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', _index: number) => {
-      const scale = 0.40 + (seededRandom() * 0.35); // 0.40 to 0.75 scale (5% bigger, more variation)
-      const flipped = seededRandom() > 0.5;
+    // Helper to add a flower with stable position
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+      const random = getFlowerRandom(type, index);
+      // Random scale for size variation (0.65 to 1.05)
+      const scale = 0.65 + (random() * 0.4);
+      const flipped = random() > 0.5;
+      // Stems start near bottom (10 to 15% from bottom)
+      const bottom = 10 + random() * 5;
+      // Use slot position with small random offset for natural look
+      const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
+      slotIndex++;
       
-      // Try up to 30 times to find a non-colliding position
-      for (let attempt = 0; attempt < 30; attempt++) {
-        // Scatter across entire width and height, but avoid top-left title area
-        // Title is roughly in top 60% height and left 55% width
-        let left: number;
-        let bottom: number;
-        
-        // Generate random position across full area
-        left = 5 + seededRandom() * 87; // 5-92% (full width with margins)
-        bottom = 5 + seededRandom() * 55; // 5-60% (use more vertical space)
-        
-        // Avoid title area: if in top portion (bottom > 40%), stay away from left side
-        if (bottom > 40 && left < 55) {
-          // Skip this position - it would overlap with title
-          continue;
-        }
-        
-        if (!checkCollision(left, bottom, scale)) {
-          positions.push({ type, left, bottom, flipped, scale });
-          return;
-        }
-      }
-      
-      // Fallback: place on right side with smaller scale to fit
-      const left = 50 + seededRandom() * 42;
-      const bottom = 5 + seededRandom() * 35;
-      positions.push({ type, left, bottom, flipped, scale: scale * 0.7 });
+      positions.push({ type, left, bottom, flipped, scale, overallIndex: overallFlowerIndex });
+      overallFlowerIndex++;
     };
     
     // PRIORITY: Place Torah and Tzedaka flowers first (they're completed less often)
@@ -179,6 +160,30 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return "Good Morning";
     if (hour < 18) return "Good Afternoon";
     return "Good Evening";
+  };
+
+  // Get time-appropriate background for garden
+  const getGardenBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return morningBackground;
+    if (hour < 18) return afternoonBackground;
+    return nightBackground;
+  };
+
+  // Get time-appropriate background for prayer button
+  const getPrayerButtonBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return prayerMorningBg;
+    if (hour < 18) return prayerAfternoonBg;
+    return prayerNightBg;
+  };
+
+  // Get time-appropriate background for shkia button
+  const getShkiaButtonBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return shkiaMorningBg;
+    if (hour < 18) return shkiaAfternoonBg;
+    return shkiaNightBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -391,30 +396,40 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <button 
               onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
               disabled={currentPrayer.disabled}
-              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 ${
+              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 overflow-hidden relative ${
                 currentPrayer.disabled 
-                  ? 'bg-gray-100 border-gray-200 opacity-60 cursor-not-allowed' 
-                  : 'bg-white/80 border-blush/20 hover:scale-105 hover:bg-white/95'
+                  ? 'border-gray-200 opacity-60 cursor-not-allowed' 
+                  : 'border-blush/20 hover:scale-105'
               }`}
               data-modal-type={currentPrayer.modal}
               data-modal-section="tefilla"
               data-testid="button-home-prayer"
             >
-              <div className="flex items-center justify-center mb-1">
-                <div className={`p-1.5 rounded-full mr-1 ${
-                  currentPrayer.disabled 
-                    ? 'bg-gray-300' 
-                    : 'bg-gradient-feminine'
-                }`}>
-                  <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-white"} size={12} />
+              {/* Background image */}
+              <img 
+                src={getPrayerButtonBackground()} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 0, opacity: 0.5 }}
+              />
+              {/* Content overlay */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-1">
+                  <div className={`p-1.5 rounded-full mr-1 ${
+                    currentPrayer.disabled 
+                      ? 'bg-gray-300' 
+                      : 'bg-white/60'
+                  }`}>
+                    <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
+                  </div>
                 </div>
+                <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+                  {currentPrayer.title}
+                </p>
+                <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+                  {currentPrayer.subtitle}
+                </p>
               </div>
-              <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-                {currentPrayer.title}
-              </p>
-              <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
-                {currentPrayer.subtitle}
-              </p>
             </button>
           </div>
 
@@ -422,18 +437,28 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <div className="relative">
             <button 
               onClick={() => openModal('events', 'home')}
-              className="w-full bg-white/80 rounded-xl p-3 text-center border border-blush/20 hover:scale-105 hover:bg-white/95 transition-all duration-300"
+              className="w-full rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 overflow-hidden relative"
               data-modal-type="events"
               data-modal-section="home"
               data-testid="button-home-events"
             >
-              <div className="flex items-center justify-center mb-1">
-                <div className="bg-gradient-feminine p-1.5 rounded-full">
-                  <Clock className="text-white" size={12} />
+              {/* Background image */}
+              <img 
+                src={getShkiaButtonBackground()} 
+                alt="" 
+                className="absolute inset-0 w-full h-full object-cover"
+                style={{ zIndex: 0, opacity: 0.5 }}
+              />
+              {/* Content overlay */}
+              <div className="relative z-10">
+                <div className="flex items-center justify-center mb-1">
+                  <div className="bg-white/60 p-1.5 rounded-full">
+                    <Clock className="text-black" size={12} />
+                  </div>
                 </div>
+                <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+                <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
               </div>
-              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
             </button>
           </div>
         </div>
@@ -655,42 +680,73 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           />
         </button>
 
-        {/* Daily Progress Tracker - Compact Version */}
+        {/* Daily Progress Tracker - Redesigned Garden */}
         <div 
           id="daily-progress-garden"
-          className="rounded-2xl shadow-lg border border-blush/10 bg-white mt-4 min-h-[100px] relative overflow-hidden"
+          className="rounded-2xl shadow-lg border border-blush/10 mt-4 min-h-[120px] relative overflow-hidden"
         >
-          {/* Grass - covers entire section, BEHIND flowers */}
+          {/* Time-based background - Layer 0 */}
           <img 
-            src={grassImage} 
+            src={getGardenBackground()} 
             alt="" 
-            className="absolute inset-0 w-full h-full z-[1]"
-            style={{ objectFit: 'cover' }}
+            className="absolute inset-0 w-full h-full z-0"
+            style={{ objectFit: 'cover', opacity: 0.5 }}
             loading="lazy"
           />
           
-          {/* Flowers - scattered ON TOP of grass */}
+          {/* Flowers with stems - Layer 1 (behind grass) */}
           {flowerPositions
             .slice()
             .sort((a, b) => {
-              // Flowers further back (higher bottom %) render first, closer ones render on top
+              // Flowers further back (lower in garden) render first
               return a.bottom - b.bottom;
             })
             .map((flower, index) => (
             <img 
               key={`${flower.type}-${index}`}
-              src={flower.type === 'torah' ? torahFlower : flower.type === 'tefilla' ? tefillaFlower : tzedakaFlower} 
-              alt={`${flower.type} flower`} 
-              className="absolute w-12 h-12 z-[2]"
+              src={
+                flower.overallIndex === 10 ? milestone10Flower :
+                flower.overallIndex === 20 ? milestone20Flower :
+                flower.type === 'torah' ? torahFlower : 
+                flower.type === 'tefilla' ? tefillaFlower : 
+                tzedakaFlower
+              } 
+              alt={
+                flower.overallIndex === 10 ? '10th flower milestone!' :
+                flower.overallIndex === 20 ? '20th flower milestone!' :
+                `${flower.type} flower`
+              } 
+              className={`absolute ${
+                flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[3]' : 
+                flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
+                'z-[1]'
+              }`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                transform: `scale(${flower.scale})${flower.flipped ? ' scaleX(-1)' : ''}`
+                width: `${67 * flower.scale}px`,
+                height: 'auto',
+                transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
+                transformOrigin: 'bottom center'
               }}
               loading="lazy"
             />
           ))}
           
+          {/* Grass overlay - Layer 4 (covers all flower stems) */}
+          <img 
+            src={grassImage} 
+            alt="" 
+            className="absolute bottom-0 left-0 w-full z-[4]"
+            style={{ 
+              height: '50%',
+              objectFit: 'cover',
+              objectPosition: 'bottom'
+            }}
+            loading="lazy"
+          />
+          
+          {/* Title - Layer 3 (topmost) */}
           <div className="absolute top-2 left-2 z-10">
             <div 
               className="px-2 py-1 rounded-lg"
