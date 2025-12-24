@@ -580,22 +580,22 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         )}
       </div>
       {/* Main Action Buttons */}
-      <div className="p-2 space-y-2 relative z-20">
-        {/* Daily Torah Bar - Always prominent */}
+      <div className="p-2 space-y-2">
+        {/* Daily Torah Bar */}
         <button
           onClick={() => navigateToSection('torah')}
-          className="w-full rounded-2xl p-5 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-4 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-            <BookOpen className="text-white" size={24} strokeWidth={1.5} />
+          <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+            <BookOpen className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
-            <h3 className="platypi-bold text-base text-black">Daily Torah</h3>
+            <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
             <p className="platypi-regular text-xs text-black/60">Halacha, Emuna & Chizuk</p>
           </div>
           <HeartProgress 
             completed={torahCompleted} 
-            size={24} 
+            size={20} 
             animationClass={torahCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
           />
         </button>
@@ -619,21 +619,21 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           />
         </button>
 
-        {/* Daily Tzedaka Bar - Always prominent */}
+        {/* Daily Tzedaka Bar */}
         <button
           onClick={() => navigateToSection('tzedaka')}
-          className="w-full rounded-2xl p-5 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-4 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
-            <Coins className="text-white" size={24} strokeWidth={1.5} />
+          <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
+            <Coins className="text-white" size={20} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
-            <h3 className="platypi-bold text-base text-black">Daily Tzedaka</h3>
+            <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
             <p className="platypi-regular text-xs text-black/60">Support Causes</p>
           </div>
           <HeartProgress 
             completed={tzedakaCompleted} 
-            size={24} 
+            size={20} 
             animationClass={tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
           />
         </button>
@@ -674,7 +674,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 flower.overallIndex === 20 ? '20th flower milestone!' :
                 `${flower.type} flower`
               } 
-              className={`absolute ${flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[2]' : 'z-[1]'}`}
+              className={`absolute ${
+                flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[3]' : 
+                flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
+                'z-[1]'
+              }`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
