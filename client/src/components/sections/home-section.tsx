@@ -691,11 +691,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             />
           ))}
           
-          {/* Grass overlay - Layer 2 (covers flower stems) */}
+          {/* Grass overlay - Layer 4 (covers all flower stems) */}
           <img 
             src={grassImage} 
             alt="" 
-            className="absolute bottom-0 left-0 w-full z-[2]"
+            className="absolute bottom-0 left-0 w-full z-[4]"
             style={{ 
               height: '50%',
               objectFit: 'cover',
