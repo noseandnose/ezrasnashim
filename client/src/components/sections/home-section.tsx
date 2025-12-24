@@ -9,7 +9,7 @@ import type { Section } from "@/pages/home";
 import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
-import grassImage from "@assets/Grass_1766581832995.png";
+import grassImage from "@assets/Daily_Progress_Garden_(6)_1766582926462.png";
 import torahFlower from "@assets/Torah_1766581824736.png";
 import tefillaFlower from "@assets/Tefilla_1766581824746.png";
 import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
