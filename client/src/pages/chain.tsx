@@ -360,11 +360,20 @@ export default function ChainPage() {
   const handleAppleCalendar = () => {
     if (!chain) return;
     
-    // Use backend endpoint for ICS file - works better in WebViews and mobile apps
-    const icsUrl = `/api/tehillim-chains/${slug}/reminder.ics?time=${encodeURIComponent(reminderTime)}`;
+    // Build proper base URL for the API endpoint
+    let baseUrl = '';
+    if (import.meta.env.VITE_API_URL) {
+      baseUrl = import.meta.env.VITE_API_URL;
+    } else if (window.location.hostname.includes('replit.dev')) {
+      baseUrl = `https://${window.location.hostname}:5000`;
+    } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      baseUrl = 'http://localhost:5000';
+    }
+    
+    const icsUrl = `${baseUrl}/api/tehillim-chains/${slug}/reminder.ics?time=${encodeURIComponent(reminderTime)}`;
     
     // Navigate to the ICS file - this triggers a download/calendar open in most environments
-    window.location.assign(icsUrl);
+    window.location.href = icsUrl;
     
     setShowReminderDialog(false);
     toast({ title: "Calendar file downloading!", description: "Open the file to add the reminder to your calendar." });

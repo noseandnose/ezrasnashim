@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import WheelDatePicker from "@/components/ui/wheel-date-picker";
-import { Calendar } from "lucide-react";
+import { Calendar, Gift } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -25,6 +25,8 @@ export default function TimesModals() {
   const [isMobile, setIsMobile] = useState(false);
   const [afterNightfall, setAfterNightfall] = useState(false);
   const [yearDuration, setYearDuration] = useState(10);
+  const [nextBirthday, setNextBirthday] = useState<string | null>(null);
+  const [nextBirthdayLoading, setNextBirthdayLoading] = useState(false);
   const { toast } = useToast();
   useQueryClient();
   
@@ -76,7 +78,7 @@ export default function TimesModals() {
     }
 
     try {
-      // Build URL with query parameters using the same base URL logic as other API calls
+      // Build URL with query parameters
       const params = new URLSearchParams({
         title: eventTitle,
         hebrewDate: convertedHebrewDate || '',
@@ -88,38 +90,48 @@ export default function TimesModals() {
       // Use the same base URL logic as axiosClient
       let baseUrl = '';
       
-      // Check if VITE_API_URL is set (production build)
       if (import.meta.env.VITE_API_URL) {
         baseUrl = import.meta.env.VITE_API_URL;
       } else if (window.location.hostname.includes('replit.dev')) {
-        // For Replit preview, use port 5000
         const hostname = window.location.hostname;
         baseUrl = `https://${hostname}:5000`;
       } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Local development
         baseUrl = 'http://localhost:5000';
       }
-      // If none of the above, baseUrl remains empty for relative URLs (production)
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      // Use window.open with a short timeout to handle download
-      const downloadWindow = window.open(downloadUrl, '_self');
+      // Detect iOS (iPhone, iPad, iPod)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
-      // Fallback to link click if window.open fails
-      if (!downloadWindow) {
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(link);
-        }, 100);
+      if (isIOS) {
+        // iOS: Open URL directly - this triggers iOS Calendar import dialog
+        window.location.href = downloadUrl;
+        return { success: true };
       }
+      
+      // For other devices, use blob download
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        throw new Error('Failed to generate calendar file');
+      }
+      
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      }, 100);
       
       return { success: true };
       
@@ -140,6 +152,7 @@ export default function TimesModals() {
       setConvertedHebrewDate("");
       setAfterNightfall(false);
       setYearDuration(10);
+      setNextBirthday(null);
       closeModal();
       // Navigate to home and scroll to progress
       window.location.hash = '#/?section=home&scrollToProgress=true';
@@ -193,6 +206,9 @@ export default function TimesModals() {
             hm: data.hm,
             hy: data.hy
           });
+          
+          // Calculate next occurrence of this Hebrew date
+          calculateNextBirthday(data.hd, data.hm);
         }
         
         // Keep existing toggle state - don't reset to Hebrew
@@ -208,8 +224,49 @@ export default function TimesModals() {
       setConvertedHebrewDate('');
       setHebrewDateParts(null);
       setDateObject(null);
+      setNextBirthday(null);
       // Keep existing toggle state on clear
     }
+  };
+  
+  // Calculate the next occurrence of this Hebrew date in the Gregorian calendar
+  const calculateNextBirthday = async (hebrewDay: number, hebrewMonth: string) => {
+    setNextBirthdayLoading(true);
+    try {
+      // Get current Hebrew year
+      const now = new Date();
+      const currentYearResponse = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${now.getFullYear()}&gm=${now.getMonth() + 1}&gd=${now.getDate()}&g2h=1`);
+      const currentData = await currentYearResponse.json();
+      const currentHebrewYear = currentData.hy;
+      
+      // Try this year first, then next year
+      for (let yearOffset = 0; yearOffset <= 1; yearOffset++) {
+        const targetYear = currentHebrewYear + yearOffset;
+        const response = await fetch(`https://www.hebcal.com/converter?cfg=json&hy=${targetYear}&hm=${hebrewMonth}&hd=${hebrewDay}&h2g=1`);
+        const data = await response.json();
+        
+        if (data.gy && data.gm && data.gd) {
+          const nextDate = new Date(data.gy, data.gm - 1, data.gd);
+          // Check if this date is today or in the future (compare by date only, not time)
+          const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          if (nextDate >= todayMidnight) {
+            const options: Intl.DateTimeFormatOptions = { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            };
+            setNextBirthday(nextDate.toLocaleDateString('en-US', options));
+            setNextBirthdayLoading(false);
+            return;
+          }
+        }
+      }
+      setNextBirthday(null);
+    } catch {
+      setNextBirthday(null);
+    }
+    setNextBirthdayLoading(false);
   };
 
   // Format date in English with weekday and Hebrew components
@@ -264,7 +321,12 @@ export default function TimesModals() {
         hideHeader={true}
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
-        <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 0.75rem)' }}>
+        <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 1rem)' }}>
+          {/* Header - close button provided by FullscreenModal */}
+          <div className="flex items-center mb-4">
+            <h1 className="text-lg platypi-bold text-black">Hebrew Date Calculator</h1>
+          </div>
+          
           {/* Form Sections */}
           <div className="space-y-3">
             {/* Event Title */}
@@ -296,15 +358,19 @@ export default function TimesModals() {
                     role="checkbox"
                     aria-checked={afterNightfall}
                     onClick={() => handleNightfallChange(!afterNightfall)}
-                    className={`h-4 w-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
-                      afterNightfall 
-                        ? 'bg-blush border-blush' 
-                        : 'bg-white border-blush/30'
-                    }`}
+                    className="rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      minWidth: '16px', 
+                      minHeight: '16px',
+                      backgroundColor: afterNightfall ? '#D4A5A5' : '#ffffff',
+                      border: afterNightfall ? '2px solid #D4A5A5' : '2px solid rgba(212, 165, 165, 0.3)'
+                    }}
                     data-testid="checkbox-nightfall"
                   >
                     {afterNightfall && (
-                      <div className="w-2 h-2 rounded-full bg-white" />
+                      <div className="rounded-full" style={{ width: '6px', height: '6px', backgroundColor: '#ffffff' }} />
                     )}
                   </button>
                   <Label 
@@ -358,6 +424,31 @@ export default function TimesModals() {
               </div>
             )}
 
+            {/* Next Birthday/Anniversary Section */}
+            {convertedHebrewDate && (
+              <div 
+                className="bg-gradient-to-r from-lavender/10 to-blush/10 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-lavender/20 animate-in slide-in-from-bottom duration-300"
+                data-testid="next-birthday-display"
+              >
+                <div className="flex items-center">
+                  <Gift className="w-4 h-4 text-lavender mr-2" />
+                  <div className="flex-1">
+                    <Label className="text-xs platypi-semibold text-black flex items-center">
+                      Next Occurrence
+                    </Label>
+                    <div className="text-sm platypi-semibold text-lavender mt-0.5">
+                      {nextBirthdayLoading ? (
+                        <span className="text-gray-400">Calculating...</span>
+                      ) : nextBirthday ? (
+                        nextBirthday
+                      ) : (
+                        <span className="text-gray-400">Unable to calculate</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* Duration Selection */}
             <div className="bg-white/80 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/10">
