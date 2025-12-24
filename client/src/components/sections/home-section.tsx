@@ -118,9 +118,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       // Random scale for size variation (0.7 to 1.2)
       const scale = 0.7 + (seededRandom() * 0.5);
       const flipped = seededRandom() > 0.5;
-      // Random height offset - flowers grow from grass level (5-25% from bottom)
-      // This positions stems behind grass, with heads peeking out above
-      const bottom = 5 + seededRandom() * 20;
+      // Random height offset - stems start near bottom (0-10% from bottom)
+      // Flowers grow up with heads peeking out above grass
+      const bottom = seededRandom() * 10;
       
       // Try up to 20 times to find a non-colliding horizontal position
       for (let attempt = 0; attempt < 20; attempt++) {
