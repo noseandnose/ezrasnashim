@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from 'react';
 
 interface WheelDatePickerProps {
   value: string; // ISO format YYYY-MM-DD
@@ -46,8 +46,8 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
   const yearRef = useRef<HTMLDivElement>(null);
   const isInitialized = useRef(false);
   
-  // Track which wheel is being scrolled to prevent interference
-  const activeWheel = useRef<string | null>(null);
+  // Track scroll end for snapping
+  const scrollEndTimeouts = useRef<{ month?: NodeJS.Timeout; day?: NodeJS.Timeout; year?: NodeJS.Timeout }>({});
 
   // Update parent when selection changes
   useEffect(() => {
@@ -64,39 +64,74 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
     }
   }, [selectedMonth, selectedYear, selectedDay]);
 
-  // Direct scroll handlers - no debounce
+  // Snap to nearest item
+  const snapToItem = useCallback((ref: React.RefObject<HTMLDivElement>, index: number) => {
+    if (ref.current) {
+      ref.current.scrollTo({
+        top: index * ITEM_HEIGHT,
+        behavior: 'smooth'
+      });
+    }
+  }, []);
+
+  // Scroll handlers with snap-on-end
   const handleMonthScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!isInitialized.current) return;
-    activeWheel.current = 'month';
+    
     const scrollTop = e.currentTarget.scrollTop;
     const index = Math.round(scrollTop / ITEM_HEIGHT);
     const newMonth = Math.max(1, Math.min(12, index + 1));
+    
     if (newMonth !== selectedMonth) {
       setSelectedMonth(newMonth);
     }
+    
+    // Clear existing timeout and set new one for snap
+    if (scrollEndTimeouts.current.month) {
+      clearTimeout(scrollEndTimeouts.current.month);
+    }
+    scrollEndTimeouts.current.month = setTimeout(() => {
+      snapToItem(monthRef, newMonth - 1);
+    }, 100);
   };
 
   const handleDayScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!isInitialized.current) return;
-    activeWheel.current = 'day';
+    
     const scrollTop = e.currentTarget.scrollTop;
     const maxDays = getDaysInMonth(selectedYear, selectedMonth);
     const index = Math.round(scrollTop / ITEM_HEIGHT);
     const newDay = Math.max(1, Math.min(maxDays, index + 1));
+    
     if (newDay !== selectedDay) {
       setSelectedDay(newDay);
     }
+    
+    if (scrollEndTimeouts.current.day) {
+      clearTimeout(scrollEndTimeouts.current.day);
+    }
+    scrollEndTimeouts.current.day = setTimeout(() => {
+      snapToItem(dayRef, newDay - 1);
+    }, 100);
   };
 
   const handleYearScroll = (e: React.UIEvent<HTMLDivElement>) => {
     if (!isInitialized.current) return;
-    activeWheel.current = 'year';
+    
     const scrollTop = e.currentTarget.scrollTop;
     const index = Math.max(0, Math.min(years.length - 1, Math.round(scrollTop / ITEM_HEIGHT)));
     const newYear = years[index];
+    
     if (newYear !== selectedYear) {
       setSelectedYear(newYear);
     }
+    
+    if (scrollEndTimeouts.current.year) {
+      clearTimeout(scrollEndTimeouts.current.year);
+    }
+    scrollEndTimeouts.current.year = setTimeout(() => {
+      snapToItem(yearRef, index);
+    }, 100);
   };
 
   // Initialize scroll positions on mount only
@@ -111,7 +146,6 @@ const WheelDatePicker = ({ value, onChange }: WheelDatePickerProps) => {
       yearRef.current.scrollTop = years.indexOf(initialValue.year) * ITEM_HEIGHT;
     }
     
-    // Small delay to enable handlers after initial positioning
     setTimeout(() => {
       isInitialized.current = true;
     }, 50);

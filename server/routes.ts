@@ -409,11 +409,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const filename = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${years}_years.ics`;
       
-      // Set headers for file download - use octet-stream to force download on iOS
-      res.setHeader('Content-Type', 'application/octet-stream');
+      // Use text/calendar for iOS to trigger calendar app import
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length', Buffer.byteLength(icsContent).toString());
-      res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       
       res.send(icsContent);

@@ -78,7 +78,7 @@ export default function TimesModals() {
     }
 
     try {
-      // Build URL with query parameters using the same base URL logic as other API calls
+      // Build URL with query parameters
       const params = new URLSearchParams({
         title: eventTitle,
         hebrewDate: convertedHebrewDate || '',
@@ -90,22 +90,28 @@ export default function TimesModals() {
       // Use the same base URL logic as axiosClient
       let baseUrl = '';
       
-      // Check if VITE_API_URL is set (production build)
       if (import.meta.env.VITE_API_URL) {
         baseUrl = import.meta.env.VITE_API_URL;
       } else if (window.location.hostname.includes('replit.dev')) {
-        // For Replit preview, use port 5000
         const hostname = window.location.hostname;
         baseUrl = `https://${hostname}:5000`;
       } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        // Local development
         baseUrl = 'http://localhost:5000';
       }
-      // If none of the above, baseUrl remains empty for relative URLs (production)
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      // Fetch the ICS content as a blob and trigger download
+      // Detect iOS (iPhone, iPad, iPod)
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      if (isIOS) {
+        // iOS: Open URL directly - this triggers iOS Calendar import dialog
+        window.location.href = downloadUrl;
+        return { success: true };
+      }
+      
+      // For other devices, use blob download
       const response = await fetch(downloadUrl);
       if (!response.ok) {
         throw new Error('Failed to generate calendar file');
