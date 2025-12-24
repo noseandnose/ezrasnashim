@@ -72,6 +72,22 @@ export default function TimesModals() {
   }, [englishDate, afterNightfall]);
 
 
+  // Detect if running in a mobile app WebView (Flutter, React Native, etc.)
+  const isInMobileAppWebView = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    // Check for common WebView indicators
+    return (
+      ua.includes('wv') || // Android WebView
+      ua.includes('webview') ||
+      // @ts-ignore - Flutter WebView detection
+      (window.flutter_inappwebview !== undefined) ||
+      // @ts-ignore - React Native WebView
+      (window.ReactNativeWebView !== undefined) ||
+      // Generic mobile app check - no browser chrome
+      ((/android|iphone|ipad|ipod/i.test(ua)) && !ua.includes('safari') && !ua.includes('chrome'))
+    );
+  };
+
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
       throw new Error('Please fill in both event title and English date');
@@ -105,8 +121,52 @@ export default function TimesModals() {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
+      // Detect if we're in a mobile app WebView
+      const inWebView = isInMobileAppWebView();
+      
+      if (inWebView) {
+        // In mobile app WebView: Use Google Calendar URL which works universally
+        // First, fetch the dates from the API
+        const response = await fetch(downloadUrl);
+        if (!response.ok) {
+          throw new Error('Failed to generate calendar dates');
+        }
+        
+        const icsContent = await response.text();
+        
+        // Parse the first event from the ICS to get the date
+        const firstEventMatch = icsContent.match(/DTSTART;VALUE=DATE:(\d{8})/);
+        if (!firstEventMatch) {
+          throw new Error('Could not parse calendar dates');
+        }
+        
+        const firstDateStr = firstEventMatch[1];
+        const year = firstDateStr.substring(0, 4);
+        const month = firstDateStr.substring(4, 6);
+        const day = firstDateStr.substring(6, 8);
+        
+        // Create Google Calendar URL for the first event (user can add recurring from there)
+        const startDate = `${year}${month}${day}`;
+        const description = `Hebrew Date: ${convertedHebrewDate || ''}\\nGregorian: ${englishDate}`;
+        
+        const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
+        googleCalendarUrl.searchParams.set('text', eventTitle);
+        googleCalendarUrl.searchParams.set('dates', `${startDate}/${startDate}`);
+        googleCalendarUrl.searchParams.set('details', description);
+        googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=YEARLY');
+        
+        // Open Google Calendar in a new window/tab
+        const newWindow = window.open(googleCalendarUrl.toString(), '_blank');
+        if (!newWindow) {
+          // If popup blocked, use location
+          window.location.href = googleCalendarUrl.toString();
+        }
+        
+        return { success: true, isGoogleCalendar: true };
+      }
+      
       if (isIOS) {
-        // iOS: Open URL directly - this triggers iOS Calendar import dialog
+        // iOS browser: Open URL directly - this triggers iOS Calendar import dialog
         window.location.href = downloadUrl;
         return { success: true };
       }
@@ -142,10 +202,13 @@ export default function TimesModals() {
 
   const downloadCalendarMutation = useMutation({
     mutationFn: handleMobileDownload,
-    onSuccess: () => {
+    onSuccess: (result) => {
+      const isGoogleCalendar = result && typeof result === 'object' && 'isGoogleCalendar' in result && result.isGoogleCalendar;
       toast({
         title: "Success",
-        description: `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''} - Import into any calendar app`
+        description: isGoogleCalendar 
+          ? "Opening Google Calendar - Save the event to get yearly reminders"
+          : `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''} - Import into any calendar app`
       });
       setEventTitle("");
       setEnglishDate("");
