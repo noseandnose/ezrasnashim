@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useEffect } from "react";
-import mazalTovBackground from '@assets/Untitled_design_(7)_1766476643365.png';
+import mazalTovBackground from '@assets/Mazaltov1_1766583177967.png';
 
 export default function CongratulationsModal() {
   const { activeModal, closeModal } = useModalStore();
