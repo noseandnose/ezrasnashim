@@ -103,23 +103,16 @@ export default function TimesModals() {
       
       const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
       
-      // Use window.open with a short timeout to handle download
-      const downloadWindow = window.open(downloadUrl, '_self');
+      // Use hidden iframe for iOS compatibility - this forces download instead of inline display
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = downloadUrl;
+      document.body.appendChild(iframe);
       
-      // Fallback to link click if window.open fails
-      if (!downloadWindow) {
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = `${eventTitle.replace(/[^a-zA-Z0-9]/g, '_')}_${yearDuration}_years.ics`;
-        link.style.display = 'none';
-        
-        document.body.appendChild(link);
-        link.click();
-        
-        setTimeout(() => {
-          document.body.removeChild(link);
-        }, 100);
-      }
+      // Clean up iframe after download starts
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+      }, 5000);
       
       return { success: true };
       
@@ -296,15 +289,16 @@ export default function TimesModals() {
                     role="checkbox"
                     aria-checked={afterNightfall}
                     onClick={() => handleNightfallChange(!afterNightfall)}
-                    className={`h-4 w-4 rounded-full border-2 transition-all duration-200 flex items-center justify-center ${
+                    className={`rounded-full border-2 transition-all duration-200 flex items-center justify-center flex-shrink-0 ${
                       afterNightfall 
                         ? 'bg-blush border-blush' 
                         : 'bg-white border-blush/30'
                     }`}
+                    style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px' }}
                     data-testid="checkbox-nightfall"
                   >
                     {afterNightfall && (
-                      <div className="w-2 h-2 rounded-full bg-white" />
+                      <div className="rounded-full bg-white" style={{ width: '8px', height: '8px' }} />
                     )}
                   </button>
                   <Label 
