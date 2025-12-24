@@ -110,11 +110,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     // Helper to add a flower with stable position
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
       const random = getFlowerRandom(type, index);
-      // Random scale for size variation (0.6 to 1.0) - 10% smaller
-      const scale = 0.6 + (random() * 0.4);
+      // Random scale for size variation (0.65 to 1.05)
+      const scale = 0.65 + (random() * 0.4);
       const flipped = random() > 0.5;
-      // Stems start at very bottom (-5 to 5% from bottom)
-      const bottom = -5 + random() * 10;
+      // Stems start near bottom (0 to 10% from bottom)
+      const bottom = random() * 10;
       // Use slot position with small random offset for natural look
       const left = slots[slotIndex % slots.length] + (random() * 10 - 5);
       slotIndex++;
@@ -664,7 +664,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: `${63 * flower.scale}px`,
+                width: `${67 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
