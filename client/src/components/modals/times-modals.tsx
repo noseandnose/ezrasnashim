@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect, useRef } from "react";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import WheelDatePicker from "@/components/ui/wheel-date-picker";
-import { Calendar, X, Gift } from "lucide-react";
+import { Calendar, Gift } from "lucide-react";
 
 export default function TimesModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -322,16 +322,9 @@ export default function TimesModals() {
         className="bg-gradient-to-br from-cream via-ivory to-sand"
       >
         <div className="max-w-lg mx-auto p-3" style={{ paddingTop: 'calc(var(--safe-area-top-resolved, 0px) + 1rem)' }}>
-          {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          {/* Header - close button provided by FullscreenModal */}
+          <div className="flex items-center mb-4">
             <h1 className="text-lg platypi-bold text-black">Hebrew Date Calculator</h1>
-            <button
-              onClick={() => closeModal()}
-              className="w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center shadow-sm hover:bg-white transition-colors"
-              data-testid="button-close-date-calculator"
-            >
-              <X className="w-4 h-4 text-gray-600" />
-            </button>
           </div>
           
           {/* Form Sections */}
