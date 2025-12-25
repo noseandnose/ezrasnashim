@@ -93,6 +93,20 @@ export default function Login() {
         toast({ title: "Welcome back!", description: "You've been signed in successfully." });
         setLocation('/');
       } else if (mode === 'signup') {
+        if (birthday) {
+          const selectedDate = new Date(birthday);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          if (selectedDate > today) {
+            toast({
+              title: "Invalid date",
+              description: "Birthday cannot be in the future.",
+              variant: "destructive"
+            });
+            setIsLoading(false);
+            return;
+          }
+        }
         await signUpWithEmail(email, password, firstName, lastName, hebrewName, birthday);
         toast({ 
           title: "Check your email", 
@@ -233,6 +247,7 @@ export default function Login() {
                     placeholder="Birthday"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
+                    max={new Date().toISOString().split('T')[0]}
                     className={`pl-9 ${!birthday ? 'text-gray-400' : ''}`}
                     data-testid="input-birthday"
                   />

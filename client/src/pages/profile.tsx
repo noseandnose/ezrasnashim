@@ -1,17 +1,90 @@
 import { useLocation } from "wouter";
-import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft } from "lucide-react";
+import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 
 export default function Profile() {
   const [, setLocation] = useLocation();
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout, updateProfile } = useAuth();
   const completedModals = useModalCompletionStore((state) => state.completedModals);
+  const { toast } = useToast();
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editFirstName, setEditFirstName] = useState('');
+  const [editLastName, setEditLastName] = useState('');
+  const [editHebrewName, setEditHebrewName] = useState('');
+  const [editBirthday, setEditBirthday] = useState('');
+  
+  const startEditing = () => {
+    setEditFirstName(user?.firstName || '');
+    setEditLastName(user?.lastName || '');
+    setEditHebrewName(user?.hebrewName || '');
+    setEditBirthday(user?.birthday || '');
+    setIsEditing(true);
+  };
+  
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
+  
+  const saveProfile = async () => {
+    if (editBirthday) {
+      const selectedDate = new Date(editBirthday);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate > today) {
+        toast({
+          title: "Invalid date",
+          description: "Birthday cannot be in the future.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+    
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        firstName: editFirstName.trim(),
+        lastName: editLastName.trim(),
+        hebrewName: editHebrewName.trim(),
+        birthday: editBirthday,
+      });
+      toast({ title: "Profile updated", description: "Your changes have been saved." });
+      setIsEditing(false);
+    } catch (error: any) {
+      toast({ 
+        title: "Error", 
+        description: error.message || "Failed to update profile.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
+  const formatBirthday = (dateStr: string | null) => {
+    if (!dateStr) return null;
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  };
+  
+  const getTodayString = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
   
   const stats = useMemo(() => {
     const today = getLocalDateString();
@@ -135,28 +208,117 @@ export default function Profile() {
       
       <div className="p-4 pt-24 pb-28 space-y-6">
         <div 
-          className="rounded-2xl p-6 text-center"
+          className="rounded-2xl p-6"
           style={{ 
             background: 'rgba(186, 137, 160, 0.12)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)'
           }}
         >
-          <div className="w-20 h-20 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-4">
-            {user?.profileImageUrl ? (
-              <img 
-                src={user.profileImageUrl} 
-                alt={user.firstName || 'Profile'} 
-                className="w-full h-full rounded-full object-cover"
-              />
+          <div className="flex justify-end mb-2">
+            {!isEditing ? (
+              <button 
+                onClick={startEditing}
+                className="text-blush hover:text-blush/80 p-1"
+                data-testid="button-edit-profile"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
             ) : (
-              <User className="w-10 h-10 text-blush" />
+              <div className="flex gap-2">
+                <button 
+                  onClick={cancelEditing}
+                  className="text-gray-500 hover:text-gray-700 p-1"
+                  disabled={isSaving}
+                  data-testid="button-cancel-edit"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={saveProfile}
+                  className="text-green-600 hover:text-green-700 p-1"
+                  disabled={isSaving}
+                  data-testid="button-save-profile"
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+              </div>
             )}
           </div>
-          <h2 className="text-xl font-semibold text-black">
-            {user?.firstName} {user?.lastName}
-          </h2>
-          <p className="text-gray-600 text-sm">{user?.email}</p>
+          
+          <div className="text-center">
+            <div className="w-20 h-20 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-4">
+              {user?.profileImageUrl ? (
+                <img 
+                  src={user.profileImageUrl} 
+                  alt={user.firstName || 'Profile'} 
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <User className="w-10 h-10 text-blush" />
+              )}
+            </div>
+            
+            {!isEditing ? (
+              <>
+                <h2 className="text-xl font-semibold text-black">
+                  {user?.firstName} {user?.lastName}
+                </h2>
+                {user?.hebrewName && (
+                  <p className="text-lg text-gray-700 mt-1" dir="rtl">
+                    <Star className="w-4 h-4 inline-block mr-1 text-blush" />
+                    {user.hebrewName}
+                  </p>
+                )}
+                <p className="text-gray-600 text-sm mt-1">{user?.email}</p>
+                {user?.birthday && (
+                  <p className="text-gray-500 text-sm mt-2 flex items-center justify-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatBirthday(user.birthday)}
+                  </p>
+                )}
+              </>
+            ) : (
+              <div className="space-y-3 text-left">
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="text"
+                    placeholder="First name"
+                    value={editFirstName}
+                    onChange={(e) => setEditFirstName(e.target.value)}
+                    className="bg-white"
+                    data-testid="input-edit-first-name"
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Last name"
+                    value={editLastName}
+                    onChange={(e) => setEditLastName(e.target.value)}
+                    className="bg-white"
+                    data-testid="input-edit-last-name"
+                  />
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Hebrew name"
+                  value={editHebrewName}
+                  onChange={(e) => setEditHebrewName(e.target.value)}
+                  className="bg-white"
+                  dir="rtl"
+                  data-testid="input-edit-hebrew-name"
+                />
+                <Input
+                  type="date"
+                  placeholder="Birthday"
+                  value={editBirthday}
+                  onChange={(e) => setEditBirthday(e.target.value)}
+                  max={getTodayString()}
+                  className="bg-white"
+                  data-testid="input-edit-birthday"
+                />
+              </div>
+            )}
+          </div>
         </div>
         
         <div 

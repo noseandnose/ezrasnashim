@@ -121,6 +121,24 @@ export function useAuth() {
     if (error) throw error;
   };
 
+  const updateProfile = async (updates: { 
+    firstName?: string; 
+    lastName?: string; 
+    hebrewName?: string; 
+    birthday?: string; 
+  }) => {
+    if (!supabase) throw new Error('Authentication not configured');
+    const { error } = await supabase.auth.updateUser({
+      data: {
+        first_name: updates.firstName,
+        last_name: updates.lastName,
+        hebrew_name: updates.hebrewName,
+        birthday: updates.birthday,
+      },
+    });
+    if (error) throw error;
+  };
+
   return {
     user,
     session,
@@ -133,5 +151,6 @@ export function useAuth() {
     loginWithEmail,
     signUpWithEmail,
     resetPassword,
+    updateProfile,
   };
 }
