@@ -27,6 +27,7 @@ const Statistics = lazy(() => import("@/pages/statistics"));
 const Admin = lazy(() => import("@/pages/admin"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 const ChainPage = lazy(() => import("@/pages/chain"));
+const Profile = lazy(() => import("@/pages/profile"));
 
 // Unified loading screen with app icon - serves as both splash and loading indicator
 // Using PWA icon instead of attached_assets for faster load (14KB vs 30KB)
@@ -266,6 +267,7 @@ function Router() {
         <Route path="/admin/messages" component={Admin} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/c/:slug" component={ChainPage} />
+        <Route path="/profile" component={Profile} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
