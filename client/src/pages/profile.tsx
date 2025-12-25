@@ -88,42 +88,86 @@ export default function Profile() {
   
   const stats = useMemo(() => {
     const today = getLocalDateString();
-    const todaysData = completedModals[today];
+    const allDates = Object.keys(completedModals).sort();
     
-    let torahCount = 0;
-    let tefillaCount = 0;
-    let tzedakaCount = 0;
-    const totalDays = Object.keys(completedModals).length;
+    let todayTorah = 0;
+    let todayTefilla = 0;
+    let todayTzedaka = 0;
+    let totalTorah = 0;
+    let totalTefilla = 0;
+    let totalTzedaka = 0;
+    const totalDays = allDates.length;
     
-    if (todaysData?.repeatables) {
-      Object.entries(todaysData.repeatables).forEach(([key, value]) => {
-        if (key.startsWith('individual-tehillim-') || 
-            key.startsWith('chain-tehillim-') ||
-            key.startsWith('brocha-') ||
-            key.startsWith('womens-prayer-') ||
-            key === 'global-tehillim-chain' ||
-            key === 'tehillim-text' ||
-            key.startsWith('meditation-')) {
-          tefillaCount += value;
-        } else if (key === 'tzedaka-daily' || key === 'tzedaka-donation') {
-          tzedakaCount += value;
-        }
-      });
+    const countForDay = (dayData: any) => {
+      let torah = 0;
+      let tefilla = 0;
+      let tzedaka = 0;
+      
+      if (dayData?.repeatables) {
+        Object.entries(dayData.repeatables).forEach(([key, value]) => {
+          const count = value as number;
+          if (key.startsWith('individual-tehillim-') || 
+              key.startsWith('chain-tehillim-') ||
+              key.startsWith('brocha-') ||
+              key.startsWith('womens-prayer-') ||
+              key === 'global-tehillim-chain' ||
+              key === 'tehillim-text' ||
+              key.startsWith('meditation-')) {
+            tefilla += count;
+          } else if (key === 'tzedaka-daily' || key === 'tzedaka-donation') {
+            tzedaka += count;
+          }
+        });
+      }
+      
+      if (dayData?.singles) {
+        dayData.singles.forEach((id: string) => {
+          if (id.includes('halacha') || id.includes('chizuk') || id.includes('emuna') || 
+              id.includes('story') || id.includes('daily-wisdom')) {
+            torah++;
+          } else if (id.includes('mincha') || id.includes('shacharis') || id.includes('maariv') ||
+                     id.includes('birkat') || id.includes('nishmas') || id.includes('prayer')) {
+            tefilla++;
+          }
+        });
+      }
+      
+      return { torah, tefilla, tzedaka };
+    };
+    
+    Object.entries(completedModals).forEach(([date, dayData]) => {
+      const counts = countForDay(dayData);
+      totalTorah += counts.torah;
+      totalTefilla += counts.tefilla;
+      totalTzedaka += counts.tzedaka;
+      
+      if (date === today) {
+        todayTorah = counts.torah;
+        todayTefilla = counts.tefilla;
+        todayTzedaka = counts.tzedaka;
+      }
+    });
+    
+    let currentStreak = 0;
+    const todayDate = new Date(today);
+    for (let i = 0; i <= 365; i++) {
+      const checkDate = new Date(todayDate);
+      checkDate.setDate(checkDate.getDate() - i);
+      const dateStr = checkDate.toISOString().split('T')[0];
+      if (completedModals[dateStr]) {
+        currentStreak++;
+      } else if (i > 0) {
+        break;
+      }
     }
     
-    if (todaysData?.singles) {
-      todaysData.singles.forEach((id: string) => {
-        if (id.includes('halacha') || id.includes('chizuk') || id.includes('emuna') || 
-            id.includes('story') || id.includes('daily-wisdom')) {
-          torahCount++;
-        } else if (id.includes('mincha') || id.includes('shacharis') || id.includes('maariv') ||
-                   id.includes('birkat') || id.includes('nishmas') || id.includes('prayer')) {
-          tefillaCount++;
-        }
-      });
-    }
+    const totalMitzvos = totalTorah + totalTefilla + totalTzedaka;
     
-    return { torahCount, tefillaCount, tzedakaCount, totalDays };
+    return { 
+      todayTorah, todayTefilla, todayTzedaka,
+      totalTorah, totalTefilla, totalTzedaka,
+      totalDays, currentStreak, totalMitzvos
+    };
   }, [completedModals]);
   
   const handleSectionChange = (section: Section) => {
@@ -339,7 +383,7 @@ export default function Profile() {
               <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
                 <BookOpen className="w-6 h-6 text-amber-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.torahCount}</div>
+              <div className="text-2xl font-bold text-black">{stats.todayTorah}</div>
               <div className="text-xs text-gray-600">Torah</div>
             </div>
             
@@ -347,7 +391,7 @@ export default function Profile() {
               <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
                 <Heart className="w-6 h-6 text-pink-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.tefillaCount}</div>
+              <div className="text-2xl font-bold text-black">{stats.todayTefilla}</div>
               <div className="text-xs text-gray-600">Tefilla</div>
             </div>
             
@@ -355,8 +399,44 @@ export default function Profile() {
               <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
                 <HandCoins className="w-6 h-6 text-green-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.tzedakaCount}</div>
+              <div className="text-2xl font-bold text-black">{stats.todayTzedaka}</div>
               <div className="text-xs text-gray-600">Tzedaka</div>
+            </div>
+          </div>
+        </div>
+        
+        <div 
+          className="rounded-2xl p-6"
+          style={{ 
+            background: 'rgba(186, 137, 160, 0.12)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
+        >
+          <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-500" />
+            All-Time Stats
+          </h3>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-amber-600">{stats.totalTorah}</div>
+              <div className="text-xs text-gray-600">Torah</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-pink-600">{stats.totalTefilla}</div>
+              <div className="text-xs text-gray-600">Tefilla</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-600">{stats.totalTzedaka}</div>
+              <div className="text-xs text-gray-600">Tzedaka</div>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blush">{stats.totalMitzvos}</div>
+              <div className="text-sm text-gray-600">Total Mitzvos Completed</div>
             </div>
           </div>
         </div>
@@ -373,9 +453,16 @@ export default function Profile() {
             <Calendar className="w-5 h-5 text-blush" />
             Your Journey
           </h3>
-          <p className="text-gray-600 text-sm">
-            You've been active for <span className="font-semibold text-black">{stats.totalDays}</span> days on Ezras Nashim.
-          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">{stats.currentStreak}</div>
+              <div className="text-xs text-gray-600">Day Streak</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-black">{stats.totalDays}</div>
+              <div className="text-xs text-gray-600">Total Active Days</div>
+            </div>
+          </div>
         </div>
         
         <Button 
