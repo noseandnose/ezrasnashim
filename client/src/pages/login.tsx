@@ -244,11 +244,10 @@ export default function Login() {
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
                   <Input
                     type="date"
-                    placeholder="Birthday"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
-                    className={`pl-9 ${!birthday ? 'text-gray-400' : ''}`}
+                    className={`pl-9 ${!birthday ? 'text-transparent' : ''}`}
                     data-testid="input-birthday"
                   />
                   {!birthday && (
