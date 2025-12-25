@@ -279,7 +279,7 @@ export default function Profile() {
       
       <div className="p-4 pt-24 pb-28 space-y-4">
         <div 
-          className="rounded-3xl p-6 border border-blush/10"
+          className="rounded-3xl p-4 border border-blush/10"
           style={{ 
             background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -287,8 +287,26 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <div className="flex justify-end mb-2">
-            {!isEditing ? (
+          {!isEditing ? (
+            <div className="flex items-center justify-between">
+              <div className="flex-1">
+                <h2 className="platypi-bold text-lg text-black">
+                  {user?.firstName} {user?.lastName}
+                </h2>
+                {user?.hebrewName && (
+                  <p className="platypi-regular text-sm text-black/70" dir="rtl">
+                    <Star className="w-3 h-3 inline-block mr-1 text-amber-500" />
+                    {user.hebrewName}
+                  </p>
+                )}
+                <p className="platypi-regular text-xs text-black/50">{user?.email}</p>
+                {user?.birthday && (
+                  <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatBirthday(user.birthday)}
+                  </p>
+                )}
+              </div>
               <button 
                 onClick={startEditing}
                 className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
@@ -296,62 +314,30 @@ export default function Profile() {
               >
                 <Pencil className="w-4 h-4 text-blush" />
               </button>
-            ) : (
-              <div className="flex gap-2">
-                <button 
-                  onClick={cancelEditing}
-                  className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
-                  disabled={isSaving}
-                  data-testid="button-cancel-edit"
-                >
-                  <X className="w-4 h-4 text-gray-500" />
-                </button>
-                <button 
-                  onClick={saveProfile}
-                  className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors"
-                  disabled={isSaving}
-                  data-testid="button-save-profile"
-                >
-                  <Check className="w-4 h-4 text-green-600" />
-                </button>
-              </div>
-            )}
-          </div>
-          
-          <div className="text-center">
-            <div className="w-24 h-24 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-4 shadow-lg">
-              {user?.profileImageUrl ? (
-                <img 
-                  src={user.profileImageUrl} 
-                  alt={user.firstName || 'Profile'} 
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <User className="w-12 h-12 text-white" />
-              )}
             </div>
-            
-            {!isEditing ? (
-              <>
-                <h2 className="platypi-bold text-2xl text-black">
-                  {user?.firstName} {user?.lastName}
-                </h2>
-                {user?.hebrewName && (
-                  <p className="platypi-regular text-lg text-black/70 mt-1" dir="rtl">
-                    <Star className="w-4 h-4 inline-block mr-1 text-amber-500" />
-                    {user.hebrewName}
-                  </p>
-                )}
-                <p className="platypi-regular text-sm text-black/50 mt-1">{user?.email}</p>
-                {user?.birthday && (
-                  <p className="platypi-regular text-sm text-black/50 mt-2 flex items-center justify-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {formatBirthday(user.birthday)}
-                  </p>
-                )}
-              </>
-            ) : (
-              <div className="space-y-3 text-left mt-4">
+          ) : (
+            <div>
+              <div className="flex justify-end mb-3">
+                <div className="flex gap-2">
+                  <button 
+                    onClick={cancelEditing}
+                    className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
+                    disabled={isSaving}
+                    data-testid="button-cancel-edit"
+                  >
+                    <X className="w-4 h-4 text-gray-500" />
+                  </button>
+                  <button 
+                    onClick={saveProfile}
+                    className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors"
+                    disabled={isSaving}
+                    data-testid="button-save-profile"
+                  >
+                    <Check className="w-4 h-4 text-green-600" />
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     type="text"
@@ -389,8 +375,8 @@ export default function Profile() {
                   data-testid="input-edit-birthday"
                 />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         
         <div 
