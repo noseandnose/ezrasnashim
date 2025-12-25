@@ -199,7 +199,7 @@ export default function TableSection() {
                 <img 
                   src="https://static.wixstatic.com/media/3b5ba3_483913622d834e2593a165e13fe65ab1~mv2.png/v1/fill/w_102,h_102,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Group%2017%20(1).png" 
                   alt={giftOfChatzos.title || "The Gift of Chatzos"} 
-                  className="w-10 h-10 rounded-xl object-cover"
+                  className="w-10 h-10 min-w-10 flex-shrink-0 rounded-xl object-cover"
                   loading="lazy"
                 />
                 
