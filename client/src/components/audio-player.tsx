@@ -244,29 +244,29 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           )}
         </button>
         
-        <div className="bg-gray-200 rounded-lg flex items-center justify-center" style={{ width: '52px', height: '28px' }}>
-          <select 
-            value={playbackSpeed} 
-            onChange={(e) => setPlaybackSpeed(e.target.value)}
-            className="bg-transparent border-none text-black text-xs cursor-pointer focus:outline-none"
-            style={{ 
-              WebkitAppearance: 'none', 
-              appearance: 'none',
-              textAlign: 'center',
-              textAlignLast: 'center',
-              width: '100%',
-              padding: '0 4px'
-            }}
-            data-testid="select-playback-speed"
-          >
-            <option value="0.5">0.5x</option>
-            <option value="0.75">0.75x</option>
-            <option value="1">1x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="2">2x</option>
-          </select>
-        </div>
+        <select 
+          value={playbackSpeed} 
+          onChange={(e) => setPlaybackSpeed(e.target.value)}
+          className="bg-gray-200 rounded-lg text-black text-xs cursor-pointer focus:outline-none"
+          style={{ 
+            WebkitAppearance: 'none', 
+            appearance: 'none',
+            textAlign: 'center',
+            textAlignLast: 'center',
+            width: '52px',
+            height: '28px',
+            padding: '0 8px',
+            border: 'none'
+          }}
+          data-testid="select-playback-speed"
+        >
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
       </div>
       <div className="space-y-4">
         <div className="flex justify-between text-sm platypi-medium text-black">
