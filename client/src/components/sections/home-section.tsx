@@ -791,8 +791,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <Popover>
               <PopoverTrigger asChild>
                 <button
-                  className="w-4 h-4 rounded-full flex items-center justify-center"
+                  className="rounded-full flex items-center justify-center"
                   style={{
+                    width: '16px',
+                    height: '16px',
+                    minWidth: '16px',
+                    minHeight: '16px',
+                    maxWidth: '16px',
+                    maxHeight: '16px',
+                    padding: 0,
                     background: 'rgba(255,255,255,0.6)',
                     backdropFilter: 'blur(12px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(12px) saturate(180%)',
@@ -801,7 +808,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                   }}
                   data-testid="button-garden-info"
                 >
-                  <Info className="w-2.5 h-2.5 text-black/60" strokeWidth={2} />
+                  <Info style={{ width: '10px', height: '10px' }} className="text-black/60" strokeWidth={2} />
                 </button>
               </PopoverTrigger>
               <PopoverContent side="bottom" className="max-w-[200px] text-center p-2">
