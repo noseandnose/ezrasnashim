@@ -412,75 +412,71 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Times Section - Time-based Prayer and Shkia */}
         <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time */}
-          <div className="relative">
-            <button 
-              onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
-              disabled={currentPrayer.disabled}
-              className={`w-full rounded-xl p-3 text-center border transition-all duration-300 overflow-hidden relative ${
-                currentPrayer.disabled 
-                  ? 'border-gray-200 opacity-60 cursor-not-allowed' 
-                  : 'border-blush/20 hover:scale-105'
-              }`}
-              data-modal-type={currentPrayer.modal}
-              data-modal-section="tefilla"
-              data-testid="button-home-prayer"
-            >
-              {/* Background image */}
-              <img 
-                src={getPrayerButtonBackground()} 
-                alt="" 
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.3 }}
-              />
-              {/* Content overlay */}
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-1">
-                  <div className={`p-1.5 rounded-full mr-1 ${
-                    currentPrayer.disabled 
-                      ? 'bg-gray-300' 
-                      : 'bg-white/60'
-                  }`}>
-                    <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
-                  </div>
+          <button 
+            onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
+            disabled={currentPrayer.disabled}
+            className={`w-full h-full rounded-xl p-3 text-center border transition-all duration-300 overflow-hidden relative ${
+              currentPrayer.disabled 
+                ? 'border-gray-200 opacity-60 cursor-not-allowed' 
+                : 'border-blush/20 hover:scale-105'
+            }`}
+            data-modal-type={currentPrayer.modal}
+            data-modal-section="tefilla"
+            data-testid="button-home-prayer"
+          >
+            {/* Background image */}
+            <img 
+              src={getPrayerButtonBackground()} 
+              alt="" 
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ zIndex: 0, opacity: 0.3 }}
+            />
+            {/* Content overlay */}
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-1">
+                <div className={`p-1.5 rounded-full mr-1 ${
+                  currentPrayer.disabled 
+                    ? 'bg-gray-300' 
+                    : 'bg-white/60'
+                }`}>
+                  <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
                 </div>
-                <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-                  {currentPrayer.title}
-                </p>
-                <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
-                  {currentPrayer.subtitle}
-                </p>
               </div>
-            </button>
-          </div>
+              <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+                {currentPrayer.title}
+              </p>
+              <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+                {currentPrayer.subtitle}
+              </p>
+            </div>
+          </button>
 
           {/* Shkia - Clickable to open Events */}
-          <div className="relative">
-            <button 
-              onClick={() => openModal('events', 'home')}
-              className="w-full rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 overflow-hidden relative"
-              data-modal-type="events"
-              data-modal-section="home"
-              data-testid="button-home-events"
-            >
-              {/* Background image */}
-              <img 
-                src={getShkiaButtonBackground()} 
-                alt="" 
-                className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.3 }}
-              />
-              {/* Content overlay */}
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-1">
-                  <div className="bg-white/60 p-1.5 rounded-full">
-                    <Clock className="text-black" size={12} />
-                  </div>
+          <button 
+            onClick={() => openModal('events', 'home')}
+            className="w-full h-full rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 overflow-hidden relative"
+            data-modal-type="events"
+            data-modal-section="home"
+            data-testid="button-home-events"
+          >
+            {/* Background image */}
+            <img 
+              src={getShkiaButtonBackground()} 
+              alt="" 
+              className="absolute inset-0 w-full h-full object-cover"
+              style={{ zIndex: 0, opacity: 0.3 }}
+            />
+            {/* Content overlay */}
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-1">
+                <div className="bg-white/60 p-1.5 rounded-full">
+                  <Clock className="text-black" size={12} />
                 </div>
-                <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-                <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
               </div>
-            </button>
-          </div>
+              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            </div>
+          </button>
         </div>
 
         {/* Today's Special Expandable Bar - Only shown when content exists */}

@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Play, Pause } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface AudioPlayerProps {
   title: string;
@@ -245,21 +244,29 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           )}
         </button>
         
-        <div className="bg-gray-200 rounded-lg p-1">
-          <Select value={playbackSpeed} onValueChange={setPlaybackSpeed}>
-            <SelectTrigger className="bg-transparent border-none text-black text-xs w-14 h-6">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0.5">0.5x</SelectItem>
-              <SelectItem value="0.75">0.75x</SelectItem>
-              <SelectItem value="1">1x</SelectItem>
-              <SelectItem value="1.25">1.25x</SelectItem>
-              <SelectItem value="1.5">1.5x</SelectItem>
-              <SelectItem value="2">2x</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <select 
+          value={playbackSpeed} 
+          onChange={(e) => setPlaybackSpeed(e.target.value)}
+          className="bg-gray-200 rounded-lg text-black text-xs cursor-pointer focus:outline-none"
+          style={{ 
+            WebkitAppearance: 'none', 
+            appearance: 'none',
+            textAlign: 'center',
+            textAlignLast: 'center',
+            width: '52px',
+            height: '28px',
+            padding: '0 8px',
+            border: 'none'
+          }}
+          data-testid="select-playback-speed"
+        >
+          <option value="0.5">0.5x</option>
+          <option value="0.75">0.75x</option>
+          <option value="1">1x</option>
+          <option value="1.25">1.25x</option>
+          <option value="1.5">1.5x</option>
+          <option value="2">2x</option>
+        </select>
       </div>
       <div className="space-y-4">
         <div className="flex justify-between text-sm platypi-medium text-black">

@@ -282,42 +282,6 @@ export default function TableSection() {
           </div>
         )}
 
-        {/* Life Classes Bar - Only shown when content exists */}
-        {currentLifeClass && (
-          <button 
-            onClick={() => openModal('life-class', 'table')}
-            className="w-full bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
-            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
-            data-testid="button-life-class"
-          >
-            <div className="flex items-center gap-3">
-              {/* Image */}
-              {currentLifeClass.imageUrl ? (
-                <img 
-                  src={currentLifeClass.imageUrl} 
-                  alt={currentLifeClass.title} 
-                  className="w-10 h-10 rounded-xl object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className="bg-gradient-feminine p-2 rounded-full">
-                  <GraduationCap className="text-white" size={16} />
-                </div>
-              )}
-              
-              {/* Title and Subtitle */}
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-sm text-black">{currentLifeClass.title}</h3>
-                {currentLifeClass.subtitle && (
-                  <p className="platypi-regular text-xs text-black/70">{currentLifeClass.subtitle}</p>
-                )}
-              </div>
-              
-              {/* Arrow indicator */}
-              <ChevronRight className="text-black/40" size={18} />
-            </div>
-          </button>
-        )}
       </div>
 
       {/* Shabbos Content Grid - Separate Section */}
@@ -393,50 +357,44 @@ export default function TableSection() {
           </button>
         </div>
 
-        {/* Bottom Row: Table Inspiration and Parshas Pinchas */}
-        <div className="grid grid-cols-2 gap-2">
-          {/* Table Inspiration Button */}
+        {/* Bottom Row: Life Classes and Meditation */}
+        <div className="grid grid-cols-2 gap-2 mb-2">
+          {/* Life Classes Button */}
           <button
             className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
-              !inspirationContent 
+              !currentLifeClass 
                 ? 'bg-gray-100 cursor-not-allowed' 
-                : isModalComplete('inspiration') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
+                : isModalComplete('life-class') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
             }`}
             onClick={() => {
-              if (inspirationContent) {
-                // Open directly in fullscreen without setting activeModal
-                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-                  detail: {
-                    modalKey: 'inspiration',
-                    content: inspirationContent
-                  }
-                });
-                window.dispatchEvent(fullscreenEvent);
+              if (currentLifeClass) {
+                openModal('life-class', 'table');
               }
             }}
-            disabled={!inspirationContent}
+            disabled={!currentLifeClass}
+            data-testid="button-life-class"
           >
             {/* Banner overlay for when no content */}
-            {!inspirationContent && (
+            {!currentLifeClass && (
               <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="platypi-regular text-xs text-black platypi-medium">Content loaded on Thursdays</p>
+                  <p className="platypi-regular text-xs text-black platypi-medium">Coming Soon</p>
                 </div>
               </div>
             )}
             
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              !inspirationContent 
+              !currentLifeClass 
                 ? 'bg-gray-300' 
-                : isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
+                : isModalComplete('life-class') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Star className={`${!inspirationContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+              <GraduationCap className={`${!currentLifeClass ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
-            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!inspirationContent ? 'text-gray-500' : 'text-black'}`}>
-              Table Inspiration
+            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>
+              Life Classes
             </h3>
-            <p className={`platypi-regular text-xs leading-relaxed ${!inspirationContent ? 'text-gray-400' : 'text-black/60'}`}>
-              {!inspirationContent ? 'Coming Soon' : isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
+            <p className={`platypi-regular text-xs leading-relaxed ${!currentLifeClass ? 'text-gray-400' : 'text-black/60'}`}>
+              {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
             </p>
           </button>
 
@@ -457,6 +415,46 @@ export default function TableSection() {
             </p>
           </button>
         </div>
+        
+        {/* Table Inspiration Bar - Only shown when content exists */}
+        {inspirationContent && (
+          <button 
+            onClick={() => {
+              const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
+                detail: {
+                  modalKey: 'inspiration',
+                  content: inspirationContent
+                }
+              });
+              window.dispatchEvent(fullscreenEvent);
+            }}
+            className={`w-full rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left transition-colors ${
+              isModalComplete('inspiration') ? 'bg-sage/20 hover:bg-sage/30' : 'bg-white/80 hover:bg-white/90'
+            }`}
+            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
+            data-testid="button-table-inspiration-bar"
+          >
+            <div className="flex items-center gap-3">
+              {/* Icon */}
+              <div className={`p-2 rounded-full ${
+                isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <Star className="text-white" size={16} />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">Table Inspiration</h3>
+                <p className="platypi-regular text-xs text-black/70">
+                  {isModalComplete('inspiration') ? 'Completed' : inspirationContent.title}
+                </p>
+              </div>
+              
+              {/* Arrow indicator */}
+              <ChevronRight className="text-black/40" size={18} />
+            </div>
+          </button>
+        )}
         
         {/* Discount Promotion Bar */}
         <div className="mt-4">
