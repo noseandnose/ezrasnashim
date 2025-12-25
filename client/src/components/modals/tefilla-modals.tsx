@@ -575,8 +575,6 @@ function renderPrayerContent(contentType: string | undefined, language: 'hebrew'
       return <GlobalTehillimFullscreenContent language={language} fontSize={fontSize} />;
     case 'special-tehillim':
       return <SpecialTehillimFullscreenContent language={language} fontSize={fontSize} />;
-    case 'tehillim-selector':
-      return <TehillimSelectorFullscreenContent />;
     case 'me-ein-shalosh':
       return <MeeinShaloshFullscreenContent language={language} fontSize={fontSize} />;
     case 'birkat-hamazon':
@@ -2744,10 +2742,11 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       return;
     } else if (wasIndividualTehillim) {
       // Go back to Tehillim selector - swap content within same fullscreen (no flash!)
+      // Use 'special-tehillim' which FullscreenModal recognizes and hides controls for
       setFullscreenContent({
         isOpen: true,
         title: 'Tehillim',
-        contentType: 'tehillim-selector',
+        contentType: 'special-tehillim',
         content: null
       });
       return;
@@ -4280,198 +4279,6 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
       >
         Close
       </Button>
-    </div>
-  );
-}
-
-// Tehillim Selector Fullscreen Content - shows the 1-150 and special occasions selector
-// This is used when navigating back from individual Tehillim without flashing home
-function TehillimSelectorFullscreenContent() {
-  const { setSelectedPsalm, tehillimActiveTab, setTehillimActiveTab, setTehillimReturnTab, setDailyTehillimPsalms } = useModalStore();
-  const { isModalComplete } = useModalCompletionStore();
-
-  // Fetch current Hebrew date
-  const today = new Date().toISOString().split('T')[0];
-  const { data: hebrewDateInfo } = useQuery<{
-    hebrew: string;
-    date: string;
-    isRoshChodesh: boolean;
-    events: string[];
-    hebrewDay: number;
-    hebrewMonth: string;
-    hebrewYear: number;
-    monthLength: number;
-    dd: number;
-    hm: string;
-  }>({
-    queryKey: ['/api/hebrew-date', today],
-    staleTime: 60 * 60 * 1000,
-  });
-
-  const getDailyTehillim = (): { psalms: number[]; title: string; subtitle: string } | null => {
-    if (!hebrewDateInfo) return null;
-    const hebrewDay = hebrewDateInfo.dd || hebrewDateInfo.hebrewDay || 0;
-    const hebrewDate = hebrewDateInfo.hebrew || '';
-    const monthLength = hebrewDateInfo.monthLength || 30;
-    const isShortMonth = monthLength === 29;
-    let psalmsToShow: number[] = [];
-    let subtitle = `${hebrewDate}`;
-    if (isShortMonth && hebrewDay === 29) {
-      psalmsToShow = [...(DAILY_TEHILLIM_SCHEDULE[29] || []), ...(DAILY_TEHILLIM_SCHEDULE[30] || [])];
-      subtitle = `${hebrewDate} (29-day month)`;
-    } else {
-      psalmsToShow = DAILY_TEHILLIM_SCHEDULE[hebrewDay] || [];
-    }
-    return { psalms: psalmsToShow, title: "Today's Tehillim", subtitle };
-  };
-
-  const dailyTehillim = getDailyTehillim();
-
-  const openTehillimText = (psalmNumber: number, fromDaily = false) => {
-    setTehillimReturnTab(tehillimActiveTab);
-    setSelectedPsalm(psalmNumber);
-    if (!fromDaily) {
-      setDailyTehillimPsalms(null);
-    }
-    const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-      detail: {
-        title: `Tehillim ${psalmNumber}`,
-        contentType: 'individual-tehillim',
-        returnTab: tehillimActiveTab
-      }
-    });
-    window.dispatchEvent(fullscreenEvent);
-  };
-
-  const allPsalms = Array.from({ length: 150 }, (_, i) => i + 1);
-
-  const specialCategories = [
-    { title: "Bris milah", psalms: [12] },
-    { title: "Cemetery", psalms: [33, 16, 17, 72, 91, 104, 130, 119] },
-    { title: "Children's success", psalms: [127, 128] },
-    { title: "Finding a mate", psalms: [32, 38, 70, 71, 121, 124] },
-    { title: "For having children", psalms: [102, 103, 128] },
-    { title: "Forgiveness", psalms: [25] },
-    { title: "Giving birth", psalms: [20, 139] },
-    { title: "Gratitude", psalms: [9, 17, 18, 21, 23, 33, 42, 57, 63, 65, 68, 71, 72, 95, 100, 103, 104, 105, 107, 108, 116, 124, 136, 138, 145, 146, 147, 148, 149, 150] },
-    { title: "Graves of righteous", psalms: [16, 17, 20, 23] },
-    { title: "Guidance", psalms: [16, 19, 139] },
-    { title: "Heavenly mercy", psalms: [89, 98, 107] },
-    { title: "House of mourning", psalms: [49] },
-    { title: "Illness", psalms: [6, 30, 41, 88, 103] },
-    { title: "Jerusalem", psalms: [87, 122, 125, 137] },
-    { title: "Land of Israel", psalms: [74, 79, 80, 83, 102, 127, 130, 136, 142] },
-    { title: "Longevity", psalms: [23, 90, 92] },
-    { title: "Wedding day", psalms: [19, 33, 45, 49, 128] },
-    { title: "Peace", psalms: [46, 98, 120] },
-    { title: "Protection from harm", psalms: [3, 5, 7, 20, 23, 27, 31, 35, 40, 48, 55, 59, 69, 70, 91, 109, 119, 121] },
-    { title: "Redemption, Rebuilding of Temple", psalms: [42, 43, 84, 96, 132, 138] },
-    { title: "Repentance", psalms: [25, 32, 47, 51, 90] },
-    { title: "Success", psalms: [4, 57, 108, 112, 122] },
-    { title: "Sustenance", psalms: [4, 24, 41] },
-    { title: "Times of trouble", psalms: [16, 20, 22, 25, 26, 38, 54, 81, 85, 86, 87, 102] },
-    { title: "Torah study", psalms: [1, 19, 119, 134] },
-    { title: "Travel", psalms: [17, 91] }
-  ];
-
-  return (
-    <div className="space-y-4">
-      {/* Tab Navigation */}
-      <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mb-4">
-        <button
-          onClick={() => setTehillimActiveTab('all')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
-            tehillimActiveTab === 'all'
-              ? 'bg-gradient-feminine text-white shadow-lg'
-              : 'text-black/70 hover:bg-blush/10'
-          }`}
-          data-testid="tab-sefer-tehillim"
-        >
-          <span className="platypi-semibold text-xs leading-tight block">Sefer Tehillim</span>
-        </button>
-        <button
-          onClick={() => setTehillimActiveTab('special')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
-            tehillimActiveTab === 'special'
-              ? 'bg-gradient-feminine text-white shadow-lg'
-              : 'text-black/70 hover:bg-blush/10'
-          }`}
-          data-testid="tab-special-occasions"
-        >
-          <span className="platypi-semibold text-xs leading-tight block">Special Occasions</span>
-        </button>
-      </div>
-
-      {/* Tab Content */}
-      <div className="max-h-[60vh] overflow-y-auto">
-        {tehillimActiveTab === 'all' ? (
-          <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-            <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
-              {allPsalms.map((psalm) => (
-                <button
-                  key={psalm}
-                  onClick={() => openTehillimText(psalm)}
-                  className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
-                    isModalComplete(`individual-tehillim-${psalm}`)
-                      ? 'bg-sage text-white'
-                      : 'bg-gradient-feminine text-white'
-                  }`}
-                  style={{ touchAction: 'manipulation' }}
-                >
-                  {psalm}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {dailyTehillim && dailyTehillim.psalms.length > 0 && (
-              <div className="relative rounded-2xl p-[3px] daily-tehillim-border">
-                <div className="bg-white rounded-2xl p-4">
-                  <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {dailyTehillim.psalms.map((psalm) => (
-                      <button
-                        key={psalm}
-                        onClick={() => openTehillimText(psalm, true)}
-                        className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
-                          isModalComplete(`individual-tehillim-${psalm}`)
-                            ? 'bg-sage text-white'
-                            : 'bg-gradient-feminine text-white'
-                        }`}
-                        style={{ touchAction: 'manipulation' }}
-                      >
-                        {psalm}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            {specialCategories.map((category, index) => (
-              <div key={index} className="bg-white/80 rounded-2xl p-3 border border-blush/10">
-                <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {category.psalms.map((psalm) => (
-                    <button
-                      key={psalm}
-                      onClick={() => openTehillimText(psalm)}
-                      className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
-                        isModalComplete(`individual-tehillim-${psalm}`)
-                          ? 'bg-sage text-white'
-                          : 'bg-gradient-feminine text-white'
-                      }`}
-                      style={{ touchAction: 'manipulation' }}
-                    >
-                      {psalm}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
