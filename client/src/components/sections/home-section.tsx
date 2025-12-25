@@ -746,7 +746,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
                 width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
-                  ? `${100 * flower.scale}px`  // Trees are bigger than flowers
+                  ? `${105 * flower.scale}px`  // Trees are bigger than flowers
                   : `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
