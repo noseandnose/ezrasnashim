@@ -212,11 +212,12 @@ export default function Login() {
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
                     max={new Date().toISOString().split('T')[0]}
-                    className={`pl-9 ${!birthday ? 'text-transparent' : ''}`}
+                    className="pl-9"
+                    style={!birthday ? { color: 'transparent' } : undefined}
                     data-testid="input-birthday"
                   />
                   {!birthday && (
-                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm">
+                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm z-10">
                       Birthday (optional)
                     </span>
                   )}
