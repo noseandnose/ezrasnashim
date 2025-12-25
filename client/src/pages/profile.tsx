@@ -277,7 +277,7 @@ export default function Profile() {
         </div>
       </header>
       
-      <div className="p-4 pt-24 pb-28 space-y-4">
+      <div className="p-4 pt-20 pb-24 space-y-3">
         <div 
           className="rounded-3xl p-4 border border-blush/10"
           style={{ 
@@ -380,7 +380,7 @@ export default function Profile() {
         </div>
         
         <div 
-          className="rounded-3xl p-5 border border-blush/10"
+          className="rounded-3xl p-4 border border-blush/10"
           style={{ 
             background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -388,42 +388,42 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-gradient-feminine">
-              <Sparkles className="w-4 h-4 text-white" />
+          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
+            <div className="p-1 rounded-full bg-gradient-feminine">
+              <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="w-5 h-5 text-blush" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-1">
+                <BookOpen className="w-4 h-4 text-blush" />
               </div>
-              <div className="platypi-bold text-2xl text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-xs text-black/60">Torah</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
             </div>
             
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-2">
-                <Heart className="w-5 h-5 text-lavender" />
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-1">
+                <Heart className="w-4 h-4 text-lavender" />
               </div>
-              <div className="platypi-bold text-2xl text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-xs text-black/60">Tefilla</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
             </div>
             
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-2">
-                <HandCoins className="w-5 h-5 text-sage" />
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-1">
+                <HandCoins className="w-4 h-4 text-sage" />
               </div>
-              <div className="platypi-bold text-2xl text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
             </div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-5 border border-blush/10"
+          className="rounded-3xl p-4 border border-blush/10"
           style={{ 
             background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -431,36 +431,36 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-blush">
-              <Trophy className="w-4 h-4 text-white" />
+          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
+            <div className="p-1 rounded-full bg-blush">
+              <Trophy className="w-3.5 h-3.5 text-white" />
             </div>
             All-Time Stats
           </h3>
           
-          <div className="grid grid-cols-3 gap-3 mb-4">
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-blush">{stats.totalTorah}</div>
-              <div className="platypi-regular text-xs text-black/60">Torah</div>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="platypi-bold text-lg text-blush">{stats.totalTorah}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
             </div>
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-lavender">{stats.totalTefilla}</div>
-              <div className="platypi-regular text-xs text-black/60">Tefilla</div>
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="platypi-bold text-lg text-lavender">{stats.totalTefilla}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
             </div>
-            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-sage">{stats.totalTzedaka}</div>
-              <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
+            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+              <div className="platypi-bold text-lg text-sage">{stats.totalTzedaka}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
             </div>
           </div>
           
-          <div className="bg-gradient-feminine rounded-2xl p-4 text-center">
-            <div className="platypi-bold text-3xl text-white">{stats.totalMitzvos}</div>
-            <div className="platypi-regular text-sm text-white/80">Total Mitzvos Completed</div>
+          <div className="bg-gradient-feminine rounded-xl p-3 text-center">
+            <div className="platypi-bold text-2xl text-white">{stats.totalMitzvos}</div>
+            <div className="platypi-regular text-xs text-white/80">Total Mitzvos Completed</div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-5 border border-blush/10"
+          className="rounded-3xl p-4 border border-blush/10"
           style={{ 
             background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -468,31 +468,31 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-blush">
-              <Flame className="w-4 h-4 text-white" />
+          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
+            <div className="p-1 rounded-full bg-blush">
+              <Flame className="w-3.5 h-3.5 text-white" />
             </div>
             Your Journey
           </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white/70 rounded-2xl p-4 text-center border border-blush/10">
-              <div className="platypi-bold text-3xl text-blush">{stats.currentStreak}</div>
-              <div className="platypi-regular text-xs text-black/60">Day Streak</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/70 rounded-xl p-3 text-center border border-blush/10">
+              <div className="platypi-bold text-2xl text-blush">{stats.currentStreak}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Day Streak</div>
             </div>
-            <div className="bg-white/70 rounded-2xl p-4 text-center border border-blush/10">
-              <div className="platypi-bold text-3xl text-blush">{stats.totalDays}</div>
-              <div className="platypi-regular text-xs text-black/60">Total Active Days</div>
+            <div className="bg-white/70 rounded-xl p-3 text-center border border-blush/10">
+              <div className="platypi-bold text-2xl text-blush">{stats.totalDays}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Total Active Days</div>
             </div>
           </div>
         </div>
         
         <button 
           onClick={() => logout()}
-          className="w-full bg-white/70 rounded-2xl p-4 border border-blush/10 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
+          className="w-full bg-white/70 rounded-xl p-3 border border-blush/10 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
           data-testid="button-sign-out"
         >
           <LogOut className="w-4 h-4 text-black/60" />
-          <span className="platypi-regular text-sm text-black/60">Sign Out</span>
+          <span className="platypi-regular text-xs text-black/60">Sign Out</span>
         </button>
       </div>
       
