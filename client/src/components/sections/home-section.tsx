@@ -788,10 +788,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           
           {/* Info icon - Top right corner */}
           <div className="absolute top-2 right-2 z-10">
-            <Tooltip>
+            <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <button
-                  className="p-1.5 rounded-full"
+                  className="w-5 h-5 rounded-full flex items-center justify-center"
                   style={{
                     background: 'rgba(255,255,255,0.6)',
                     backdropFilter: 'blur(12px) saturate(180%)',
@@ -800,8 +800,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                     boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
                   }}
                   data-testid="button-garden-info"
+                  onClick={(e) => e.currentTarget.focus()}
                 >
-                  <Info className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
+                  <Info className="w-3 h-3 text-black/60" strokeWidth={2} />
                 </button>
               </TooltipTrigger>
               <TooltipContent side="bottom" className="max-w-[200px] text-center">
