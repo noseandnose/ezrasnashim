@@ -207,19 +207,27 @@ export default function Login() {
                 </div>
                 <div className="relative">
                   <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
-                  <Input
-                    type="date"
-                    value={birthday}
-                    onChange={(e) => setBirthday(e.target.value)}
-                    max={new Date().toISOString().split('T')[0]}
-                    className="pl-9"
-                    style={!birthday ? { color: 'transparent' } : undefined}
-                    data-testid="input-birthday"
-                  />
-                  {!birthday && (
-                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm z-10">
-                      Birthday (optional)
-                    </span>
+                  {birthday ? (
+                    <Input
+                      type="date"
+                      value={birthday}
+                      onChange={(e) => setBirthday(e.target.value)}
+                      max={new Date().toISOString().split('T')[0]}
+                      className="pl-9"
+                      data-testid="input-birthday"
+                    />
+                  ) : (
+                    <Input
+                      type="text"
+                      placeholder="Birthday (optional)"
+                      onFocus={(e) => {
+                        e.target.type = 'date';
+                        e.target.max = new Date().toISOString().split('T')[0];
+                      }}
+                      className="pl-9"
+                      data-testid="input-birthday"
+                      onChange={(e) => setBirthday(e.target.value)}
+                    />
                   )}
                 </div>
               </>
