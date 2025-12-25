@@ -140,12 +140,18 @@ export function FullscreenModal({
   // Track if this modal instance is already closing (prevents double-close from rapid clicks)
   const isClosingRef = useRef(false);
   
-  // Reset closing flag when modal opens
+  // Reset closing flag when modal opens or when onClose handler changes
+  // (onClose changes when content swaps, e.g., individual-tehillim -> special-tehillim)
   useEffect(() => {
     if (isOpen) {
       isClosingRef.current = false;
     }
   }, [isOpen]);
+  
+  // Also reset when onClose changes (content swap without closing the modal)
+  useEffect(() => {
+    isClosingRef.current = false;
+  }, [onClose]);
 
   // Simple close handler with double-click protection
   const handleClose = useCallback(() => {

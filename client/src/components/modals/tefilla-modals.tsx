@@ -6,7 +6,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, Sunrise, Sun } from "lucide-react";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
 import { toast } from "@/hooks/use-toast";
@@ -2499,6 +2499,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     content: React.ReactNode;
     contentType?: string;
     hasTranslation?: boolean;
+    originSection?: string;
   }>({ isOpen: false, title: '', content: null });
 
   // Function to update fullscreen translation availability
@@ -2672,11 +2673,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       }
       
       // Open fullscreen immediately without closing modal first
+      // Track origin section so we can return there on close
       setFullscreenContent({
         isOpen: true,
         title,
         contentType,
-        content: null // Content will be rendered based on contentType
+        content: null, // Content will be rendered based on contentType
+        originSection: 'tefilla' // Track that we came from Tefilla section
       });
       
       // Close the regular modal immediately with fullscreen opens
@@ -2726,45 +2729,51 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     }
   }, [selectedPsalm, fullscreenContent.isOpen, fullscreenContent.contentType]);
 
+  // Handler for closing fullscreen modal - navigates back appropriately based on content type
+  const handleFullscreenClose = useCallback(() => {
+    const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
+    const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
+    const originSection = fullscreenContent.originSection;
+    
+    if (wasIndividualBrocha) {
+      // Go back to Siddur selector instead of home - swap content within same fullscreen
+      setFullscreenContent({
+        isOpen: true,
+        title: 'Siddur',
+        contentType: 'brochas',
+        content: null,
+        ...(originSection && { originSection }) // Preserve origin if exists
+      });
+      return;
+    } else if (wasIndividualTehillim) {
+      // Go back to Tehillim selector - swap content within same fullscreen (no flash!)
+      // Use 'special-tehillim' which FullscreenModal recognizes and hides controls for
+      setFullscreenContent({
+        isOpen: true,
+        title: 'Tehillim',
+        contentType: 'special-tehillim',
+        content: null,
+        ...(originSection && { originSection }) // Preserve origin if exists
+      });
+      return;
+    }
+    
+    // For other content types: close and return to origin section (or home if no origin)
+    setFullscreenContent({ isOpen: false, title: '', content: null });
+    closeModal();
+    
+    // Navigate back to the section we came from
+    if (onSectionChange && originSection) {
+      onSectionChange(originSection as 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table');
+    }
+    // If no originSection, just close without navigation (stay where we are)
+  }, [fullscreenContent.contentType, fullscreenContent.originSection, closeModal, openModal, onSectionChange]);
+
   // Listen for custom close fullscreen events
   useEffect(() => {
-    const handleCloseFullscreen = () => {
-      const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
-      
-      setFullscreenContent({ isOpen: false, title: '', content: null });
-      // Close any active modal to reset state properly
-      closeModal();
-      
-      if (wasIndividualBrocha) {
-        // Go back to Siddur selector instead of home
-        setTimeout(() => {
-          setFullscreenContent({
-            isOpen: true,
-            title: 'Siddur',
-            contentType: 'brochas',
-            content: null
-          });
-        }, 100);
-      } else {
-        // Navigate to home section and show flower growth for other types
-        if (onSectionChange) {
-          onSectionChange('home');
-          setTimeout(() => {
-            const progressElement = document.getElementById('daily-progress-garden');
-            if (progressElement) {
-              progressElement.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'center' 
-              });
-            }
-          }, 300);
-        }
-      }
-    };
-
-    window.addEventListener('closeFullscreen', handleCloseFullscreen);
-    return () => window.removeEventListener('closeFullscreen', handleCloseFullscreen);
-  }, [onSectionChange]);
+    window.addEventListener('closeFullscreen', handleFullscreenClose);
+    return () => window.removeEventListener('closeFullscreen', handleFullscreenClose);
+  }, [handleFullscreenClose]);
 
   const handlePrayerSelect = (prayerId: number) => {
     setSelectedPrayerId(prayerId);
@@ -3697,7 +3706,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       {/* Fullscreen Modal */}
       <FullscreenModal
         isOpen={fullscreenContent.isOpen}
-        onClose={() => setFullscreenContent({ isOpen: false, title: '', content: null })}
+        onClose={handleFullscreenClose}
         title={fullscreenContent.title}
         showFontControls={fullscreenContent.contentType !== 'special-tehillim' && fullscreenContent.contentType !== 'brochas' && fullscreenContent.contentType !== 'compass'}
         showLanguageControls={

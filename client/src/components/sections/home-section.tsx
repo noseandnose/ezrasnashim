@@ -16,8 +16,8 @@ import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
 import morningBackground from "@assets/Morning_1766585201516.png";
 import afternoonBackground from "@assets/Afternoon_1766585201516.png";
 import nightBackground from "@assets/Evening_1766585201513.png";
-import milestone10Flower from "@assets/10_1766583559373.png";
-import milestone20Flower from "@assets/20_1766583559368.png";
+import milestone10Tree from "@assets/10_1766649225861.png";
+import milestone20Tree from "@assets/20_1766649225859.png";
 import prayerMorningBg from "@assets/Morning_1766585505566.png";
 import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
 import prayerNightBg from "@assets/Night_1766585505565.png";
@@ -428,7 +428,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 src={getPrayerButtonBackground()} 
                 alt="" 
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.4 }}
+                style={{ zIndex: 0, opacity: 0.3 }}
               />
               {/* Content overlay */}
               <div className="relative z-10">
@@ -465,7 +465,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 src={getShkiaButtonBackground()} 
                 alt="" 
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{ zIndex: 0, opacity: 0.4 }}
+                style={{ zIndex: 0, opacity: 0.3 }}
               />
               {/* Content overlay */}
               <div className="relative z-10">
@@ -723,15 +723,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <img 
               key={`${flower.type}-${index}`}
               src={
-                flower.overallIndex === 10 ? milestone10Flower :
-                flower.overallIndex === 20 ? milestone20Flower :
+                flower.overallIndex === 10 ? milestone10Tree :
+                flower.overallIndex === 20 ? milestone20Tree :
                 flower.type === 'torah' ? torahFlower : 
                 flower.type === 'tefilla' ? tefillaFlower : 
                 tzedakaFlower
               } 
               alt={
-                flower.overallIndex === 10 ? '10th flower milestone!' :
-                flower.overallIndex === 20 ? '20th flower milestone!' :
+                flower.overallIndex === 10 ? '10th milestone tree!' :
+                flower.overallIndex === 20 ? '20th milestone tree!' :
                 `${flower.type} flower`
               } 
               className={`absolute ${
@@ -742,7 +742,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: `${67 * flower.scale}px`,
+                width: flower.overallIndex === 10 || flower.overallIndex === 20 
+                  ? `${100 * flower.scale}px`  // Trees are bigger than flowers
+                  : `${67 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'

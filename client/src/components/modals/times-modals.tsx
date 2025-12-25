@@ -27,6 +27,8 @@ export default function TimesModals() {
   const [yearDuration, setYearDuration] = useState(10);
   const [nextBirthday, setNextBirthday] = useState<string | null>(null);
   const [nextBirthdayLoading, setNextBirthdayLoading] = useState(false);
+  const [showCalendarChoice, setShowCalendarChoice] = useState(false);
+  const [calendarLoading, setCalendarLoading] = useState<'google' | 'apple' | null>(null);
   const { toast } = useToast();
   useQueryClient();
   
@@ -72,6 +74,22 @@ export default function TimesModals() {
   }, [englishDate, afterNightfall]);
 
 
+  // Detect if running in a mobile app WebView (Flutter, React Native, etc.)
+  const isInMobileAppWebView = () => {
+    const ua = navigator.userAgent.toLowerCase();
+    // Check for common WebView indicators
+    return (
+      ua.includes('wv') || // Android WebView
+      ua.includes('webview') ||
+      // @ts-ignore - Flutter WebView detection
+      (window.flutter_inappwebview !== undefined) ||
+      // @ts-ignore - React Native WebView
+      (window.ReactNativeWebView !== undefined) ||
+      // Generic mobile app check - no browser chrome
+      ((/android|iphone|ipad|ipod/i.test(ua)) && !ua.includes('safari') && !ua.includes('chrome'))
+    );
+  };
+
   const handleMobileDownload = async () => {
     if (!eventTitle || !englishDate) {
       throw new Error('Please fill in both event title and English date');
@@ -105,8 +123,17 @@ export default function TimesModals() {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
+      // Detect if we're in a mobile app WebView
+      const inWebView = isInMobileAppWebView();
+      
+      if (inWebView) {
+        // Show calendar choice dialog for WebView users
+        setShowCalendarChoice(true);
+        return { success: true, showChoice: true };
+      }
+      
       if (isIOS) {
-        // iOS: Open URL directly - this triggers iOS Calendar import dialog
+        // iOS browser: Open URL directly - this triggers iOS Calendar import dialog
         window.location.href = downloadUrl;
         return { success: true };
       }
@@ -140,22 +167,126 @@ export default function TimesModals() {
     }
   };
 
+  // Handle Google Calendar for WebView users
+  const handleGoogleCalendar = async () => {
+    if (!eventTitle || !englishDate) return;
+    
+    setCalendarLoading('google');
+    try {
+      const params = new URLSearchParams({
+        title: eventTitle,
+        hebrewDate: convertedHebrewDate || '',
+        gregorianDate: englishDate,
+        years: yearDuration.toString(),
+        afterNightfall: afterNightfall.toString()
+      });
+      
+      let baseUrl = '';
+      if (import.meta.env.VITE_API_URL) {
+        baseUrl = import.meta.env.VITE_API_URL;
+      } else if (window.location.hostname.includes('replit.dev')) {
+        baseUrl = `https://${window.location.hostname}:5000`;
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        baseUrl = 'http://localhost:5000';
+      }
+      
+      const downloadUrl = `${baseUrl}/api/download-calendar?${params.toString()}`;
+      const response = await fetch(downloadUrl);
+      if (!response.ok) throw new Error('Failed to generate calendar dates');
+      
+      const icsContent = await response.text();
+      const firstEventMatch = icsContent.match(/DTSTART;VALUE=DATE:(\d{8})/);
+      if (!firstEventMatch) throw new Error('Could not parse calendar dates');
+      
+      const firstDateStr = firstEventMatch[1];
+      const startDate = firstDateStr;
+      const description = `Hebrew Date: ${convertedHebrewDate || ''}\nGregorian: ${englishDate}`;
+      
+      const googleCalendarUrl = new URL('https://calendar.google.com/calendar/r/eventedit');
+      googleCalendarUrl.searchParams.set('text', eventTitle);
+      googleCalendarUrl.searchParams.set('dates', `${startDate}/${startDate}`);
+      googleCalendarUrl.searchParams.set('details', description);
+      googleCalendarUrl.searchParams.set('recur', 'RRULE:FREQ=YEARLY');
+      
+      window.open(googleCalendarUrl.toString(), '_blank') || (window.location.href = googleCalendarUrl.toString());
+      
+      toast({ title: "Success", description: "Opening Google Calendar - Save the event to get yearly reminders" });
+      setShowCalendarChoice(false);
+      resetFormAndClose();
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to open Google Calendar", variant: "destructive" });
+    } finally {
+      setCalendarLoading(null);
+    }
+  };
+
+  // Handle Apple Calendar for WebView users - uses webcal:// protocol
+  const handleAppleCalendar = async () => {
+    if (!eventTitle || !englishDate) return;
+    
+    setCalendarLoading('apple');
+    try {
+      const params = new URLSearchParams({
+        title: eventTitle,
+        hebrewDate: convertedHebrewDate || '',
+        gregorianDate: englishDate,
+        years: yearDuration.toString(),
+        afterNightfall: afterNightfall.toString()
+      });
+      
+      let baseUrl = '';
+      if (import.meta.env.VITE_API_URL) {
+        baseUrl = import.meta.env.VITE_API_URL;
+      } else if (window.location.hostname.includes('replit.dev')) {
+        baseUrl = `https://${window.location.hostname}:5000`;
+      } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        baseUrl = 'http://localhost:5000';
+      }
+      
+      // Try webcal:// protocol for Apple Calendar subscription
+      const webcalUrl = `webcal://${baseUrl.replace(/^https?:\/\//, '')}/api/download-calendar?${params.toString()}`;
+      
+      // Try to open webcal URL (works on iOS Safari and some WebViews)
+      window.location.href = webcalUrl;
+      
+      toast({ title: "Opening Calendar", description: "If nothing happens, try using Safari or your device's browser" });
+      
+      // Give some time for the webcal to trigger, then close
+      setTimeout(() => {
+        setShowCalendarChoice(false);
+        resetFormAndClose();
+      }, 1500);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to open Apple Calendar", variant: "destructive" });
+    } finally {
+      setCalendarLoading(null);
+    }
+  };
+
+  const resetFormAndClose = () => {
+    setEventTitle("");
+    setEnglishDate("");
+    setConvertedHebrewDate("");
+    setAfterNightfall(false);
+    setYearDuration(10);
+    setNextBirthday(null);
+    closeModal();
+    window.location.hash = '#/?section=home&scrollToProgress=true';
+  };
+
   const downloadCalendarMutation = useMutation({
     mutationFn: handleMobileDownload,
-    onSuccess: () => {
+    onSuccess: (result) => {
+      const showChoice = result && typeof result === 'object' && 'showChoice' in result && result.showChoice;
+      if (showChoice) {
+        // Don't close modal, showing choice dialog
+        return;
+      }
       toast({
         title: "Success",
         description: `Calendar file downloaded for the next ${yearDuration} year${yearDuration > 1 ? 's' : ''} - Import into any calendar app`
       });
-      setEventTitle("");
-      setEnglishDate("");
-      setConvertedHebrewDate("");
-      setAfterNightfall(false);
-      setYearDuration(10);
-      setNextBirthday(null);
-      closeModal();
-      // Navigate to home and scroll to progress
-      window.location.hash = '#/?section=home&scrollToProgress=true';
+      resetFormAndClose();
     },
     onError: (error) => {
       toast({
@@ -496,26 +627,67 @@ export default function TimesModals() {
               </div>
             </div>
             
-            {/* Download Button */}
+            {/* Download Button or Calendar Choice */}
             <div className="pt-1">
-              <Button 
-                onClick={handleDownloadCalendar}
-                disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
-                className="w-full bg-gradient-feminine text-white py-2.5 rounded-lg platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
-                data-testid="button-download-calendar"
-              >
-                {downloadCalendarMutation.isPending ? (
-                  <div className="flex items-center justify-center">
-                    <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                    Generating Calendar...
+              {showCalendarChoice ? (
+                <div className="space-y-2">
+                  <p className="text-xs text-center text-gray-600 platypi-medium mb-2">
+                    Choose your calendar app:
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      onClick={handleGoogleCalendar}
+                      disabled={calendarLoading !== null}
+                      className="bg-white border-2 border-blush/30 text-gray-700 py-2.5 rounded-lg platypi-semibold text-sm hover:border-blush hover:bg-blush/5 transition-all"
+                      data-testid="button-google-calendar"
+                    >
+                      {calendarLoading === 'google' ? (
+                        <div className="w-4 h-4 border-2 border-blush border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span>Google Calendar</span>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleAppleCalendar}
+                      disabled={calendarLoading !== null}
+                      className="bg-white border-2 border-blush/30 text-gray-700 py-2.5 rounded-lg platypi-semibold text-sm hover:border-blush hover:bg-blush/5 transition-all"
+                      data-testid="button-apple-calendar"
+                    >
+                      {calendarLoading === 'apple' ? (
+                        <div className="w-4 h-4 border-2 border-blush border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <span>Apple Calendar</span>
+                      )}
+                    </Button>
                   </div>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    <Calendar className="w-3 h-3 mr-2" />
-                    Download Calendar
-                  </div>
-                )}
-              </Button>
+                  <button
+                    onClick={() => setShowCalendarChoice(false)}
+                    className="w-full text-xs text-gray-500 py-1 hover:text-gray-700"
+                    data-testid="button-cancel-choice"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={handleDownloadCalendar}
+                  disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
+                  className="w-full bg-gradient-feminine text-white py-2.5 rounded-lg platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
+                  data-testid="button-download-calendar"
+                >
+                  {downloadCalendarMutation.isPending ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Generating Calendar...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <Calendar className="w-3 h-3 mr-2" />
+                      Download Calendar
+                    </div>
+                  )}
+                </Button>
+              )}
               
               {/* Attribution */}
               <div className="mt-1 text-center">
