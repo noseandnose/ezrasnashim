@@ -19,6 +19,7 @@ import { registerLocationRoutes } from "./routes/location";
 import { registerTehillimRoutes } from "./routes/tehillim";
 import { registerPrayerRoutes } from "./routes/prayers";
 import { registerContentRoutes } from "./routes/content";
+import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -187,6 +188,10 @@ function requireAdminAuth(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup Replit Auth (optional user login) - must be before other routes
+  await setupAuth(app);
+  registerAuthRoutes(app);
+
   // Schedule periodic cleanup of expired names (every hour)
   setInterval(async () => {
     try {
