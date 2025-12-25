@@ -735,7 +735,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 `${flower.type} flower`
               } 
               className={`absolute ${
-                flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[3]' : 
+                flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[0]' : 
                 flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
                 'z-[1]'
               }`}
