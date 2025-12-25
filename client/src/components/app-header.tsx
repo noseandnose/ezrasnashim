@@ -226,6 +226,7 @@ export default function AppHeader() {
                     <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
                   )}
                 </DropdownMenuItem>
+{/* Hidden until ready to launch - Create Profile feature
                 {!authLoading && !isAuthenticated && (
                   <DropdownMenuItem
                     onClick={() => setLocation('/login')}
@@ -237,6 +238,7 @@ export default function AppHeader() {
                     Create Profile
                   </DropdownMenuItem>
                 )}
+*/}
                 {isAuthenticated && user && (
                   <>
                     <DropdownMenuItem
