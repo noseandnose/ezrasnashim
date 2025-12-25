@@ -358,7 +358,7 @@ export default function TableSection() {
         </div>
 
         {/* Bottom Row: Life Classes and Meditation */}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Life Classes Button */}
           <button
             className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
