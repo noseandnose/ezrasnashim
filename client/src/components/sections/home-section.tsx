@@ -16,8 +16,9 @@ import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
 import morningBackground from "@assets/Morning_1766585201516.png";
 import afternoonBackground from "@assets/Afternoon_1766585201516.png";
 import nightBackground from "@assets/Evening_1766585201513.png";
-import milestone10Tree from "@assets/10_1766649225861.png";
-import milestone20Tree from "@assets/20_1766649225859.png";
+import milestone10Tree from "@assets/10_1766651598565.png";
+import milestone20Tree from "@assets/20_1766651598570.png";
+import milestone30Tree from "@assets/30_1766651598570.png";
 import prayerMorningBg from "@assets/Morning_1766585505566.png";
 import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
 import prayerNightBg from "@assets/Night_1766585505565.png";
@@ -725,6 +726,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               src={
                 flower.overallIndex === 10 ? milestone10Tree :
                 flower.overallIndex === 20 ? milestone20Tree :
+                flower.overallIndex === 30 ? milestone30Tree :
                 flower.type === 'torah' ? torahFlower : 
                 flower.type === 'tefilla' ? tefillaFlower : 
                 tzedakaFlower
@@ -732,19 +734,20 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               alt={
                 flower.overallIndex === 10 ? '10th milestone tree!' :
                 flower.overallIndex === 20 ? '20th milestone tree!' :
+                flower.overallIndex === 30 ? '30th milestone tree!' :
                 `${flower.type} flower`
               } 
               className={`absolute ${
-                flower.overallIndex === 10 || flower.overallIndex === 20 ? 'z-[0]' : 
+                flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30 ? 'z-[0]' : 
                 flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
                 'z-[1]'
               }`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: flower.overallIndex === 10 || flower.overallIndex === 20 
-                  ? `${100 * flower.scale}px`  // Trees are bigger than flowers
-                  : `${67 * flower.scale}px`,
+                width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
+                  ? `${105 * flower.scale}px`  // Trees are bigger than flowers
+                  : `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
