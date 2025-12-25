@@ -244,12 +244,19 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           )}
         </button>
         
-        <div className="bg-gray-200 rounded-lg px-1 py-0.5">
+        <div className="bg-gray-200 rounded-lg flex items-center justify-center" style={{ width: '52px', height: '28px' }}>
           <select 
             value={playbackSpeed} 
             onChange={(e) => setPlaybackSpeed(e.target.value)}
-            className="bg-transparent border-none text-black text-xs w-14 h-6 cursor-pointer focus:outline-none appearance-none text-center"
-            style={{ WebkitAppearance: 'none' }}
+            className="bg-transparent border-none text-black text-xs cursor-pointer focus:outline-none"
+            style={{ 
+              WebkitAppearance: 'none', 
+              appearance: 'none',
+              textAlign: 'center',
+              textAlignLast: 'center',
+              width: '100%',
+              padding: '0 4px'
+            }}
             data-testid="select-playback-speed"
           >
             <option value="0.5">0.5x</option>
