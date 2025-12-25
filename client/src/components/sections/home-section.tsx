@@ -1,5 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
@@ -788,27 +788,26 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           
           {/* Info icon - Top right corner */}
           <div className="absolute top-2 right-2 z-10">
-            <Tooltip delayDuration={0}>
-              <TooltipTrigger asChild>
+            <Popover>
+              <PopoverTrigger asChild>
                 <button
-                  className="w-5 h-5 rounded-full flex items-center justify-center"
+                  className="w-4 h-4 rounded-full flex items-center justify-center"
                   style={{
                     background: 'rgba(255,255,255,0.6)',
                     backdropFilter: 'blur(12px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(12px) saturate(180%)',
                     border: '1px solid rgba(255,255,255,0.4)',
-                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
                   }}
                   data-testid="button-garden-info"
-                  onClick={(e) => e.currentTarget.focus()}
                 >
-                  <Info className="w-3 h-3 text-black/60" strokeWidth={2} />
+                  <Info className="w-2.5 h-2.5 text-black/60" strokeWidth={2} />
                 </button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+              </PopoverTrigger>
+              <PopoverContent side="bottom" className="max-w-[200px] text-center p-2">
                 <p className="text-xs">Each mitzvah plants a flower in your garden. Reach 10, 20, or 30 mitzvos to grow a special tree.</p>
-              </TooltipContent>
-            </Tooltip>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
