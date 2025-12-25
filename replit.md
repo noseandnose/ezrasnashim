@@ -57,6 +57,7 @@ Header layout: Search icon placed next to hamburger menu for quick access. Heade
 - **Torah Classes**: Daily Torah classes section with series content from multiple providers, displayed conditionally when content exists for the day, using date range filtering (fromDate/untilDate) to support scheduled content series.
 - **The Kotel Compass**: Geolocation-based compass for prayer orientation, with Android WebView fixes.
 - **Donation System**: Stripe integration.
+- **Optional User Authentication**: Replit Auth integration (Google, Apple, GitHub, email/password) - 100% optional, app works fully without login. When logged in: personalized greeting with first name, profile page (/profile) showing daily progress stats, "My Profile" and "Sign Out" menu items. When logged out: "Create Profile" option in hamburger menu.
 - **Personal Tehillim Chains**: Individual prayer chains with create/find, stats, and shareable links.
 - **Sponsorship System**: Daily content sponsorship.
 - **Analytics**: Tracking daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard, offline queue support with idempotency, and Google Analytics.
