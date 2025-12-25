@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X } from "lucide-react";
+import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -176,22 +176,32 @@ export default function Profile() {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F2DDD4] to-[#E4C5B8] flex items-center justify-center">
-        <div className="animate-pulse">Loading...</div>
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ 
+          background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+        }}
+      >
+        <div className="animate-pulse text-black/60">Loading...</div>
       </div>
     );
   }
   
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F2DDD4] to-[#E4C5B8]">
+      <div 
+        className="min-h-screen"
+        style={{ 
+          background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+        }}
+      >
         <header 
           className="fixed top-0 left-0 right-0 z-50 px-4"
           style={{ 
             paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-            background: 'rgba(186, 137, 160, 0.12)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)'
           }}
         >
           <div className="flex items-center h-12">
@@ -202,24 +212,36 @@ export default function Profile() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <h1 className="flex-1 text-center font-semibold text-black">My Profile</h1>
+            <h1 className="flex-1 text-center platypi-bold text-black">My Profile</h1>
             <div className="w-9" />
           </div>
         </header>
         
-        <div className="flex flex-col items-center justify-center p-8 pt-24">
-          <User className="w-16 h-16 text-blush mb-4" />
-          <h2 className="text-xl font-semibold text-black mb-2">Create Your Profile</h2>
-          <p className="text-gray-600 text-center mb-6">
-            Sign in to save your progress across devices and access personalized features.
-          </p>
-          <Button 
-            onClick={() => setLocation('/login')}
-            className="bg-blush hover:bg-blush/90 text-white px-8 py-3"
-            data-testid="button-login"
+        <div className="flex flex-col items-center justify-center p-6 pt-28 pb-28">
+          <div 
+            className="w-full max-w-sm rounded-3xl p-8 text-center border border-blush/10"
+            style={{ 
+              background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+              backdropFilter: 'blur(20px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+            }}
           >
-            Sign In to Get Started
-          </Button>
+            <div className="w-20 h-20 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-6">
+              <User className="w-10 h-10 text-white" />
+            </div>
+            <h2 className="platypi-bold text-xl text-black mb-2">Create Your Profile</h2>
+            <p className="platypi-regular text-sm text-black/60 mb-6">
+              Sign in to save your progress across devices and access personalized features.
+            </p>
+            <Button 
+              onClick={() => setLocation('/login')}
+              className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-xl py-3 platypi-bold"
+              data-testid="button-login"
+            >
+              Sign In to Get Started
+            </Button>
+          </div>
         </div>
         <BottomNavigation activeSection="home" onSectionChange={handleSectionChange} />
       </div>
@@ -227,14 +249,19 @@ export default function Profile() {
   }
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F2DDD4] to-[#E4C5B8]">
+    <div 
+      className="min-h-screen"
+      style={{ 
+        background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+      }}
+    >
       <header 
         className="fixed top-0 left-0 right-0 z-50 px-4"
         style={{ 
           paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-          background: 'rgba(186, 137, 160, 0.12)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
+          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          backdropFilter: 'blur(20px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(20px) saturate(180%)'
         }}
       >
         <div className="flex items-center h-12">
@@ -245,53 +272,54 @@ export default function Profile() {
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="flex-1 text-center font-semibold text-black">My Profile</h1>
+          <h1 className="flex-1 text-center platypi-bold text-black">My Profile</h1>
           <div className="w-9" />
         </div>
       </header>
       
-      <div className="p-4 pt-24 pb-28 space-y-6">
+      <div className="p-4 pt-24 pb-28 space-y-4">
         <div 
-          className="rounded-2xl p-6"
+          className="rounded-3xl p-6 border border-blush/10"
           style={{ 
-            background: 'rgba(186, 137, 160, 0.12)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
           <div className="flex justify-end mb-2">
             {!isEditing ? (
               <button 
                 onClick={startEditing}
-                className="text-blush hover:text-blush/80 p-1"
+                className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
                 data-testid="button-edit-profile"
               >
-                <Pencil className="w-4 h-4" />
+                <Pencil className="w-4 h-4 text-blush" />
               </button>
             ) : (
               <div className="flex gap-2">
                 <button 
                   onClick={cancelEditing}
-                  className="text-gray-500 hover:text-gray-700 p-1"
+                  className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
                   disabled={isSaving}
                   data-testid="button-cancel-edit"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-4 h-4 text-gray-500" />
                 </button>
                 <button 
                   onClick={saveProfile}
-                  className="text-green-600 hover:text-green-700 p-1"
+                  className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors"
                   disabled={isSaving}
                   data-testid="button-save-profile"
                 >
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 text-green-600" />
                 </button>
               </div>
             )}
           </div>
           
           <div className="text-center">
-            <div className="w-20 h-20 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-4">
+            <div className="w-24 h-24 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-4 shadow-lg">
               {user?.profileImageUrl ? (
                 <img 
                   src={user.profileImageUrl} 
@@ -299,38 +327,38 @@ export default function Profile() {
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <User className="w-10 h-10 text-blush" />
+                <User className="w-12 h-12 text-white" />
               )}
             </div>
             
             {!isEditing ? (
               <>
-                <h2 className="text-xl font-semibold text-black">
+                <h2 className="platypi-bold text-2xl text-black">
                   {user?.firstName} {user?.lastName}
                 </h2>
                 {user?.hebrewName && (
-                  <p className="text-lg text-gray-700 mt-1" dir="rtl">
-                    <Star className="w-4 h-4 inline-block mr-1 text-blush" />
+                  <p className="platypi-regular text-lg text-black/70 mt-1" dir="rtl">
+                    <Star className="w-4 h-4 inline-block mr-1 text-amber-500" />
                     {user.hebrewName}
                   </p>
                 )}
-                <p className="text-gray-600 text-sm mt-1">{user?.email}</p>
+                <p className="platypi-regular text-sm text-black/50 mt-1">{user?.email}</p>
                 {user?.birthday && (
-                  <p className="text-gray-500 text-sm mt-2 flex items-center justify-center gap-1">
-                    <Calendar className="w-3 h-3" />
+                  <p className="platypi-regular text-sm text-black/50 mt-2 flex items-center justify-center gap-1">
+                    <Calendar className="w-3.5 h-3.5" />
                     {formatBirthday(user.birthday)}
                   </p>
                 )}
               </>
             ) : (
-              <div className="space-y-3 text-left">
+              <div className="space-y-3 text-left mt-4">
                 <div className="grid grid-cols-2 gap-2">
                   <Input
                     type="text"
                     placeholder="First name"
                     value={editFirstName}
                     onChange={(e) => setEditFirstName(e.target.value)}
-                    className="bg-white"
+                    className="bg-white/70 border-blush/20 rounded-xl"
                     data-testid="input-edit-first-name"
                   />
                   <Input
@@ -338,7 +366,7 @@ export default function Profile() {
                     placeholder="Last name"
                     value={editLastName}
                     onChange={(e) => setEditLastName(e.target.value)}
-                    className="bg-white"
+                    className="bg-white/70 border-blush/20 rounded-xl"
                     data-testid="input-edit-last-name"
                   />
                 </div>
@@ -347,7 +375,7 @@ export default function Profile() {
                   placeholder="Hebrew name"
                   value={editHebrewName}
                   onChange={(e) => setEditHebrewName(e.target.value)}
-                  className="bg-white"
+                  className="bg-white/70 border-blush/20 rounded-xl"
                   dir="rtl"
                   data-testid="input-edit-hebrew-name"
                 />
@@ -357,7 +385,7 @@ export default function Profile() {
                   value={editBirthday}
                   onChange={(e) => setEditBirthday(e.target.value)}
                   max={getTodayString()}
-                  className="bg-white"
+                  className="bg-white/70 border-blush/20 rounded-xl"
                   data-testid="input-edit-birthday"
                 />
               </div>
@@ -366,114 +394,120 @@ export default function Profile() {
         </div>
         
         <div 
-          className="rounded-2xl p-6"
+          className="rounded-3xl p-5 border border-blush/10"
           style={{ 
-            background: 'rgba(186, 137, 160, 0.12)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-blush" />
+          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
+            <div className="p-1.5 rounded-full bg-gradient-feminine">
+              <Sparkles className="w-4 h-4 text-white" />
+            </div>
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="w-6 h-6 text-amber-600" />
+          <div className="grid grid-cols-3 gap-3">
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
+                <BookOpen className="w-5 h-5 text-amber-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.todayTorah}</div>
-              <div className="text-xs text-gray-600">Torah</div>
+              <div className="platypi-bold text-2xl text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-xs text-black/60">Torah</div>
             </div>
             
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
-                <Heart className="w-6 h-6 text-pink-600" />
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
+                <Heart className="w-5 h-5 text-pink-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.todayTefilla}</div>
-              <div className="text-xs text-gray-600">Tefilla</div>
+              <div className="platypi-bold text-2xl text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-xs text-black/60">Tefilla</div>
             </div>
             
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-                <HandCoins className="w-6 h-6 text-green-600" />
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                <HandCoins className="w-5 h-5 text-green-600" />
               </div>
-              <div className="text-2xl font-bold text-black">{stats.todayTzedaka}</div>
-              <div className="text-xs text-gray-600">Tzedaka</div>
+              <div className="platypi-bold text-2xl text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
             </div>
           </div>
         </div>
         
         <div 
-          className="rounded-2xl p-6"
+          className="rounded-3xl p-5 border border-blush/10"
           style={{ 
-            background: 'rgba(186, 137, 160, 0.12)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
+          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
+            <div className="p-1.5 rounded-full bg-amber-500">
+              <Trophy className="w-4 h-4 text-white" />
+            </div>
             All-Time Stats
           </h3>
           
-          <div className="grid grid-cols-3 gap-4 mb-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-amber-600">{stats.totalTorah}</div>
-              <div className="text-xs text-gray-600">Torah</div>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="platypi-bold text-xl text-amber-600">{stats.totalTorah}</div>
+              <div className="platypi-regular text-xs text-black/60">Torah</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-pink-600">{stats.totalTefilla}</div>
-              <div className="text-xs text-gray-600">Tefilla</div>
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="platypi-bold text-xl text-pink-600">{stats.totalTefilla}</div>
+              <div className="platypi-regular text-xs text-black/60">Tefilla</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{stats.totalTzedaka}</div>
-              <div className="text-xs text-gray-600">Tzedaka</div>
+            <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
+              <div className="platypi-bold text-xl text-green-600">{stats.totalTzedaka}</div>
+              <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
             </div>
           </div>
           
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blush">{stats.totalMitzvos}</div>
-              <div className="text-sm text-gray-600">Total Mitzvos Completed</div>
-            </div>
+          <div className="bg-gradient-feminine rounded-2xl p-4 text-center">
+            <div className="platypi-bold text-3xl text-white">{stats.totalMitzvos}</div>
+            <div className="platypi-regular text-sm text-white/80">Total Mitzvos Completed</div>
           </div>
         </div>
         
         <div 
-          className="rounded-2xl p-6"
+          className="rounded-3xl p-5 border border-blush/10"
           style={{ 
-            background: 'rgba(186, 137, 160, 0.12)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            backdropFilter: 'blur(20px) saturate(180%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
-          <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-blush" />
+          <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
+            <div className="p-1.5 rounded-full bg-blush">
+              <Flame className="w-4 h-4 text-white" />
+            </div>
             Your Journey
           </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-black">{stats.currentStreak}</div>
-              <div className="text-xs text-gray-600">Day Streak</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/70 rounded-2xl p-4 text-center border border-blush/10">
+              <div className="platypi-bold text-3xl text-blush">{stats.currentStreak}</div>
+              <div className="platypi-regular text-xs text-black/60">Day Streak</div>
             </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-black">{stats.totalDays}</div>
-              <div className="text-xs text-gray-600">Total Active Days</div>
+            <div className="bg-white/70 rounded-2xl p-4 text-center border border-blush/10">
+              <div className="platypi-bold text-3xl text-blush">{stats.totalDays}</div>
+              <div className="platypi-regular text-xs text-black/60">Total Active Days</div>
             </div>
           </div>
         </div>
         
-        <Button 
-          variant="outline"
+        <button 
           onClick={() => logout()}
-          className="w-full border-gray-300 text-gray-600 hover:text-gray-800"
+          className="w-full bg-white/70 rounded-2xl p-4 border border-blush/10 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
           data-testid="button-sign-out"
         >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sign Out
-        </Button>
+          <LogOut className="w-4 h-4 text-black/60" />
+          <span className="platypi-regular text-sm text-black/60">Sign Out</span>
+        </button>
       </div>
       
       <BottomNavigation activeSection="home" onSectionChange={handleSectionChange} />
