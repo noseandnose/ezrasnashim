@@ -431,7 +431,6 @@ export default function TableSection() {
             className={`w-full rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left transition-colors ${
               isModalComplete('inspiration') ? 'bg-sage/20 hover:bg-sage/30' : 'bg-white/80 hover:bg-white/90'
             }`}
-            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
             data-testid="button-table-inspiration-bar"
           >
             <div className="flex items-center gap-3">
