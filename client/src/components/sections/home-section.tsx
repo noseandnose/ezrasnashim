@@ -753,7 +753,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
                 width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
-                  ? '85px'  // Trees are fixed size (smaller to avoid top cutoff)
+                  ? '95px'  // Trees are fixed size
                   : `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
