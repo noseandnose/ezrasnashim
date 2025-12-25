@@ -39,6 +39,7 @@
     "@replit/vite-plugin-cartographer": "^0.4.2",
     "@stripe/react-stripe-js": "^3.9.0",
     "@stripe/stripe-js": "^7.8.0",
+    "@supabase/supabase-js": "^2.89.0",
     "@tanstack/query-sync-storage-persister": "^5.90.2",
     "@tanstack/react-query": "^5.60.5",
     "@tanstack/react-query-persist-client": "^5.90.2",
