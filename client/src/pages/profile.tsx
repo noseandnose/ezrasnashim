@@ -2,7 +2,6 @@ import { useLocation } from "wouter";
 import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { getBackendLoginUrl } from "@/lib/auth-utils";
 import { useModalCompletionStore } from "@/lib/types";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { useMemo } from "react";
@@ -98,7 +97,7 @@ export default function Profile() {
             Sign in to save your progress across devices and access personalized features.
           </p>
           <Button 
-            onClick={() => window.location.href = getBackendLoginUrl()}
+            onClick={() => setLocation('/login')}
             className="bg-blush hover:bg-blush/90 text-white px-8 py-3"
             data-testid="button-login"
           >

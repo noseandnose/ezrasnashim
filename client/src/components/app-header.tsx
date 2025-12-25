@@ -3,7 +3,6 @@ import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
-import { getBackendLoginUrl } from "@/lib/auth-utils";
 import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
@@ -229,7 +228,7 @@ export default function AppHeader() {
                 </DropdownMenuItem>
                 {!authLoading && !isAuthenticated && (
                   <DropdownMenuItem
-                    onClick={() => window.location.href = getBackendLoginUrl()}
+                    onClick={() => setLocation('/login')}
                     className="cursor-pointer"
                     data-testid="menu-item-login"
                     data-action="menu-login"

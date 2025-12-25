@@ -19,7 +19,8 @@ import { registerLocationRoutes } from "./routes/location";
 import { registerTehillimRoutes } from "./routes/tehillim";
 import { registerPrayerRoutes } from "./routes/prayers";
 import { registerContentRoutes } from "./routes/content";
-import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+// Supabase Auth - replaces Replit Auth
+import { verifySupabaseToken, optionalAuth, isSupabaseConfigured } from "./supabase-auth";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -188,9 +189,13 @@ function requireAdminAuth(req: any, res: any, next: any) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup Replit Auth (optional user login) - must be before other routes
-  await setupAuth(app);
-  registerAuthRoutes(app);
+  // Supabase Auth is handled client-side - no server setup needed
+  // This endpoint returns the current user (if authenticated) or null
+  // It uses optionalAuth to gracefully handle when auth is not configured
+  app.get("/api/auth/user", optionalAuth, (req, res) => {
+    // Return the user if authenticated, or null if not
+    res.json(req.supabaseUser || null);
+  });
 
   // Schedule periodic cleanup of expired names (every hour)
   setInterval(async () => {
