@@ -1,4 +1,5 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
@@ -783,6 +784,30 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             >
               <h3 className="platypi-bold text-xs text-black">Daily Mitzvah Garden</h3>
             </div>
+          </div>
+          
+          {/* Info icon - Top right corner */}
+          <div className="absolute top-2 right-2 z-10">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className="p-1.5 rounded-full"
+                  style={{
+                    background: 'rgba(255,255,255,0.6)',
+                    backdropFilter: 'blur(12px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 4px 16px rgba(0,0,0,0.08)'
+                  }}
+                  data-testid="button-garden-info"
+                >
+                  <Info className="w-3.5 h-3.5 text-black/60" strokeWidth={1.5} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" className="max-w-[200px] text-center">
+                <p className="text-xs">Each mitzvah plants a flower in your garden. Reach 10, 20, or 30 mitzvos to grow a special tree.</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>
