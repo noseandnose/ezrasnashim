@@ -5,6 +5,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
+import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { useMemo } from "react";
@@ -34,6 +35,7 @@ interface HomeSectionProps {
 function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { openModal } = useModalStore();
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
+  const { user, isAuthenticated } = useAuth();
   // Subscribe to completedModals to trigger re-renders when completions change
   const completedModals = useModalCompletionStore((state) => state.completedModals);
   
@@ -177,9 +179,17 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   // Get time-appropriate greeting (evening starts at tzais hakochavim)
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return "Good Morning";
-    if (isAfterTzais()) return "Good Evening";
-    return "Good Afternoon";
+    let greeting = "";
+    if (hour < 12) greeting = "Good Morning";
+    else if (isAfterTzais()) greeting = "Good Evening";
+    else greeting = "Good Afternoon";
+    
+    // Add user's first name if logged in
+    if (isAuthenticated && user?.firstName) {
+      greeting += `, ${user.firstName}`;
+    }
+    
+    return greeting;
   };
 
   // Get time-appropriate background for garden

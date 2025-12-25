@@ -2,7 +2,8 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useHomeSummary } from "@/hooks/use-home-summary";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
@@ -24,6 +25,7 @@ export default function AppHeader() {
   useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
@@ -224,6 +226,39 @@ export default function AppHeader() {
                     <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
                   )}
                 </DropdownMenuItem>
+                {!authLoading && !isAuthenticated && (
+                  <DropdownMenuItem
+                    onClick={() => window.location.href = '/api/login'}
+                    className="cursor-pointer"
+                    data-testid="menu-item-login"
+                    data-action="menu-login"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    Create Profile
+                  </DropdownMenuItem>
+                )}
+                {isAuthenticated && user && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setLocation("/profile")}
+                      className="cursor-pointer"
+                      data-testid="menu-item-profile"
+                      data-action="menu-profile"
+                    >
+                      <User className="h-5 w-5 mr-2" />
+                      My Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => logout()}
+                      className="cursor-pointer"
+                      data-testid="menu-item-logout"
+                      data-action="menu-logout"
+                    >
+                      <LogOut className="h-5 w-5 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
