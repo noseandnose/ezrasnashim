@@ -31,7 +31,7 @@ const getVersionTimestamp = (): number => {
 export function registerUtilityRoutes(app: Express, deps: UtilityRouteDeps) {
   const { requireAdminAuth } = deps;
 
-  app.get("/healthcheck", (req: Request, res: Response) => {
+  app.get("/healthcheck", (_req: Request, res: Response) => {
     const isProduction = process.env.NODE_ENV === 'production';
     
     const health: {
@@ -68,7 +68,7 @@ export function registerUtilityRoutes(app: Express, deps: UtilityRouteDeps) {
       }
     }
     
-    res.json(health);
+    return res.json(health);
   });
 
   if (process.env.NODE_ENV === 'development') {
@@ -102,12 +102,12 @@ export function registerUtilityRoutes(app: Express, deps: UtilityRouteDeps) {
       `);
     });
   } else {
-    app.get("/", (req: Request, res: Response) => {
-      res.json({ status: "OK" });
+    app.get("/", (_req: Request, res: Response) => {
+      return res.json({ status: "OK" });
     });
   }
 
-  app.get("/api/version", (req: Request, res: Response) => {
+  app.get("/api/version", (_req: Request, res: Response) => {
     res.set({
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
       'Pragma': 'no-cache',
@@ -124,10 +124,10 @@ export function registerUtilityRoutes(app: Express, deps: UtilityRouteDeps) {
       isCritical: process.env.CRITICAL_UPDATE === 'true',
       releaseNotes: process.env.RELEASE_NOTES || undefined
     };
-    res.json(version);
+    return res.json(version);
   });
 
-  app.post("/api/regenerate-cache-version", requireAdminAuth, async (req: Request, res: Response) => {
+  app.post("/api/regenerate-cache-version", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       const { execSync } = await import('child_process');
       const scriptPath = path.join(__dirname, '../../scripts/generate-version.js');

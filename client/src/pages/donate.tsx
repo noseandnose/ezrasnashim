@@ -399,7 +399,7 @@ export default function Donate() {
   const [, setLocation] = useLocation();
   //const [clientSecret, setClientSecret] = useState("");
   const [donationComplete, setDonationComplete] = useState(false);
-  const [, setUserEmailForReceipt] = useState("");
+  const [userEmailForReceipt] = useState("");
   const [showLoadingScreen, setShowLoadingScreen] = useState(true);
   const { toast } = useToast();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();

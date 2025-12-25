@@ -25,7 +25,7 @@ export default function AppHeader() {
   useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
-  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);

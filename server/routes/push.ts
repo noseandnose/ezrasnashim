@@ -13,8 +13,8 @@ export interface PushRouteDeps {
 export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
   const { requireAdminAuth, storage, pushRetryQueue, VAPID_PUBLIC_KEY } = deps;
 
-  app.get("/api/push/vapid-public-key", (req: Request, res: Response) => {
-    res.json({ publicKey: VAPID_PUBLIC_KEY || null });
+  app.get("/api/push/vapid-public-key", (_req: Request, res: Response) => {
+    return res.json({ publicKey: VAPID_PUBLIC_KEY || null });
   });
 
   app.post("/api/push/subscribe", async (req: Request, res: Response) => {
@@ -32,7 +32,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
         sessionId: sessionId || null
       });
 
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: "Successfully subscribed to push notifications",
         subscriptionId: savedSubscription.id 
@@ -52,7 +52,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
       }
 
       await storage.unsubscribeFromPush(endpoint);
-      res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
+      return res.json({ success: true, message: "Successfully unsubscribed from push notifications" });
     } catch (error) {
       console.error("Error unsubscribing from push:", error);
       return res.status(500).json({ error: "Failed to unsubscribe from push notifications" });
@@ -153,7 +153,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
 
       await storage.updateNotificationStats(notification.id, successCount, failureCount);
 
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: `Sent to ${successCount} users`,
         sentCount: successCount + failureCount,
@@ -166,17 +166,17 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
     }
   });
 
-  app.get("/api/push/history", requireAdminAuth, async (req: Request, res: Response) => {
+  app.get("/api/push/history", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       const history = await storage.getNotificationHistory(50);
-      res.json(history);
+      return res.json(history);
     } catch (error) {
       console.error("Error fetching notification history:", error);
       return res.status(500).json({ error: "Failed to fetch notification history" });
     }
   });
 
-  app.post("/api/push/simple-test", async (req: Request, res: Response) => {
+  app.post("/api/push/simple-test", async (_req: Request, res: Response) => {
     try {
       const subscriptions = await storage.getActiveSubscriptions();
       
@@ -215,7 +215,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
         }
       }
 
-      res.json({ success: sent > 0, sent });
+      return res.json({ success: sent > 0, sent });
     } catch (error) {
       console.error("[Simple Test] Error:", error);
       return res.status(500).json({ error: "Failed" });
@@ -292,7 +292,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
 
       await Promise.all(sendPromises);
 
-      res.json({ 
+      return res.json({ 
         success: successCount > 0, 
         message: `Sent to ${successCount} users, ${failureCount} failed`,
         successCount,
@@ -305,7 +305,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
     }
   });
 
-  app.post("/api/push/validate-subscriptions", requireAdminAuth, async (req: Request, res: Response) => {
+  app.post("/api/push/validate-subscriptions", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       const subscriptions = await storage.getSubscriptionsNeedingValidation(24);
       
@@ -361,7 +361,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
         }
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: `Validated ${subscriptions.length} subscriptions`,
         validCount,
@@ -375,7 +375,7 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
     }
   });
 
-  app.get("/api/push/subscriptions", requireAdminAuth, async (req: Request, res: Response) => {
+  app.get("/api/push/subscriptions", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       const subscriptions = await storage.getAllSubscriptions();
       
@@ -392,15 +392,15 @@ export function registerPushRoutes(app: Express, deps: PushRouteDeps) {
         updatedAt: sub.updatedAt
       }));
 
-      res.json(sanitized);
+      return res.json(sanitized);
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
       return res.status(500).json({ error: "Failed to fetch subscriptions" });
     }
   });
 
-  app.get("/api/push/queue-status", requireAdminAuth, (req: Request, res: Response) => {
+  app.get("/api/push/queue-status", requireAdminAuth, (_req: Request, res: Response) => {
     const status = pushRetryQueue.getStatus();
-    res.json(status);
+    return res.json(status);
   });
 }

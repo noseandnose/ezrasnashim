@@ -82,7 +82,7 @@ export const playCoinClinkSoundFromFile = () => {
   try {
     const audio = new Audio('/sounds/coin-jingle.mp3');
     audio.volume = 0.3;
-    audio.play().catch(error => {
+    audio.play().catch(() => {
       // Could not play coin jingle sound file
     });
   } catch {

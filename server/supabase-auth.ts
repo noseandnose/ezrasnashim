@@ -100,7 +100,7 @@ export const verifySupabaseToken: RequestHandler = async (
 
 export const optionalAuth: RequestHandler = async (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ) => {
   if (!isSupabaseConfigured() || !supabase) {

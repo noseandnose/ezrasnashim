@@ -27,7 +27,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         analyticsDate: date
       });
       
-      res.json(event);
+      return res.json(event);
     } catch (error) {
       console.error('Error tracking analytics event:', error);
       return res.status(500).json({ message: "Failed to track event" });
@@ -45,7 +45,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       const validEvents = events.filter((e: any) => ALLOWED_EVENTS.includes(e.eventType));
       const result = await storage.syncAnalyticsEvents(validEvents);
       
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       console.error('Error syncing analytics events:', error);
       return res.status(500).json({ message: "Failed to sync events" });
@@ -69,7 +69,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         sessionId: null
       });
       
-      res.json({ success: true, event });
+      return res.json({ success: true, event });
     } catch (error) {
       console.error('Error tracking feature usage:', error);
       return res.status(500).json({ message: "Failed to track feature usage" });
@@ -85,17 +85,17 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       }
       
       await storage.recordActiveSession(sessionId);
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error('Error recording session:', error);
       return res.status(500).json({ message: "Failed to record session" });
     }
   });
 
-  app.post("/api/analytics/cleanup", requireAdminAuth, async (req: Request, res: Response) => {
+  app.post("/api/analytics/cleanup", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       await storage.cleanupOldAnalytics();
-      res.json({ success: true, message: "Old analytics data cleaned up" });
+      return res.json({ success: true, message: "Old analytics data cleaned up" });
     } catch (error) {
       console.error('Error cleaning up analytics:', error);
       return res.status(500).json({ message: "Failed to cleanup analytics" });
@@ -128,7 +128,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         stats = await storage.recalculateDailyStats(today);
       }
       
-      res.json(stats || {
+      return res.json(stats || {
         date: today,
         uniqueUsers: 0,
         pageViews: 0,
@@ -171,7 +171,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       }
       
       const weeklyStats = await storage.getWeeklyStats(weekStart);
-      res.json(weeklyStats);
+      return res.json(weeklyStats);
     } catch (error) {
       console.error('Error fetching weekly stats:', error);
       return res.status(500).json({ message: "Failed to fetch weekly stats" });
@@ -192,14 +192,14 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
       
       const monthlyStats = await storage.getMonthlyStats(year, month);
-      res.json(monthlyStats);
+      return res.json(monthlyStats);
     } catch (error) {
       console.error('Error fetching monthly stats:', error);
       return res.status(500).json({ message: "Failed to fetch monthly stats" });
     }
   });
 
-  app.get("/api/analytics/stats/total", async (req: Request, res: Response) => {
+  app.get("/api/analytics/stats/total", async (_req: Request, res: Response) => {
     try {
       res.set({
         'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
@@ -209,20 +209,20 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       });
       
       const totals = await storage.getTotalStats();
-      res.json(totals);
+      return res.json(totals);
     } catch (error) {
       console.error('Error fetching total stats:', error);
       return res.status(500).json({ message: "Failed to fetch total stats" });
     }
   });
 
-  app.post("/api/analytics/recalculate-all", requireAdminAuth, async (req: Request, res: Response) => {
+  app.post("/api/analytics/recalculate-all", requireAdminAuth, async (_req: Request, res: Response) => {
     try {
       console.log('Starting recalculation of all historical analytics...');
       const result = await storage.recalculateAllHistoricalStats();
       console.log(`Completed: Updated ${result.updated} dates`);
       
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: `Successfully recalculated analytics for ${result.updated} dates`,
         datesUpdated: result.updated,
@@ -234,7 +234,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
     }
   });
 
-  app.get("/api/analytics/stats/daily", async (req: Request, res: Response) => {
+  app.get("/api/analytics/stats/daily", async (_req: Request, res: Response) => {
     try {
       const dailyStats = [];
       const today = new Date();
@@ -250,7 +250,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         }
       }
       
-      res.json(dailyStats);
+      return res.json(dailyStats);
     } catch (error) {
       console.error('Error fetching daily stats:', error);
       return res.status(500).json({ message: "Failed to fetch daily stats" });
@@ -274,7 +274,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       }
 
       const rangeStats = await storage.getDateRangeStats(startDate, endDate);
-      res.json(rangeStats);
+      return res.json(rangeStats);
     } catch (error) {
       console.error('Error fetching date range stats:', error);
       return res.status(500).json({ message: "Failed to fetch date range stats" });
@@ -297,7 +297,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       }
 
       const comparisonStats = await storage.getComparisonStats(period);
-      res.json(comparisonStats);
+      return res.json(comparisonStats);
     } catch (error) {
       console.error('Error fetching comparison stats:', error);
       return res.status(500).json({ message: "Failed to fetch comparison stats" });
@@ -308,7 +308,7 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
     try {
       const period = req.query.period as string || 'alltime';
       const impact = await storage.getCommunityImpact(period);
-      res.json(impact);
+      return res.json(impact);
     } catch (error) {
       console.error('Error fetching community impact:', error);
       return res.status(500).json({ message: "Failed to fetch community impact" });

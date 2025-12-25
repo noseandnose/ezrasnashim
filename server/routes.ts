@@ -20,7 +20,7 @@ import { registerTehillimRoutes } from "./routes/tehillim";
 import { registerPrayerRoutes } from "./routes/prayers";
 import { registerContentRoutes } from "./routes/content";
 // Supabase Auth - replaces Replit Auth
-import { verifySupabaseToken, optionalAuth, isSupabaseConfigured } from "./supabase-auth";
+import { optionalAuth } from "./supabase-auth";
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -105,7 +105,7 @@ async function cachedGet(url: string, config: any = {}): Promise<any> {
 }
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+void path.dirname(__filename);
 
 let stripe: Stripe | null = null;
 
@@ -141,11 +141,9 @@ import {
   insertParshaVortSchema,
   insertTorahClassSchema,
   insertLifeClassSchema,
-  insertMarriageInsightSchema,
   insertNishmasTextSchema,
   insertMessagesSchema
 } from "../shared/schema";
-import { z } from "zod";
 
 // Admin authentication middleware - JWT only (legacy password fallback removed)
 function requireAdminAuth(req: any, res: any, next: any) {
@@ -264,8 +262,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin auth status check - verifies if current token is valid
-  app.get("/api/admin/auth-status", requireAdminAuth, (req, res) => {
-    res.json({ authenticated: true });
+  app.get("/api/admin/auth-status", requireAdminAuth, (_req, res) => {
+    return res.json({ authenticated: true });
   });
 
   // Calendar download endpoint using GET request to avoid CORS issues
@@ -425,7 +423,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Length', Buffer.byteLength(icsContent).toString());
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       
-      res.send(icsContent);
+      return res.send(icsContent);
       
     } catch (error) {
       // Calendar download error
@@ -657,7 +655,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Debug logging removed for production
 
-      res.json(formattedTimes);
+      return res.json(formattedTimes);
     } catch (error) {
       // Error fetching Hebcal zmanim
       return res.status(500).json({ message: "Failed to fetch zmanim from Hebcal API" });
@@ -750,7 +748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Geocoding failed, use default location name
       }
 
-      res.json({
+      return res.json({
         events: formattedEvents,
         location: locationName
       });
@@ -905,7 +903,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
 
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       // Error fetching Shabbos times
       return res.status(500).json({ message: "Failed to fetch Shabbos times from Hebcal API" });
@@ -913,7 +911,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Sefaria API proxy route for Morning Brochas
-  app.get("/api/sefaria/morning-brochas", async (req, res) => {
+  app.get("/api/sefaria/morning-brochas", async (_req, res) => {
     try {
       const morningBlessingUrls = [
         "https://www.sefaria.org/api/v3/texts/Siddur_Ashkenaz%2C_Weekday%2C_Shacharit%2C_Preparatory_Prayers%2C_Modeh_Ani.1",
@@ -1020,12 +1018,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         blessing.hebrew.trim() || blessing.english.trim()
       );
 
-      res.json(validBlessings);
+      return res.json(validBlessings);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         // Error fetching morning brochas from Sefaria
       }
-      res.status(500).json({ message: "Failed to fetch morning brochas from Sefaria API" });
+      return res.status(500).json({ message: "Failed to fetch morning brochas from Sefaria API" });
     }
   });
 
@@ -1194,7 +1192,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Length', Buffer.byteLength(icsContent).toString());
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.send(icsContent);
+      return res.send(icsContent);
       
     } catch (error) {
       console.error('Error generating calendar file:', error);
@@ -1210,10 +1208,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Shop routes
   app.get("/api/shop", 
     cacheMiddleware({ ttl: CACHE_TTL.PIRKEI_AVOT, category: 'shop-items' }),
-    async (req, res) => {
+    async (_req, res) => {
       try {
         const items = await storage.getAllShopItems();
-        res.json(items);
+        return res.json(items);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch shop items" });
       }
@@ -1232,7 +1230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (!item) {
           return res.status(404).json({ message: "Shop item not found" });
         }
-        res.json(item);
+        return res.json(item);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch shop item" });
       }
@@ -1255,14 +1253,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await serverAxiosClient.get(hebcalUrl);
       const data = response.data;
       
-      res.json(data);
+      return res.json(data);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch from Hebcal API" });
     }
   });
 
   // Object storage endpoints for file uploads
-  app.post("/api/objects/upload", requireAdminAuth, async (req, res) => {
+  app.post("/api/objects/upload", requireAdminAuth, async (_req, res) => {
     try {
       // Check if AWS S3 is configured
       if (!process.env.AWS_S3_BUCKET) {
@@ -1274,11 +1272,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const objectStorageService = new ObjectStorageService();
       const uploadURL = await objectStorageService.getObjectEntityUploadURL();
-      res.json({ uploadURL });
+      return res.json({ uploadURL });
     } catch (error: any) {
       console.error('Error getting upload URL:', error);
       
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: "Failed to get upload URL",
         message: error.message || "An unexpected error occurred"
       });
@@ -1290,7 +1288,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const objectStorageService = new ObjectStorageService();
     try {
       const objectFile = await objectStorageService.getObjectEntityFile(req.path);
-      objectStorageService.downloadObject(objectFile, res);
+      return objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
       console.error("Error serving object:", error);
       if (error instanceof ObjectNotFoundError) {
@@ -1317,11 +1315,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
 
-      res.status(200).json({ objectPath });
+      return res.status(200).json({ objectPath });
     } catch (error: any) {
       console.error("Error setting object ACL:", error);
       
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: "Internal server error",
         message: error.message || "Failed to process object upload"
       });
@@ -1345,11 +1343,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       );
 
-      res.status(200).json({ objectPath });
+      return res.status(200).json({ objectPath });
     } catch (error: any) {
       console.error("Error setting object ACL:", error);
       
-      res.status(500).json({ 
+      return res.status(500).json({ 
         error: "Internal server error",
         message: error.message || "Failed to process object upload"
       });
@@ -1363,7 +1361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { date } = req.params;
         const impact = await storage.getCommunityImpactByDate(date);
-        res.json(impact || null);
+        return res.json(impact || null);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch community impact" });
       }
@@ -1391,7 +1389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expires: now + (4 * 60 * 60 * 1000)
       });
       
-      res.json(sponsor || null);
+      return res.json(sponsor || null);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch sponsor" });
     }
@@ -1417,13 +1415,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expires: now + (5 * 60 * 1000)
       });
       
-      res.json(sponsor || null);
+      return res.json(sponsor || null);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch daily sponsor" });
     }
   });
 
-  app.get("/api/sponsors", async (req, res) => {
+  app.get("/api/sponsors", async (_req, res) => {
     try {
       const cacheKey = 'active_sponsors';
       const now = Date.now();
@@ -1442,7 +1440,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         expires: now + (30 * 60 * 1000)
       });
       
-      res.json(sponsors);
+      return res.json(sponsors);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch sponsors" });
     }
@@ -1468,7 +1466,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         apiCache.delete(`sponsor_${contentType}_${sponsorshipDate}`);
       });
       
-      res.json(sponsor);
+      return res.json(sponsor);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create sponsor" });
     }
@@ -1477,20 +1475,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Campaign routes
   app.get("/api/campaigns/active", 
     cacheMiddleware({ ttl: CACHE_TTL.TODAYS_SPECIAL, category: 'campaigns-active' }),
-    async (req, res) => {
+    async (_req, res) => {
       try {
         const campaign = await storage.getActiveCampaign();
-        res.json(campaign || null);
+        return res.json(campaign || null);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch active campaign" });
       }
     }
   );
 
-  app.get("/api/campaigns", async (req, res) => {
+  app.get("/api/campaigns", async (_req, res) => {
     try {
       const campaigns = await storage.getAllCampaigns();
-      res.json(campaigns);
+      return res.json(campaigns);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch campaigns" });
     }
@@ -1499,7 +1497,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/campaigns", requireAdminAuth, async (req, res) => {
     try {
       const campaign = await storage.createCampaign(req.body);
-      res.json(campaign);
+      return res.json(campaign);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create campaign" });
     }
@@ -1512,7 +1510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { date } = req.params;
         const recipe = await storage.getDailyRecipeByDate(date);
-        res.json(recipe || null);
+        return res.json(recipe || null);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch daily recipe" });
       }
@@ -1521,7 +1519,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/table/recipe", 
     cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes-today' }),
-    async (req, res) => {
+    async (_req, res) => {
       try {
         // Get current date
         // Day starts at 02:00 local time for analytics
@@ -1533,7 +1531,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const today = now.toISOString().split('T')[0];
         
         const recipe = await storage.getDailyRecipeByDate(today);
-        res.json(recipe || null);
+        return res.json(recipe || null);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch daily recipe" });
       }
@@ -1550,22 +1548,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Recipe validated data:", validatedData);
       }
       const recipe = await storage.createDailyRecipe(validatedData);
-      res.json(recipe);
+      return res.json(recipe);
     } catch (error) {
       console.error("Failed to create daily recipe:", error);
       if (error instanceof Error) {
         return res.status(500).json({ message: "Failed to create daily recipe", error: error.message });
       } else {
-        res.status(500).json({ message: "Failed to create daily recipe", error: String(error) });
+        return res.status(500).json({ message: "Failed to create daily recipe", error: String(error) });
       }
     }
   });
 
   // Get all recipes for admin interface
-  app.get("/api/table/recipes", requireAdminAuth, async (req, res) => {
+  app.get("/api/table/recipes", requireAdminAuth, async (_req, res) => {
     try {
       const recipes = await storage.getAllDailyRecipes();
-      res.json(recipes);
+      return res.json(recipes);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch recipes" });
     }
@@ -1577,7 +1575,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const { week } = req.params;
         const vort = await storage.getParshaVortByWeek(week);
-        res.json(vort || null);
+        return res.json(vort || null);
       } catch (error) {
         return res.status(500).json({ message: "Failed to fetch Parsha vort" });
       }
@@ -1586,7 +1584,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/table/vort", 
     cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'parsha-vorts-today' }),
-    async (req, res) => {
+    async (_req, res) => {
       try {
         // Day starts at 02:00 local time for analytics
         const now = new Date();
@@ -1596,7 +1594,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         const today = now.toISOString().split('T')[0];
         const vorts = await storage.getParshaVortsByDate(today);
-        res.json(vorts);
+        return res.json(vorts);
       } catch (error) {
         console.error('Error fetching Parsha vorts:', error);
         return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
@@ -1608,7 +1606,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertParshaVortSchema.parse(req.body);
       const vort = await storage.createParshaVort(validatedData);
-      res.json(vort);
+      return res.json(vort);
     } catch (error) {
       console.error('Error creating Parsha vort:', error);
       return res.status(500).json({ message: "Failed to create Parsha vort" });
@@ -1616,10 +1614,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all Parsha vorts (admin only)
-  app.get("/api/table/vorts", requireAdminAuth, async (req, res) => {
+  app.get("/api/table/vorts", requireAdminAuth, async (_req, res) => {
     try {
       const vorts = await storage.getAllParshaVorts();
-      res.json(vorts);
+      return res.json(vorts);
     } catch (error) {
       console.error('Error fetching all Parsha vorts:', error);
       return res.status(500).json({ message: "Failed to fetch Parsha vorts" });
@@ -1652,13 +1650,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const vort = await storage.updateParshaVort(id, validatedData);
+      // Filter out undefined values for exactOptionalPropertyTypes compatibility
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const vort = await storage.updateParshaVort(id, cleanedData as any);
       
       if (!vort) {
         return res.status(404).json({ message: "Parsha vort not found" });
       }
       
-      res.json(vort);
+      return res.json(vort);
     } catch (error) {
       console.error('Error updating Parsha vort:', error);
       return res.status(500).json({ message: "Failed to update Parsha vort" });
@@ -1679,7 +1681,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Parsha vort not found" });
       }
       
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error('Error deleting Parsha vort:', error);
       return res.status(500).json({ message: "Failed to delete Parsha vort" });
@@ -1689,7 +1691,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Torah Classes routes
   app.get("/api/torah-classes", 
     cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'torah-classes-today' }),
-    async (req, res) => {
+    async (_req, res) => {
       try {
         const now = new Date();
         const hours = now.getHours();
@@ -1698,7 +1700,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
         const today = now.toISOString().split('T')[0];
         const classes = await storage.getTorahClassesByDate(today);
-        res.json(classes);
+        return res.json(classes);
       } catch (error) {
         console.error('Error fetching Torah classes:', error);
         return res.status(500).json({ message: "Failed to fetch Torah classes" });
@@ -1706,10 +1708,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
-  app.get("/api/torah-classes/all", requireAdminAuth, async (req, res) => {
+  app.get("/api/torah-classes/all", requireAdminAuth, async (_req, res) => {
     try {
       const classes = await storage.getAllTorahClasses();
-      res.json(classes);
+      return res.json(classes);
     } catch (error) {
       console.error('Error fetching all Torah classes:', error);
       return res.status(500).json({ message: "Failed to fetch Torah classes" });
@@ -1720,7 +1722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertTorahClassSchema.parse(req.body);
       const torahClass = await storage.createTorahClass(validatedData);
-      res.json(torahClass);
+      return res.json(torahClass);
     } catch (error) {
       console.error('Error creating Torah class:', error);
       return res.status(500).json({ message: "Failed to create Torah class" });
@@ -1735,13 +1737,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validatedData = insertTorahClassSchema.partial().parse(req.body);
-      const torahClass = await storage.updateTorahClass(id, validatedData);
+      // Filter out undefined values for exactOptionalPropertyTypes compatibility
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const torahClass = await storage.updateTorahClass(id, cleanedData as any);
       
       if (!torahClass) {
         return res.status(404).json({ message: "Torah class not found" });
       }
       
-      res.json(torahClass);
+      return res.json(torahClass);
     } catch (error) {
       console.error('Error updating Torah class:', error);
       return res.status(500).json({ message: "Failed to update Torah class" });
@@ -1761,7 +1767,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Torah class not found" });
       }
       
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error('Error deleting Torah class:', error);
       return res.status(500).json({ message: "Failed to delete Torah class" });
@@ -1769,7 +1775,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Life Classes routes
-  app.get("/api/life-classes", async (req, res) => {
+  app.get("/api/life-classes", async (_req, res) => {
     try {
       const now = new Date();
       const hours = now.getHours();
@@ -1778,17 +1784,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const today = now.toISOString().split('T')[0];
       const classes = await storage.getLifeClassesByDate(today);
-      res.json(classes);
+      return res.json(classes);
     } catch (error) {
       console.error('Error fetching Life classes:', error);
       return res.status(500).json({ message: "Failed to fetch Life classes" });
     }
   });
 
-  app.get("/api/life-classes/all", requireAdminAuth, async (req, res) => {
+  app.get("/api/life-classes/all", requireAdminAuth, async (_req, res) => {
     try {
       const classes = await storage.getAllLifeClasses();
-      res.json(classes);
+      return res.json(classes);
     } catch (error) {
       console.error('Error fetching all Life classes:', error);
       return res.status(500).json({ message: "Failed to fetch Life classes" });
@@ -1799,7 +1805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertLifeClassSchema.parse(req.body);
       const lifeClass = await storage.createLifeClass(validatedData);
-      res.json(lifeClass);
+      return res.json(lifeClass);
     } catch (error) {
       console.error('Error creating Life class:', error);
       return res.status(500).json({ message: "Failed to create Life class" });
@@ -1814,13 +1820,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const validatedData = insertLifeClassSchema.partial().parse(req.body);
-      const lifeClass = await storage.updateLifeClass(id, validatedData);
+      // Filter out undefined values for exactOptionalPropertyTypes compatibility
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const lifeClass = await storage.updateLifeClass(id, cleanedData as any);
       
       if (!lifeClass) {
         return res.status(404).json({ message: "Life class not found" });
       }
       
-      res.json(lifeClass);
+      return res.json(lifeClass);
     } catch (error) {
       console.error('Error updating Life class:', error);
       return res.status(500).json({ message: "Failed to update Life class" });
@@ -1840,7 +1850,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Life class not found" });
       }
       
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error('Error deleting Life class:', error);
       return res.status(500).json({ message: "Failed to delete Life class" });
@@ -1905,20 +1915,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         times.location = data.location?.title || 'New York';
       }
       
-      res.json(times);
+      return res.json(times);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch zmanim data" });
     }
   });
 
   // Admin: Migrate tehillim_names to tehillim_chains
-  app.post("/api/admin/migrate-tehillim-names", requireAdminAuth, async (req, res) => {
+  app.post("/api/admin/migrate-tehillim-names", requireAdminAuth, async (_req, res) => {
     try {
       const result = await storage.migrateTehillimNamesToChains();
-      res.json(result);
+      return res.json(result);
     } catch (error) {
       console.error("Error migrating tehillim names:", error);
-      res.status(500).json({ error: "Failed to migrate tehillim names" });
+      return res.status(500).json({ error: "Failed to migrate tehillim names" });
     }
   });
 
@@ -1927,7 +1937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { language } = req.params;
       const text = await storage.getNishmasTextByLanguage(language);
-      res.json(text || null);
+      return res.json(text || null);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch Nishmas text" });
     }
@@ -1937,7 +1947,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertNishmasTextSchema.parse(req.body);
       const text = await storage.createNishmasText(validatedData);
-      res.json(text);
+      return res.json(text);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create Nishmas text" });
     }
@@ -1947,18 +1957,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { language } = req.params;
       const validatedData = insertNishmasTextSchema.partial().parse(req.body);
-      const text = await storage.updateNishmasText(language, validatedData);
-      res.json(text);
+      // Filter out undefined values for exactOptionalPropertyTypes compatibility
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const text = await storage.updateNishmasText(language, cleanedData as any);
+      return res.json(text);
     } catch (error) {
       return res.status(500).json({ message: "Failed to update Nishmas text" });
     }
   });
 
   // Pirkei Avot progression route
-  app.get("/api/pirkei-avot/progress", async (req, res) => {
+  app.get("/api/pirkei-avot/progress", async (_req, res) => {
     try {
       const progress = await storage.getPirkeiAvotProgress();
-      res.json(progress);
+      return res.json(progress);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch Pirkei Avot progress" });
     }
@@ -1969,7 +1983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { category } = req.params;
       const prayers = await storage.getWomensPrayersByCategory(category);
-      res.json(prayers);
+      return res.json(prayers);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch women's prayers" });
     }
@@ -1979,17 +1993,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       const prayer = await storage.getWomensPrayerById(parseInt(id));
-      res.json(prayer || null);
+      return res.json(prayer || null);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch prayer" });
     }
   });
 
   // Meditation routes
-  app.get("/api/meditations/categories", async (req, res) => {
+  app.get("/api/meditations/categories", async (_req, res) => {
     try {
       const categories = await storage.getMeditationCategories();
-      res.json(categories);
+      return res.json(categories);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch meditation categories" });
     }
@@ -1999,16 +2013,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { section } = req.params;
       const meditations = await storage.getMeditationsBySection(section);
-      res.json(meditations);
+      return res.json(meditations);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch meditations" });
     }
   });
 
-  app.get("/api/meditations/all", async (req, res) => {
+  app.get("/api/meditations/all", async (_req, res) => {
     try {
       const allMeditations = await storage.getAllMeditations();
-      res.json(allMeditations);
+      return res.json(allMeditations);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch all meditations" });
     }
@@ -2032,7 +2046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const promotions = await storage.getActiveDiscountPromotions(userLocation);
-      res.json(promotions);
+      return res.json(promotions);
     } catch (error) {
       console.error('Error fetching discount promotions:', error);
       return res.status(500).json({ message: "Failed to fetch active discount promotions" });
@@ -2088,7 +2102,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: createdSponsor.message
         });
         
-        res.json({ success: true, message: 'Sponsor record created', sponsor: createdSponsor });
+        return res.json({ success: true, message: 'Sponsor record created', sponsor: createdSponsor });
       } else {
         console.log('⏭️ No sponsor record needed - conditions not met:', {
           donationType,
@@ -2096,7 +2110,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isCorrectType: donationType === 'Sponsor a Day of Ezras Nashim',
           hasName: !!sponsorName
         });
-        res.json({ success: true, message: 'No sponsor record needed' });
+        return res.json({ success: true, message: 'No sponsor record needed' });
       }
     } catch (error: any) {
       console.error('❌ Failed to create sponsor record:', error);
@@ -2109,7 +2123,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Serve Apple Pay domain verification file
-  app.get("/.well-known/apple-developer-merchantid-domain-association", (req, res) => {
+  app.get("/.well-known/apple-developer-merchantid-domain-association", (_req, res) => {
     console.log('Apple Pay domain verification file requested');
     res.setHeader('Content-Type', 'text/plain');
     // Send the Apple Pay domain verification content
@@ -2117,7 +2131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test Stripe connection endpoint
-  app.get("/api/stripe-test", async (req, res) => {
+  app.get("/api/stripe-test", async (_req, res) => {
     try {
       if (!stripe) {
         return res.status(503).json({
@@ -2139,7 +2153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Test payment intent created:', testIntent.id);
       
-      res.json({
+      return res.json({
         success: true,
         message: 'Stripe connection working',
         testIntentId: testIntent.id,
@@ -2153,7 +2167,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         decline_code: error.decline_code
       });
       
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         error: error.message,
         type: error.type,
@@ -2316,7 +2330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Session created successfully:', session.id)
-      res.json({ 
+      return res.json({ 
         sessionId: session.id,
         amount: amount,
       });
@@ -2327,7 +2341,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         type: error.type,
         decline_code: error.decline_code
       });
-      res.status(500).json({ 
+      return res.status(500).json({ 
         message: "Error creating payment intent: " + error.message,
         code: error.code,
         type: error.type
@@ -2388,9 +2402,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Stream the response directly with axios
       if (response.data) {
-        response.data.pipe(res);
+        return response.data.pipe(res);
       } else {
-        res.status(500).json({ error: "No response body" });
+        return res.status(500).json({ error: "No response body" });
       }
     } catch (error) {
       console.error('Media proxy error:', error);
@@ -2402,7 +2416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/audio-proxy/:fileId", async (req, res) => {
     const { fileId } = req.params;
     // Redirect to new universal proxy with gdrive service
-    res.redirect(`/api/media-proxy/gdrive/${fileId}`);
+    return res.redirect(`/api/media-proxy/gdrive/${fileId}`);
   });
 
   // Serve frontend application on root route
@@ -2421,8 +2435,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
 
   // Debug endpoint to verify webhook secret is loaded
-  app.get("/api/webhooks/stripe/debug", async (req, res) => {
-    res.json({
+  app.get("/api/webhooks/stripe/debug", async (_req, res) => {
+    return res.json({
       hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
       secretPrefix: process.env.STRIPE_WEBHOOK_SECRET ? (Array.isArray(process.env.STRIPE_WEBHOOK_SECRET) ? process.env.STRIPE_WEBHOOK_SECRET[0] : process.env.STRIPE_WEBHOOK_SECRET).substring(0, 10) + '...' : 'NOT_SET',
       environment: process.env.NODE_ENV || 'development'
@@ -2706,7 +2720,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`Unhandled event type ${event.type}`);
       }
 
-      res.json({ received: true });
+      return res.json({ received: true });
     } catch (error) {
       console.error('Error processing webhook:', error);
       return res.status(500).json({ error: 'Webhook processing failed' });
@@ -2720,9 +2734,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log('Checking completion for session:', sessionId);
       
-      // Look for completion events in the last 10 minutes
-      const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-      
       // Check if donation exists and was completed
       const donation = await storage.getDonationBySessionId(sessionId);
       
@@ -2732,14 +2743,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const metadata = donation.metadata as Record<string, any> || {};
         const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
         
-        res.json({
+        return res.json({
           completed: true,
           buttonType: buttonType,
           amount: donation.amount,
           timestamp: donation.createdAt
         });
       } else {
-        res.json({ completed: false });
+        return res.json({ completed: false });
       }
     } catch (error) {
       console.error('Error checking donation completion:', error);
@@ -2795,7 +2806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log('SUCCESS: Donation success processing complete');
       console.log('Button type processed:', buttonType);
       
-      res.json({ 
+      return res.json({ 
         success: true, 
         buttonType: buttonType,
         message: `${buttonType} completion recorded successfully` 
@@ -2809,7 +2820,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Frontend-driven payment confirmation (idempotent)
   app.post("/api/payments/confirm", async (req, res) => {
     try {
-      const { paymentIntentId, sessionId, amount, currency, metadata } = req.body;
+      const { paymentIntentId, sessionId, amount, metadata } = req.body;
+      void sessionId; // Mark as used
       
       if (!paymentIntentId) {
         return res.status(400).json({ message: "Payment intent ID required" });
@@ -2965,7 +2977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`Payment ${paymentIntentId} confirmed and stats updated`);
       
-      res.json({ 
+      return res.json({ 
         success: true, 
         message: "Payment confirmed successfully",
         buttonType: buttonType
@@ -3058,7 +3070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({ message: `Payment status: ${status}`, created: false });
       }
       
-      res.json({ message: "Donation status updated", donation });
+      return res.json({ message: "Donation status updated", donation });
     } catch (error) {
       console.error('Error updating donation status:', error);
       return res.status(500).json({ message: "Failed to update donation status" });
@@ -3066,7 +3078,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Offline bootstrap endpoint - Essential content for offline access
-  app.get("/api/offline/bootstrap", async (req, res) => {
+  app.get("/api/offline/bootstrap", async (_req, res) => {
     try {
       // Gather essential content for offline access
       const [
@@ -3091,7 +3103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Content-Type': 'application/json'
       });
 
-      res.json({
+      return res.json({
         timestamp: new Date().toISOString(),
         prayers: {
           morning: morningPrayers,
@@ -3172,12 +3184,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           link: item.link || ''
         })).sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-        res.json({
+        return res.json({
           events,
           location: eventsResponse.data.location || null
         });
       } else {
-        res.json({ events: [], location: null });
+        return res.json({ events: [], location: null });
       }
     } catch (error) {
       console.error('Error fetching Jewish events:', error);
@@ -3228,7 +3240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Cache-Control': 'public, max-age=120', // 2 minutes
       });
 
-      res.json(summary);
+      return res.json(summary);
     } catch (error) {
       console.error('Error fetching home summary:', error);
       return res.status(500).json({ error: "Failed to fetch home summary" });
@@ -3303,7 +3315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Cache-Control': 'public, max-age=300', // 5 minutes
       });
 
-      res.json(summary);
+      return res.json(summary);
     } catch (error) {
       console.error('Error fetching torah summary:', error);
       return res.status(500).json({ error: "Failed to fetch torah summary" });
@@ -3349,7 +3361,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cache.set(cacheKey, summary, { ttl: 300 });
 
       res.set({ 'Cache-Control': 'public, max-age=300' });
-      res.json(summary);
+      return res.json(summary);
     } catch (error) {
       console.error('Error fetching tzedaka summary:', error);
       return res.status(500).json({ error: "Failed to fetch tzedaka summary" });
@@ -3357,7 +3369,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Tefilla Stats Summary - Batched endpoint for Tehillim chain statistics
-  app.get("/api/tefilla-stats", async (req, res) => {
+  app.get("/api/tefilla-stats", async (_req, res) => {
     try {
       // Check server-side cache first (1 minute TTL for stats)
       const cacheKey = 'tefilla-stats';
@@ -3389,7 +3401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       cache.set(cacheKey, summary, { ttl: 60 });
 
       res.set({ 'Cache-Control': 'public, max-age=60' });
-      res.json(summary);
+      return res.json(summary);
     } catch (error) {
       console.error('Error fetching tefilla stats:', error);
       return res.status(500).json({ error: "Failed to fetch tefilla stats" });
@@ -3452,7 +3464,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         'Cache-Control': 'public, max-age=300',
       });
 
-      res.json(summary);
+      return res.json(summary);
     } catch (error) {
       console.error('Error fetching table summary:', error);
       return res.status(500).json({ error: "Failed to fetch table summary" });
@@ -3469,7 +3481,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No message found for this date" });
       }
       
-      res.json(message);
+      return res.json(message);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch message" });
     }
@@ -3481,7 +3493,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Validate request body with Zod schema
       const validatedData = insertMessagesSchema.parse(req.body);
       const newMessage = await storage.createMessage(validatedData);
-      res.status(201).json(newMessage);
+      return res.status(201).json(newMessage);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
@@ -3490,7 +3502,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       console.error("Error creating message:", error);
-      res.status(500).json({ message: "Failed to create message" });
+      return res.status(500).json({ message: "Failed to create message" });
     }
   });
 
@@ -3500,7 +3512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = upcoming === 'true' 
         ? await storage.getUpcomingMessages()
         : await storage.getAllMessages();
-      res.json(messages);
+      return res.json(messages);
     } catch (error) {
       console.error("Error fetching messages:", error);
       return res.status(500).json({ message: "Failed to fetch messages" });
@@ -3518,7 +3530,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       const validatedData = updateSchema.parse(req.body);
       const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
-      res.json(updatedMessage);
+      return res.json(updatedMessage);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
@@ -3527,7 +3539,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       console.error("Error updating message:", error);
-      res.status(500).json({ message: "Failed to update message" });
+      return res.status(500).json({ message: "Failed to update message" });
     }
   });
 
@@ -3535,7 +3547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       await storage.deleteMessage(parseInt(id));
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting message:", error);
       return res.status(500).json({ message: "Failed to delete message" });
@@ -3543,30 +3555,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Scheduled Notification endpoints (admin-only)
-  app.get("/api/scheduled-notifications", requireAdminAuth, async (req, res) => {
+  app.get("/api/scheduled-notifications", requireAdminAuth, async (_req, res) => {
     try {
       const notifications = await storage.getAllScheduledNotifications();
-      res.json(notifications);
+      return res.json(notifications);
     } catch (error) {
       console.error("Error fetching scheduled notifications:", error);
       return res.status(500).json({ message: "Failed to fetch scheduled notifications" });
     }
   });
 
-  app.get("/api/scheduled-notifications/upcoming", requireAdminAuth, async (req, res) => {
+  app.get("/api/scheduled-notifications/upcoming", requireAdminAuth, async (_req, res) => {
     try {
       const notifications = await storage.getUpcomingScheduledNotifications();
-      res.json(notifications);
+      return res.json(notifications);
     } catch (error) {
       console.error("Error fetching upcoming scheduled notifications:", error);
       return res.status(500).json({ message: "Failed to fetch upcoming scheduled notifications" });
     }
   });
 
-  app.get("/api/scheduled-notifications/pending", requireAdminAuth, async (req, res) => {
+  app.get("/api/scheduled-notifications/pending", requireAdminAuth, async (_req, res) => {
     try {
       const notifications = await storage.getPendingScheduledNotifications();
-      res.json(notifications);
+      return res.json(notifications);
     } catch (error) {
       console.error("Error fetching pending scheduled notifications:", error);
       return res.status(500).json({ message: "Failed to fetch pending scheduled notifications" });
@@ -3578,7 +3590,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { insertScheduledNotificationSchema } = await import("../shared/schema");
       const validatedData = insertScheduledNotificationSchema.parse(req.body);
       const newNotification = await storage.createScheduledNotification(validatedData);
-      res.json(newNotification);
+      return res.json(newNotification);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
@@ -3597,8 +3609,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { insertScheduledNotificationSchema } = await import("../shared/schema");
       const updateSchema = insertScheduledNotificationSchema.partial();
       const validatedData = updateSchema.parse(req.body);
-      const updatedNotification = await storage.updateScheduledNotification(parseInt(id), validatedData);
-      res.json(updatedNotification);
+      // Filter out undefined values for exactOptionalPropertyTypes compatibility
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const updatedNotification = await storage.updateScheduledNotification(parseInt(id), cleanedData as any);
+      return res.json(updatedNotification);
     } catch (error: any) {
       if (error.name === 'ZodError') {
         return res.status(400).json({ 
@@ -3615,7 +3631,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { id } = req.params;
       await storage.deleteScheduledNotification(parseInt(id));
-      res.json({ success: true });
+      return res.json({ success: true });
     } catch (error) {
       console.error("Error deleting scheduled notification:", error);
       return res.status(500).json({ message: "Failed to delete scheduled notification" });

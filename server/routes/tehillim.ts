@@ -27,10 +27,10 @@ const GLOBAL_STATS_CACHE_TTL = 5 * 60 * 1000;
 export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
   const { storage } = deps;
 
-  app.get("/api/tehillim/progress", async (req: Request, res: Response) => {
+  app.get("/api/tehillim/progress", async (_req: Request, res: Response) => {
     try {
       const progressWithName = await storage.getProgressWithAssignedName();
-      res.json(progressWithName);
+      return res.json(progressWithName);
     } catch (error) {
       console.error('Error fetching Tehillim progress:', error);
       return res.status(500).json({ error: "Failed to fetch Tehillim progress" });
@@ -50,33 +50,33 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       }
       
       const updatedProgress = await storage.updateGlobalTehillimProgress(currentPerek, language, completedBy);
-      res.json(updatedProgress);
+      return res.json(updatedProgress);
     } catch (error) {
       console.error('Error completing Tehillim:', error);
       return res.status(500).json({ error: "Failed to complete Tehillim" });
     }
   });
 
-  app.get("/api/tehillim/current-name", async (req: Request, res: Response) => {
+  app.get("/api/tehillim/current-name", async (_req: Request, res: Response) => {
     try {
       const progressWithName = await storage.getProgressWithAssignedName();
       
       if (progressWithName.currentNameId) {
         const names = await storage.getActiveNames();
         const assignedName = names.find(n => n.id === progressWithName.currentNameId);
-        res.json(assignedName || null);
+        return res.json(assignedName || null);
       } else {
-        res.json(null);
+        return res.json(null);
       }
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch current name" });
     }
   });
 
-  app.get("/api/tehillim/names", async (req: Request, res: Response) => {
+  app.get("/api/tehillim/names", async (_req: Request, res: Response) => {
     try {
       const names = await storage.getActiveNames();
-      res.json(names);
+      return res.json(names);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch Tehillim names" });
     }
@@ -85,7 +85,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
   app.get("/api/tehillim/global-progress", async (_req: Request, res: Response) => {
     try {
       const progress = await storage.getGlobalTehillimProgress();
-      res.json(progress);
+      return res.json(progress);
     } catch (error) {
       console.error("Error fetching global tehillim progress:", error);
       return res.status(500).json({ message: "Failed to fetch global tehillim progress" });
@@ -105,7 +105,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         return res.status(404).json({ error: "Tehillim not found" });
       }
       
-      res.json(tehillimInfo);
+      return res.json(tehillimInfo);
     } catch (error) {
       console.error('Error fetching Tehillim info:', error);
       return res.status(500).json({ error: "Failed to fetch Tehillim info" });
@@ -128,7 +128,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         }
         
         const tehillimData = await storage.getSupabaseTehillim(perek, language);
-        res.json(tehillimData);
+        return res.json(tehillimData);
       } catch (error) {
         console.error('Error fetching Tehillim text:', error);
         return res.status(500).json({ error: "Failed to fetch Tehillim text" });
@@ -152,7 +152,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         }
         
         const tehillimData = await storage.getTehillimById(id, language);
-        res.json(tehillimData);
+        return res.json(tehillimData);
       } catch (error) {
         console.error('Error fetching Tehillim text by ID:', error);
         return res.status(500).json({ error: "Failed to fetch Tehillim text" });
@@ -253,7 +253,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       const tehillimText = await storage.getSefariaTehillim(perek, language);
       const firstLine = tehillimText.text.split('\n')[0] || tehillimText.text.substring(0, 100) + '...';
       
-      res.json({
+      return res.json({
         preview: firstLine,
         perek: tehillimText.perek,
         language: tehillimText.language
@@ -268,12 +268,12 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
     try {
       const validatedData = insertTehillimNameSchema.parse(req.body);
       const name = await storage.createTehillimName(validatedData);
-      res.json(name);
+      return res.json(name);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        res.status(400).json({ message: "Invalid name data", errors: error.errors });
+        return res.status(400).json({ message: "Invalid name data", errors: error.errors });
       } else {
-        res.status(500).json({ message: "Failed to create Tehillim name" });
+        return res.status(500).json({ message: "Failed to create Tehillim name" });
       }
     }
   });
@@ -299,7 +299,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         displayTitle = `Tehillim 119 (Part 1)`;
       }
       
-      res.json({
+      return res.json({
         tehillimId,
         psalmNumber: tehillimRow.englishNumber,
         partNumber: tehillimRow.partNumber,
@@ -340,10 +340,10 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         isActive: true,
       });
 
-      res.json(chain);
+      return res.json(chain);
     } catch (error) {
       console.error("Error creating Tehillim chain:", error);
-      res.status(500).json({ error: "Failed to create Tehillim chain" });
+      return res.status(500).json({ error: "Failed to create Tehillim chain" });
     }
   });
 
@@ -351,24 +351,24 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
     try {
       const query = (req.query.q as string) || '';
       const chains = await storage.searchTehillimChains(query);
-      res.json(chains);
+      return res.json(chains);
     } catch (error) {
       console.error("Error searching Tehillim chains (returning empty):", error);
-      res.json([]);
+      return res.json([]);
     }
   });
 
-  app.get("/api/tehillim-chains/stats/total", async (req: Request, res: Response) => {
+  app.get("/api/tehillim-chains/stats/total", async (_req: Request, res: Response) => {
     try {
       const total = await storage.getTotalChainTehillimCompleted();
-      res.json({ total });
+      return res.json({ total });
     } catch (error) {
       console.error("Error fetching total chains tehillim (returning 0):", error);
-      res.json({ total: 0 });
+      return res.json({ total: 0 });
     }
   });
 
-  app.get("/api/tehillim-chains/stats/global", async (req: Request, res: Response) => {
+  app.get("/api/tehillim-chains/stats/global", async (_req: Request, res: Response) => {
     try {
       if (globalStatsCache && Date.now() - globalStatsCache.timestamp < GLOBAL_STATS_CACHE_TTL) {
         return res.json(globalStatsCache.data);
@@ -377,33 +377,33 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       const stats = await storage.getTehillimGlobalStats();
       globalStatsCache = { data: stats, timestamp: Date.now() };
       
-      res.json(stats);
+      return res.json(stats);
     } catch (error) {
       console.error("Error fetching global tehillim stats:", error);
-      res.json({ totalRead: 0, booksCompleted: 0, uniqueReaders: 0 });
+      return res.json({ totalRead: 0, booksCompleted: 0, uniqueReaders: 0 });
     }
   });
 
-  app.get("/api/tehillim-chains/stats/active-count", async (req: Request, res: Response) => {
+  app.get("/api/tehillim-chains/stats/active-count", async (_req: Request, res: Response) => {
     try {
       const count = await storage.getActiveTehillimChainCount();
-      res.json({ count });
+      return res.json({ count });
     } catch (error) {
       console.error("Error fetching active chain count:", error);
-      res.json({ count: 0 });
+      return res.json({ count: 0 });
     }
   });
 
-  app.get("/api/tehillim-chains/random", async (req: Request, res: Response) => {
+  app.get("/api/tehillim-chains/random", async (_req: Request, res: Response) => {
     try {
       const randomChain = await storage.getRandomTehillimChain();
       if (!randomChain) {
         return res.status(404).json({ error: "No chains found" });
       }
-      res.json(randomChain);
+      return res.json(randomChain);
     } catch (error) {
       console.error("Error getting random chain:", error);
-      res.status(500).json({ error: "Failed to get random chain" });
+      return res.status(500).json({ error: "Failed to get random chain" });
     }
   });
 
@@ -458,10 +458,10 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       
       res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
       res.setHeader('Content-Disposition', `attachment; filename="tehillim-reminder-${slug}.ics"`);
-      res.send(icsContent);
+      return res.send(icsContent);
     } catch (error) {
       console.error("Error generating ICS file:", error);
-      res.status(500).json({ error: "Failed to generate calendar file" });
+      return res.status(500).json({ error: "Failed to generate calendar file" });
     }
   });
 
@@ -490,7 +490,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.json({
+      return res.json({
         ...chain,
         stats: {
           totalCompleted: stats.totalSaid,
@@ -503,7 +503,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       });
     } catch (error) {
       console.error("Error fetching Tehillim chain:", error);
-      res.status(500).json({ error: "Failed to fetch Tehillim chain" });
+      return res.status(500).json({ error: "Failed to fetch Tehillim chain" });
     }
   });
 
@@ -520,7 +520,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      res.json({
+      return res.json({
         totalCompleted: stats.totalSaid,
         booksCompleted: stats.booksCompleted,
         currentlyReading: stats.currentlyReading,
@@ -528,7 +528,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       });
     } catch (error) {
       console.error("Error fetching chain stats:", error);
-      res.status(500).json({ error: "Failed to fetch chain stats" });
+      return res.status(500).json({ error: "Failed to fetch chain stats" });
     }
   });
 
@@ -555,10 +555,10 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       }
 
       const reading = await storage.startChainReading(chain.id, psalm, deviceId);
-      res.json(reading);
+      return res.json(reading);
     } catch (error) {
       console.error("Error starting chain reading:", error);
-      res.status(500).json({ error: "Failed to start reading" });
+      return res.status(500).json({ error: "Failed to start reading" });
     }
   });
 
@@ -581,7 +581,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       globalStatsCache = null;
       
       const stats = await storage.getTehillimChainStats(chain.id);
-      res.json({ 
+      return res.json({ 
         reading, 
         stats: {
           totalCompleted: stats.totalSaid,
@@ -592,7 +592,7 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
       });
     } catch (error) {
       console.error("Error completing chain reading:", error);
-      res.status(500).json({ error: "Failed to complete reading" });
+      return res.status(500).json({ error: "Failed to complete reading" });
     }
   });
 
@@ -611,10 +611,10 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         return res.status(404).json({ error: "No psalms available" });
       }
 
-      res.json({ psalmNumber: psalm });
+      return res.json({ psalmNumber: psalm });
     } catch (error) {
       console.error("Error getting next psalm:", error);
-      res.status(500).json({ error: "Failed to get next psalm" });
+      return res.status(500).json({ error: "Failed to get next psalm" });
     }
   });
 
@@ -641,10 +641,10 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
         return res.status(404).json({ error: "No psalms available" });
       }
 
-      res.json({ psalmNumber: psalm });
+      return res.json({ psalmNumber: psalm });
     } catch (error) {
       console.error("Error getting random psalm:", error);
-      res.status(500).json({ error: "Failed to get random psalm" });
+      return res.status(500).json({ error: "Failed to get random psalm" });
     }
   });
 }

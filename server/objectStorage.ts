@@ -33,8 +33,7 @@ const s3Client = new S3Client(s3ClientConfig);
 export class S3Object {
   constructor(
     public readonly bucketName: string,
-    public readonly key: string,
-    private metadata?: Record<string, string>
+    public readonly key: string
   ) {}
 
   async exists(): Promise<[boolean]> {
@@ -58,11 +57,11 @@ export class S3Object {
       Key: this.key,
     });
     const response = await s3Client.send(command);
-    return [{
-      contentType: response.ContentType,
-      size: response.ContentLength,
-      metadata: response.Metadata,
-    }];
+    const result: { contentType?: string; size?: number; metadata?: Record<string, string> } = {};
+    if (response.ContentType !== undefined) result.contentType = response.ContentType;
+    if (response.ContentLength !== undefined) result.size = response.ContentLength;
+    if (response.Metadata !== undefined) result.metadata = response.Metadata;
+    return [result];
   }
 
   async setMetadata(options: { metadata: Record<string, string> }): Promise<void> {
@@ -82,7 +81,6 @@ export class S3Object {
       MetadataDirective: 'REPLACE',
     }));
     
-    this.metadata = { ...existingMetadata, ...options.metadata };
   }
 
   createReadStream() {
