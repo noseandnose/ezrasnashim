@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,6 +18,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const [hebrewName, setHebrewName] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -91,7 +93,7 @@ export default function Login() {
         toast({ title: "Welcome back!", description: "You've been signed in successfully." });
         setLocation('/');
       } else if (mode === 'signup') {
-        await signUpWithEmail(email, password, firstName, lastName);
+        await signUpWithEmail(email, password, firstName, lastName, hebrewName, birthday);
         toast({ 
           title: "Check your email", 
           description: "We've sent you a confirmation link to complete your registration." 
@@ -187,30 +189,55 @@ export default function Login() {
 
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {mode === 'signup' && (
-              <div className="grid grid-cols-2 gap-3">
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="First name"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      className="pl-9"
+                      data-testid="input-first-name"
+                    />
+                  </div>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      type="text"
+                      placeholder="Last name"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      className="pl-9"
+                      data-testid="input-last-name"
+                    />
+                  </div>
+                </div>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Star className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     type="text"
-                    placeholder="First name"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Hebrew name (optional)"
+                    value={hebrewName}
+                    onChange={(e) => setHebrewName(e.target.value)}
                     className="pl-9"
-                    data-testid="input-first-name"
+                    dir="rtl"
+                    data-testid="input-hebrew-name"
                   />
                 </div>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
-                    type="text"
-                    placeholder="Last name"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    type="date"
+                    placeholder="Birthday"
+                    value={birthday}
+                    onChange={(e) => setBirthday(e.target.value)}
                     className="pl-9"
-                    data-testid="input-last-name"
+                    data-testid="input-birthday"
                   />
                 </div>
-              </div>
+              </>
             )}
 
             <div className="relative">

@@ -8,6 +8,8 @@ export interface User {
   email: string | null;
   firstName: string | null;
   lastName: string | null;
+  hebrewName: string | null;
+  birthday: string | null;
   profileImageUrl: string | null;
 }
 
@@ -21,6 +23,8 @@ function mapSupabaseUser(user: SupabaseUser | null): User | null {
     email: user.email || null,
     firstName: metadata.first_name || metadata.full_name?.split(' ')[0] || null,
     lastName: metadata.last_name || metadata.full_name?.split(' ').slice(1).join(' ') || null,
+    hebrewName: metadata.hebrew_name || null,
+    birthday: metadata.birthday || null,
     profileImageUrl: metadata.avatar_url || metadata.picture || null,
   };
 }
@@ -84,7 +88,14 @@ export function useAuth() {
     if (error) throw error;
   };
 
-  const signUpWithEmail = async (email: string, password: string, firstName?: string, lastName?: string) => {
+  const signUpWithEmail = async (
+    email: string, 
+    password: string, 
+    firstName?: string, 
+    lastName?: string,
+    hebrewName?: string,
+    birthday?: string
+  ) => {
     if (!supabase) throw new Error('Authentication not configured');
     const { error } = await supabase.auth.signUp({
       email,
@@ -93,6 +104,8 @@ export function useAuth() {
         data: {
           first_name: firstName,
           last_name: lastName,
+          hebrew_name: hebrewName,
+          birthday: birthday,
         },
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
