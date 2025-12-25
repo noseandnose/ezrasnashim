@@ -432,7 +432,7 @@ export default function Profile() {
           }}
         >
           <h3 className="platypi-bold text-base text-black mb-4 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-amber-500">
+            <div className="p-1.5 rounded-full bg-blush">
               <Trophy className="w-4 h-4 text-white" />
             </div>
             All-Time Stats
