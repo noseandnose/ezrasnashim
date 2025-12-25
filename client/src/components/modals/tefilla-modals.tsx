@@ -2499,6 +2499,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     content: React.ReactNode;
     contentType?: string;
     hasTranslation?: boolean;
+    originSection?: string;
   }>({ isOpen: false, title: '', content: null });
 
   // Function to update fullscreen translation availability
@@ -2672,11 +2673,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       }
       
       // Open fullscreen immediately without closing modal first
+      // Track origin section so we can return there on close
       setFullscreenContent({
         isOpen: true,
         title,
         contentType,
-        content: null // Content will be rendered based on contentType
+        content: null, // Content will be rendered based on contentType
+        originSection: 'tefilla' // Track that we came from Tefilla section
       });
       
       // Close the regular modal immediately with fullscreen opens
@@ -2730,6 +2733,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
   const handleFullscreenClose = useCallback(() => {
     const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
     const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
+    const originSection = fullscreenContent.originSection;
     
     if (wasIndividualBrocha) {
       // Go back to Siddur selector instead of home - swap content within same fullscreen
@@ -2737,7 +2741,8 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title: 'Siddur',
         contentType: 'brochas',
-        content: null
+        content: null,
+        ...(originSection && { originSection }) // Preserve origin if exists
       });
       return;
     } else if (wasIndividualTehillim) {
@@ -2747,29 +2752,22 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         isOpen: true,
         title: 'Tehillim',
         contentType: 'special-tehillim',
-        content: null
+        content: null,
+        ...(originSection && { originSection }) // Preserve origin if exists
       });
       return;
     }
     
-    // For other content types: close everything and go to home
+    // For other content types: close and return to origin section (or home if no origin)
     setFullscreenContent({ isOpen: false, title: '', content: null });
     closeModal();
     
-    // Navigate to home section and show flower growth
-    if (onSectionChange) {
-      onSectionChange('home');
-      setTimeout(() => {
-        const progressElement = document.getElementById('daily-progress-garden');
-        if (progressElement) {
-          progressElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-        }
-      }, 300);
+    // Navigate back to the section we came from
+    if (onSectionChange && originSection) {
+      onSectionChange(originSection as 'torah' | 'tefilla' | 'tzedaka' | 'home' | 'table');
     }
-  }, [fullscreenContent.contentType, closeModal, openModal, onSectionChange]);
+    // If no originSection, just close without navigation (stay where we are)
+  }, [fullscreenContent.contentType, fullscreenContent.originSection, closeModal, openModal, onSectionChange]);
 
   // Listen for custom close fullscreen events
   useEffect(() => {
