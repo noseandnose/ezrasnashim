@@ -1,6 +1,5 @@
 import type { Express, Request, Response } from "express";
 import serverAxiosClient from "../axiosClient";
-import { cachedGet } from "./utils/cache";
 
 export function registerLocationRoutes(app: Express) {
   app.get("/api/location/ip", async (req: Request, res: Response) => {
@@ -36,10 +35,10 @@ export function registerLocationRoutes(app: Express) {
         };
         
         console.log('IP-based location detected:', locationData);
-        res.json(locationData);
+        return res.json(locationData);
       } else {
         console.log('IP-based location failed:', ipResponse.data.message);
-        res.status(400).json({ error: 'Could not determine location from IP address' });
+        return res.status(400).json({ error: 'Could not determine location from IP address' });
       }
     } catch (error) {
       console.error('IP-based location detection error:', error);
@@ -62,14 +61,14 @@ export function registerLocationRoutes(app: Express) {
       );
 
       if (response.data) {
-        res.json({
+        return res.json({
           country: response.data.address?.country || 'Unknown',
           city: response.data.address?.city || response.data.address?.town || response.data.address?.village || 'Unknown',
           state: response.data.address?.state || response.data.address?.province || null,
           coordinates: { latitude, longitude }
         });
       } else {
-        res.status(404).json({ message: "Location not found" });
+        return res.status(404).json({ message: "Location not found" });
       }
     } catch (error) {
       console.error('Error fetching location:', error);
@@ -131,7 +130,7 @@ export function registerLocationRoutes(app: Express) {
           monthLength = hebrewResponse.data.monthLength;
         }
         
-        res.json({
+        return res.json({
           hebrew: hebrewResponse.data.hebrew || '',
           date: date,
           isRoshChodesh,
@@ -144,7 +143,7 @@ export function registerLocationRoutes(app: Express) {
           hm: hebrewResponse.data.hm
         });
       } else {
-        res.status(404).json({ message: "Hebrew date not found" });
+        return res.status(404).json({ message: "Hebrew date not found" });
       }
     } catch (error) {
       console.error('Error fetching Hebrew date:', error);

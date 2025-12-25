@@ -1,6 +1,5 @@
 import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
-import { useLocation } from "wouter";
 import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";

@@ -74,7 +74,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
               <img
                 src={promotion.logoUrl}
                 alt={promotion.title}
-                className="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                className="w-10 h-10 min-w-10 flex-shrink-0 rounded-full object-cover border-2 border-white shadow-sm"
               />
               <div className="flex-1">
                 <h3 className="text-sm platypi-semibold text-gray-800 leading-tight">

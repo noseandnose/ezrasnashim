@@ -7,8 +7,8 @@ interface QueuedNotification {
   payload: string;
   attempts: number;
   lastAttempt: Date;
-  notificationId?: number;
-  queueId: string; // Unique ID for this queued item
+  notificationId?: number | undefined;
+  queueId: string;
 }
 
 export class PushRetryQueue {

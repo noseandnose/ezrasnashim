@@ -944,3 +944,6 @@ export const appVersions = pgTable("app_versions", {
 export const insertAppVersionSchema = createInsertSchema(appVersions).omit({ id: true, deployedAt: true });
 export type AppVersion = typeof appVersions.$inferSelect;
 export type InsertAppVersion = z.infer<typeof insertAppVersionSchema>;
+
+// Auth models (users, sessions) - required for Replit Auth
+export * from "./models/auth";

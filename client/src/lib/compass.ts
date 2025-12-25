@@ -135,7 +135,6 @@ export class SimpleCompass {
   private orientationHandler: ((event: DeviceOrientationEvent) => void) | null = null;
   private absoluteOrientationHandler: ((event: DeviceOrientationEvent) => void) | null = null;
   private watchId: number | null = null;
-  private _activeEventType: string | null = null;
   private eventSwitchTimeout: NodeJS.Timeout | null = null;
   
   // Filtering and smoothing
@@ -254,21 +253,6 @@ export class SimpleCompass {
     );
   }
   
-  private _hasLocationChanged(oldLoc: {lat: number, lng: number}, newLoc: {lat: number, lng: number}, accuracy: number): boolean {
-    const distance = this.calculateDistance(oldLoc.lat, oldLoc.lng, newLoc.lat, newLoc.lng);
-    return distance > Math.max(COMPASS_CONFIG.LOCATION_ACCURACY_THRESHOLD, accuracy || 50);
-  }
-  
-  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
-    const R = 6371000; // Earth's radius in meters
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLng = (lng2 - lng1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2);
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  }
-  
   private getCachedLocation(): {lat: number, lng: number} | null {
     try {
       const cached = localStorage.getItem('compass-location');
@@ -338,7 +322,7 @@ export class SimpleCompass {
     
     // For iOS with webkitCompassHeading, only use deviceorientation
     if (deviceInfo.isIOS && deviceInfo.hasWebkitCompass) {
-      this._activeEventType = 'deviceorientation';
+
       this.orientationHandler = (event: DeviceOrientationEvent) => {
         this.handleOrientationEvent(event, 'deviceorientation');
       };
@@ -359,7 +343,6 @@ export class SimpleCompass {
     this.absoluteOrientationHandler = (event: DeviceOrientationEvent) => {
       if (!absoluteEventFired) {
         absoluteEventFired = true;
-        this._activeEventType = 'deviceorientationabsolute';
         
         // Remove standard event listener if absolute works
         if (this.orientationHandler) {
@@ -378,7 +361,7 @@ export class SimpleCompass {
     this.orientationHandler = (event: DeviceOrientationEvent) => {
       if (!standardEventFired) {
         standardEventFired = true;
-        this._activeEventType = 'deviceorientation';
+  
         
         if (this.debugMode) {
           console.log('[Compass] Using deviceorientation (fallback)');
@@ -396,7 +379,7 @@ export class SimpleCompass {
       if (!absoluteEventFired && this.absoluteOrientationHandler) {
         window.removeEventListener('deviceorientationabsolute', this.absoluteOrientationHandler as any);
         this.absoluteOrientationHandler = null;
-        this._activeEventType = 'deviceorientation';
+  
         
         if (this.debugMode) {
           console.log('[Compass] deviceorientationabsolute timeout, using deviceorientation only');
@@ -532,7 +515,6 @@ export class SimpleCompass {
       this.absoluteOrientationHandler = null;
     }
     
-    this._activeEventType = null;
   }
   
   subscribe(callback: (state: CompassState) => void) {

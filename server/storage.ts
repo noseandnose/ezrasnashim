@@ -27,25 +27,25 @@ import {
   type Donation, type InsertDonation,
   type Act, type InsertAct,
   type WomensPrayer, type InsertWomensPrayer,
-  type Meditation, type InsertMeditation,
+  type Meditation,
   type DiscountPromotion, type InsertDiscountPromotion,
   type PirkeiAvot, type InsertPirkeiAvot,
-  type PirkeiAvotProgress, type InsertPirkeiAvotProgress,
+  type PirkeiAvotProgress,
   type AnalyticsEvent, type InsertAnalyticsEvent,
-  type DailyStats, type InsertDailyStats,
+  type DailyStats,
   type Message, type InsertMessage, messages,
   scheduledNotifications, type ScheduledNotification, type InsertScheduledNotification,
   pushSubscriptions, pushNotifications,
   type PushSubscription, type InsertPushSubscription,
   type PushNotification, type InsertPushNotification,
   type TehillimChain, type InsertTehillimChain,
-  type TehillimChainReading, type InsertTehillimChainReading,
+  type TehillimChainReading,
   type TodaysSpecial, type InsertTodaysSpecial,
   type GiftOfChatzos, type InsertGiftOfChatzos
 } from "../shared/schema";
-import { db, pool } from "./db";
-import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, inArray, isNull } from "drizzle-orm";
-import { cleanHebrewText, memoize, withRetry, formatDate } from './typeHelpers';
+import { db } from "./db";
+import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, isNull } from "drizzle-orm";
+import { formatDate } from './typeHelpers';
 
 export interface IStorage {
   
@@ -366,14 +366,7 @@ export class DatabaseStorage implements IStorage {
     // Skip initialization for better performance
   }
 
-  private async initializeDefaults() {
-    // Skip initialization to improve startup performance
-    return;
-  }
 
-  private initializeData() {
-    this.initializeDefaults().catch(console.error);
-  }
 
 
 
@@ -514,7 +507,7 @@ export class DatabaseStorage implements IStorage {
       // Track analytics events using the transaction context
       try {
         // Track the Tehillim completion - using tx for proper transaction consistency
-        const [tehillimEvent] = await tx
+        await tx
           .insert(analyticsEvents)
           .values({
             eventType: 'tehillim_complete',
@@ -525,12 +518,11 @@ export class DatabaseStorage implements IStorage {
               isGlobal: true
             },
             sessionId: 'global-chain'
-          })
-          .returning();
+          });
         
         // Track the name being prayed for (if there was a name)
         if (currentNameDetails) {
-          const [nameEvent] = await tx
+          await tx
             .insert(analyticsEvents)
             .values({
               eventType: 'name_prayed',
@@ -542,13 +534,12 @@ export class DatabaseStorage implements IStorage {
                 completedBy: completedBy || 'Anonymous'
               },
               sessionId: 'global-chain'
-            })
-            .returning();
+            });
         }
         
         // IMPORTANT: Global Tehillim chain counts as 2 mitzvos
         // Track an additional mitzvah for the global chain completion
-        const [secondMitzvahEvent] = await tx
+        await tx
           .insert(analyticsEvents)
           .values({
             eventType: 'modal_complete',
@@ -560,8 +551,7 @@ export class DatabaseStorage implements IStorage {
               mitzvahType: 'second_global_mitzvah'
             },
             sessionId: 'global-chain'
-          })
-          .returning();
+          });
         
         console.log(`Tracked Tehillim completion: perek ${currentPerek}, name: ${currentNameDetails?.hebrewName || 'None'}, counted as 2 mitzvos`);
       } catch (analyticsError) {
@@ -1144,7 +1134,7 @@ export class DatabaseStorage implements IStorage {
     return available[0];
   }
 
-  async getRandomAvailablePsalmForChain(chainId: number, excludeDeviceId?: string, excludePsalm?: number): Promise<number | null> {
+  async getRandomAvailablePsalmForChain(chainId: number, _excludeDeviceId?: string, excludePsalm?: number): Promise<number | null> {
     // Total tehillim units: 171 (psalms 1-150, but psalm 119 has 22 parts instead of 1)
     const TOTAL_TEHILLIM_UNITS = 171;
     
@@ -1564,7 +1554,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Sponsor methods
-  async getSponsorByContentTypeAndDate(contentType: string, date: string): Promise<Sponsor | undefined> {
+  async getSponsorByContentTypeAndDate(_contentType: string, date: string): Promise<Sponsor | undefined> {
     // Since we now have daily sponsors instead of content-specific ones, just return the daily sponsor
     return this.getDailySponsor(date);
   }
