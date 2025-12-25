@@ -2731,39 +2731,38 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
     const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
     
+    if (wasIndividualBrocha) {
+      // Go back to Siddur selector instead of home - close fullscreen and immediately open brochas
+      setFullscreenContent({
+        isOpen: true,
+        title: 'Siddur',
+        contentType: 'brochas',
+        content: null
+      });
+      return; // Don't close modal or navigate to home
+    } else if (wasIndividualTehillim) {
+      // Go back to Tehillim selector instead of home - open modal BEFORE closing fullscreen
+      setFullscreenContent({ isOpen: false, title: '', content: null });
+      openModal('special-tehillim', 'tefilla');
+      return; // Don't close modal or navigate to home
+    }
+    
+    // For other content types: close everything and go to home
     setFullscreenContent({ isOpen: false, title: '', content: null });
-    // Close any active modal to reset state properly
     closeModal();
     
-    if (wasIndividualBrocha) {
-      // Go back to Siddur selector instead of home
+    // Navigate to home section and show flower growth
+    if (onSectionChange) {
+      onSectionChange('home');
       setTimeout(() => {
-        setFullscreenContent({
-          isOpen: true,
-          title: 'Siddur',
-          contentType: 'brochas',
-          content: null
-        });
-      }, 100);
-    } else if (wasIndividualTehillim) {
-      // Go back to Tehillim selector instead of home
-      setTimeout(() => {
-        openModal('special-tehillim', 'tefilla');
-      }, 100);
-    } else {
-      // Navigate to home section and show flower growth for other types
-      if (onSectionChange) {
-        onSectionChange('home');
-        setTimeout(() => {
-          const progressElement = document.getElementById('daily-progress-garden');
-          if (progressElement) {
-            progressElement.scrollIntoView({ 
-              behavior: 'smooth', 
-              block: 'center' 
-            });
-          }
-        }, 300);
-      }
+        const progressElement = document.getElementById('daily-progress-garden');
+        if (progressElement) {
+          progressElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 300);
     }
   }, [fullscreenContent.contentType, closeModal, openModal, onSectionChange]);
 
