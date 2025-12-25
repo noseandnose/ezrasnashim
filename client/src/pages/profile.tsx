@@ -395,29 +395,29 @@ export default function Profile() {
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-1">
-                <BookOpen className="w-4 h-4 text-blush" />
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
+              <div className="w-6 h-6 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-0.5">
+                <BookOpen className="w-3 h-3 text-blush" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
             </div>
             
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-1">
-                <Heart className="w-4 h-4 text-lavender" />
+            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
+              <div className="w-6 h-6 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-0.5">
+                <Heart className="w-3 h-3 text-lavender" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
             </div>
             
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-1">
-                <HandCoins className="w-4 h-4 text-sage" />
+            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
+              <div className="w-6 h-6 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-0.5">
+                <HandCoins className="w-3 h-3 text-sage" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
             </div>
           </div>
         </div>
