@@ -397,24 +397,24 @@ export default function Profile() {
           
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2">
-                <BookOpen className="w-5 h-5 text-amber-600" />
+              <div className="w-10 h-10 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-2">
+                <BookOpen className="w-5 h-5 text-blush" />
               </div>
               <div className="platypi-bold text-2xl text-black">{stats.todayTorah}</div>
               <div className="platypi-regular text-xs text-black/60">Torah</div>
             </div>
             
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mx-auto mb-2">
-                <Heart className="w-5 h-5 text-pink-600" />
+              <div className="w-10 h-10 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-2">
+                <Heart className="w-5 h-5 text-lavender" />
               </div>
               <div className="platypi-bold text-2xl text-black">{stats.todayTefilla}</div>
               <div className="platypi-regular text-xs text-black/60">Tefilla</div>
             </div>
             
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-                <HandCoins className="w-5 h-5 text-green-600" />
+              <div className="w-10 h-10 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-2">
+                <HandCoins className="w-5 h-5 text-sage" />
               </div>
               <div className="platypi-bold text-2xl text-black">{stats.todayTzedaka}</div>
               <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
@@ -440,15 +440,15 @@ export default function Profile() {
           
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-amber-600">{stats.totalTorah}</div>
+              <div className="platypi-bold text-xl text-blush">{stats.totalTorah}</div>
               <div className="platypi-regular text-xs text-black/60">Torah</div>
             </div>
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-pink-600">{stats.totalTefilla}</div>
+              <div className="platypi-bold text-xl text-lavender">{stats.totalTefilla}</div>
               <div className="platypi-regular text-xs text-black/60">Tefilla</div>
             </div>
             <div className="bg-white/70 rounded-2xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-xl text-green-600">{stats.totalTzedaka}</div>
+              <div className="platypi-bold text-xl text-sage">{stats.totalTzedaka}</div>
               <div className="platypi-regular text-xs text-black/60">Tzedaka</div>
             </div>
           </div>
