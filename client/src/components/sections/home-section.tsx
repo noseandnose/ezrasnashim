@@ -1,4 +1,5 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
@@ -746,7 +747,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
                 width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
-                  ? `${105 * flower.scale}px`  // Trees are bigger than flowers
+                  ? `${110 * flower.scale}px`  // Trees are bigger than flowers
                   : `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
@@ -783,6 +784,37 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             >
               <h3 className="platypi-bold text-xs text-black">Daily Mitzvah Garden</h3>
             </div>
+          </div>
+          
+          {/* Info icon - Top right corner */}
+          <div className="absolute top-2 right-2 z-10">
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="rounded-full flex items-center justify-center"
+                  style={{
+                    width: '16px',
+                    height: '16px',
+                    minWidth: '16px',
+                    minHeight: '16px',
+                    maxWidth: '16px',
+                    maxHeight: '16px',
+                    padding: 0,
+                    background: 'rgba(255,255,255,0.6)',
+                    backdropFilter: 'blur(12px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                    border: '1px solid rgba(255,255,255,0.4)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                  }}
+                  data-testid="button-garden-info"
+                >
+                  <Info style={{ width: '10px', height: '10px' }} className="text-black/60" strokeWidth={2} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" className="max-w-[200px] text-center p-2">
+                <p className="text-xs">Each mitzvah plants a flower in your garden. Reach 10, 20, or 30 mitzvos to grow a special tree.</p>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
