@@ -65,5 +65,3 @@ integrations = ["javascript_google_analytics:1.0.0", "javascript_stripe:1.0.0", 
 [userenv]
 
 [userenv.shared]
-VITE_SUPABASE_URL = "${SUPABASE_URL}"
-VITE_SUPABASE_ANON_KEY = "${SUPABASE_ANON_KEY}"
