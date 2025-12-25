@@ -227,15 +227,20 @@ export default function Login() {
                   />
                 </div>
                 <div className="relative">
-                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
                   <Input
                     type="date"
                     placeholder="Birthday"
                     value={birthday}
                     onChange={(e) => setBirthday(e.target.value)}
-                    className="pl-9"
+                    className={`pl-9 ${!birthday ? 'text-gray-400' : ''}`}
                     data-testid="input-birthday"
                   />
+                  {!birthday && (
+                    <span className="absolute left-9 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-sm">
+                      Birthday (optional)
+                    </span>
+                  )}
                 </div>
               </>
             )}
