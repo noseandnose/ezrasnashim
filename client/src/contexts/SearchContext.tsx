@@ -58,7 +58,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   
   // Life page queries
   const { data: recipeContent } = useQuery<any>({ 
-    queryKey: ['/api/table/recipe'],
+    queryKey: [`/api/table/recipe/${today}`],
     staleTime: 15 * 60 * 1000, // 15 minutes
   });
   const { data: pirkeiAvot } = useQuery<any>({ 

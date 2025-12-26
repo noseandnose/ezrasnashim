@@ -225,7 +225,7 @@ export default function TableModals() {
   }, [setFullscreenContent]);
 
   const { data: recipeContent } = useQuery<{title?: string; description?: string; ingredients?: string[]; instructions?: string[]; cookingTime?: string; servings?: number; imageUrl?: string; totalTime?: string; difficulty?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string; websiteUrl?: string; emailAddress?: string}>({
-    queryKey: ['/api/table/recipe'],
+    queryKey: [`/api/table/recipe/${getLocalDateString()}`],
     enabled: activeModal === 'recipe' || fullscreenContent.contentType === 'recipe'
   });
 
