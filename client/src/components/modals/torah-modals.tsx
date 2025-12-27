@@ -1223,7 +1223,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     const event = new CustomEvent('closeFullscreen');
                     window.dispatchEvent(event);
                     setTimeout(() => {
-                      openModal('individual-tehillim', 'tefilla', 100);
+                      openModal('individual-tehillim', 'gems-of-gratitude', 100);
                     }, 100);
                   }}
                   className="w-full py-3 rounded-xl platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 border-0"
