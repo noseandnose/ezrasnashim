@@ -48,6 +48,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const emunaContent = torahSummary?.emuna;
   const featuredContent = torahSummary?.featured;
   const torahClasses = torahSummary?.torahClasses || [];
+  const gemsOfGratitude = torahSummary?.gemsOfGratitude;
   
   // Extract per-section errors for UI fallbacks
   const sectionErrors = torahSummary?.errors || {};
@@ -269,64 +270,66 @@ function TorahSectionComponent({}: TorahSectionProps) {
           </button>
         )}
 
-        {/* Gems of Gratitude Bar */}
-        <div 
-          className={`w-full rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 transition-colors ${
-            isModalComplete('gems-of-gratitude') ? 'bg-sage/20' : 'bg-white/80'
-          }`}
-          data-testid="bar-gems-of-gratitude"
-        >
-          <div className="flex items-center gap-3 mb-3">
-            {/* Icon */}
-            <div className={`p-2 rounded-full ${
-              isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Star className="text-white" size={16} />
+        {/* Gems of Gratitude Bar - Only show when database content exists */}
+        {gemsOfGratitude && (
+          <div 
+            className={`w-full rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 transition-colors ${
+              isModalComplete('gems-of-gratitude') ? 'bg-sage/20' : 'bg-white/80'
+            }`}
+            data-testid="bar-gems-of-gratitude"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              {/* Icon */}
+              <div className={`p-2 rounded-full ${
+                isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <Star className="text-white" size={16} />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">{gemsOfGratitude.title || 'Gems of Gratitude'}</h3>
+                <p className="platypi-regular text-xs text-black/70">{gemsOfGratitude.subtitle || 'Daily Inspiring Thought'}</p>
+              </div>
             </div>
             
-            {/* Title and Subtitle */}
-            <div className="flex-grow">
-              <h3 className="platypi-bold text-sm text-black">Gems of Gratitude</h3>
-              <p className="platypi-regular text-xs text-black/70">Daily Inspiring Thought</p>
+            {/* Two Buttons */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  if (!isModalComplete('gems-of-gratitude')) {
+                    trackModalComplete('gems-of-gratitude');
+                    markModalComplete('gems-of-gratitude');
+                    completeTask('torah');
+                    setShowHeartExplosion(true);
+                    setTimeout(() => {
+                      setShowHeartExplosion(false);
+                      if (checkAndShowCongratulations()) {
+                        openModal('congratulations', 'torah');
+                      }
+                    }, 1000);
+                  }
+                }}
+                disabled={isModalComplete('gems-of-gratitude')}
+                className={`flex-1 py-2 px-3 rounded-xl text-sm platypi-medium transition-all ${
+                  isModalComplete('gems-of-gratitude')
+                    ? 'bg-sage/30 text-sage cursor-default'
+                    : 'bg-gradient-feminine text-white hover:scale-105'
+                }`}
+                data-testid="button-gems-complete"
+              >
+                {isModalComplete('gems-of-gratitude') ? 'Completed' : 'Complete'}
+              </button>
+              <button
+                onClick={() => openModal('individual-tehillim', 'tefilla', 100)}
+                className="flex-1 py-2 px-3 rounded-xl text-sm platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 transition-all"
+                data-testid="button-tehillim-100"
+              >
+                Tehillim 100
+              </button>
             </div>
           </div>
-          
-          {/* Two Buttons */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => {
-                if (!isModalComplete('gems-of-gratitude')) {
-                  trackModalComplete('gems-of-gratitude');
-                  markModalComplete('gems-of-gratitude');
-                  completeTask('torah');
-                  setShowHeartExplosion(true);
-                  setTimeout(() => {
-                    setShowHeartExplosion(false);
-                    if (checkAndShowCongratulations()) {
-                      openModal('congratulations', 'torah');
-                    }
-                  }, 1000);
-                }
-              }}
-              disabled={isModalComplete('gems-of-gratitude')}
-              className={`flex-1 py-2 px-3 rounded-xl text-sm platypi-medium transition-all ${
-                isModalComplete('gems-of-gratitude')
-                  ? 'bg-sage/30 text-sage cursor-default'
-                  : 'bg-gradient-feminine text-white hover:scale-105'
-              }`}
-              data-testid="button-gems-complete"
-            >
-              {isModalComplete('gems-of-gratitude') ? 'Completed' : 'Complete'}
-            </button>
-            <button
-              onClick={() => openModal('individual-tehillim', 'tefilla', 100)}
-              className="flex-1 py-2 px-3 rounded-xl text-sm platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 transition-all"
-              data-testid="button-tehillim-100"
-            >
-              Tehillim 100
-            </button>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Daily Torah Content - Separate Section */}

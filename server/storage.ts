@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos,
-  dailyRecipes, parshaVorts, torahClasses, lifeClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
 
@@ -20,6 +20,7 @@ import {
   type ParshaVort, type InsertParshaVort,
   type TorahClass, type InsertTorahClass,
   type LifeClass, type InsertLifeClass,
+  type GemsOfGratitude, type InsertGemsOfGratitude,
   type TableInspiration, type InsertTableInspiration,
   type MarriageInsight, type InsertMarriageInsight,
   type CommunityImpact, type InsertCommunityImpact,
@@ -109,6 +110,13 @@ export interface IStorage {
   createLifeClass(lifeClass: InsertLifeClass): Promise<LifeClass>;
   updateLifeClass(id: number, lifeClass: Partial<InsertLifeClass>): Promise<LifeClass | undefined>;
   deleteLifeClass(id: number): Promise<boolean>;
+
+  // Gems of Gratitude methods
+  getGemsOfGratitudeByDate(date: string): Promise<GemsOfGratitude | undefined>;
+  getAllGemsOfGratitude(): Promise<GemsOfGratitude[]>;
+  createGemsOfGratitude(gem: InsertGemsOfGratitude): Promise<GemsOfGratitude>;
+  updateGemsOfGratitude(id: number, gem: Partial<InsertGemsOfGratitude>): Promise<GemsOfGratitude | undefined>;
+  deleteGemsOfGratitude(id: number): Promise<boolean>;
 
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
@@ -1916,6 +1924,41 @@ export class DatabaseStorage implements IStorage {
 
   async deleteLifeClass(id: number): Promise<boolean> {
     const result = await db.delete(lifeClasses).where(eq(lifeClasses.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  // Gems of Gratitude methods
+  async getGemsOfGratitudeByDate(date: string): Promise<GemsOfGratitude | undefined> {
+    const gems = await db
+      .select()
+      .from(gemsOfGratitude)
+      .where(and(
+        lte(gemsOfGratitude.fromDate, date),
+        gte(gemsOfGratitude.untilDate, date)
+      ))
+      .orderBy(gemsOfGratitude.id);
+    return gems[0];
+  }
+
+  async getAllGemsOfGratitude(): Promise<GemsOfGratitude[]> {
+    return await db.select().from(gemsOfGratitude).orderBy(desc(gemsOfGratitude.fromDate), desc(gemsOfGratitude.id));
+  }
+
+  async createGemsOfGratitude(gem: InsertGemsOfGratitude): Promise<GemsOfGratitude> {
+    const [created] = await db.insert(gemsOfGratitude).values(gem).returning();
+    return created;
+  }
+
+  async updateGemsOfGratitude(id: number, gem: Partial<InsertGemsOfGratitude>): Promise<GemsOfGratitude | undefined> {
+    const filteredGem = Object.fromEntries(
+      Object.entries(gem).filter(([_, v]) => v !== undefined)
+    ) as Partial<InsertGemsOfGratitude>;
+    const [updated] = await db.update(gemsOfGratitude).set(filteredGem).where(eq(gemsOfGratitude.id, id)).returning();
+    return updated;
+  }
+
+  async deleteGemsOfGratitude(id: number): Promise<boolean> {
+    const result = await db.delete(gemsOfGratitude).where(eq(gemsOfGratitude.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 
