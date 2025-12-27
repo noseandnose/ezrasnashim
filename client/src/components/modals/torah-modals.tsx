@@ -41,8 +41,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   // Auto-redirect Torah modals to fullscreen - RE-ENABLED for halacha and featured
   // These now open modal briefly and auto-redirect to fullscreen immediately
   useEffect(() => {
-    // Re-enable halacha and featured to auto-redirect to fullscreen
-    const fullscreenTorahModals = ['halacha', 'featured'];
+    // Re-enable halacha, featured, and gems-of-gratitude to auto-redirect to fullscreen
+    const fullscreenTorahModals = ['halacha', 'featured', 'gems-of-gratitude'];
     
     if (activeModal && fullscreenTorahModals.includes(activeModal)) {
       let title = '';
@@ -56,6 +56,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         case 'featured':
           title = 'Inspiration Hub';
           contentType = 'featured';
+          break;
+        case 'gems-of-gratitude':
+          title = 'Gems of Gratitude';
+          contentType = 'gems-of-gratitude';
           break;
       }
       
@@ -140,6 +144,19 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   const { data: featuredContent } = useQuery<{title?: string; content?: string; audioUrl?: string; speaker?: string; speakerWebsite?: string; imageUrl?: string; footnotes?: string; thankYouMessage?: string; attributionLogoUrl?: string; attributionAboutText?: string}>({
     queryKey: ['/api/torah/featured', today],
     enabled: activeModal === 'featured' || fullscreenContent.contentType === 'featured',
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
+  });
+
+  const { data: gemsOfGratitudeContent } = useQuery<{id: number; title: string; subtitle?: string; content?: string; imageUrl?: string}>({
+    queryKey: ['/api/torah-summary', today, 'gems'],
+    queryFn: async () => {
+      const response = await fetch(`/api/torah-summary?date=${today}`);
+      if (!response.ok) throw new Error('Failed to fetch gems of gratitude');
+      const data = await response.json();
+      return data.gemsOfGratitude;
+    },
+    enabled: activeModal === 'gems-of-gratitude' || fullscreenContent.contentType === 'gems-of-gratitude',
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });
@@ -1124,6 +1141,95 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   {isModalComplete('featured') ? 'Completed Today' : 'Complete'}
                 </Button>
                 <HeartExplosion trigger={showExplosion} />
+              </div>
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'gems-of-gratitude' ? (
+          gemsOfGratitudeContent && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {gemsOfGratitudeContent.title && (
+                  <h3 className="platypi-bold text-xl text-black text-center mb-4">
+                    {gemsOfGratitudeContent.title}
+                  </h3>
+                )}
+                
+                {gemsOfGratitudeContent.subtitle && (
+                  <p className="platypi-regular text-sm text-black/70 text-center mb-4">
+                    {gemsOfGratitudeContent.subtitle}
+                  </p>
+                )}
+                
+                {/* Image if provided */}
+                {gemsOfGratitudeContent.imageUrl && (
+                  <div className="mb-4 rounded-xl overflow-hidden">
+                    <img 
+                      src={gemsOfGratitudeContent.imageUrl} 
+                      alt={gemsOfGratitudeContent.title}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Main content */}
+                {gemsOfGratitudeContent.content && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                    style={{ fontSize: `${fontSize}px` }}
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(gemsOfGratitudeContent.content) }}
+                  />
+                )}
+              </div>
+              
+              {/* Two action buttons */}
+              <div className="space-y-3">
+                {/* Complete button */}
+                <div className="heart-explosion-container">
+                  <Button 
+                    onClick={isModalComplete('gems-of-gratitude') ? undefined : () => {
+                      trackModalComplete('gems-of-gratitude');
+                      markModalComplete('gems-of-gratitude');
+                      setShowExplosion(true);
+                      setTimeout(() => {
+                        setShowExplosion(false);
+                        completeTask('torah');
+                        
+                        if (checkAndShowCongratulations()) {
+                          openModal('congratulations', 'torah');
+                        }
+                        
+                        const event = new CustomEvent('closeFullscreen');
+                        window.dispatchEvent(event);
+                        setTimeout(() => {
+                          window.location.hash = '#/?section=home&scrollToProgress=true';
+                        }, 100);
+                      }, 1500);
+                    }}
+                    disabled={isModalComplete('gems-of-gratitude')}
+                    className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+                      isModalComplete('gems-of-gratitude') 
+                        ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                        : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                    }`}
+                  >
+                    {isModalComplete('gems-of-gratitude') ? 'Completed Today' : 'Complete'}
+                  </Button>
+                  <HeartExplosion trigger={showExplosion} />
+                </div>
+                
+                {/* Tehillim 100 button */}
+                <Button 
+                  onClick={() => {
+                    const event = new CustomEvent('closeFullscreen');
+                    window.dispatchEvent(event);
+                    setTimeout(() => {
+                      openModal('individual-tehillim', 'tefilla', 100);
+                    }, 100);
+                  }}
+                  className="w-full py-3 rounded-xl platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 border-0"
+                >
+                  Say Tehillim 100
+                </Button>
               </div>
             </div>
           )

@@ -270,15 +270,18 @@ function TorahSectionComponent({}: TorahSectionProps) {
           </button>
         )}
 
-        {/* Gems of Gratitude Bar - Only show when database content exists */}
+        {/* Gems of Gratitude Button - Only show when database content exists */}
         {gemsOfGratitude && (
-          <div 
-            className={`w-full rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 transition-colors ${
-              isModalComplete('gems-of-gratitude') ? 'bg-sage/20' : 'bg-white/80'
+          <button
+            onClick={() => openModal('gems-of-gratitude', 'torah')}
+            className={`w-full rounded-xl mt-3 overflow-hidden border transition-colors text-left ${
+              isModalComplete('gems-of-gratitude') 
+                ? 'bg-sage/20 border-sage/30' 
+                : 'bg-white/80 border-blush/20'
             }`}
-            data-testid="bar-gems-of-gratitude"
+            data-testid="button-gems-of-gratitude"
           >
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-3 p-3">
               {/* Icon */}
               <div className={`p-2 rounded-full ${
                 isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
@@ -291,44 +294,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 <h3 className="platypi-bold text-sm text-black">{gemsOfGratitude.title || 'Gems of Gratitude'}</h3>
                 <p className="platypi-regular text-xs text-black/70">{gemsOfGratitude.subtitle || 'Daily Inspiring Thought'}</p>
               </div>
+              
+              {/* Arrow or Checkmark */}
+              {isModalComplete('gems-of-gratitude') ? (
+                <Check className="text-sage" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40" size={18} />
+              )}
             </div>
-            
-            {/* Two Buttons */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => {
-                  if (!isModalComplete('gems-of-gratitude')) {
-                    trackModalComplete('gems-of-gratitude');
-                    markModalComplete('gems-of-gratitude');
-                    completeTask('torah');
-                    setShowHeartExplosion(true);
-                    setTimeout(() => {
-                      setShowHeartExplosion(false);
-                      if (checkAndShowCongratulations()) {
-                        openModal('congratulations', 'torah');
-                      }
-                    }, 1000);
-                  }
-                }}
-                disabled={isModalComplete('gems-of-gratitude')}
-                className={`flex-1 py-2 px-3 rounded-xl text-sm platypi-medium transition-all ${
-                  isModalComplete('gems-of-gratitude')
-                    ? 'bg-sage/30 text-sage cursor-default'
-                    : 'bg-gradient-feminine text-white hover:scale-105'
-                }`}
-                data-testid="button-gems-complete"
-              >
-                {isModalComplete('gems-of-gratitude') ? 'Completed' : 'Complete'}
-              </button>
-              <button
-                onClick={() => openModal('individual-tehillim', 'tefilla', 100)}
-                className="flex-1 py-2 px-3 rounded-xl text-sm platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 transition-all"
-                data-testid="button-tehillim-100"
-              >
-                Tehillim 100
-              </button>
-            </div>
-          </div>
+          </button>
         )}
       </div>
 
