@@ -384,12 +384,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}
       >
-        {/* Background image - same opacity as garden (0.5) */}
+        {/* Background image - same opacity as garden (0.3) */}
         <img 
           src={getSectionBackground()} 
           alt="" 
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 0, opacity: 0.5 }}
+          style={{ zIndex: 0, opacity: 0.3 }}
         />
         {/* Content wrapper */}
         <div className="relative" style={{ zIndex: 1 }}>
@@ -755,7 +755,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             src={getGardenBackground()} 
             alt="" 
             className="absolute inset-0 w-full h-full z-0"
-            style={{ objectFit: 'cover', opacity: 0.5 }}
+            style={{ objectFit: 'cover', opacity: 0.3 }}
             loading="lazy"
           />
           
