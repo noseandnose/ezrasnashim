@@ -149,14 +149,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   });
 
   const { data: gemsOfGratitudeContent } = useQuery<{id: number; title: string; subtitle?: string; content?: string; imageUrl?: string}>({
-    queryKey: ['/api/torah-summary', today, 'gems'],
+    queryKey: ['/api/gems-of-gratitude', today],
     queryFn: async () => {
       const response = await fetch(`/api/torah-summary?date=${today}`);
       if (!response.ok) throw new Error('Failed to fetch gems of gratitude');
       const data = await response.json();
       return data.gemsOfGratitude;
     },
-    enabled: activeModal === 'gems-of-gratitude' || fullscreenContent.contentType === 'gems-of-gratitude',
+    enabled: true,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000
   });

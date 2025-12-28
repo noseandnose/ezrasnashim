@@ -270,40 +270,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
           </button>
         )}
 
-        {/* Gems of Gratitude Button - Only show when database content exists */}
-        {gemsOfGratitude && (
-          <button
-            onClick={() => openModal('gems-of-gratitude', 'torah')}
-            className={`w-full rounded-xl mt-3 overflow-hidden border transition-colors text-left ${
-              isModalComplete('gems-of-gratitude') 
-                ? 'bg-sage/20 border-sage/30' 
-                : 'bg-white/80 border-blush/20'
-            }`}
-            data-testid="button-gems-of-gratitude"
-          >
-            <div className="flex items-center gap-3 p-3">
-              {/* Icon */}
-              <div className={`p-2 rounded-full ${
-                isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
-              }`}>
-                <Star className="text-white" size={16} />
-              </div>
-              
-              {/* Title and Subtitle */}
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-sm text-black">{gemsOfGratitude.title || 'Gems of Gratitude'}</h3>
-                <p className="platypi-regular text-xs text-black/70">{gemsOfGratitude.subtitle || 'Daily Inspiring Thought'}</p>
-              </div>
-              
-              {/* Arrow or Checkmark */}
-              {isModalComplete('gems-of-gratitude') ? (
-                <Check className="text-sage" size={18} />
-              ) : (
-                <ChevronRight className="text-black/40" size={18} />
-              )}
-            </div>
-          </button>
-        )}
       </div>
 
       {/* Daily Torah Content - Separate Section */}
@@ -519,6 +485,41 @@ function TorahSectionComponent({}: TorahSectionProps) {
             </div>
           ) : null;
         })()}
+
+        {/* Gems of Gratitude Button - Only show when database content exists */}
+        {gemsOfGratitude && (
+          <button
+            onClick={() => openModal('gems-of-gratitude', 'torah')}
+            className={`w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 ${
+              isModalComplete('gems-of-gratitude') 
+                ? 'bg-sage/20 border-sage/30' 
+                : 'bg-white/80 border-blush/20'
+            }`}
+            data-testid="button-gems-of-gratitude"
+          >
+            <div className="flex items-center gap-3 p-3">
+              {/* Icon */}
+              <div className={`p-2 rounded-full ${
+                isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <Star className="text-white" size={16} />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">Gems of Gratitude</h3>
+                <p className="platypi-regular text-xs text-black/70">Daily Inspiring Thoughts</p>
+              </div>
+              
+              {/* Arrow or Checkmark */}
+              {isModalComplete('gems-of-gratitude') ? (
+                <Check className="text-sage" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40" size={18} />
+              )}
+            </div>
+          </button>
+        )}
 
         {/* Bottom padding */}
         <div className="h-16"></div>
