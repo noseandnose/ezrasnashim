@@ -3622,6 +3622,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Feed routes - Public endpoints for accessing the message feed
   app.get("/api/feed", async (_req, res) => {
     try {
+      // Disable caching to ensure fresh vote counts
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
       const allMessages = await storage.getAllMessages();
       const today = new Date().toISOString().split('T')[0];
       
