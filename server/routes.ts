@@ -3592,13 +3592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/messages/:id", requireAdminAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      // Validate request body with Zod schema (omit id and timestamps for updates)
-      const updateSchema = insertMessagesSchema.omit({ 
-        id: true, 
-        createdAt: true, 
-        updatedAt: true 
-      });
-      const validatedData = updateSchema.parse(req.body);
+      // Validate request body with Zod schema (insertMessagesSchema already omits id and timestamps)
+      const validatedData = insertMessagesSchema.parse(req.body);
       const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
       return res.json(updatedMessage);
     } catch (error: any) {
@@ -3621,6 +3616,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting message:", error);
       return res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
+  // Feed routes - Public endpoints for accessing the message feed
+  app.get("/api/feed", async (_req, res) => {
+    try {
+      const messages = await storage.getAllMessages();
+      // Sort by date descending (newest first)
+      messages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return res.json(messages);
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      return res.status(500).json({ message: "Failed to fetch feed" });
+    }
+  });
+
+  // Like/dislike routes for feed messages
+  app.post("/api/feed/:id/like", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.incrementMessageLike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error liking message:", error);
+      return res.status(500).json({ message: "Failed to like message" });
+    }
+  });
+
+  app.post("/api/feed/:id/dislike", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.incrementMessageDislike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error disliking message:", error);
+      return res.status(500).json({ message: "Failed to dislike message" });
     }
   });
 

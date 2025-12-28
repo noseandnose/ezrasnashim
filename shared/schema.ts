@@ -899,19 +899,23 @@ export const insertTehillimChainReadingSchema = createInsertSchema(tehillimChain
 export type TehillimChainReading = typeof tehillimChainReadings.$inferSelect;
 export type InsertTehillimChainReading = z.infer<typeof insertTehillimChainReadingSchema>;
 
-// Messages table for daily messages to users
+// Messages table for daily messages to users (Feed)
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
+  category: varchar("category", { length: 20 }).notNull().default("message"), // 'message', 'feature', 'bugfix', 'poll'
+  likes: integer("likes").notNull().default(0),
+  dislikes: integer("dislikes").notNull().default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertMessagesSchema = createInsertSchema(messages);
+export const insertMessagesSchema = createInsertSchema(messages).omit({ id: true, likes: true, dislikes: true, createdAt: true, updatedAt: true });
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessagesSchema>;
+export type MessageCategory = 'message' | 'feature' | 'bugfix' | 'poll';
 
 // Scheduled Notifications table for sending push notifications at specific times
 export const scheduledNotifications = pgTable("scheduled_notifications", {

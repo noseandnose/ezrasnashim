@@ -343,6 +343,8 @@ export interface IStorage {
   getUpcomingMessages(): Promise<Message[]>;
   updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message>;
   deleteMessage(id: number): Promise<void>;
+  incrementMessageLike(id: number): Promise<Message>;
+  incrementMessageDislike(id: number): Promise<Message>;
   
   // Scheduled Notification methods
   getAllScheduledNotifications(): Promise<ScheduledNotification[]>;
@@ -3407,6 +3409,24 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(messages)
       .where(eq(messages.id, id));
+  }
+  
+  async incrementMessageLike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ likes: sql`${messages.likes} + 1` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async incrementMessageDislike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ dislikes: sql`${messages.dislikes} + 1` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
   }
   
   // Scheduled Notification methods

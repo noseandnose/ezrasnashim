@@ -9,7 +9,6 @@ import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
-import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
 import {
@@ -27,7 +26,6 @@ export default function AppHeader() {
   const { openModal } = useModalStore();
   const { user, isAuthenticated, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -56,12 +54,6 @@ export default function AppHeader() {
     setHasReadMessage(localStorage.getItem(readKey) === 'true');
   }, [today]);
   
-  const handleOpenMessage = () => {
-    setShowMessageModal(true);
-    const readKey = `message-read-${today}`;
-    localStorage.setItem(readKey, 'true');
-    setHasReadMessage(true);
-  };
 
   const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight
@@ -215,13 +207,13 @@ export default function AppHeader() {
                   Community Feedback
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={handleOpenMessage}
+                  onClick={() => setLocation('/feed')}
                   className="cursor-pointer relative"
-                  data-testid="menu-item-message"
-                  data-action="menu-message"
+                  data-testid="menu-item-feed"
+                  data-action="menu-feed"
                 >
                   <Mail className="h-5 w-5 mr-2" />
-                  Daily Message
+                  Feed
                   {!!todayMessage && !hasReadMessage && (
                     <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
                   )}
@@ -293,11 +285,6 @@ export default function AppHeader() {
         onClose={() => setShowAddToHomeScreen(false)}
       />
       
-      <MessageModal
-        isOpen={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        date={today}
-      />
       
       <SearchModal
         isOpen={showSearchModal}
