@@ -1177,10 +1177,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 )}
               </div>
               
-              {/* Two action buttons */}
-              <div className="space-y-3">
+              {/* Two action buttons side by side */}
+              <div className="flex gap-3">
                 {/* Complete button */}
-                <div className="heart-explosion-container">
+                <div className="heart-explosion-container flex-1">
                   <Button 
                     onClick={isModalComplete('gems-of-gratitude') ? undefined : () => {
                       trackModalComplete('gems-of-gratitude');
@@ -1208,23 +1208,24 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                         : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                     }`}
                   >
-                    {isModalComplete('gems-of-gratitude') ? 'Completed Today' : 'Complete'}
+                    {isModalComplete('gems-of-gratitude') ? 'Completed' : 'Complete'}
                   </Button>
                   <HeartExplosion trigger={showExplosion} />
                 </div>
                 
-                {/* Tehillim 100 button */}
+                {/* Tehillim 100 button - exciting style */}
                 <Button 
                   onClick={() => {
+                    trackModalComplete('gems-of-gratitude');
                     const event = new CustomEvent('closeFullscreen');
                     window.dispatchEvent(event);
                     setTimeout(() => {
                       openModal('individual-tehillim', 'gems-of-gratitude', 100);
                     }, 100);
                   }}
-                  className="w-full py-3 rounded-xl platypi-medium bg-lavender/20 text-lavender hover:bg-lavender/30 border-0"
+                  className="flex-1 py-3 rounded-xl platypi-medium bg-gradient-to-r from-sage via-sage/90 to-lavender text-white shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300 border-0"
                 >
-                  Say Tehillim 100
+                  ✨ Tehillim 100 ✨
                 </Button>
               </div>
             </div>
