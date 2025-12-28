@@ -384,23 +384,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}
       >
-        {/* Background image */}
+        {/* Background image - same opacity as garden (0.4) */}
         <img 
           src={getSectionBackground()} 
           alt="" 
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 0 }}
-        />
-        {/* Semi-transparent overlay for readability */}
-        <div 
-          className="absolute inset-0" 
-          style={{ 
-            zIndex: 1,
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.15) 100%)'
-          }} 
+          style={{ zIndex: 0, opacity: 0.4 }}
         />
         {/* Content wrapper */}
-        <div className="relative" style={{ zIndex: 2 }}>
+        <div className="relative" style={{ zIndex: 1 }}>
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
