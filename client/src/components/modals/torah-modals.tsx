@@ -11,6 +11,7 @@ import { formatThankYouMessage } from "@/lib/link-formatter";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { Expand } from "lucide-react";
+import { useTorahSummary } from "@/hooks/use-torah-summary";
 
 
 interface TorahModalsProps {
@@ -148,18 +149,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: gemsOfGratitudeContent, isLoading: isGemsLoading } = useQuery<{id: number; title: string; subtitle?: string; content?: string; imageUrl?: string}>({
-    queryKey: ['/api/gems-of-gratitude', today],
-    queryFn: async () => {
-      const response = await fetch(`/api/torah-summary?date=${today}`);
-      if (!response.ok) throw new Error('Failed to fetch gems of gratitude');
-      const data = await response.json();
-      return data.gemsOfGratitude;
-    },
-    enabled: true,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000
-  });
+  const { data: torahSummaryData, isLoading: isTorahSummaryLoading } = useTorahSummary();
+  const gemsOfGratitudeContent = torahSummaryData?.gemsOfGratitude;
+  const isGemsLoading = isTorahSummaryLoading;
 
   const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
     queryKey: ['/api/torah/pirkei-avot', today],
