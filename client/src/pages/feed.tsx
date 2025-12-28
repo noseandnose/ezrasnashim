@@ -143,16 +143,27 @@ export default function Feed() {
   });
   
   const [pendingVotes, setPendingVotes] = useState<Set<number>>(new Set());
+  
+  // Local count adjustments to handle Supabase read replica lag
+  const [countAdjustments, setCountAdjustments] = useState<Record<number, { likes: number; dislikes: number }>>({});
 
-  const { data: messages, isLoading, refetch } = useQuery<Message[]>({
+  const { data: messages, isLoading } = useQuery<Message[]>({
     queryKey: ['/api/feed'],
-    staleTime: 0,
+    staleTime: 60 * 1000,
   });
 
   const saveVotes = useCallback((newVotes: Record<number, 'like' | 'dislike'>) => {
     setVotes(newVotes);
     localStorage.setItem('feedVotes', JSON.stringify(newVotes));
   }, []);
+  
+  const getAdjustedCounts = (message: Message) => {
+    const adj = countAdjustments[message.id] || { likes: 0, dislikes: 0 };
+    return {
+      likes: Math.max(0, (message.likes || 0) + adj.likes),
+      dislikes: Math.max(0, (message.dislikes || 0) + adj.dislikes),
+    };
+  };
 
   const handleVote = async (id: number, action: 'like' | 'dislike' | 'unlike' | 'undislike') => {
     if (pendingVotes.has(id)) return;
@@ -163,32 +174,71 @@ export default function Feed() {
     
     try {
       if (action === 'like') {
+        // Optimistically update counts
+        setCountAdjustments(prev => ({
+          ...prev,
+          [id]: {
+            likes: (prev[id]?.likes || 0) + 1,
+            dislikes: currentVote === 'dislike' ? (prev[id]?.dislikes || 0) - 1 : (prev[id]?.dislikes || 0),
+          }
+        }));
+        
         if (currentVote === 'dislike') {
           await apiRequest('DELETE', `/api/feed/${id}/dislike`);
         }
         await apiRequest('POST', `/api/feed/${id}/like`);
         saveVotes({ ...votes, [id]: 'like' });
       } else if (action === 'dislike') {
+        // Optimistically update counts
+        setCountAdjustments(prev => ({
+          ...prev,
+          [id]: {
+            likes: currentVote === 'like' ? (prev[id]?.likes || 0) - 1 : (prev[id]?.likes || 0),
+            dislikes: (prev[id]?.dislikes || 0) + 1,
+          }
+        }));
+        
         if (currentVote === 'like') {
           await apiRequest('DELETE', `/api/feed/${id}/like`);
         }
         await apiRequest('POST', `/api/feed/${id}/dislike`);
         saveVotes({ ...votes, [id]: 'dislike' });
       } else if (action === 'unlike') {
+        // Optimistically update counts
+        setCountAdjustments(prev => ({
+          ...prev,
+          [id]: {
+            likes: (prev[id]?.likes || 0) - 1,
+            dislikes: (prev[id]?.dislikes || 0),
+          }
+        }));
+        
         await apiRequest('DELETE', `/api/feed/${id}/like`);
         const newVotes = { ...votes };
         delete newVotes[id];
         saveVotes(newVotes);
       } else if (action === 'undislike') {
+        // Optimistically update counts
+        setCountAdjustments(prev => ({
+          ...prev,
+          [id]: {
+            likes: (prev[id]?.likes || 0),
+            dislikes: (prev[id]?.dislikes || 0) - 1,
+          }
+        }));
+        
         await apiRequest('DELETE', `/api/feed/${id}/dislike`);
         const newVotes = { ...votes };
         delete newVotes[id];
         saveVotes(newVotes);
       }
-      
-      await refetch();
     } catch (error) {
       console.error('Vote error:', error);
+      // Revert optimistic update on error
+      setCountAdjustments(prev => {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      });
     } finally {
       setPendingVotes(prev => {
         const next = new Set(prev);
@@ -274,6 +324,7 @@ export default function Feed() {
                       const isTodayMsg = isToday(messageDate);
                       const shouldHighlight = isTodayMsg && !highlightedTodaysMessage;
                       if (shouldHighlight) highlightedTodaysMessage = true;
+                      const adjustedCounts = getAdjustedCounts(message);
                       return (
                         <FeedItem
                           key={message.id}
@@ -284,8 +335,8 @@ export default function Feed() {
                           onUndislike={handleUndislike}
                           isVoting={isVotingMessage(message.id)}
                           userVote={votes[message.id] || null}
-                          optimisticLikes={message.likes || 0}
-                          optimisticDislikes={message.dislikes || 0}
+                          optimisticLikes={adjustedCounts.likes}
+                          optimisticDislikes={adjustedCounts.dislikes}
                           isTodaysMessage={shouldHighlight}
                         />
                       );

@@ -3630,8 +3630,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allMessages = await storage.getAllMessages();
       const today = new Date().toISOString().split('T')[0];
       
+      // Filter out future dates - only show messages for today or earlier
+      const filteredMessages = allMessages.filter(m => m.date <= today);
+      
       // Sort: pinned first, then today's message, then by date descending
-      allMessages.sort((a, b) => {
+      filteredMessages.sort((a, b) => {
         // Pinned messages always first
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
@@ -3646,7 +3649,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
       
-      return res.json(allMessages);
+      return res.json(filteredMessages);
     } catch (error) {
       console.error("Error fetching feed:", error);
       return res.status(500).json({ message: "Failed to fetch feed" });
