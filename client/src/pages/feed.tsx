@@ -186,7 +186,7 @@ export default function Feed() {
         saveVotes(newVotes);
       }
       
-      await queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+      await queryClient.refetchQueries({ queryKey: ['/api/feed'] });
     } catch (error) {
       console.error('Vote error:', error);
     } finally {
