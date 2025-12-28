@@ -375,7 +375,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const PrayerIcon = currentPrayer.icon;
 
   return (
-    <div className="pb-20 relative overflow-hidden" data-bridge-container>
+    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
       {/* TEMPORARY: Full page background image */}
       <img 
         src={getSectionBackground()} 

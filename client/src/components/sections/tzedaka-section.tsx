@@ -99,18 +99,20 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   
   // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
   const isAfterTzais = () => {
-    if (!jewishTimes?.tzais) return false;
+    const tzaisStr = jewishTimes?.tzaitHakochavim;
+    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM
     const now = new Date();
-    const tzaisMatch = jewishTimes.tzais.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
-    if (!tzaisMatch) return false;
-    let hours = parseInt(tzaisMatch[1]);
-    const minutes = parseInt(tzaisMatch[2]);
-    const period = tzaisMatch[3].toUpperCase();
+    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
+    if (!match) return now.getHours() >= 18;
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const period = match[3]?.toUpperCase();
     if (period === 'PM' && hours !== 12) hours += 12;
     else if (period === 'AM' && hours === 12) hours = 0;
-    const tzaisDate = new Date();
-    tzaisDate.setHours(hours, minutes, 0, 0);
-    return now >= tzaisDate;
+    else if (!period && hours < 12) hours += 12; // 24-hour format fallback
+    const tzaisTime = new Date(now);
+    tzaisTime.setHours(hours, minutes, 0, 0);
+    return now >= tzaisTime;
   };
 
   // TEMPORARY: Get time-appropriate background for main section
@@ -238,7 +240,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
 
   return (
-    <div className="pb-20 relative overflow-hidden" data-bridge-container>
+    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
       {/* TEMPORARY: Full page background image */}
       <img 
         src={getSectionBackground()} 
