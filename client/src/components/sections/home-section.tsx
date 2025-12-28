@@ -1,4 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { useWeather, getWeatherEmoji } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -153,6 +154,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
+  const { data: weather } = useWeather();
 
   // Helper to check if current time is after tzais hakochavim (nightfall)
   const isAfterTzais = (): boolean => {
@@ -476,6 +478,22 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               className="absolute inset-0 w-full h-full object-cover"
               style={{ zIndex: 0, opacity: 0.3 }}
             />
+            {/* Weather badge - Apple glass style */}
+            {weather && (
+              <div 
+                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.7)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
+                <span className="platypi-bold text-[10px] text-black/80">{weather.temperature}°</span>
+              </div>
+            )}
             {/* Content overlay */}
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-1">
