@@ -112,7 +112,7 @@ export default function AppHeader() {
   return (
     <>
       <header 
-        className="header-extended absolute top-0 left-0 right-0 px-3 border-0 z-40" 
+        className="header-extended relative px-3 border-0 z-40" 
         data-bridge-container 
         style={{ 
           paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
