@@ -33,8 +33,8 @@ function formatTime(createdAt: Date | string | null, dateStr: string): string {
 
 interface FeedItemProps {
   message: Message;
-  onLike: (id: number) => void;
-  onDislike: (id: number) => void;
+  onLike: (id: number, currentVote: 'like' | 'dislike' | null) => void;
+  onDislike: (id: number, currentVote: 'like' | 'dislike' | null) => void;
   onUnlike: (id: number) => void;
   onUndislike: (id: number) => void;
   isVoting: boolean;
@@ -52,7 +52,7 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
     if (userVote === 'like') {
       onUnlike(message.id);
     } else {
-      onLike(message.id);
+      onLike(message.id, userVote);
     }
   };
 
@@ -60,7 +60,7 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
     if (userVote === 'dislike') {
       onUndislike(message.id);
     } else {
-      onDislike(message.id);
+      onDislike(message.id, userVote);
     }
   };
 
@@ -196,13 +196,15 @@ export default function Feed() {
     },
   });
 
-  const handleLike = async (id: number) => {
-    const previousVote = votes[id];
+  const handleLike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
+    // If already liked, do nothing (should use handleUnlike)
+    if (currentVote === 'like') return;
+    
     const newVotes = { ...votes, [id]: 'like' as const };
     saveVotes(newVotes);
     
     // If switching from dislike, decrement dislike first
-    if (previousVote === 'dislike') {
+    if (currentVote === 'dislike') {
       updateOptimisticCount(id, 'dislikes', -1);
       await undislikeMutation.mutateAsync(id);
     }
@@ -211,13 +213,15 @@ export default function Feed() {
     likeMutation.mutate(id);
   };
 
-  const handleDislike = async (id: number) => {
-    const previousVote = votes[id];
+  const handleDislike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
+    // If already disliked, do nothing (should use handleUndislike)
+    if (currentVote === 'dislike') return;
+    
     const newVotes = { ...votes, [id]: 'dislike' as const };
     saveVotes(newVotes);
     
     // If switching from like, decrement like first
-    if (previousVote === 'like') {
+    if (currentVote === 'like') {
       updateOptimisticCount(id, 'likes', -1);
       await unlikeMutation.mutateAsync(id);
     }
@@ -227,16 +231,24 @@ export default function Feed() {
   };
 
   const handleUnlike = (id: number) => {
-    const newVotes = { ...votes };
-    delete newVotes[id];
+    const newVotes: Record<number, 'like' | 'dislike'> = {};
+    Object.entries(votes).forEach(([key, value]) => {
+      if (Number(key) !== id) {
+        newVotes[Number(key)] = value;
+      }
+    });
     saveVotes(newVotes);
     updateOptimisticCount(id, 'likes', -1);
     unlikeMutation.mutate(id);
   };
 
   const handleUndislike = (id: number) => {
-    const newVotes = { ...votes };
-    delete newVotes[id];
+    const newVotes: Record<number, 'like' | 'dislike'> = {};
+    Object.entries(votes).forEach(([key, value]) => {
+      if (Number(key) !== id) {
+        newVotes[Number(key)] = value;
+      }
+    });
     saveVotes(newVotes);
     updateOptimisticCount(id, 'dislikes', -1);
     undislikeMutation.mutate(id);
