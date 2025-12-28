@@ -376,13 +376,13 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
   return (
     <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
-      {/* TEMPORARY: Full page background image */}
+      {/* TEMPORARY: Full page background image - fixed to cover header */}
       <img 
         src={getSectionBackground()} 
         alt="" 
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
+        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ zIndex: -1, opacity: 0.3 }}
       />
       
       {/* Unified Top Section */}

@@ -132,8 +132,8 @@ export default function TableSection() {
         src={getSectionBackground()} 
         alt="" 
         aria-hidden="true"
-        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
+        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ zIndex: -1, opacity: 0.3 }}
       />
       
       {/* Main Table Section */}
