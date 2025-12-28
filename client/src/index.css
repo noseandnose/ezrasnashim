@@ -1129,8 +1129,7 @@ html, body, #root {
   height: 0; /* Important for flex child to be scrollable */
   overflow-y: auto;
   overflow-x: hidden;
-  /* Content starts where header ends - pure CSS calculation */
-  padding-top: var(--header-total-height);
+  /* Header is now inside content-area and scrolls with content - no padding-top needed */
   
   /* Bottom padding for footer and safe area - pure CSS */
   padding-bottom: var(--footer-total-height);
