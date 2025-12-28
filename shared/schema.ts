@@ -95,6 +95,7 @@ export const gemsOfGratitude = pgTable("gems_of_gratitude", {
   attributionLabel: text("attribution_label"), // Short label for collapsed attribution
   attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
   attributionAboutText: text("attribution_about_text"), // About text for attribution section
+  websiteUrl: text("website_url"), // Website URL for "Visit Website" button
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   dateRangeIdx: index("gems_of_gratitude_date_range_idx").on(table.fromDate, table.untilDate),

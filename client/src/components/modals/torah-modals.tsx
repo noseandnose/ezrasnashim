@@ -1170,6 +1170,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     logoUrl={gemsOfGratitudeContent.attributionLogoUrl || undefined}
                     aboutText={gemsOfGratitudeContent.attributionAboutText || undefined}
                     label={gemsOfGratitudeContent.attributionLabel || 'About'}
+                    websiteUrl={gemsOfGratitudeContent.websiteUrl || undefined}
                   />
                 )}
               </div>
