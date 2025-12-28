@@ -144,8 +144,8 @@ export default function Feed() {
   
   const [pendingVotes, setPendingVotes] = useState<Set<number>>(new Set());
   
-  // Local count adjustments to handle Supabase read replica lag
-  const [countAdjustments, setCountAdjustments] = useState<Record<number, { likes: number; dislikes: number }>>({});
+  // Track expected counts after user votes - stores the final expected value, not a delta
+  const [expectedCounts, setExpectedCounts] = useState<Record<number, { likes: number; dislikes: number }>>({});
 
   const { data: messages, isLoading } = useQuery<Message[]>({
     queryKey: ['/api/feed'],
@@ -158,11 +158,30 @@ export default function Feed() {
   }, []);
   
   const getAdjustedCounts = (message: Message) => {
-    const adj = countAdjustments[message.id] || { likes: 0, dislikes: 0 };
-    return {
-      likes: Math.max(0, (message.likes || 0) + adj.likes),
-      dislikes: Math.max(0, (message.dislikes || 0) + adj.dislikes),
-    };
+    const expected = expectedCounts[message.id];
+    if (!expected) {
+      // No pending optimistic update
+      return {
+        likes: message.likes || 0,
+        dislikes: message.dislikes || 0,
+      };
+    }
+    // Use expected if server hasn't caught up, otherwise use server value and clear expected
+    const serverLikes = message.likes || 0;
+    const serverDislikes = message.dislikes || 0;
+    
+    // If server has caught up (values match or exceed expected), use server values
+    if (serverLikes >= expected.likes && serverDislikes >= expected.dislikes) {
+      // Clear this expected entry since server caught up
+      setExpectedCounts(prev => {
+        const { [message.id]: _, ...rest } = prev;
+        return rest;
+      });
+      return { likes: serverLikes, dislikes: serverDislikes };
+    }
+    
+    // Server hasn't caught up yet, show expected values
+    return expected;
   };
 
   const handleVote = async (id: number, action: 'like' | 'dislike' | 'unlike' | 'undislike') => {
@@ -171,15 +190,18 @@ export default function Feed() {
     setPendingVotes(prev => new Set(prev).add(id));
     
     const currentVote = votes[id] || null;
+    const message = messages?.find(m => m.id === id);
+    const currentLikes = expectedCounts[id]?.likes ?? (message?.likes || 0);
+    const currentDislikes = expectedCounts[id]?.dislikes ?? (message?.dislikes || 0);
     
     try {
       if (action === 'like') {
-        // Optimistically update counts
-        setCountAdjustments(prev => ({
+        // Set expected final counts
+        setExpectedCounts(prev => ({
           ...prev,
           [id]: {
-            likes: (prev[id]?.likes || 0) + 1,
-            dislikes: currentVote === 'dislike' ? (prev[id]?.dislikes || 0) - 1 : (prev[id]?.dislikes || 0),
+            likes: currentLikes + 1,
+            dislikes: currentVote === 'dislike' ? Math.max(0, currentDislikes - 1) : currentDislikes,
           }
         }));
         
@@ -189,12 +211,12 @@ export default function Feed() {
         await apiRequest('POST', `/api/feed/${id}/like`);
         saveVotes({ ...votes, [id]: 'like' });
       } else if (action === 'dislike') {
-        // Optimistically update counts
-        setCountAdjustments(prev => ({
+        // Set expected final counts
+        setExpectedCounts(prev => ({
           ...prev,
           [id]: {
-            likes: currentVote === 'like' ? (prev[id]?.likes || 0) - 1 : (prev[id]?.likes || 0),
-            dislikes: (prev[id]?.dislikes || 0) + 1,
+            likes: currentVote === 'like' ? Math.max(0, currentLikes - 1) : currentLikes,
+            dislikes: currentDislikes + 1,
           }
         }));
         
@@ -204,12 +226,12 @@ export default function Feed() {
         await apiRequest('POST', `/api/feed/${id}/dislike`);
         saveVotes({ ...votes, [id]: 'dislike' });
       } else if (action === 'unlike') {
-        // Optimistically update counts
-        setCountAdjustments(prev => ({
+        // Set expected final counts
+        setExpectedCounts(prev => ({
           ...prev,
           [id]: {
-            likes: (prev[id]?.likes || 0) - 1,
-            dislikes: (prev[id]?.dislikes || 0),
+            likes: Math.max(0, currentLikes - 1),
+            dislikes: currentDislikes,
           }
         }));
         
@@ -218,12 +240,12 @@ export default function Feed() {
         delete newVotes[id];
         saveVotes(newVotes);
       } else if (action === 'undislike') {
-        // Optimistically update counts
-        setCountAdjustments(prev => ({
+        // Set expected final counts
+        setExpectedCounts(prev => ({
           ...prev,
           [id]: {
-            likes: (prev[id]?.likes || 0),
-            dislikes: (prev[id]?.dislikes || 0) - 1,
+            likes: currentLikes,
+            dislikes: Math.max(0, currentDislikes - 1),
           }
         }));
         
@@ -235,7 +257,7 @@ export default function Feed() {
     } catch (error) {
       console.error('Vote error:', error);
       // Revert optimistic update on error
-      setCountAdjustments(prev => {
+      setExpectedCounts(prev => {
         const { [id]: _, ...rest } = prev;
         return rest;
       });
