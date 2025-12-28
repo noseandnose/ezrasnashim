@@ -148,7 +148,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
     gcTime: 30 * 60 * 1000
   });
 
-  const { data: gemsOfGratitudeContent } = useQuery<{id: number; title: string; subtitle?: string; content?: string; imageUrl?: string}>({
+  const { data: gemsOfGratitudeContent, isLoading: isGemsLoading } = useQuery<{id: number; title: string; subtitle?: string; content?: string; imageUrl?: string}>({
     queryKey: ['/api/gems-of-gratitude', today],
     queryFn: async () => {
       const response = await fetch(`/api/torah-summary?date=${today}`);
@@ -1145,7 +1145,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
             </div>
           )
         ) : fullscreenContent.contentType === 'gems-of-gratitude' ? (
-          gemsOfGratitudeContent && (
+          isGemsLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush"></div>
+            </div>
+          ) : gemsOfGratitudeContent ? (
             <div className="space-y-4">
               <div className="bg-white rounded-2xl p-6 border border-blush/10">
                 {gemsOfGratitudeContent.title && (
@@ -1231,6 +1235,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   Say Tehillim 100
                 </Button>
               </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-black/60 platypi-regular">
+              No content available for today
             </div>
           )
         ) : (
