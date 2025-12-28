@@ -5,7 +5,7 @@ import { ThumbsUp, ThumbsDown, ArrowLeft, Pin } from "lucide-react";
 import { Link } from "wouter";
 import type { Message, MessageCategory } from "@shared/schema";
 import { linkifyText } from "@/lib/text-formatter";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { apiRequest } from "@/lib/queryClient";
 
 const categoryColors: Record<MessageCategory, { bg: string; label: string }> = {
   message: { bg: "bg-yellow-400", label: "Message" },
@@ -144,9 +144,9 @@ export default function Feed() {
   
   const [pendingVotes, setPendingVotes] = useState<Set<number>>(new Set());
 
-  const { data: messages, isLoading } = useQuery<Message[]>({
+  const { data: messages, isLoading, refetch } = useQuery<Message[]>({
     queryKey: ['/api/feed'],
-    staleTime: 60 * 1000,
+    staleTime: 0,
   });
 
   const saveVotes = useCallback((newVotes: Record<number, 'like' | 'dislike'>) => {
@@ -186,7 +186,7 @@ export default function Feed() {
         saveVotes(newVotes);
       }
       
-      await queryClient.refetchQueries({ queryKey: ['/api/feed'] });
+      await refetch();
     } catch (error) {
       console.error('Vote error:', error);
     } finally {
