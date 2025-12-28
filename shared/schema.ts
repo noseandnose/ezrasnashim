@@ -92,6 +92,9 @@ export const gemsOfGratitude = pgTable("gems_of_gratitude", {
   subtitle: text("subtitle"), // Subtitle for the bar display
   content: text("content"), // Main content/inspiring thought
   imageUrl: text("image_url"), // Optional image
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   dateRangeIdx: index("gems_of_gratitude_date_range_idx").on(table.fromDate, table.untilDate),

@@ -1163,6 +1163,15 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     dangerouslySetInnerHTML={{ __html: formatTextContent(gemsOfGratitudeContent.content) }}
                   />
                 )}
+                
+                {/* Attribution Section */}
+                {(gemsOfGratitudeContent.attributionLogoUrl || gemsOfGratitudeContent.attributionAboutText) && (
+                  <AttributionSection 
+                    logoUrl={gemsOfGratitudeContent.attributionLogoUrl || undefined}
+                    aboutText={gemsOfGratitudeContent.attributionAboutText || undefined}
+                    label={gemsOfGratitudeContent.attributionLabel || 'About'}
+                  />
+                )}
               </div>
               
               {/* Two action buttons side by side */}
