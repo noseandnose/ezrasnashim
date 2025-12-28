@@ -118,9 +118,7 @@ export default function AppHeader() {
           paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
           paddingBottom: '0.625rem',
           minHeight: 'var(--header-total-height)',
-          background: 'rgba(186,137,160,0.12)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)'
+          background: 'transparent'
         }}
       >
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
@@ -128,11 +126,16 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none relative ${
+                  className={`p-2 rounded-full transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)'
+                  }}
                 >
                   <Menu className="h-5 w-5 text-black/70" />
                   {!!todayMessage && !hasReadMessage && (
@@ -269,10 +272,15 @@ export default function AppHeader() {
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              className="p-2 rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
               data-action="header-search"
+              style={{
+                background: 'rgba(255, 255, 255, 0.6)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)'
+              }}
             >
               <Search className="h-5 w-5 text-black/70" />
             </button>
