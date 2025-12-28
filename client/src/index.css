@@ -1570,3 +1570,17 @@ select {
 .uppy-custom-text .uppy-Dashboard-browse:hover {
   color: #1d4ed8 !important; /* Blue-700 */
 }
+
+/* Pulsating glow animation for today's Feed message */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 8px 2px rgba(232, 173, 183, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(232, 173, 183, 0.7);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}

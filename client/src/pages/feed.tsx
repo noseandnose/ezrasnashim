@@ -41,9 +41,10 @@ interface FeedItemProps {
   userVote: 'like' | 'dislike' | null;
   optimisticLikes: number;
   optimisticDislikes: number;
+  isTodaysMessage?: boolean;
 }
 
-function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting, userVote, optimisticLikes, optimisticDislikes }: FeedItemProps) {
+function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting, userVote, optimisticLikes, optimisticDislikes, isTodaysMessage }: FeedItemProps) {
   const category = (message.category as MessageCategory) || 'message';
   const { bg, label } = categoryColors[category];
 
@@ -64,7 +65,17 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-blush/10 relative" data-testid={`feed-item-${message.id}`}>
+    <div 
+      className={`bg-white rounded-2xl p-4 shadow-sm relative ${
+        isTodaysMessage 
+          ? 'ring-2 ring-blush/60 animate-pulse-glow' 
+          : 'border border-blush/10'
+      }`} 
+      style={isTodaysMessage ? {
+        background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #E8ADB7 0%, #F5D0D6 50%, #E8ADB7 100%) border-box',
+      } : undefined}
+      data-testid={`feed-item-${message.id}`}
+    >
       <div className="absolute top-3 right-3 flex items-center gap-1.5">
         {message.isPinned && (
           <Pin className="w-3.5 h-3.5 text-blush fill-blush" />
@@ -284,6 +295,7 @@ export default function Feed() {
                 <div className="space-y-3">
                   {group.messages.map((message) => {
                     const opt = optimisticCounts[message.id] || { likes: 0, dislikes: 0 };
+                    const messageDate = parseISO(message.date);
                     return (
                       <FeedItem
                         key={message.id}
@@ -296,6 +308,7 @@ export default function Feed() {
                         userVote={votes[message.id] || null}
                         optimisticLikes={(message.likes || 0) + opt.likes}
                         optimisticDislikes={(message.dislikes || 0) + opt.dislikes}
+                        isTodaysMessage={isToday(messageDate)}
                       />
                     );
                   })}
