@@ -30,9 +30,9 @@ import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
 import shkiaNightBg from "@assets/Night_1766586713110.png";
 
 // TEMPORARY: New section background images for testing
-import sectionMorningBg from "@assets/Morning_Background_1766949754060.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1766949754059.jpg";
-import sectionNightBg from "@assets/Night_Background_1766949754058.jpg";
+import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
+import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
+import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
