@@ -10,9 +10,23 @@ import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll, BarChart3, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message, TableInspiration, ScheduledNotification, ParshaVort } from '@shared/schema';
+import type { Message, TableInspiration, ScheduledNotification, ParshaVort, MessageCategory } from '@shared/schema';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
+
+const categoryOptions: { value: MessageCategory; label: string; color: string }[] = [
+  { value: 'message', label: 'Message', color: 'bg-yellow-400' },
+  { value: 'feature', label: 'New Feature', color: 'bg-blue-400' },
+  { value: 'bugfix', label: 'Bug Fix', color: 'bg-pink-400' },
+  { value: 'poll', label: 'Poll', color: 'bg-green-400' },
+];
 
 type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts' | 'gems-of-gratitude' | 'analytics';
 
@@ -40,7 +54,8 @@ export default function Admin() {
   const [messageFormData, setMessageFormData] = useState({
     date: '',
     title: '',
-    message: ''
+    message: '',
+    category: 'message' as MessageCategory
   });
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [isSavingMessage, setIsSavingMessage] = useState(false);
@@ -408,7 +423,8 @@ export default function Admin() {
       const messageData = {
         date: messageFormData.date,
         title: messageFormData.title || '',
-        message: messageFormData.message
+        message: messageFormData.message,
+        category: messageFormData.category
       };
 
       let response;
@@ -433,7 +449,7 @@ export default function Admin() {
         queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageData.date}`] });
         await refetchMessages();
         
-        setMessageFormData({ date: '', title: '', message: '' });
+        setMessageFormData({ date: '', title: '', message: '', category: 'message' });
         setEditingMessage(null);
       }
     } catch (error: any) {
@@ -1293,6 +1309,28 @@ export default function Admin() {
                 </div>
 
                 <div>
+                  <Label htmlFor="message-category">Category</Label>
+                  <Select
+                    value={messageFormData.category}
+                    onValueChange={(value) => setMessageFormData(prev => ({ ...prev, category: value as MessageCategory }))}
+                  >
+                    <SelectTrigger className="mt-1" data-testid="select-message-category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${option.color}`} />
+                            {option.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <Label htmlFor="message-content">Message Content *</Label>
                   <Textarea
                     id="message-content"
@@ -1319,7 +1357,7 @@ export default function Admin() {
                   <Button 
                     onClick={() => {
                       setEditingMessage(null);
-                      setMessageFormData({ date: '', title: '', message: '' });
+                      setMessageFormData({ date: '', title: '', message: '', category: 'message' });
                     }}
                     variant="outline"
                     className="w-full"
@@ -1364,7 +1402,8 @@ export default function Admin() {
                             setMessageFormData({
                               date: message.date,
                               title: message.title || '',
-                              message: message.message
+                              message: message.message,
+                              category: (message.category as MessageCategory) || 'message'
                             });
                           }}
                           data-testid={`button-edit-message-${message.id}`}
