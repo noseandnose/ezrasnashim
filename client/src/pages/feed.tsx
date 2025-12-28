@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useState, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ThumbsUp, ThumbsDown, ArrowLeft, Pin } from "lucide-react";
 import { Link } from "wouter";
@@ -142,143 +142,81 @@ export default function Feed() {
     }
   });
   
-  const [optimisticCounts, setOptimisticCounts] = useState<Record<number, { likes: number; dislikes: number }>>({});
+  const [pendingVotes, setPendingVotes] = useState<Set<number>>(new Set());
 
-  const { data: messages, isLoading, dataUpdatedAt } = useQuery<Message[]>({
+  const { data: messages, isLoading } = useQuery<Message[]>({
     queryKey: ['/api/feed'],
     staleTime: 60 * 1000,
   });
-
-  // Reset optimistic counts when fresh data arrives from server
-  useEffect(() => {
-    if (dataUpdatedAt) {
-      setOptimisticCounts({});
-    }
-  }, [dataUpdatedAt]);
 
   const saveVotes = useCallback((newVotes: Record<number, 'like' | 'dislike'>) => {
     setVotes(newVotes);
     localStorage.setItem('feedVotes', JSON.stringify(newVotes));
   }, []);
 
-  const updateOptimisticCount = useCallback((id: number, field: 'likes' | 'dislikes', delta: number) => {
-    setOptimisticCounts(prev => {
-      const current = prev[id] || { likes: 0, dislikes: 0 };
-      return { ...prev, [id]: { ...current, [field]: current[field] + delta } };
-    });
-  }, []);
+  const handleVote = async (id: number, action: 'like' | 'dislike' | 'unlike' | 'undislike') => {
+    if (pendingVotes.has(id)) return;
+    
+    setPendingVotes(prev => new Set(prev).add(id));
+    
+    const currentVote = votes[id] || null;
+    
+    try {
+      if (action === 'like') {
+        if (currentVote === 'dislike') {
+          await apiRequest('DELETE', `/api/feed/${id}/dislike`);
+        }
+        await apiRequest('POST', `/api/feed/${id}/like`);
+        saveVotes({ ...votes, [id]: 'like' });
+      } else if (action === 'dislike') {
+        if (currentVote === 'like') {
+          await apiRequest('DELETE', `/api/feed/${id}/like`);
+        }
+        await apiRequest('POST', `/api/feed/${id}/dislike`);
+        saveVotes({ ...votes, [id]: 'dislike' });
+      } else if (action === 'unlike') {
+        await apiRequest('DELETE', `/api/feed/${id}/like`);
+        const newVotes = { ...votes };
+        delete newVotes[id];
+        saveVotes(newVotes);
+      } else if (action === 'undislike') {
+        await apiRequest('DELETE', `/api/feed/${id}/dislike`);
+        const newVotes = { ...votes };
+        delete newVotes[id];
+        saveVotes(newVotes);
+      }
+      
+      await queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    } catch (error) {
+      console.error('Vote error:', error);
+    } finally {
+      setPendingVotes(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
+  };
 
-  const likeMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('POST', `/api/feed/${id}/like`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    },
-  });
-
-  const dislikeMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('POST', `/api/feed/${id}/dislike`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    },
-  });
-
-  const unlikeMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/feed/${id}/like`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    },
-  });
-
-  const undislikeMutation = useMutation({
-    mutationFn: (id: number) => apiRequest('DELETE', `/api/feed/${id}/dislike`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    },
-  });
-
-  const handleLike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
+  const handleLike = (id: number, currentVote: 'like' | 'dislike' | null) => {
     if (currentVote === 'like') return;
-    
-    // Optimistically update UI
-    const newVotes = { ...votes, [id]: 'like' as const };
-    saveVotes(newVotes);
-    updateOptimisticCount(id, 'likes', 1);
-    if (currentVote === 'dislike') {
-      updateOptimisticCount(id, 'dislikes', -1);
-    }
-    
-    try {
-      // Remove dislike first if switching
-      if (currentVote === 'dislike') {
-        await undislikeMutation.mutateAsync(id);
-      }
-      await likeMutation.mutateAsync(id);
-    } catch {
-      // Revert on error
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    }
+    handleVote(id, 'like');
   };
 
-  const handleDislike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
+  const handleDislike = (id: number, currentVote: 'like' | 'dislike' | null) => {
     if (currentVote === 'dislike') return;
-    
-    // Optimistically update UI
-    const newVotes = { ...votes, [id]: 'dislike' as const };
-    saveVotes(newVotes);
-    updateOptimisticCount(id, 'dislikes', 1);
-    if (currentVote === 'like') {
-      updateOptimisticCount(id, 'likes', -1);
-    }
-    
-    try {
-      // Remove like first if switching
-      if (currentVote === 'like') {
-        await unlikeMutation.mutateAsync(id);
-      }
-      await dislikeMutation.mutateAsync(id);
-    } catch {
-      // Revert on error
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    }
+    handleVote(id, 'dislike');
   };
 
-  const handleUnlike = async (id: number) => {
-    // Remove vote from local state
-    const newVotes: Record<number, 'like' | 'dislike'> = {};
-    Object.entries(votes).forEach(([key, value]) => {
-      if (Number(key) !== id) {
-        newVotes[Number(key)] = value;
-      }
-    });
-    saveVotes(newVotes);
-    updateOptimisticCount(id, 'likes', -1);
-    
-    try {
-      await unlikeMutation.mutateAsync(id);
-    } catch {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    }
+  const handleUnlike = (id: number) => {
+    handleVote(id, 'unlike');
   };
 
-  const handleUndislike = async (id: number) => {
-    // Remove vote from local state
-    const newVotes: Record<number, 'like' | 'dislike'> = {};
-    Object.entries(votes).forEach(([key, value]) => {
-      if (Number(key) !== id) {
-        newVotes[Number(key)] = value;
-      }
-    });
-    saveVotes(newVotes);
-    updateOptimisticCount(id, 'dislikes', -1);
-    
-    try {
-      await undislikeMutation.mutateAsync(id);
-    } catch {
-      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
-    }
+  const handleUndislike = (id: number) => {
+    handleVote(id, 'undislike');
   };
 
-  const isVoting = likeMutation.isPending || dislikeMutation.isPending || unlikeMutation.isPending || undislikeMutation.isPending;
+  const isVotingMessage = (id: number) => pendingVotes.has(id);
 
   const groupedMessages: { date: string; messages: Message[] }[] = [];
   if (messages) {
@@ -332,7 +270,6 @@ export default function Feed() {
                   
                   <div className="space-y-3">
                     {group.messages.map((message) => {
-                      const opt = optimisticCounts[message.id] || { likes: 0, dislikes: 0 };
                       const messageDate = parseISO(message.date);
                       const isTodayMsg = isToday(messageDate);
                       const shouldHighlight = isTodayMsg && !highlightedTodaysMessage;
@@ -345,10 +282,10 @@ export default function Feed() {
                           onDislike={handleDislike}
                           onUnlike={handleUnlike}
                           onUndislike={handleUndislike}
-                          isVoting={isVoting}
+                          isVoting={isVotingMessage(message.id)}
                           userVote={votes[message.id] || null}
-                          optimisticLikes={(message.likes || 0) + opt.likes}
-                          optimisticDislikes={(message.dislikes || 0) + opt.dislikes}
+                          optimisticLikes={message.likes || 0}
+                          optimisticDislikes={message.dislikes || 0}
                           isTodaysMessage={shouldHighlight}
                         />
                       );
