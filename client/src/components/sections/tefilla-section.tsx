@@ -340,7 +340,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         alt="" 
         aria-hidden="true"
         className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: -1, opacity: 0.3 }}
+        style={{ zIndex: 0, opacity: 0.3 }}
       />
 
       {/* Main Tefilla Section */}
@@ -348,7 +348,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         className="rounded-b-3xl p-3 space-y-3 relative"
         style={{
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-          zIndex: 1
+          zIndex: 2
         }}
       >
         

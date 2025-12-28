@@ -247,7 +247,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         alt="" 
         aria-hidden="true"
         className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: -1, opacity: 0.3 }}
+        style={{ zIndex: 0, opacity: 0.3 }}
       />
       
       {/* Main Tzedaka Section */}
@@ -255,7 +255,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         className="rounded-b-3xl px-3 pt-3 pb-2 relative"
         style={{
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-          zIndex: 1
+          zIndex: 2
         }}
       >
         <button 
