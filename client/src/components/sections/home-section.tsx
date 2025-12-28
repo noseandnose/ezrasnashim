@@ -29,6 +29,11 @@ import shkiaMorningBg from "@assets/Morning_1766586713115.png";
 import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
 import shkiaNightBg from "@assets/Night_1766586713110.png";
 
+// TEMPORARY: New section background images for testing
+import sectionMorningBg from "@assets/Morning_1766933137711.jpg";
+import sectionAfternoonBg from "@assets/Afternoon_1766933137711.jpg";
+import sectionNightBg from "@assets/Night_1766933137710.jpg";
+
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
 }
@@ -217,6 +222,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return shkiaMorningBg;
     if (isAfterTzais()) return shkiaNightBg;
     return shkiaAfternoonBg;
+  };
+
+  // TEMPORARY: Get time-appropriate background for main section
+  const getSectionBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return sectionMorningBg;
+    if (isAfterTzais()) return sectionNightBg;
+    return sectionAfternoonBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
