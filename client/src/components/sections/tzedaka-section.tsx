@@ -3,9 +3,9 @@ import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } fr
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766941859356.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766941859356.jpg";
-import sectionNightBg from "@assets/Night_Background_1766942692567.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1766949754060.jpg";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1766949754059.jpg";
+import sectionNightBg from "@assets/Night_Background_1766949754058.jpg";
 import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
