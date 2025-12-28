@@ -1,8 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { useGeolocation } from "@/hooks/use-jewish-times";
+import { useState, useEffect, useCallback } from "react";
 
 interface WeatherData {
-  temperature: number;
+  temperatureC: number;
+  temperatureF: number;
   weatherCode: number;
   isDay: boolean;
 }
@@ -51,15 +53,39 @@ async function fetchWeather(lat: number, lng: number): Promise<WeatherData | nul
     if (!response.ok) return null;
     
     const data = await response.json();
+    const tempC = Math.round(data.current.temperature_2m);
+    const tempF = Math.round((tempC * 9/5) + 32);
     
     return {
-      temperature: Math.round(data.current.temperature_2m),
+      temperatureC: tempC,
+      temperatureF: tempF,
       weatherCode: data.current.weather_code,
       isDay: data.current.is_day === 1,
     };
   } catch {
     return null;
   }
+}
+
+const TEMP_UNIT_KEY = 'weatherTempUnit';
+
+export function useTemperatureUnit() {
+  const [unit, setUnit] = useState<'C' | 'F'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem(TEMP_UNIT_KEY) as 'C' | 'F') || 'C';
+    }
+    return 'C';
+  });
+  
+  useEffect(() => {
+    localStorage.setItem(TEMP_UNIT_KEY, unit);
+  }, [unit]);
+  
+  const toggle = useCallback(() => {
+    setUnit(prev => prev === 'C' ? 'F' : 'C');
+  }, []);
+  
+  return { unit, toggle };
 }
 
 export function useWeather() {

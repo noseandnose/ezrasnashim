@@ -1,5 +1,5 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
-import { useWeather, getWeatherEmoji } from "@/hooks/use-weather";
+import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
@@ -155,6 +155,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
   const { data: weather } = useWeather();
+  const { unit: tempUnit, toggle: toggleTempUnit } = useTemperatureUnit();
 
   // Helper to check if current time is after tzais hakochavim (nightfall)
   const isAfterTzais = (): boolean => {
@@ -478,10 +479,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               className="absolute inset-0 w-full h-full object-cover"
               style={{ zIndex: 0, opacity: 0.3 }}
             />
-            {/* Weather badge - Apple glass style */}
+            {/* Weather badge - Apple glass style, tappable to toggle C/F */}
             {weather && (
               <div 
-                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTempUnit();
+                }}
+                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
                 style={{
                   background: 'rgba(255, 255, 255, 0.7)',
                   backdropFilter: 'blur(10px)',
@@ -491,7 +496,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 }}
               >
                 <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
-                <span className="platypi-bold text-[10px] text-black/80">{weather.temperature}°</span>
+                <span className="platypi-bold text-[10px] text-black/80">
+                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
+                </span>
               </div>
             )}
             {/* Content overlay */}
