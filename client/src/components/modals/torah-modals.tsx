@@ -1144,18 +1144,6 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           ) : gemsOfGratitudeContent ? (
             <div className="space-y-4">
               <div className="bg-white rounded-2xl p-6 border border-blush/10">
-                {gemsOfGratitudeContent.title && (
-                  <h3 className="platypi-bold text-xl text-black text-center mb-4">
-                    {gemsOfGratitudeContent.title}
-                  </h3>
-                )}
-                
-                {gemsOfGratitudeContent.subtitle && (
-                  <p className="platypi-regular text-sm text-black/70 text-center mb-4">
-                    {gemsOfGratitudeContent.subtitle}
-                  </p>
-                )}
-                
                 {/* Image if provided */}
                 {gemsOfGratitudeContent.imageUrl && (
                   <div className="mb-4 rounded-xl overflow-hidden">
