@@ -295,7 +295,7 @@ export default function Feed() {
         </div>
       </header>
       
-      <main className="content-area px-4 pt-0 pb-8" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 2rem)' }}>
+      <main className="px-4 pb-8 overflow-y-auto" style={{ paddingTop: 0, paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 2rem)' }}>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-blush/30 border-t-blush rounded-full animate-spin" />
