@@ -1,5 +1,11 @@
 import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
+import { useJewishTimes } from "@/hooks/use-jewish-times";
+
+// TEMPORARY: Section background images
+import sectionMorningBg from "@assets/Morning_1766933137711.jpg";
+import sectionAfternoonBg from "@assets/Afternoon_1766933137711.jpg";
+import sectionNightBg from "@assets/Night_1766933137710.jpg";
 import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
@@ -87,6 +93,33 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const { resetDaily } = useDonationCompletionStore();
   const [showExplosion, setShowExplosion] = useState(false);
   const { trackEvent } = useAnalytics();
+  
+  // Get Jewish times for isAfterTzais check
+  const { data: jewishTimes } = useJewishTimes();
+  
+  // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
+  const isAfterTzais = () => {
+    if (!jewishTimes?.tzais) return false;
+    const now = new Date();
+    const tzaisMatch = jewishTimes.tzais.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    if (!tzaisMatch) return false;
+    let hours = parseInt(tzaisMatch[1]);
+    const minutes = parseInt(tzaisMatch[2]);
+    const period = tzaisMatch[3].toUpperCase();
+    if (period === 'PM' && hours !== 12) hours += 12;
+    else if (period === 'AM' && hours === 12) hours = 0;
+    const tzaisDate = new Date();
+    tzaisDate.setHours(hours, minutes, 0, 0);
+    return now >= tzaisDate;
+  };
+
+  // TEMPORARY: Get time-appropriate background for main section
+  const getSectionBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return sectionMorningBg;
+    if (isAfterTzais()) return sectionNightBg;
+    return sectionAfternoonBg;
+  };
 
   // Individual button completion tracking using localStorage with daily reset
   const getLocalDateString = () => {
@@ -207,16 +240,23 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   return (
     <div className="pb-20" data-bridge-container>
       
-      {/* Main Tzedaka Section - ONLY CAMPAIGN */}
+      {/* TEMPORARY: Main Tzedaka Section with time-based background */}
       <div 
-        className="rounded-b-3xl px-3 pt-3 pb-2"
+        className="rounded-b-3xl px-3 pt-3 pb-2 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
         }}
       >
+        {/* Background image */}
+        <img 
+          src={getSectionBackground()} 
+          alt="" 
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+          style={{ zIndex: 0, opacity: 0.3 }}
+        />
+        {/* Content wrapper */}
+        <div className="relative" style={{ zIndex: 1 }}>
         <button 
           onClick={() => handleTzedakaButtonClick('active_campaign')}
           className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${
@@ -363,6 +403,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
         {/* Bottom padding */}
         <div className="h-16"></div>
+        </div>{/* End content wrapper */}
       </div>
     </div>
   );
