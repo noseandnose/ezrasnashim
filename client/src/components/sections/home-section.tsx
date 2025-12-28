@@ -375,25 +375,24 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const PrayerIcon = currentPrayer.icon;
 
   return (
-    <div className="pb-20" data-bridge-container>
+    <div className="pb-20 relative overflow-hidden" data-bridge-container>
+      {/* TEMPORARY: Full page background image */}
+      <img 
+        src={getSectionBackground()} 
+        alt="" 
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ zIndex: 0, opacity: 0.3 }}
+      />
       
-      {/* TEMPORARY: Unified Top Section with time-based background image */}
+      {/* Unified Top Section */}
       <div 
-        className="rounded-b-3xl p-3 relative overflow-hidden"
+        className="rounded-b-3xl p-3 relative"
         style={{
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+          zIndex: 1
         }}
       >
-        {/* Background image - same opacity as garden (0.3) */}
-        <img 
-          src={getSectionBackground()} 
-          alt="" 
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ zIndex: 0, opacity: 0.3 }}
-        />
-        {/* Content wrapper */}
-        <div className="relative" style={{ zIndex: 1 }}>
         {/* Greeting and Date in one row */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
@@ -685,7 +684,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             )}
           </div>
         )}
-        </div>{/* End content wrapper */}
       </div>
       {/* Main Action Buttons */}
       <div className="p-2 space-y-2">

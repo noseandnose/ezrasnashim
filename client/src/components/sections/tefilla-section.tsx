@@ -331,25 +331,24 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
 
   return (
-    <div className="pb-20" data-bridge-container>
+    <div className="pb-20 relative overflow-hidden" data-bridge-container>
+      {/* TEMPORARY: Full page background image */}
+      <img 
+        src={getSectionBackground()} 
+        alt="" 
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ zIndex: 0, opacity: 0.3 }}
+      />
 
-      {/* TEMPORARY: Main Tefilla Section with time-based background */}
+      {/* Main Tefilla Section */}
       <div 
-        className="rounded-b-3xl p-3 space-y-3 relative overflow-hidden"
+        className="rounded-b-3xl p-3 space-y-3 relative"
         style={{
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+          zIndex: 1
         }}
       >
-        {/* Background image */}
-        <img 
-          src={getSectionBackground()} 
-          alt="" 
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-          style={{ zIndex: 0, opacity: 0.3 }}
-        />
-        {/* Content wrapper */}
-        <div className="relative space-y-3" style={{ zIndex: 1 }}>
         
         {/* Total Tehillim Said Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
@@ -697,7 +696,6 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
         {/* Bottom padding */}
         <div className="h-16"></div>
-        </div>{/* End content wrapper */}
       </div>
       
     </div>
