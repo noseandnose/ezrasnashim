@@ -11,7 +11,21 @@ import { useQuery } from '@tanstack/react-query';
 import { MessageSquare, Plus, ArrowLeft, Save, Edit, Trash2, Bell, ChefHat } from 'lucide-react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
-import type { Message } from '@shared/schema';
+import type { Message, MessageCategory } from '@shared/schema';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const categoryOptions: { value: MessageCategory; label: string; color: string }[] = [
+  { value: 'message', label: 'Message', color: 'bg-yellow-400' },
+  { value: 'feature', label: 'New Feature', color: 'bg-blue-400' },
+  { value: 'bugfix', label: 'Bug Fix', color: 'bg-pink-400' },
+  { value: 'poll', label: 'Poll', color: 'bg-green-400' },
+];
 
 export default function AdminMessages() {
   const [adminPassword, setAdminPassword] = useState('');
@@ -31,7 +45,8 @@ export default function AdminMessages() {
   const [formData, setFormData] = useState({
     date: '',
     title: '',
-    message: ''
+    message: '',
+    category: 'message' as MessageCategory
   });
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -130,7 +145,8 @@ export default function AdminMessages() {
     setFormData({
       date: message.date,
       title: message.title,
-      message: message.message
+      message: message.message,
+      category: message.category || 'message'
     });
   };
 
@@ -139,7 +155,8 @@ export default function AdminMessages() {
     setFormData({
       date: '',
       title: '',
-      message: ''
+      message: '',
+      category: 'message'
     });
   };
 
@@ -158,7 +175,8 @@ export default function AdminMessages() {
       const messageData = {
         date: formData.date,
         title: formData.title,
-        message: formData.message
+        message: formData.message,
+        category: formData.category
       };
 
       let response;
@@ -193,7 +211,8 @@ export default function AdminMessages() {
         setFormData({
           date: '',
           title: '',
-          message: ''
+          message: '',
+          category: 'message'
         });
         setEditingMessage(null);
       }
@@ -356,6 +375,28 @@ export default function AdminMessages() {
               </div>
 
               <div>
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value as MessageCategory }))}
+                >
+                  <SelectTrigger data-testid="select-message-category">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${option.color}`} />
+                          {option.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
                 <Label htmlFor="message">Content</Label>
                 <Textarea
                   id="message"
@@ -396,11 +437,18 @@ export default function AdminMessages() {
             
             <div className="space-y-3 max-h-96 overflow-y-auto">
               {messages && messages.length > 0 ? (
-                messages.map((message: Message) => (
+                messages.map((message: Message) => {
+                  const categoryInfo = categoryOptions.find(c => c.value === message.category) || categoryOptions[0];
+                  return (
                   <div key={message.id} className="border rounded-lg p-4 space-y-2">
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <h3 className="font-medium">{message.title}</h3>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="font-medium">{message.title}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs text-white ${categoryInfo.color}`}>
+                            {categoryInfo.label}
+                          </span>
+                        </div>
                         <p className="text-sm text-gray-600">
                           {format(new Date(message.date), "MMMM d, yyyy")}
                         </p>
@@ -428,7 +476,7 @@ export default function AdminMessages() {
                       </div>
                     </div>
                   </div>
-                ))
+                );})
               ) : (
                 <p className="text-gray-500 text-center py-8">
                   No upcoming messages found.
