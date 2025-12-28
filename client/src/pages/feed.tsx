@@ -197,40 +197,53 @@ export default function Feed() {
   });
 
   const handleLike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
-    // If already liked, do nothing (should use handleUnlike)
     if (currentVote === 'like') return;
     
+    // Optimistically update UI
     const newVotes = { ...votes, [id]: 'like' as const };
     saveVotes(newVotes);
-    
-    // If switching from dislike, decrement dislike first
+    updateOptimisticCount(id, 'likes', 1);
     if (currentVote === 'dislike') {
       updateOptimisticCount(id, 'dislikes', -1);
-      await undislikeMutation.mutateAsync(id);
     }
     
-    updateOptimisticCount(id, 'likes', 1);
-    likeMutation.mutate(id);
+    try {
+      // Remove dislike first if switching
+      if (currentVote === 'dislike') {
+        await undislikeMutation.mutateAsync(id);
+      }
+      await likeMutation.mutateAsync(id);
+    } catch {
+      // Revert on error
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    }
   };
 
   const handleDislike = async (id: number, currentVote: 'like' | 'dislike' | null) => {
-    // If already disliked, do nothing (should use handleUndislike)
     if (currentVote === 'dislike') return;
     
+    // Optimistically update UI
     const newVotes = { ...votes, [id]: 'dislike' as const };
     saveVotes(newVotes);
-    
-    // If switching from like, decrement like first
+    updateOptimisticCount(id, 'dislikes', 1);
     if (currentVote === 'like') {
       updateOptimisticCount(id, 'likes', -1);
-      await unlikeMutation.mutateAsync(id);
     }
     
-    updateOptimisticCount(id, 'dislikes', 1);
-    dislikeMutation.mutate(id);
+    try {
+      // Remove like first if switching
+      if (currentVote === 'like') {
+        await unlikeMutation.mutateAsync(id);
+      }
+      await dislikeMutation.mutateAsync(id);
+    } catch {
+      // Revert on error
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    }
   };
 
-  const handleUnlike = (id: number) => {
+  const handleUnlike = async (id: number) => {
+    // Remove vote from local state
     const newVotes: Record<number, 'like' | 'dislike'> = {};
     Object.entries(votes).forEach(([key, value]) => {
       if (Number(key) !== id) {
@@ -239,10 +252,16 @@ export default function Feed() {
     });
     saveVotes(newVotes);
     updateOptimisticCount(id, 'likes', -1);
-    unlikeMutation.mutate(id);
+    
+    try {
+      await unlikeMutation.mutateAsync(id);
+    } catch {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    }
   };
 
-  const handleUndislike = (id: number) => {
+  const handleUndislike = async (id: number) => {
+    // Remove vote from local state
     const newVotes: Record<number, 'like' | 'dislike'> = {};
     Object.entries(votes).forEach(([key, value]) => {
       if (Number(key) !== id) {
@@ -251,7 +270,12 @@ export default function Feed() {
     });
     saveVotes(newVotes);
     updateOptimisticCount(id, 'dislikes', -1);
-    undislikeMutation.mutate(id);
+    
+    try {
+      await undislikeMutation.mutateAsync(id);
+    } catch {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    }
   };
 
   const isVoting = likeMutation.isPending || dislikeMutation.isPending || unlikeMutation.isPending || undislikeMutation.isPending;
@@ -296,9 +320,9 @@ export default function Feed() {
           <div className="space-y-4">
             {(() => {
               let highlightedTodaysMessage = false;
-              return groupedMessages.map((group) => (
+              return groupedMessages.map((group, groupIndex) => (
                 <div key={group.date}>
-                  <div className="flex items-center gap-3 my-4">
+                  <div className={`flex items-center gap-3 ${groupIndex === 0 ? 'mb-4' : 'my-4'}`}>
                     <div className="flex-1 h-px bg-gray-200" />
                     <span className="text-xs text-warm-gray/70 platypi-medium whitespace-nowrap">
                       {formatDateDivider(group.date)}
