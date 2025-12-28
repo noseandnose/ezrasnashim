@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, Plus, ArrowLeft, Save, Edit, Trash2, Bell, ChefHat } from 'lucide-react';
+import { MessageSquare, Plus, ArrowLeft, Save, Edit, Trash2, Bell, ChefHat, Pin } from 'lucide-react';
 import { Link } from 'wouter';
 import { format } from 'date-fns';
 import type { Message, MessageCategory } from '@shared/schema';
@@ -146,7 +146,7 @@ export default function AdminMessages() {
       date: message.date,
       title: message.title,
       message: message.message,
-      category: message.category || 'message'
+      category: (message.category as MessageCategory) || 'message'
     });
   };
 
@@ -253,6 +253,7 @@ export default function AdminMessages() {
       // Refresh messages list and invalidate cache
       refetchMessages();
       queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
       // Also invalidate the specific date query so it's removed from home page immediately
       queryClient.invalidateQueries({ queryKey: [`/api/messages/${message.date}`] });
     } catch (error: any) {
@@ -267,6 +268,47 @@ export default function AdminMessages() {
         toast({
           title: 'Error',
           description: error?.response?.data?.message || error?.message || 'Failed to delete message.',
+          variant: 'destructive'
+        });
+      }
+    }
+  };
+
+  const handlePinMessage = async (message: Message) => {
+    try {
+      if (message.isPinned) {
+        await axiosClient.delete(`/api/messages/${message.id}/pin`, {
+          headers: getAuthHeaders()
+        });
+        toast({
+          title: 'Message Unpinned',
+          description: 'The message has been unpinned from the top of the Feed.',
+        });
+      } else {
+        await axiosClient.post(`/api/messages/${message.id}/pin`, {}, {
+          headers: getAuthHeaders()
+        });
+        toast({
+          title: 'Message Pinned',
+          description: 'The message will now appear at the top of the Feed.',
+        });
+      }
+      
+      refetchMessages();
+      queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        setIsAuthenticated(false);
+        toast({
+          title: 'Authentication Error',
+          description: 'Your session has expired. Please log in again.',
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: error?.response?.data?.message || error?.message || 'Failed to update pin status.',
           variant: 'destructive'
         });
       }
@@ -445,6 +487,11 @@ export default function AdminMessages() {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="font-medium">{message.title}</h3>
+                          {message.isPinned && (
+                            <span className="px-2 py-0.5 rounded-full text-xs text-white bg-blush flex items-center gap-1">
+                              <Pin className="w-3 h-3" /> Pinned
+                            </span>
+                          )}
                           <span className={`px-2 py-0.5 rounded-full text-xs text-white ${categoryInfo.color}`}>
                             {categoryInfo.label}
                           </span>
@@ -457,6 +504,15 @@ export default function AdminMessages() {
                         </p>
                       </div>
                       <div className="flex gap-1 ml-2">
+                        <Button
+                          size="sm"
+                          variant={message.isPinned ? "default" : "outline"}
+                          onClick={() => handlePinMessage(message)}
+                          title={message.isPinned ? "Unpin message" : "Pin message to top"}
+                          data-testid={`button-pin-message-${message.id}`}
+                        >
+                          <Pin className={`w-3 h-3 ${message.isPinned ? 'fill-current' : ''}`} />
+                        </Button>
                         <Button
                           size="sm"
                           variant="outline"

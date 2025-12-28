@@ -1,6 +1,7 @@
+import { useState, useCallback, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
-import { ThumbsUp, ThumbsDown, ArrowLeft } from "lucide-react";
+import { ThumbsUp, ThumbsDown, ArrowLeft, Pin } from "lucide-react";
 import { Link } from "wouter";
 import type { Message, MessageCategory } from "@shared/schema";
 import { linkifyText } from "@/lib/text-formatter";
@@ -34,23 +35,47 @@ interface FeedItemProps {
   message: Message;
   onLike: (id: number) => void;
   onDislike: (id: number) => void;
-  isLiking: boolean;
-  isDisliking: boolean;
+  onUnlike: (id: number) => void;
+  onUndislike: (id: number) => void;
+  isVoting: boolean;
   userVote: 'like' | 'dislike' | null;
+  optimisticLikes: number;
+  optimisticDislikes: number;
 }
 
-function FeedItem({ message, onLike, onDislike, isLiking, isDisliking, userVote }: FeedItemProps) {
+function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting, userVote, optimisticLikes, optimisticDislikes }: FeedItemProps) {
   const category = (message.category as MessageCategory) || 'message';
   const { bg, label } = categoryColors[category];
 
+  const handleLikeClick = () => {
+    if (userVote === 'like') {
+      onUnlike(message.id);
+    } else {
+      onLike(message.id);
+    }
+  };
+
+  const handleDislikeClick = () => {
+    if (userVote === 'dislike') {
+      onUndislike(message.id);
+    } else {
+      onDislike(message.id);
+    }
+  };
+
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm border border-blush/10 relative" data-testid={`feed-item-${message.id}`}>
-      <div 
-        className={`absolute top-3 right-3 w-3 h-3 rounded-full ${bg}`}
-        title={label}
-      />
+      <div className="absolute top-3 right-3 flex items-center gap-1.5">
+        {message.isPinned && (
+          <Pin className="w-3.5 h-3.5 text-blush fill-blush" />
+        )}
+        <div 
+          className={`w-3 h-3 rounded-full ${bg}`}
+          title={label}
+        />
+      </div>
       
-      <h3 className="platypi-bold text-lg text-black pr-6 mb-2">{message.title}</h3>
+      <h3 className="platypi-bold text-lg text-black pr-8 mb-2">{message.title}</h3>
       
       <div 
         className="text-warm-gray platypi-medium leading-relaxed mb-3"
@@ -64,31 +89,31 @@ function FeedItem({ message, onLike, onDislike, isLiking, isDisliking, userVote 
         
         <div className="flex items-center gap-4">
           <button
-            onClick={() => onLike(message.id)}
-            disabled={isLiking || userVote === 'like'}
+            onClick={handleLikeClick}
+            disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'like' 
                 ? 'bg-green-100 text-green-600' 
                 : 'bg-gray-50 text-gray-500 hover:bg-green-50 hover:text-green-600'
-            } ${isLiking ? 'opacity-50' : ''}`}
+            } ${isVoting ? 'opacity-50' : ''}`}
             data-testid={`like-button-${message.id}`}
           >
             <ThumbsUp className="w-4 h-4" />
-            <span className="text-sm font-medium">{message.likes || 0}</span>
+            <span className="text-sm font-medium">{optimisticLikes}</span>
           </button>
           
           <button
-            onClick={() => onDislike(message.id)}
-            disabled={isDisliking || userVote === 'dislike'}
+            onClick={handleDislikeClick}
+            disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'dislike' 
                 ? 'bg-red-100 text-red-600' 
                 : 'bg-gray-50 text-gray-500 hover:bg-red-50 hover:text-red-600'
-            } ${isDisliking ? 'opacity-50' : ''}`}
+            } ${isVoting ? 'opacity-50' : ''}`}
             data-testid={`dislike-button-${message.id}`}
           >
             <ThumbsDown className="w-4 h-4" />
-            <span className="text-sm font-medium">{message.dislikes || 0}</span>
+            <span className="text-sm font-medium">{optimisticDislikes}</span>
           </button>
         </div>
       </div>
@@ -97,10 +122,40 @@ function FeedItem({ message, onLike, onDislike, isLiking, isDisliking, userVote 
 }
 
 export default function Feed() {
-  const { data: messages, isLoading } = useQuery<Message[]>({
+  const [votes, setVotes] = useState<Record<number, 'like' | 'dislike'>>(() => {
+    try {
+      const stored = localStorage.getItem('feedVotes');
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
+  
+  const [optimisticCounts, setOptimisticCounts] = useState<Record<number, { likes: number; dislikes: number }>>({});
+
+  const { data: messages, isLoading, dataUpdatedAt } = useQuery<Message[]>({
     queryKey: ['/api/feed'],
     staleTime: 60 * 1000,
   });
+
+  // Reset optimistic counts when fresh data arrives from server
+  useEffect(() => {
+    if (dataUpdatedAt) {
+      setOptimisticCounts({});
+    }
+  }, [dataUpdatedAt]);
+
+  const saveVotes = useCallback((newVotes: Record<number, 'like' | 'dislike'>) => {
+    setVotes(newVotes);
+    localStorage.setItem('feedVotes', JSON.stringify(newVotes));
+  }, []);
+
+  const updateOptimisticCount = useCallback((id: number, field: 'likes' | 'dislikes', delta: number) => {
+    setOptimisticCounts(prev => {
+      const current = prev[id] || { likes: 0, dislikes: 0 };
+      return { ...prev, [id]: { ...current, [field]: current[field] + delta } };
+    });
+  }, []);
 
   const likeMutation = useMutation({
     mutationFn: (id: number) => apiRequest('POST', `/api/feed/${id}/like`),
@@ -116,36 +171,67 @@ export default function Feed() {
     },
   });
 
-  const getVotesFromStorage = (): Record<number, 'like' | 'dislike'> => {
-    try {
-      const stored = localStorage.getItem('feedVotes');
-      return stored ? JSON.parse(stored) : {};
-    } catch {
-      return {};
+  const unlikeMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/feed/${id}/like`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    },
+  });
+
+  const undislikeMutation = useMutation({
+    mutationFn: (id: number) => apiRequest('DELETE', `/api/feed/${id}/dislike`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/feed'] });
+    },
+  });
+
+  const handleLike = async (id: number) => {
+    const previousVote = votes[id];
+    const newVotes = { ...votes, [id]: 'like' as const };
+    saveVotes(newVotes);
+    
+    // If switching from dislike, decrement dislike first
+    if (previousVote === 'dislike') {
+      updateOptimisticCount(id, 'dislikes', -1);
+      await undislikeMutation.mutateAsync(id);
     }
-  };
-
-  const saveVote = (id: number, vote: 'like' | 'dislike') => {
-    const votes = getVotesFromStorage();
-    votes[id] = vote;
-    localStorage.setItem('feedVotes', JSON.stringify(votes));
-  };
-
-  const handleLike = (id: number) => {
-    const votes = getVotesFromStorage();
-    if (votes[id]) return;
-    saveVote(id, 'like');
+    
+    updateOptimisticCount(id, 'likes', 1);
     likeMutation.mutate(id);
   };
 
-  const handleDislike = (id: number) => {
-    const votes = getVotesFromStorage();
-    if (votes[id]) return;
-    saveVote(id, 'dislike');
+  const handleDislike = async (id: number) => {
+    const previousVote = votes[id];
+    const newVotes = { ...votes, [id]: 'dislike' as const };
+    saveVotes(newVotes);
+    
+    // If switching from like, decrement like first
+    if (previousVote === 'like') {
+      updateOptimisticCount(id, 'likes', -1);
+      await unlikeMutation.mutateAsync(id);
+    }
+    
+    updateOptimisticCount(id, 'dislikes', 1);
     dislikeMutation.mutate(id);
   };
 
-  const votes = getVotesFromStorage();
+  const handleUnlike = (id: number) => {
+    const newVotes = { ...votes };
+    delete newVotes[id];
+    saveVotes(newVotes);
+    updateOptimisticCount(id, 'likes', -1);
+    unlikeMutation.mutate(id);
+  };
+
+  const handleUndislike = (id: number) => {
+    const newVotes = { ...votes };
+    delete newVotes[id];
+    saveVotes(newVotes);
+    updateOptimisticCount(id, 'dislikes', -1);
+    undislikeMutation.mutate(id);
+  };
+
+  const isVoting = likeMutation.isPending || dislikeMutation.isPending || unlikeMutation.isPending || undislikeMutation.isPending;
 
   const groupedMessages: { date: string; messages: Message[] }[] = [];
   if (messages) {
@@ -196,17 +282,23 @@ export default function Feed() {
                 </div>
                 
                 <div className="space-y-3">
-                  {group.messages.map((message) => (
-                    <FeedItem
-                      key={message.id}
-                      message={message}
-                      onLike={handleLike}
-                      onDislike={handleDislike}
-                      isLiking={likeMutation.isPending}
-                      isDisliking={dislikeMutation.isPending}
-                      userVote={votes[message.id] || null}
-                    />
-                  ))}
+                  {group.messages.map((message) => {
+                    const opt = optimisticCounts[message.id] || { likes: 0, dislikes: 0 };
+                    return (
+                      <FeedItem
+                        key={message.id}
+                        message={message}
+                        onLike={handleLike}
+                        onDislike={handleDislike}
+                        onUnlike={handleUnlike}
+                        onUndislike={handleUndislike}
+                        isVoting={isVoting}
+                        userVote={votes[message.id] || null}
+                        optimisticLikes={(message.likes || 0) + opt.likes}
+                        optimisticDislikes={(message.dislikes || 0) + opt.dislikes}
+                      />
+                    );
+                  })}
                 </div>
               </div>
             ))}

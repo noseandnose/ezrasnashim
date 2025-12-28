@@ -3622,10 +3622,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Feed routes - Public endpoints for accessing the message feed
   app.get("/api/feed", async (_req, res) => {
     try {
-      const messages = await storage.getAllMessages();
-      // Sort by date descending (newest first)
-      messages.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      return res.json(messages);
+      const allMessages = await storage.getAllMessages();
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Sort: pinned first, then today's message, then by date descending
+      allMessages.sort((a, b) => {
+        // Pinned messages always first
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        // Today's message comes next (if not pinned)
+        const aIsToday = a.date === today;
+        const bIsToday = b.date === today;
+        if (aIsToday && !bIsToday) return -1;
+        if (!aIsToday && bIsToday) return 1;
+        
+        // Then sort by date descending
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      return res.json(allMessages);
     } catch (error) {
       console.error("Error fetching feed:", error);
       return res.status(500).json({ message: "Failed to fetch feed" });
@@ -3652,6 +3668,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error disliking message:", error);
       return res.status(500).json({ message: "Failed to dislike message" });
+    }
+  });
+
+  app.delete("/api/feed/:id/like", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.decrementMessageLike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error removing like:", error);
+      return res.status(500).json({ message: "Failed to remove like" });
+    }
+  });
+
+  app.delete("/api/feed/:id/dislike", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.decrementMessageDislike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error removing dislike:", error);
+      return res.status(500).json({ message: "Failed to remove dislike" });
+    }
+  });
+
+  // Pin/unpin message routes (admin only)
+  app.post("/api/messages/:id/pin", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const pinnedMessage = await storage.pinMessage(parseInt(id));
+      return res.json(pinnedMessage);
+    } catch (error) {
+      console.error("Error pinning message:", error);
+      return res.status(500).json({ message: "Failed to pin message" });
+    }
+  });
+
+  app.delete("/api/messages/:id/pin", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.unpinMessage(parseInt(id));
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error unpinning message:", error);
+      return res.status(500).json({ message: "Failed to unpin message" });
     }
   });
 

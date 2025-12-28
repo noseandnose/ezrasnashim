@@ -345,6 +345,10 @@ export interface IStorage {
   deleteMessage(id: number): Promise<void>;
   incrementMessageLike(id: number): Promise<Message>;
   incrementMessageDislike(id: number): Promise<Message>;
+  decrementMessageLike(id: number): Promise<Message>;
+  decrementMessageDislike(id: number): Promise<Message>;
+  pinMessage(id: number): Promise<Message>;
+  unpinMessage(id: number): Promise<void>;
   
   // Scheduled Notification methods
   getAllScheduledNotifications(): Promise<ScheduledNotification[]>;
@@ -3427,6 +3431,43 @@ export class DatabaseStorage implements IStorage {
       .where(eq(messages.id, id))
       .returning();
     return updatedMessage;
+  }
+  
+  async decrementMessageLike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ likes: sql`GREATEST(${messages.likes} - 1, 0)` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async decrementMessageDislike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ dislikes: sql`GREATEST(${messages.dislikes} - 1, 0)` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async pinMessage(id: number): Promise<Message> {
+    // First unpin all messages
+    await db.update(messages).set({ isPinned: false });
+    // Then pin the specified message
+    const [pinnedMessage] = await db
+      .update(messages)
+      .set({ isPinned: true })
+      .where(eq(messages.id, id))
+      .returning();
+    return pinnedMessage;
+  }
+  
+  async unpinMessage(id: number): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isPinned: false })
+      .where(eq(messages.id, id));
   }
   
   // Scheduled Notification methods

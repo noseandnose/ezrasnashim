@@ -908,11 +908,12 @@ export const messages = pgTable("messages", {
   category: varchar("category", { length: 20 }).notNull().default("message"), // 'message', 'feature', 'bugfix', 'poll'
   likes: integer("likes").notNull().default(0),
   dislikes: integer("dislikes").notNull().default(0),
+  isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertMessagesSchema = createInsertSchema(messages).omit({ id: true, likes: true, dislikes: true, createdAt: true, updatedAt: true });
+export const insertMessagesSchema = createInsertSchema(messages).omit({ id: true, likes: true, dislikes: true, isPinned: true, createdAt: true, updatedAt: true });
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessagesSchema>;
 export type MessageCategory = 'message' | 'feature' | 'bugfix' | 'poll';
