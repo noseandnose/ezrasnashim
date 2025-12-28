@@ -18,7 +18,7 @@ import tefillaFlower from "@assets/Tefilla_1766581824746.png";
 import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
 import morningBackground from "@assets/Morning_1766585201516.png";
 import afternoonBackground from "@assets/Afternoon_1766585201516.png";
-import nightBackground from "@assets/Evening_1766585201513.png";
+import nightBackground from "@assets/Night_Garden_1766942692566.jpg";
 import milestone10Tree from "@assets/10_1766688255354.png";
 import milestone20Tree from "@assets/20_1766688255353.png";
 import milestone30Tree from "@assets/30_1766688255351.png";
@@ -32,7 +32,7 @@ import shkiaNightBg from "@assets/Night_1766586713110.png";
 // TEMPORARY: New section background images for testing
 import sectionMorningBg from "@assets/Morning_1766941859356.jpg";
 import sectionAfternoonBg from "@assets/Afternoon_1766941859356.jpg";
-import sectionNightBg from "@assets/Night_1766941859353.jpg";
+import sectionNightBg from "@assets/Night_Background_1766942692567.jpg";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
