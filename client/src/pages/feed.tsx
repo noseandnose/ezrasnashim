@@ -294,39 +294,45 @@ export default function Feed() {
           </div>
         ) : (
           <div className="space-y-4">
-            {groupedMessages.map((group) => (
-              <div key={group.date}>
-                <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-gray-200" />
-                  <span className="text-xs text-warm-gray/70 platypi-medium whitespace-nowrap">
-                    {formatDateDivider(group.date)}
-                  </span>
-                  <div className="flex-1 h-px bg-gray-200" />
+            {(() => {
+              let highlightedTodaysMessage = false;
+              return groupedMessages.map((group) => (
+                <div key={group.date}>
+                  <div className="flex items-center gap-3 my-4">
+                    <div className="flex-1 h-px bg-gray-200" />
+                    <span className="text-xs text-warm-gray/70 platypi-medium whitespace-nowrap">
+                      {formatDateDivider(group.date)}
+                    </span>
+                    <div className="flex-1 h-px bg-gray-200" />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {group.messages.map((message) => {
+                      const opt = optimisticCounts[message.id] || { likes: 0, dislikes: 0 };
+                      const messageDate = parseISO(message.date);
+                      const isTodayMsg = isToday(messageDate);
+                      const shouldHighlight = isTodayMsg && !highlightedTodaysMessage;
+                      if (shouldHighlight) highlightedTodaysMessage = true;
+                      return (
+                        <FeedItem
+                          key={message.id}
+                          message={message}
+                          onLike={handleLike}
+                          onDislike={handleDislike}
+                          onUnlike={handleUnlike}
+                          onUndislike={handleUndislike}
+                          isVoting={isVoting}
+                          userVote={votes[message.id] || null}
+                          optimisticLikes={(message.likes || 0) + opt.likes}
+                          optimisticDislikes={(message.dislikes || 0) + opt.dislikes}
+                          isTodaysMessage={shouldHighlight}
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-                
-                <div className="space-y-3">
-                  {group.messages.map((message) => {
-                    const opt = optimisticCounts[message.id] || { likes: 0, dislikes: 0 };
-                    const messageDate = parseISO(message.date);
-                    return (
-                      <FeedItem
-                        key={message.id}
-                        message={message}
-                        onLike={handleLike}
-                        onDislike={handleDislike}
-                        onUnlike={handleUnlike}
-                        onUndislike={handleUndislike}
-                        isVoting={isVoting}
-                        userVote={votes[message.id] || null}
-                        optimisticLikes={(message.likes || 0) + opt.likes}
-                        optimisticDislikes={(message.dislikes || 0) + opt.dislikes}
-                        isTodaysMessage={isToday(messageDate)}
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
+              ));
+            })()}
           </div>
         )}
       </main>
