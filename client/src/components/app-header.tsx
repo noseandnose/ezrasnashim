@@ -126,12 +126,16 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
+                  className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
                   style={{
+                    width: '36px',
+                    height: '36px',
+                    minWidth: '36px',
+                    minHeight: '36px',
                     background: 'rgba(255, 255, 255, 0.6)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)'
@@ -272,11 +276,15 @@ export default function AppHeader() {
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+              className="flex items-center justify-center rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
               data-action="header-search"
               style={{
+                width: '36px',
+                height: '36px',
+                minWidth: '36px',
+                minHeight: '36px',
                 background: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)'
