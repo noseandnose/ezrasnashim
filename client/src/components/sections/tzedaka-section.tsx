@@ -402,7 +402,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               </div>
               <h3 className="platypi-bold text-xs text-black mb-1">Gave Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()} today` : 'Mark as complete'}
+                {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()}X today` : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>
