@@ -1,7 +1,7 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -105,6 +105,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const tzedakaFlowerCount = useMemo(() => {
     return tzedakaCompleted ? 1 : 0;
   }, [tzedakaCompleted]);
+
+  // TEMPORARY: Time period state for automatic background updates
+  // Updates every minute to catch time-of-day transitions
+  const [, setTimeUpdate] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeUpdate(Date.now());
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Generate stable but randomized positions for flowers - like a natural garden
   // Each flower has a fixed position based on its type and index (stable across re-renders)
