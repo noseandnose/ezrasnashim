@@ -1163,17 +1163,17 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     dangerouslySetInnerHTML={{ __html: formatTextContent(gemsOfGratitudeContent.content) }}
                   />
                 )}
-                
-                {/* Attribution Section */}
-                {(gemsOfGratitudeContent.attributionLogoUrl || gemsOfGratitudeContent.attributionAboutText) && (
-                  <AttributionSection 
-                    logoUrl={gemsOfGratitudeContent.attributionLogoUrl || undefined}
-                    aboutText={gemsOfGratitudeContent.attributionAboutText || undefined}
-                    label={gemsOfGratitudeContent.attributionLabel || 'About'}
-                    websiteUrl={gemsOfGratitudeContent.websiteUrl || undefined}
-                  />
-                )}
               </div>
+              
+              {/* Attribution Section - outside content box */}
+              {(gemsOfGratitudeContent.attributionLogoUrl || gemsOfGratitudeContent.attributionAboutText) && (
+                <AttributionSection 
+                  logoUrl={gemsOfGratitudeContent.attributionLogoUrl || undefined}
+                  aboutText={gemsOfGratitudeContent.attributionAboutText || undefined}
+                  label={gemsOfGratitudeContent.attributionLabel || 'About'}
+                  websiteUrl={gemsOfGratitudeContent.websiteUrl || undefined}
+                />
+              )}
               
               {/* Two action buttons side by side */}
               <div className="flex gap-3">
