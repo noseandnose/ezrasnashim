@@ -263,7 +263,8 @@ function Router() {
           }}
         </Route>
         <Route path="/donate" component={Donate} />
-        <Route path="/statistics" component={Statistics} />
+        <Route path="/statistics">{() => <Statistics />}</Route>
+        <Route path="/statistics/alltime">{() => <Statistics initialPeriod="alltime" />}</Route>
         <Route path="/admin" component={Admin} />
         <Route path="/admin/notifications" component={Admin} />
         <Route path="/admin/recipes" component={Admin} />
