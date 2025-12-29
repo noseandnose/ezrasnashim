@@ -167,7 +167,7 @@ export default function TableSection() {
         )}
         
         {/* Shabbos Times Section */}
-        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10"
+        <div className="bg-white/85 rounded-2xl p-3 border border-blush/10"
              style={{
                animation: 'gentle-glow-pink 3s ease-in-out infinite'
              }}>
@@ -190,7 +190,7 @@ export default function TableSection() {
 
           
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+            <div className="bg-white/85 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Candle Lighting</p>
               <div className="flex items-center justify-center space-x-1">
                 <img 
@@ -206,7 +206,7 @@ export default function TableSection() {
                 </p>
               </div>
             </div>
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
+            <div className="bg-white/85 rounded-xl p-2 text-center border border-blush/10">
               <p className="platypi-regular text-xs text-black/70 platypi-bold">Havdalah</p>
               <div className="flex items-center justify-center space-x-1">
                 <Flame className="text-lavender" size={14} />
@@ -223,7 +223,7 @@ export default function TableSection() {
         {/* Gift of Chatzos Expandable Bar - Only shown when content exists */}
         {hasGiftContent && giftOfChatzos && (
           <div 
-            className="bg-white/80 rounded-xl mt-2 overflow-hidden border border-blush/20"
+            className="bg-white/85 rounded-xl mt-2 overflow-hidden border border-blush/20"
           >
             {/* Collapsed/Header Bar */}
             <button

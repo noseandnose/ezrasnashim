@@ -464,7 +464,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 : 'hover:scale-105'
             }`}
             style={{
-              background: 'rgba(255, 255, 255, 0.6)',
+              background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
@@ -496,7 +496,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             onClick={() => openModal('events', 'home')}
             className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300 relative"
             style={{
-              background: 'rgba(255, 255, 255, 0.6)',
+              background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',

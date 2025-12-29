@@ -369,7 +369,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           
           {/* Tehillim Chains Section with pulsating border */}
           <div 
-            className="rounded-xl p-3 border border-blush/20"
+            className="rounded-xl p-3 border border-blush/20 bg-white/80"
             style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
           >
             {/* Buttons Row */}
