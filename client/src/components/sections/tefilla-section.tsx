@@ -353,9 +353,20 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
       >
         
         {/* Total Tehillim Said Card */}
-        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10 relative">
+          {/* Apple Glass Style Find Button - Top Right Corner */}
+          <button
+            onClick={handleFindToggle}
+            className={`absolute -top-2 -right-2 p-2.5 rounded-full backdrop-blur-md border border-white/30 shadow-lg transition-all ${chainView === 'find' ? 'bg-blush/40' : 'bg-white/60'}`}
+            style={{ backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)' }}
+            aria-label="Find Chain"
+            data-testid="button-chain-find-icon"
+          >
+            <Search size={20} className="text-blush" />
+          </button>
+          
           {/* Header Row - Title and Subheading */}
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center mb-3">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-feminine p-3 rounded-full">
                 <Link2 className="text-white" size={20} />
@@ -365,14 +376,6 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                 <span className="platypi-medium text-sm text-black/60">Sefer Tehillim, Completed Together.</span>
               </div>
             </div>
-            <button
-              onClick={handleFindToggle}
-              className={`p-2 rounded-full hover:bg-blush/10 transition-colors ${chainView === 'find' ? 'bg-blush/20' : ''}`}
-              aria-label="Find Chain"
-              data-testid="button-chain-find-icon"
-            >
-              <Search size={22} className="text-blush" />
-            </button>
           </div>
           
           {/* Tehillim Chains Section with pulsating border */}
