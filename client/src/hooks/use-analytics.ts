@@ -39,7 +39,8 @@ function queueEvent(event: PendingEvent): void {
 
 // Sync all pending events to server
 async function syncPendingEvents(): Promise<void> {
-  if (!navigator.onLine) return;
+  // Note: Skip navigator.onLine check - it returns false in Flutter WebView even when online
+  // Always try to sync, let the fetch fail if truly offline
   
   const pending = getPendingEvents();
   if (pending.length === 0) return;
@@ -99,13 +100,8 @@ export const useAnalytics = () => {
         date
       };
       
-      // If offline, queue for later
-      if (!navigator.onLine) {
-        queueEvent(event);
-        return { queued: true };
-      }
-      
-      // Try to send directly
+      // Note: Skip navigator.onLine check - it returns false in Flutter WebView even when online
+      // Always try to send directly, queue only if fetch fails
       try {
         const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/analytics/track`, {
           method: "POST",
