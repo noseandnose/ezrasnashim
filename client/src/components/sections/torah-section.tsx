@@ -4,9 +4,9 @@ import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from 
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/Night_Background_1767032607493.png";
 import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";

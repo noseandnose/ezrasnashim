@@ -5,9 +5,9 @@ import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/Night_Background_1767032607493.png";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useTableSummary } from "@/hooks/use-table-summary";
