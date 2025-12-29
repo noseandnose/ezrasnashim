@@ -361,14 +361,16 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             style={{ 
               backdropFilter: 'blur(12px)', 
               WebkitBackdropFilter: 'blur(12px)',
-              width: '32px',
-              height: '32px',
-              padding: 0
+              width: '24px',
+              height: '24px',
+              padding: 0,
+              minWidth: '24px',
+              minHeight: '24px'
             }}
             aria-label="Find Chain"
             data-testid="button-chain-find-icon"
           >
-            <Search size={16} className="text-blush" />
+            <Search size={14} className="text-blush" />
           </button>
           
           {/* Header Row - Title and Subheading */}
