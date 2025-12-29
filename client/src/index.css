@@ -1329,14 +1329,14 @@ html, body, #root {
   left: 35%;
 }
 
-.sparkle-1 { animation: sparkle-twinkle 2s ease-in-out infinite; }
-.sparkle-2 { animation: sparkle-twinkle 2.3s 0.3s ease-in-out infinite; }
-.sparkle-3 { animation: sparkle-twinkle 1.8s 0.6s ease-in-out infinite; }
-.sparkle-4 { animation: sparkle-twinkle 2.5s 0.9s ease-in-out infinite; }
-.sparkle-5 { animation: sparkle-twinkle 2.1s 1.2s ease-in-out infinite; }
-.sparkle-6 { animation: sparkle-twinkle 1.9s 0.4s ease-in-out infinite; }
-.sparkle-7 { animation: sparkle-twinkle 2.4s 0.7s ease-in-out infinite; }
-.sparkle-8 { animation: sparkle-twinkle 2.2s 1s ease-in-out infinite; }
+.sparkle-1 { animation: sparkle-twinkle 4s ease-in-out infinite; }
+.sparkle-2 { animation: sparkle-twinkle 4.6s 0.6s ease-in-out infinite; }
+.sparkle-3 { animation: sparkle-twinkle 3.6s 1.2s ease-in-out infinite; }
+.sparkle-4 { animation: sparkle-twinkle 5s 1.8s ease-in-out infinite; }
+.sparkle-5 { animation: sparkle-twinkle 4.2s 2.4s ease-in-out infinite; }
+.sparkle-6 { animation: sparkle-twinkle 3.8s 0.8s ease-in-out infinite; }
+.sparkle-7 { animation: sparkle-twinkle 4.8s 1.4s ease-in-out infinite; }
+.sparkle-8 { animation: sparkle-twinkle 4.4s 2s ease-in-out infinite; }
 
 /* ====== MOBILE PERFORMANCE OPTIMIZATIONS ====== */
 
