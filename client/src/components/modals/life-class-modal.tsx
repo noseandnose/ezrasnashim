@@ -47,13 +47,11 @@ export default function LifeClassModal() {
     }, 1000);
   };
 
-  const titleText = lifeClass?.title || 'Life Class';
-  
   return (
     <FullscreenModal
       isOpen={isOpen}
       onClose={closeModal}
-      title={titleText}
+      title="Practical Parenting"
     >
       {isLoading ? (
         <div className="text-center py-8">
@@ -62,6 +60,13 @@ export default function LifeClassModal() {
         </div>
       ) : lifeClass ? (
         <div className="space-y-4">
+          {/* Title section */}
+          {lifeClass.title && (
+            <div className="bg-blush/10 rounded-2xl px-4 py-3 border border-blush/20">
+              <h2 className="text-base platypi-bold text-black text-center">{lifeClass.title}</h2>
+            </div>
+          )}
+          
           {lifeClass.content && (
             <div className="bg-white rounded-2xl p-6 border border-blush/10">
               <div 
