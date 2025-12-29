@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { format, isToday, isYesterday, parseISO } from "date-fns";
 import { ThumbsUp, ThumbsDown, ArrowLeft, Pin } from "lucide-react";
@@ -151,6 +151,17 @@ export default function Feed() {
     queryKey: ['/api/feed'],
     staleTime: 60 * 1000,
   });
+
+  // Mark today's message as read when Feed page is visited
+  useEffect(() => {
+    if (messages && messages.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const hasTodayMessage = messages.some(m => m.date === today);
+      if (hasTodayMessage) {
+        localStorage.setItem(`message-read-${today}`, 'true');
+      }
+    }
+  }, [messages]);
 
   const saveVotes = useCallback((newVotes: Record<number, 'like' | 'dislike'>) => {
     setVotes(newVotes);
