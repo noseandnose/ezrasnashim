@@ -1215,6 +1215,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 <Button 
                   onClick={() => {
                     trackModalComplete('gems-of-gratitude');
+                    markModalComplete('gems-of-gratitude');
+                    completeTask('torah');
                     const event = new CustomEvent('closeFullscreen');
                     window.dispatchEvent(event);
                     setTimeout(() => {
