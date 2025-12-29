@@ -357,16 +357,17 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Apple Glass Style Find Button - Top Right Corner */}
           <button
             onClick={handleFindToggle}
-            className={`absolute top-2 right-2 rounded-full backdrop-blur-md border border-white/30 shadow-lg transition-all flex items-center gap-1 px-2.5 py-1 ${chainView === 'find' ? 'bg-blush/40' : 'bg-white/60'}`}
+            className={`absolute top-2 right-2 backdrop-blur-md border border-white/30 shadow-lg transition-all flex items-center gap-1 px-2 py-0.5 ${chainView === 'find' ? 'bg-blush/40' : 'bg-white/60'}`}
             style={{ 
               backdropFilter: 'blur(12px)', 
-              WebkitBackdropFilter: 'blur(12px)'
+              WebkitBackdropFilter: 'blur(12px)',
+              borderRadius: '12px'
             }}
             aria-label="Find Chain"
             data-testid="button-chain-find-icon"
           >
-            <Search size={12} className="text-blush" />
-            <span className="text-blush text-xs platypi-medium">Find</span>
+            <Search size={10} className="text-blush" />
+            <span className="text-blush text-[10px] platypi-medium">Find</span>
           </button>
           
           {/* Header Row - Title and Subheading */}
