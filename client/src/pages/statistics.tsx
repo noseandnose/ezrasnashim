@@ -8,6 +8,8 @@ import BottomNavigation from "@/components/bottom-navigation";
 import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 
+type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
+
 // Hook to track if page is visible and focused
 function usePageVisible() {
   const [isVisible, setIsVisible] = useState(!document.hidden);
@@ -49,8 +51,6 @@ interface PeriodStats {
   totalModalCompletions: Record<string, number>;
 }
 
-type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
-
 // Calculate the start of the current week (Sunday at 2 AM in local timezone)
 function getWeekStartDate(): string {
   const now = new Date();
@@ -72,9 +72,13 @@ function getWeekStartDate(): string {
   return weekStart.toISOString().split('T')[0];
 }
 
-export default function Statistics() {
+interface StatisticsProps {
+  initialPeriod?: TimePeriod;
+}
+
+export default function Statistics({ initialPeriod = 'today' }: StatisticsProps) {
   const [, setLocation] = useLocation();
-  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>('today');
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(initialPeriod);
   const isPageVisible = usePageVisible();
   
   // Calculate today's analytics date once
