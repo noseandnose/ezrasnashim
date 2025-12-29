@@ -19,9 +19,10 @@ import tzedakaFlower from "@assets/Tzedaka_1767034786507.png";
 import morningBackground from "@assets/Morning_Garden_1767032602705.png";
 import afternoonBackground from "@assets/Afternoon_Garden_1767032602705.png";
 import nightBackground from "@assets/Night_Garden_1767032602702.png";
-import milestone10Tree from "@assets/10_1766688255354.png";
-import milestone20Tree from "@assets/20_1766688255353.png";
-import milestone30Tree from "@assets/30_1766688255351.png";
+// Milestone tree images temporarily removed - will be replaced with new ones later
+// import milestone10Tree from "@assets/10_1766688255354.png";
+// import milestone20Tree from "@assets/20_1766688255353.png";
+// import milestone30Tree from "@assets/30_1766688255351.png";
 import prayerMorningBg from "@assets/Morning_1766585505566.png";
 import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
 import prayerNightBg from "@assets/Night_1766585505565.png";
@@ -780,30 +781,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <img 
               key={`${flower.type}-${index}`}
               src={
-                flower.overallIndex === 10 ? milestone10Tree :
-                flower.overallIndex === 20 ? milestone20Tree :
-                flower.overallIndex === 30 ? milestone30Tree :
                 flower.type === 'torah' ? torahFlower : 
                 flower.type === 'tefilla' ? tefillaFlower : 
                 tzedakaFlower
               } 
-              alt={
-                flower.overallIndex === 10 ? '10th milestone tree!' :
-                flower.overallIndex === 20 ? '20th milestone tree!' :
-                flower.overallIndex === 30 ? '30th milestone tree!' :
-                `${flower.type} flower`
-              } 
+              alt={`${flower.type} flower`} 
               className={`absolute ${
-                flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30 ? 'z-[0]' : 
                 flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
                 'z-[1]'
               }`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
-                  ? '95px'  // Trees are fixed size
-                  : `${64 * flower.scale}px`,
+                width: `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
