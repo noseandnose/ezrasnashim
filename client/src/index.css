@@ -1310,7 +1310,7 @@ html, body, #root {
 .garden-sparkle::after {
   content: '';
   position: absolute;
-  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 50%, #fff 100%);
+  background: linear-gradient(135deg, #fff 0%, #ffeef5 50%, #fff 100%);
   border-radius: 1px;
 }
 
