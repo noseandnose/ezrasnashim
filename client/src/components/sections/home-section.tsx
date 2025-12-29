@@ -860,6 +860,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               </PopoverContent>
             </Popover>
           </div>
+          
+          {/* Sparkle effects overlay */}
+          <div className="garden-sparkle sparkle-1" style={{ top: '15%', left: '20%' }} />
+          <div className="garden-sparkle sparkle-2" style={{ top: '25%', left: '75%' }} />
+          <div className="garden-sparkle sparkle-3" style={{ top: '10%', left: '50%' }} />
+          <div className="garden-sparkle sparkle-4" style={{ top: '35%', left: '35%' }} />
+          <div className="garden-sparkle sparkle-5" style={{ top: '20%', left: '85%' }} />
+          <div className="garden-sparkle sparkle-6" style={{ top: '30%', left: '10%' }} />
+          <div className="garden-sparkle sparkle-7" style={{ top: '8%', left: '65%' }} />
+          <div className="garden-sparkle sparkle-8" style={{ top: '40%', left: '55%' }} />
         </div>
       </div>
     </div>
