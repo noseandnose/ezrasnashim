@@ -223,7 +223,7 @@ export default function Statistics() {
     "sponsor-day": "Day Sponsorship",
     refuah: "Refuah Names",
     "womens-prayer": "Women's Prayers",
-    "life-class": "Life Class",
+    "life-class": "Practical Parenting",
 
     // Other
     donate: "Donations",
