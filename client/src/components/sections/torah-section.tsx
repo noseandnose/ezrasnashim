@@ -406,7 +406,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             return (
               <button
                 key={id}
-                className={`${isCompleted ? 'bg-sage/20' : hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
+                className={`${hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
                 onClick={(event) => {
                   if (!hasContent) return;
                   
@@ -531,11 +531,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {gemsOfGratitude && (
           <button
             onClick={() => openModal('gems-of-gratitude', 'torah')}
-            className={`w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 ${
-              isModalComplete('gems-of-gratitude') 
-                ? 'bg-sage/20 border-sage/30' 
-                : 'bg-white/80 border-blush/20'
-            }`}
+            className="w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 bg-white/80 border-blush/20"
             data-testid="button-gems-of-gratitude"
           >
             <div className="flex items-center gap-3 p-3">

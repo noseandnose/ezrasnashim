@@ -330,7 +330,7 @@ export default function TableSection() {
             className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
               !recipeContent 
                 ? 'bg-gray-100 cursor-not-allowed' 
-                : isModalComplete('recipe') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
+                : 'bg-white hover:scale-105'
             }`}
             onClick={() => {
               if (recipeContent) {
@@ -373,9 +373,7 @@ export default function TableSection() {
           {/* Marriage Insights Button */}
           <button
             data-testid="button-marriage-insights"
-            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
-              isModalComplete('marriage-insights') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
-            }`}
+            className="rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative bg-white hover:scale-105"
             onClick={() => openModal('marriage-insights', 'table')}
             data-modal-type="marriage-insights"
             data-modal-section="table"
@@ -401,7 +399,7 @@ export default function TableSection() {
             className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
               !currentLifeClass 
                 ? 'bg-gray-100 cursor-not-allowed' 
-                : isModalComplete('life-class') ? 'bg-sage/20 hover:scale-105' : 'bg-white hover:scale-105'
+                : 'bg-white hover:scale-105'
             }`}
             onClick={() => {
               if (currentLifeClass) {
@@ -465,9 +463,7 @@ export default function TableSection() {
               });
               window.dispatchEvent(fullscreenEvent);
             }}
-            className={`w-full rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left transition-colors ${
-              isModalComplete('inspiration') ? 'bg-sage/20 hover:bg-sage/30' : 'bg-white/80 hover:bg-white/90'
-            }`}
+            className="w-full rounded-xl mt-2 overflow-hidden border border-blush/20 p-3 text-left transition-colors bg-white/80 hover:bg-white/90"
             data-testid="button-table-inspiration-bar"
           >
             <div className="flex items-center gap-3">

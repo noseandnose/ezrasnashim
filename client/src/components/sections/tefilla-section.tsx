@@ -599,9 +599,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="brochas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-brochas"
@@ -619,9 +617,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              hasAnyTehillimCompleted() ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="special-tehillim"
             data-modal-section="tefilla"
             data-testid="button-tefilla-tehillim"
@@ -642,9 +638,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => openModal('womens-tefillas', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              false ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="womens-tefillas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-womens"
@@ -658,9 +652,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           <button 
             onClick={() => openModal('nishmas-campaign', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="nishmas-campaign"
             data-modal-section="tefilla"
             data-testid="button-tefilla-nishmas"

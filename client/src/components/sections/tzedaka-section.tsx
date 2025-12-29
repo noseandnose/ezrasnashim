@@ -270,9 +270,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
       >
         <button 
           onClick={() => handleTzedakaButtonClick('active_campaign')}
-          className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${
-            isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white/85'
-          }`}
+          className="w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left bg-white/85"
         >
         {isLoading ? (
           <div className="animate-pulse">
@@ -341,11 +339,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         {/* Put a Coin in Tzedaka - Long Button at Top */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 ${
-            isTzedakaButtonCompleted('put_a_coin') 
-              ? 'bg-sage/20 border-sage/30' 
-              : 'bg-white border-blush/30'
-          }`}
+          className="w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
               ? 'gentle-glow-green 3s ease-in-out infinite' 
@@ -372,9 +366,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Left: Sponsor a Day */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage' : 'bg-gradient-feminine'
