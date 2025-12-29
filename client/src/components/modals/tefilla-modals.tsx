@@ -403,7 +403,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                         disabled={isModalComplete('morning-brochas')}
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('morning-brochas') 
-                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                            ? 'bg-sage text-white' 
                             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
@@ -531,7 +531,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
           disabled={isLoading || isModalComplete('morning-brochas')}
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isModalComplete('morning-brochas') 
-              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+              ? 'bg-sage text-white' 
               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
           }`}
         >
@@ -642,7 +642,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         disabled={isModalComplete('maariv')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('maariv') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
@@ -704,7 +704,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
         disabled={isModalComplete('mincha')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('mincha') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >
@@ -917,7 +917,7 @@ function ShachrisFullscreenContent({
                   disabled={isModalComplete('shacharis')}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('shacharis') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
@@ -1663,7 +1663,7 @@ function MorningBrochasFullscreenContent({
                   disabled={isModalComplete('morning-brochas')}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('morning-brochas') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
@@ -3049,7 +3049,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                         disabled={isModalComplete('mincha')}
                         className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                           isModalComplete('mincha') 
-                            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                            ? 'bg-sage text-white' 
                             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                         }`}
                       >
@@ -3113,7 +3113,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               disabled={isModalComplete('mincha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -3680,7 +3680,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               disabled={isModalComplete('maariv')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >

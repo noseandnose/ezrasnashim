@@ -493,7 +493,7 @@ export function BirkatHamazonModal() {
                 disabled={isModalComplete('al-hamichiya')}
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('al-hamichiya') 
-                    ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                    ? 'bg-sage text-white' 
                     : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                 }`}
               >
@@ -530,7 +530,7 @@ export function BirkatHamazonModal() {
               disabled={isModalComplete('al-hamichiya')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('al-hamichiya') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -874,7 +874,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
         disabled={isModalComplete('al-hamichiya')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('al-hamichiya') 
-            ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+            ? 'bg-sage text-white' 
             : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
         }`}
       >

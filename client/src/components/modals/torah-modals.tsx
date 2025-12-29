@@ -248,7 +248,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           disabled={isModalComplete('halacha')}
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('halacha') 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white' 
                               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
@@ -362,7 +362,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               disabled={isModalComplete('halacha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('halacha') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -428,7 +428,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           disabled={isModalComplete('emuna')}
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('emuna') 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white' 
                               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
@@ -522,7 +522,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               disabled={isModalComplete('emuna')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('emuna') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -590,7 +590,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               disabled={isModalComplete('chizuk')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('chizuk') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -661,7 +661,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               disabled={isModalComplete('parsha-vort')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('parsha-vort') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -749,7 +749,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           disabled={isModalComplete('featured')}
                           className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                             isModalComplete('featured') 
-                              ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                              ? 'bg-sage text-white' 
                               : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                           }`}
                         >
@@ -872,7 +872,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               disabled={isModalComplete('featured')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('featured') 
-                  ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                  ? 'bg-sage text-white' 
                   : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
               }`}
             >
@@ -1006,7 +1006,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   disabled={isModalComplete('halacha')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('halacha') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
@@ -1126,7 +1126,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                   disabled={isModalComplete('featured')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('featured') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
@@ -1202,7 +1202,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                     disabled={isModalComplete('gems-of-gratitude')}
                     className={`w-full py-3 rounded-xl platypi-medium border-0 ${
                       isModalComplete('gems-of-gratitude') 
-                        ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                        ? 'bg-sage text-white' 
                         : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                     }`}
                   >
