@@ -195,7 +195,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       >
         {/* Daily Inspiration - Pirkei Avot */}
         {(pirkeiAvot || sectionErrors.pirkeiAvot || (!torahLoading && torahSummary)) && (
-          <div className="bg-white/70 rounded-2xl p-3 mb-3 border border-blush/10 relative"
+          <div className="bg-white/85 rounded-2xl p-3 mb-3 border border-blush/10 relative"
                style={{
                  animation: 'gentle-glow-pink 3s ease-in-out infinite'
                }}>
