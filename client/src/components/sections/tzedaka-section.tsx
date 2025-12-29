@@ -261,7 +261,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         <button 
           onClick={() => handleTzedakaButtonClick('active_campaign')}
           className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${
-            isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white/70'
+            isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white/85'
           }`}
         >
         {isLoading ? (
