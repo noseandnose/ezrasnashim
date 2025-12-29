@@ -215,6 +215,7 @@ export default function Statistics() {
     featured: "Featured",
     "parsha-vort": "Parsha Shiur",
     "pirkei-avot": "Pirkei Avot",
+    "gems-of-gratitude": "Gems of Gratitude",
     
     // Life section
     recipe: "Daily Recipe",
@@ -262,6 +263,7 @@ export default function Statistics() {
     // Torah subcategories  
     chizuk: Heart,
     emuna: Shield,
+    "gems-of-gratitude": Sparkles,
     halacha: BookOpen,
     "featured-content": Star,
     featured: Star,
