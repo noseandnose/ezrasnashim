@@ -84,6 +84,23 @@ export const lifeClasses = pgTable("life_classes", {
   dateRangeIdx: index("life_classes_date_range_idx").on(table.fromDate, table.untilDate),
 }));
 
+export const gemsOfGratitude = pgTable("gems_of_gratitude", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(), // Start date for display
+  untilDate: date("until_date").notNull(), // End date for display
+  title: text("title").notNull(),
+  subtitle: text("subtitle"), // Subtitle for the bar display
+  content: text("content"), // Main content/inspiring thought
+  imageUrl: text("image_url"), // Optional image
+  attributionLabel: text("attribution_label"), // Short label for collapsed attribution
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
+  websiteUrl: text("website_url"), // Website URL for "Visit Website" button
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateRangeIdx: index("gems_of_gratitude_date_range_idx").on(table.fromDate, table.untilDate),
+}));
+
 export const tableInspirations = pgTable("table_inspirations", {
   id: serial("id").primaryKey(),
   fromDate: date("from_date").notNull(), // Week start date
@@ -677,6 +694,11 @@ export const insertLifeClassSchema = createInsertSchema(lifeClasses).omit({
   createdAt: true,
 });
 
+export const insertGemsOfGratitudeSchema = createInsertSchema(gemsOfGratitude).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertMarriageInsightSchema = createInsertSchema(marriageInsights).omit({
   id: true,
   createdAt: true,
@@ -775,6 +797,8 @@ export type TorahClass = typeof torahClasses.$inferSelect;
 export type InsertTorahClass = z.infer<typeof insertTorahClassSchema>;
 export type LifeClass = typeof lifeClasses.$inferSelect;
 export type InsertLifeClass = z.infer<typeof insertLifeClassSchema>;
+export type GemsOfGratitude = typeof gemsOfGratitude.$inferSelect;
+export type InsertGemsOfGratitude = z.infer<typeof insertGemsOfGratitudeSchema>;
 export type TableInspiration = typeof tableInspirations.$inferSelect;
 export type InsertTableInspiration = z.infer<typeof insertTableInspirationSchema>;
 
@@ -875,19 +899,24 @@ export const insertTehillimChainReadingSchema = createInsertSchema(tehillimChain
 export type TehillimChainReading = typeof tehillimChainReadings.$inferSelect;
 export type InsertTehillimChainReading = z.infer<typeof insertTehillimChainReadingSchema>;
 
-// Messages table for daily messages to users
+// Messages table for daily messages to users (Feed)
 export const messages = pgTable("messages", {
   id: serial("id").primaryKey(),
   date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
+  category: varchar("category", { length: 20 }).notNull().default("message"), // 'message', 'feature', 'bugfix', 'poll'
+  likes: integer("likes").notNull().default(0),
+  dislikes: integer("dislikes").notNull().default(0),
+  isPinned: boolean("is_pinned").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertMessagesSchema = createInsertSchema(messages);
+export const insertMessagesSchema = createInsertSchema(messages).omit({ id: true, likes: true, dislikes: true, isPinned: true, createdAt: true, updatedAt: true });
 export type Message = typeof messages.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessagesSchema>;
+export type MessageCategory = 'message' | 'feature' | 'bugfix' | 'poll';
 
 // Scheduled Notifications table for sending push notifications at specific times
 export const scheduledNotifications = pgTable("scheduled_notifications", {

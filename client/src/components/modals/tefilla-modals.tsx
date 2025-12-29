@@ -1866,7 +1866,7 @@ function CompassFullscreenContent() {
 }
 
 function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' | 'english', fontSize: number }) {
-  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal, dailyTehillimPsalms } = useModalStore();
+  const { selectedPsalm, tehillimReturnTab, setTehillimActiveTab, openModal, dailyTehillimPsalms, previousSection } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -1931,6 +1931,17 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     // Check if all tasks are completed and show congratulations
     if (checkAndShowCongratulations()) {
       openModal('congratulations', 'tefilla');
+      return;
+    }
+    
+    // If we came from gems-of-gratitude, close and return to Torah section
+    if (previousSection === 'gems-of-gratitude') {
+      const event = new CustomEvent('closeFullscreen');
+      window.dispatchEvent(event);
+      setTimeout(() => {
+        window.location.hash = '#/?section=torah';
+      }, 100);
+      return;
     }
     
     // Get the saved return tab preference from Zustand store
@@ -2734,6 +2745,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
     const wasIndividualBrocha = fullscreenContent.contentType === 'individual-brocha';
     const wasIndividualTehillim = fullscreenContent.contentType === 'individual-tehillim';
     const originSection = fullscreenContent.originSection;
+    const { previousSection } = useModalStore.getState();
     
     if (wasIndividualBrocha) {
       // Go back to Siddur selector instead of home - swap content within same fullscreen
@@ -2746,6 +2758,16 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       });
       return;
     } else if (wasIndividualTehillim) {
+      // If we came from gems-of-gratitude, close and return to Torah section
+      if (previousSection === 'gems-of-gratitude') {
+        setFullscreenContent({ isOpen: false, title: '', content: null });
+        closeModal();
+        setTimeout(() => {
+          window.location.hash = '#/?section=torah';
+        }, 100);
+        return;
+      }
+      
       // Go back to Tehillim selector - swap content within same fullscreen (no flash!)
       // Use 'special-tehillim' which FullscreenModal recognizes and hides controls for
       setFullscreenContent({

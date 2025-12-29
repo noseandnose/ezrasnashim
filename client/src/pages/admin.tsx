@@ -8,13 +8,27 @@ import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
 import axiosClient from '@/lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
-import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
+import { MessageSquare, Plus, Save, Edit, Trash2, Bell, ChefHat, Send, Clock, Users, CheckCircle, XCircle, Image, Calendar, Scroll, BarChart3, TrendingUp, TrendingDown, Star } from 'lucide-react';
 import { format } from 'date-fns';
-import type { Message, TableInspiration, ScheduledNotification, ParshaVort } from '@shared/schema';
+import type { Message, TableInspiration, ScheduledNotification, ParshaVort, MessageCategory } from '@shared/schema';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { InlineImageUploader } from '@/components/InlineImageUploader';
 import type { UploadResult } from '@uppy/core';
 
-type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts' | 'analytics';
+const categoryOptions: { value: MessageCategory; label: string; color: string }[] = [
+  { value: 'message', label: 'Message', color: 'bg-yellow-400' },
+  { value: 'feature', label: 'New Feature', color: 'bg-blue-400' },
+  { value: 'bugfix', label: 'Bug Fix', color: 'bg-pink-400' },
+  { value: 'poll', label: 'Poll', color: 'bg-green-400' },
+];
+
+type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'parsha-vorts' | 'gems-of-gratitude' | 'analytics';
 
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
@@ -40,7 +54,8 @@ export default function Admin() {
   const [messageFormData, setMessageFormData] = useState({
     date: '',
     title: '',
-    message: ''
+    message: '',
+    category: 'message' as MessageCategory
   });
   const [editingMessage, setEditingMessage] = useState<Message | null>(null);
   const [isSavingMessage, setIsSavingMessage] = useState(false);
@@ -108,6 +123,16 @@ export default function Admin() {
   });
   const [editingParshaVort, setEditingParshaVort] = useState<ParshaVort | null>(null);
   const [isSavingParshaVort, setIsSavingParshaVort] = useState(false);
+
+  // Gems of Gratitude state
+  const [gemsFormData, setGemsFormData] = useState({
+    fromDate: '',
+    untilDate: '',
+    title: '',
+    subtitle: ''
+  });
+  const [editingGem, setEditingGem] = useState<any>(null);
+  const [isSavingGem, setIsSavingGem] = useState(false);
 
   // Analytics state
   const [analyticsStartDate, setAnalyticsStartDate] = useState('');
@@ -300,6 +325,27 @@ export default function Admin() {
     enabled: isAuthenticated && activeTab === 'parsha-vorts',
   });
 
+  // Gems of Gratitude API calls
+  const { data: gemsOfGratitude, refetch: refetchGems } = useQuery({
+    queryKey: ['admin-gems-of-gratitude'],
+    queryFn: async () => {
+      if (!isAuthenticated || activeTab !== 'gems-of-gratitude') return [];
+      try {
+        const response = await axiosClient.get('/api/gems-of-gratitude/all', {
+          headers: getAuthHeaders()
+        });
+        return response.data;
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setIsAuthenticated(false);
+          throw new Error('Authentication expired');
+        }
+        throw error;
+      }
+    },
+    enabled: isAuthenticated && activeTab === 'gems-of-gratitude',
+  });
+
 
   const handleLogin = async () => {
     const trimmedPassword = adminPassword.trim();
@@ -377,7 +423,8 @@ export default function Admin() {
       const messageData = {
         date: messageFormData.date,
         title: messageFormData.title || '',
-        message: messageFormData.message
+        message: messageFormData.message,
+        category: messageFormData.category
       };
 
       let response;
@@ -402,7 +449,7 @@ export default function Admin() {
         queryClient.invalidateQueries({ queryKey: [`/api/messages/${messageData.date}`] });
         await refetchMessages();
         
-        setMessageFormData({ date: '', title: '', message: '' });
+        setMessageFormData({ date: '', title: '', message: '', category: 'message' });
         setEditingMessage(null);
       }
     } catch (error: any) {
@@ -767,6 +814,92 @@ export default function Admin() {
     }
   };
 
+  // Gems of Gratitude functions
+  const handleSaveGem = async () => {
+    if (!gemsFormData.title || !gemsFormData.fromDate) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please provide at least a title and start date.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsSavingGem(true);
+    try {
+      const payload = {
+        ...gemsFormData,
+        untilDate: gemsFormData.untilDate || gemsFormData.fromDate
+      };
+
+      if (editingGem) {
+        await axiosClient.put(`/api/gems-of-gratitude/${editingGem.id}`, payload, {
+          headers: getAuthHeaders()
+        });
+        toast({
+          title: 'Gem Updated',
+          description: 'The Gem of Gratitude has been successfully updated.',
+        });
+      } else {
+        await axiosClient.post('/api/gems-of-gratitude', payload, {
+          headers: getAuthHeaders()
+        });
+        toast({
+          title: 'Gem Created',
+          description: 'The Gem of Gratitude has been successfully created.',
+        });
+      }
+
+      setGemsFormData({ fromDate: '', untilDate: '', title: '', subtitle: '' });
+      setEditingGem(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-gems-of-gratitude'] });
+      await refetchGems();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: 'Failed to save Gem of Gratitude. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSavingGem(false);
+    }
+  };
+
+  const handleDeleteGem = async (gem: any) => {
+    if (!confirm(`Are you sure you want to delete "${gem.title}"?`)) {
+      return;
+    }
+
+    try {
+      await axiosClient.delete(`/api/gems-of-gratitude/${gem.id}`, {
+        headers: getAuthHeaders()
+      });
+      
+      toast({
+        title: 'Gem Deleted',
+        description: 'The Gem of Gratitude has been successfully deleted.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin-gems-of-gratitude'] });
+      await refetchGems();
+    } catch (error: any) {
+      toast({
+        title: 'Delete Failed',
+        description: 'Failed to delete Gem of Gratitude',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleEditGem = (gem: any) => {
+    setEditingGem(gem);
+    setGemsFormData({
+      fromDate: gem.fromDate || '',
+      untilDate: gem.untilDate || '',
+      title: gem.title || '',
+      subtitle: gem.subtitle || ''
+    });
+  };
+
   // Notification functions (handles both instant and scheduled)
   const handleSendNotification = async () => {
     if (!notificationData.title || !notificationData.body) {
@@ -1114,6 +1247,18 @@ export default function Admin() {
               Parsha Vorts
             </button>
             <button
+              onClick={() => setActiveTab('gems-of-gratitude')}
+              className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === 'gems-of-gratitude'
+                  ? 'admin-tab-active'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+              }`}
+              data-testid="tab-gems-of-gratitude"
+            >
+              <Star className="w-4 h-4 mr-2" />
+              Gems
+            </button>
+            <button
               onClick={() => setActiveTab('analytics')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'analytics'
@@ -1164,6 +1309,28 @@ export default function Admin() {
                 </div>
 
                 <div>
+                  <Label htmlFor="message-category">Category</Label>
+                  <Select
+                    value={messageFormData.category}
+                    onValueChange={(value) => setMessageFormData(prev => ({ ...prev, category: value as MessageCategory }))}
+                  >
+                    <SelectTrigger className="mt-1" data-testid="select-message-category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-3 h-3 rounded-full ${option.color}`} />
+                            {option.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
                   <Label htmlFor="message-content">Message Content *</Label>
                   <Textarea
                     id="message-content"
@@ -1190,7 +1357,7 @@ export default function Admin() {
                   <Button 
                     onClick={() => {
                       setEditingMessage(null);
-                      setMessageFormData({ date: '', title: '', message: '' });
+                      setMessageFormData({ date: '', title: '', message: '', category: 'message' });
                     }}
                     variant="outline"
                     className="w-full"
@@ -1235,7 +1402,8 @@ export default function Admin() {
                             setMessageFormData({
                               date: message.date,
                               title: message.title || '',
-                              message: message.message
+                              message: message.message,
+                              category: (message.category as MessageCategory) || 'message'
                             });
                           }}
                           data-testid={`button-edit-message-${message.id}`}
@@ -2295,6 +2463,160 @@ export default function Admin() {
               </div>
             </Card>
           </div>
+          </div>
+        )}
+
+        {/* Gems of Gratitude Tab */}
+        {activeTab === 'gems-of-gratitude' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Create/Edit Gem Form */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Plus className="w-5 h-5 mr-2 text-rose-600" />
+                {editingGem ? 'Edit Gem of Gratitude' : 'Create New Gem'}
+              </h2>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="gem-from-date">From Date *</Label>
+                    <Input
+                      id="gem-from-date"
+                      type="date"
+                      value={gemsFormData.fromDate}
+                      onChange={(e) => setGemsFormData(prev => ({ ...prev, fromDate: e.target.value }))}
+                      data-testid="input-gem-from-date"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="gem-until-date">Until Date</Label>
+                    <Input
+                      id="gem-until-date"
+                      type="date"
+                      value={gemsFormData.untilDate}
+                      onChange={(e) => setGemsFormData(prev => ({ ...prev, untilDate: e.target.value }))}
+                      data-testid="input-gem-until-date"
+                      className="mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Leave empty for single day</p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="gem-title">Title *</Label>
+                  <Input
+                    id="gem-title"
+                    value={gemsFormData.title}
+                    onChange={(e) => setGemsFormData(prev => ({ ...prev, title: e.target.value }))}
+                    data-testid="input-gem-title"
+                    placeholder="e.g., Gems of Gratitude"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="gem-subtitle">Subtitle</Label>
+                  <Input
+                    id="gem-subtitle"
+                    value={gemsFormData.subtitle}
+                    onChange={(e) => setGemsFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                    data-testid="input-gem-subtitle"
+                    placeholder="e.g., Daily Inspiring Thought"
+                    className="mt-1"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleSaveGem}
+                    disabled={isSavingGem}
+                    className="flex-1"
+                    data-testid="button-save-gem"
+                  >
+                    {isSavingGem ? (
+                      <>Saving...</>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        {editingGem ? 'Update Gem' : 'Create Gem'}
+                      </>
+                    )}
+                  </Button>
+                  {editingGem && (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setEditingGem(null);
+                        setGemsFormData({ fromDate: '', untilDate: '', title: '', subtitle: '' });
+                      }}
+                      data-testid="button-cancel-gem-edit"
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+
+            {/* Gems List */}
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center">
+                <Star className="w-5 h-5 mr-2 text-rose-600" />
+                Existing Gems of Gratitude
+              </h2>
+              
+              <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                {gemsOfGratitude && gemsOfGratitude.length > 0 ? (
+                  gemsOfGratitude.map((gem: any) => (
+                    <div
+                      key={gem.id}
+                      className="p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      data-testid={`gem-item-${gem.id}`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{gem.title}</h3>
+                          {gem.subtitle && (
+                            <p className="text-sm text-gray-600 mt-1">{gem.subtitle}</p>
+                          )}
+                          <div className="text-xs text-gray-500 mt-2 flex items-center">
+                            <Calendar className="w-3 h-3 mr-1" />
+                            {gem.fromDate === gem.untilDate
+                              ? format(new Date(gem.fromDate), 'MMM dd, yyyy')
+                              : `${format(new Date(gem.fromDate), 'MMM dd')} - ${format(new Date(gem.untilDate), 'MMM dd, yyyy')}`
+                            }
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEditGem(gem)}
+                            data-testid={`button-edit-gem-${gem.id}`}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteGem(gem)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            data-testid={`button-delete-gem-${gem.id}`}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    No gems of gratitude yet. Create one to get started!
+                  </div>
+                )}
+              </div>
+            </Card>
           </div>
         )}
 

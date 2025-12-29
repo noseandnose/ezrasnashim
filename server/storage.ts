@@ -3,7 +3,7 @@ import {
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos,
-  dailyRecipes, parshaVorts, torahClasses, lifeClasses, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
+  dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
 
@@ -20,6 +20,7 @@ import {
   type ParshaVort, type InsertParshaVort,
   type TorahClass, type InsertTorahClass,
   type LifeClass, type InsertLifeClass,
+  type GemsOfGratitude, type InsertGemsOfGratitude,
   type TableInspiration, type InsertTableInspiration,
   type MarriageInsight, type InsertMarriageInsight,
   type CommunityImpact, type InsertCommunityImpact,
@@ -109,6 +110,13 @@ export interface IStorage {
   createLifeClass(lifeClass: InsertLifeClass): Promise<LifeClass>;
   updateLifeClass(id: number, lifeClass: Partial<InsertLifeClass>): Promise<LifeClass | undefined>;
   deleteLifeClass(id: number): Promise<boolean>;
+
+  // Gems of Gratitude methods
+  getGemsOfGratitudeByDate(date: string): Promise<GemsOfGratitude | undefined>;
+  getAllGemsOfGratitude(): Promise<GemsOfGratitude[]>;
+  createGemsOfGratitude(gem: InsertGemsOfGratitude): Promise<GemsOfGratitude>;
+  updateGemsOfGratitude(id: number, gem: Partial<InsertGemsOfGratitude>): Promise<GemsOfGratitude | undefined>;
+  deleteGemsOfGratitude(id: number): Promise<boolean>;
 
   // Table inspiration methods
   getTableInspirationByDate(date: string): Promise<TableInspiration | undefined>;
@@ -335,6 +343,12 @@ export interface IStorage {
   getUpcomingMessages(): Promise<Message[]>;
   updateMessage(id: number, message: Partial<InsertMessage>): Promise<Message>;
   deleteMessage(id: number): Promise<void>;
+  incrementMessageLike(id: number): Promise<Message>;
+  incrementMessageDislike(id: number): Promise<Message>;
+  decrementMessageLike(id: number): Promise<Message>;
+  decrementMessageDislike(id: number): Promise<Message>;
+  pinMessage(id: number): Promise<Message>;
+  unpinMessage(id: number): Promise<void>;
   
   // Scheduled Notification methods
   getAllScheduledNotifications(): Promise<ScheduledNotification[]>;
@@ -1919,6 +1933,41 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount ? result.rowCount > 0 : false;
   }
 
+  // Gems of Gratitude methods
+  async getGemsOfGratitudeByDate(date: string): Promise<GemsOfGratitude | undefined> {
+    const gems = await db
+      .select()
+      .from(gemsOfGratitude)
+      .where(and(
+        lte(gemsOfGratitude.fromDate, date),
+        gte(gemsOfGratitude.untilDate, date)
+      ))
+      .orderBy(gemsOfGratitude.id);
+    return gems[0];
+  }
+
+  async getAllGemsOfGratitude(): Promise<GemsOfGratitude[]> {
+    return await db.select().from(gemsOfGratitude).orderBy(desc(gemsOfGratitude.fromDate), desc(gemsOfGratitude.id));
+  }
+
+  async createGemsOfGratitude(gem: InsertGemsOfGratitude): Promise<GemsOfGratitude> {
+    const [created] = await db.insert(gemsOfGratitude).values(gem).returning();
+    return created;
+  }
+
+  async updateGemsOfGratitude(id: number, gem: Partial<InsertGemsOfGratitude>): Promise<GemsOfGratitude | undefined> {
+    const filteredGem = Object.fromEntries(
+      Object.entries(gem).filter(([_, v]) => v !== undefined)
+    ) as Partial<InsertGemsOfGratitude>;
+    const [updated] = await db.update(gemsOfGratitude).set(filteredGem).where(eq(gemsOfGratitude.id, id)).returning();
+    return updated;
+  }
+
+  async deleteGemsOfGratitude(id: number): Promise<boolean> {
+    const result = await db.delete(gemsOfGratitude).where(eq(gemsOfGratitude.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
   async getNishmasTextByLanguage(language: string): Promise<NishmasText | undefined> {
     const [text] = await db.select().from(nishmasText).where(eq(nishmasText.language, language));
     return text || undefined;
@@ -2674,7 +2723,7 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0, meditationsCompleted: number = 0): number {
-    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot'];
+    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude'];
     const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
     
@@ -3363,6 +3412,61 @@ export class DatabaseStorage implements IStorage {
   async deleteMessage(id: number): Promise<void> {
     await db
       .delete(messages)
+      .where(eq(messages.id, id));
+  }
+  
+  async incrementMessageLike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ likes: sql`${messages.likes} + 1` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async incrementMessageDislike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ dislikes: sql`${messages.dislikes} + 1` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async decrementMessageLike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ likes: sql`GREATEST(${messages.likes} - 1, 0)` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async decrementMessageDislike(id: number): Promise<Message> {
+    const [updatedMessage] = await db
+      .update(messages)
+      .set({ dislikes: sql`GREATEST(${messages.dislikes} - 1, 0)` })
+      .where(eq(messages.id, id))
+      .returning();
+    return updatedMessage;
+  }
+  
+  async pinMessage(id: number): Promise<Message> {
+    // First unpin all messages
+    await db.update(messages).set({ isPinned: false });
+    // Then pin the specified message
+    const [pinnedMessage] = await db
+      .update(messages)
+      .set({ isPinned: true })
+      .where(eq(messages.id, id))
+      .returning();
+    return pinnedMessage;
+  }
+  
+  async unpinMessage(id: number): Promise<void> {
+    await db
+      .update(messages)
+      .set({ isPinned: false })
       .where(eq(messages.id, id));
   }
   

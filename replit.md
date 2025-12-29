@@ -15,6 +15,8 @@ Tefilla conditional formatting: Holiday-specific content using [[CHANUKA]]conten
 Compass alignment message: When compass is aligned with Jerusalem, displays "Your heart is in the right place" instead of technical alignment message.
 Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20% bigger (w-8 h-8), both BH Green icon and center heart pulse when aligned.
 Header layout: Search icon placed next to hamburger menu for quick access. Header shows hamburger menu + search button (left), centered logo, and message button (right). Both sides balanced with flex-1 to keep logo centered.
+Weather display: Real-time weather badge on Shkia button using Open-Meteo API (free, no API key). Displays temperature with weather emoji in Apple glass style. Tappable to toggle between Celsius and Fahrenheit (preference saved in localStorage with key 'weatherTempUnit').
+Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed). Features date dividers, message categories (Yellow=Message, Blue=Feature, Pink=Bug Fix, Green=Poll), and like/dislike buttons with backend tracking. Messages schema includes category, likes, and dislikes fields.
 
 ## System Architecture
 ### Frontend

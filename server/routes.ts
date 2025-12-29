@@ -141,6 +141,7 @@ import {
   insertParshaVortSchema,
   insertTorahClassSchema,
   insertLifeClassSchema,
+  insertGemsOfGratitudeSchema,
   insertNishmasTextSchema,
   insertMessagesSchema
 } from "../shared/schema";
@@ -1857,6 +1858,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Gems of Gratitude routes
+  app.get("/api/gems-of-gratitude/all", requireAdminAuth, async (_req, res) => {
+    try {
+      const gems = await storage.getAllGemsOfGratitude();
+      return res.json(gems);
+    } catch (error) {
+      console.error('Error fetching all Gems of Gratitude:', error);
+      return res.status(500).json({ message: "Failed to fetch Gems of Gratitude" });
+    }
+  });
+
+  app.post("/api/gems-of-gratitude", requireAdminAuth, async (req, res) => {
+    try {
+      const validatedData = insertGemsOfGratitudeSchema.parse(req.body);
+      const gem = await storage.createGemsOfGratitude(validatedData);
+      return res.json(gem);
+    } catch (error) {
+      console.error('Error creating Gems of Gratitude:', error);
+      return res.status(500).json({ message: "Failed to create Gems of Gratitude" });
+    }
+  });
+
+  app.put("/api/gems-of-gratitude/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const validatedData = insertGemsOfGratitudeSchema.partial().parse(req.body);
+      const cleanedData = Object.fromEntries(
+        Object.entries(validatedData).filter(([_, v]) => v !== undefined)
+      );
+      const gem = await storage.updateGemsOfGratitude(id, cleanedData as any);
+      
+      if (!gem) {
+        return res.status(404).json({ message: "Gems of Gratitude not found" });
+      }
+      
+      return res.json(gem);
+    } catch (error) {
+      console.error('Error updating Gems of Gratitude:', error);
+      return res.status(500).json({ message: "Failed to update Gems of Gratitude" });
+    }
+  });
+
+  app.delete("/api/gems-of-gratitude/:id", requireAdminAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid ID" });
+      }
+      
+      const success = await storage.deleteGemsOfGratitude(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Gems of Gratitude not found" });
+      }
+      
+      return res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting Gems of Gratitude:', error);
+      return res.status(500).json({ message: "Failed to delete Gems of Gratitude" });
+    }
+  });
+
   // Zmanim route that returns parsed and adjusted times
   app.get("/api/zmanim/:location?", async (req, res) => {
     try {
@@ -3265,14 +3332,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch all Torah data in parallel with individual error tracking
-      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses] = await Promise.allSettled([
+      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses, gemsOfGratitude] = await Promise.allSettled([
         storage.getDailyHalachaByDate(date),
         storage.getDailyChizukByDate(date),
         storage.getDailyEmunaByDate(date),
         storage.getFeaturedContentByDate(date),
         storage.getCurrentPirkeiAvot(),
         storage.getParshaVortsByDate(date),
-        storage.getTorahClassesByDate(date)
+        storage.getTorahClassesByDate(date),
+        storage.getGemsOfGratitudeByDate(date)
       ]);
 
       // Track per-section errors for UI fallback messages
@@ -3284,6 +3352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (pirkeiAvot.status === 'rejected') errors.pirkeiAvot = true;
       if (parshaVorts.status === 'rejected') errors.parshaVorts = true;
       if (torahClasses.status === 'rejected') errors.torahClasses = true;
+      if (gemsOfGratitude.status === 'rejected') errors.gemsOfGratitude = true;
 
       // Format Pirkei Avot response to match existing /api/torah/pirkei-avot/:date API
       let formattedPirkeiAvot = null;
@@ -3303,6 +3372,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         pirkeiAvot: formattedPirkeiAvot,
         parshaVorts: parshaVorts.status === 'fulfilled' ? parshaVorts.value : [],
         torahClasses: torahClasses.status === 'fulfilled' ? torahClasses.value : [],
+        gemsOfGratitude: gemsOfGratitude.status === 'fulfilled' ? gemsOfGratitude.value : null,
         errors: Object.keys(errors).length > 0 ? errors : undefined,
         fetchedAt: new Date().toISOString()
       };
@@ -3522,13 +3592,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/messages/:id", requireAdminAuth, async (req, res) => {
     try {
       const { id } = req.params;
-      // Validate request body with Zod schema (omit id and timestamps for updates)
-      const updateSchema = insertMessagesSchema.omit({ 
-        id: true, 
-        createdAt: true, 
-        updatedAt: true 
-      });
-      const validatedData = updateSchema.parse(req.body);
+      // Validate request body with Zod schema (insertMessagesSchema already omits id and timestamps)
+      const validatedData = insertMessagesSchema.parse(req.body);
       const updatedMessage = await storage.updateMessage(parseInt(id), validatedData);
       return res.json(updatedMessage);
     } catch (error: any) {
@@ -3551,6 +3616,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting message:", error);
       return res.status(500).json({ message: "Failed to delete message" });
+    }
+  });
+
+  // Feed routes - Public endpoints for accessing the message feed
+  app.get("/api/feed", async (_req, res) => {
+    try {
+      // Disable caching to ensure fresh vote counts
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
+      
+      const allMessages = await storage.getAllMessages();
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Filter out future dates - only show messages for today or earlier
+      const filteredMessages = allMessages.filter(m => m.date <= today);
+      
+      // Sort: pinned first, then today's message, then by date descending
+      filteredMessages.sort((a, b) => {
+        // Pinned messages always first
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        // Today's message comes next (if not pinned)
+        const aIsToday = a.date === today;
+        const bIsToday = b.date === today;
+        if (aIsToday && !bIsToday) return -1;
+        if (!aIsToday && bIsToday) return 1;
+        
+        // Then sort by date descending
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      
+      return res.json(filteredMessages);
+    } catch (error) {
+      console.error("Error fetching feed:", error);
+      return res.status(500).json({ message: "Failed to fetch feed" });
+    }
+  });
+
+  // Like/dislike routes for feed messages
+  app.post("/api/feed/:id/like", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.incrementMessageLike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error liking message:", error);
+      return res.status(500).json({ message: "Failed to like message" });
+    }
+  });
+
+  app.post("/api/feed/:id/dislike", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.incrementMessageDislike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error disliking message:", error);
+      return res.status(500).json({ message: "Failed to dislike message" });
+    }
+  });
+
+  app.delete("/api/feed/:id/like", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.decrementMessageLike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error removing like:", error);
+      return res.status(500).json({ message: "Failed to remove like" });
+    }
+  });
+
+  app.delete("/api/feed/:id/dislike", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const updatedMessage = await storage.decrementMessageDislike(parseInt(id));
+      return res.json(updatedMessage);
+    } catch (error) {
+      console.error("Error removing dislike:", error);
+      return res.status(500).json({ message: "Failed to remove dislike" });
+    }
+  });
+
+  // Pin/unpin message routes (admin only)
+  app.post("/api/messages/:id/pin", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const pinnedMessage = await storage.pinMessage(parseInt(id));
+      return res.json(pinnedMessage);
+    } catch (error) {
+      console.error("Error pinning message:", error);
+      return res.status(500).json({ message: "Failed to pin message" });
+    }
+  });
+
+  app.delete("/api/messages/:id/pin", requireAdminAuth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      await storage.unpinMessage(parseInt(id));
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Error unpinning message:", error);
+      return res.status(500).json({ message: "Failed to unpin message" });
     }
   });
 

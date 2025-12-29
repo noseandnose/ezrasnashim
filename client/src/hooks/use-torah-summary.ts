@@ -6,7 +6,8 @@ import type {
   DailyChizuk, 
   DailyEmuna, 
   FeaturedContent, 
-  ParshaVort 
+  ParshaVort,
+  GemsOfGratitude
 } from "@shared/schema";
 
 interface PirkeiAvotFormatted {
@@ -23,6 +24,7 @@ interface TorahSummaryErrors {
   pirkeiAvot?: boolean;
   parshaVorts?: boolean;
   torahClasses?: boolean;
+  gemsOfGratitude?: boolean;
 }
 
 interface TorahSummary {
@@ -33,6 +35,7 @@ interface TorahSummary {
   pirkeiAvot: PirkeiAvotFormatted | null;
   parshaVorts: ParshaVort[];
   torahClasses: TorahClass[];
+  gemsOfGratitude: GemsOfGratitude | null;
   errors?: TorahSummaryErrors;
   fetchedAt: string;
 }

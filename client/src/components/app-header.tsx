@@ -9,7 +9,6 @@ import { useModalStore } from "@/lib/types";
 import { useState, useEffect } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
-import MessageModal from "./modals/message-modal";
 import { SearchModal } from "./SearchModal";
 import { getLocalDateString } from "@/lib/dateUtils";
 import {
@@ -27,7 +26,6 @@ export default function AppHeader() {
   const { openModal } = useModalStore();
   const { user, isAuthenticated, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -56,12 +54,6 @@ export default function AppHeader() {
     setHasReadMessage(localStorage.getItem(readKey) === 'true');
   }, [today]);
   
-  const handleOpenMessage = () => {
-    setShowMessageModal(true);
-    const readKey = `message-read-${today}`;
-    localStorage.setItem(readKey, 'true');
-    setHasReadMessage(true);
-  };
 
   const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight
@@ -120,15 +112,13 @@ export default function AppHeader() {
   return (
     <>
       <header 
-        className="header-extended fixed top-0 left-0 right-0 px-3 border-0 z-40" 
+        className="header-extended relative px-3 border-0 z-40" 
         data-bridge-container 
         style={{ 
           paddingTop: `calc(var(--safe-area-top) + 0.625rem)`, 
           paddingBottom: '0.625rem',
           minHeight: 'var(--header-total-height)',
-          background: 'rgba(186,137,160,0.12)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)'
+          background: 'transparent'
         }}
       >
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
@@ -136,11 +126,16 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full hover:bg-white/50 transition-colors focus:outline-none relative ${
+                  className={`p-2 rounded-full transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)'
+                  }}
                 >
                   <Menu className="h-5 w-5 text-black/70" />
                   {!!todayMessage && !hasReadMessage && (
@@ -215,13 +210,13 @@ export default function AppHeader() {
                   Community Feedback
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={handleOpenMessage}
+                  onClick={() => setLocation('/feed')}
                   className="cursor-pointer relative"
-                  data-testid="menu-item-message"
-                  data-action="menu-message"
+                  data-testid="menu-item-feed"
+                  data-action="menu-feed"
                 >
                   <Mail className="h-5 w-5 mr-2" />
-                  Daily Message
+                  Feed
                   {!!todayMessage && !hasReadMessage && (
                     <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
                   )}
@@ -277,10 +272,15 @@ export default function AppHeader() {
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
+              className="p-2 rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
               data-action="header-search"
+              style={{
+                background: 'rgba(255, 255, 255, 0.6)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)'
+              }}
             >
               <Search className="h-5 w-5 text-black/70" />
             </button>
@@ -293,11 +293,6 @@ export default function AppHeader() {
         onClose={() => setShowAddToHomeScreen(false)}
       />
       
-      <MessageModal
-        isOpen={showMessageModal}
-        onClose={() => setShowMessageModal(false)}
-        date={today}
-      />
       
       <SearchModal
         isOpen={showSearchModal}

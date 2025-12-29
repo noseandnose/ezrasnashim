@@ -215,6 +215,7 @@ export default function Statistics() {
     featured: "Featured",
     "parsha-vort": "Parsha Shiur",
     "pirkei-avot": "Pirkei Avot",
+    "gems-of-gratitude": "Gems of Gratitude",
     
     // Life section
     recipe: "Daily Recipe",
@@ -222,6 +223,7 @@ export default function Statistics() {
     "sponsor-day": "Day Sponsorship",
     refuah: "Refuah Names",
     "womens-prayer": "Women's Prayers",
+    "life-class": "Life Class",
 
     // Other
     donate: "Donations",
@@ -262,6 +264,7 @@ export default function Statistics() {
     // Torah subcategories  
     chizuk: Heart,
     emuna: Shield,
+    "gems-of-gratitude": Sparkles,
     halacha: BookOpen,
     "featured-content": Star,
     featured: Star,
@@ -272,6 +275,7 @@ export default function Statistics() {
     inspiration: Star,
     "sponsor-day": Trophy,
     refuah: Heart,
+    "life-class": BookOpen,
     
     // Other
     donate: HandCoins,

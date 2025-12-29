@@ -1,6 +1,7 @@
 import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -16,8 +17,8 @@ import torahFlower from "@assets/Torah_1766581824736.png";
 import tefillaFlower from "@assets/Tefilla_1766581824746.png";
 import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
 import morningBackground from "@assets/Morning_1766585201516.png";
-import afternoonBackground from "@assets/Afternoon_1766585201516.png";
-import nightBackground from "@assets/Evening_1766585201513.png";
+import afternoonBackground from "@assets/Afternoon_Garden_1766949757852.jpg";
+import nightBackground from "@assets/Night_Garden_1766942692566.jpg";
 import milestone10Tree from "@assets/10_1766688255354.png";
 import milestone20Tree from "@assets/20_1766688255353.png";
 import milestone30Tree from "@assets/30_1766688255351.png";
@@ -27,6 +28,11 @@ import prayerNightBg from "@assets/Night_1766585505565.png";
 import shkiaMorningBg from "@assets/Morning_1766586713115.png";
 import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
 import shkiaNightBg from "@assets/Night_1766586713110.png";
+
+// TEMPORARY: New section background images for testing
+import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
+import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
+import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -82,7 +88,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort
+    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort, gems-of-gratitude
     // All Torah items are repeatables (not in SINGLE_COMPLETION_PRAYERS set)
     if (todaysData.repeatables) {
       count += todaysData.repeatables['halacha'] || 0;
@@ -91,6 +97,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['featured'] || 0;
       count += todaysData.repeatables['pirkei-avot'] || 0;
       count += todaysData.repeatables['parsha-vort'] || 0;
+      count += todaysData.repeatables['gems-of-gratitude'] || 0;
     }
     return count;
   }, [completedModals]);
@@ -98,6 +105,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const tzedakaFlowerCount = useMemo(() => {
     return tzedakaCompleted ? 1 : 0;
   }, [tzedakaCompleted]);
+
+  // TEMPORARY: Time period state for automatic background updates
+  // Updates every minute to catch time-of-day transitions
+  const [, setTimeUpdate] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeUpdate(Date.now());
+    }, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   // Generate stable but randomized positions for flowers - like a natural garden
   // Each flower has a fixed position based on its type and index (stable across re-renders)
@@ -153,6 +170,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const jewishTimesQuery = useJewishTimes();
   const { coordinates, permissionDenied } = useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
+  const { data: weather } = useWeather();
+  const { unit: tempUnit, toggle: toggleTempUnit } = useTemperatureUnit();
 
   // Helper to check if current time is after tzais hakochavim (nightfall)
   const isAfterTzais = (): boolean => {
@@ -214,6 +233,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (hour < 12) return shkiaMorningBg;
     if (isAfterTzais()) return shkiaNightBg;
     return shkiaAfternoonBg;
+  };
+
+  // TEMPORARY: Get time-appropriate background for main section
+  const getSectionBackground = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return sectionMorningBg;
+    if (isAfterTzais()) return sectionNightBg;
+    return sectionAfternoonBg;
   };
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -359,16 +386,22 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const PrayerIcon = currentPrayer.icon;
 
   return (
-    <div className="pb-20" data-bridge-container>
+    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
+      {/* TEMPORARY: Full page background image - fixed to cover header */}
+      <img 
+        src={getSectionBackground()} 
+        alt="" 
+        aria-hidden="true"
+        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
+        style={{ zIndex: 0, opacity: 0.3 }}
+      />
       
-      {/* Unified Top Section with Greeting, Times, and Today Info - Connected to top bar */}
+      {/* Unified Top Section */}
       <div 
-        className="rounded-b-3xl p-3"
+        className="rounded-b-3xl p-3 relative"
         style={{
-          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+          zIndex: 2
         }}
       >
         {/* Greeting and Date in one row */}
@@ -419,73 +452,89 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
         </button>
 
-        {/* Times Section - Time-based Prayer and Shkia */}
+        {/* TEMPORARY: Times Section - Apple glass style buttons */}
         <div className="grid grid-cols-2 gap-2">
-          {/* Time-based Prayer - Dynamic based on current time */}
+          {/* Time-based Prayer - Dynamic based on current time - Apple Glass Style */}
           <button 
             onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
             disabled={currentPrayer.disabled}
-            className={`w-full h-full rounded-xl p-3 text-center border transition-all duration-300 overflow-hidden relative ${
+            className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 ${
               currentPrayer.disabled 
-                ? 'border-gray-200 opacity-60 cursor-not-allowed' 
-                : 'border-blush/20 hover:scale-105'
+                ? 'opacity-60 cursor-not-allowed' 
+                : 'hover:scale-105'
             }`}
+            style={{
+              background: 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type={currentPrayer.modal}
             data-modal-section="tefilla"
             data-testid="button-home-prayer"
           >
-            {/* Background image */}
-            <img 
-              src={getPrayerButtonBackground()} 
-              alt="" 
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ zIndex: 0, opacity: 0.3 }}
-            />
-            {/* Content overlay */}
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-1">
-                <div className={`p-1.5 rounded-full mr-1 ${
-                  currentPrayer.disabled 
-                    ? 'bg-gray-300' 
-                    : 'bg-white/60'
-                }`}>
-                  <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
-                </div>
+            <div className="flex items-center justify-center mb-1">
+              <div className={`p-1.5 rounded-full mr-1 ${
+                currentPrayer.disabled 
+                  ? 'bg-gray-300' 
+                  : 'bg-white/70'
+              }`}>
+                <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
               </div>
-              <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-                {currentPrayer.title}
-              </p>
-              <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
-                {currentPrayer.subtitle}
-              </p>
             </div>
+            <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
+              {currentPrayer.title}
+            </p>
+            <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+              {currentPrayer.subtitle}
+            </p>
           </button>
 
-          {/* Shkia - Clickable to open Events */}
+          {/* Shkia - Clickable to open Events - Apple Glass Style */}
           <button 
             onClick={() => openModal('events', 'home')}
-            className="w-full h-full rounded-xl p-3 text-center border border-blush/20 hover:scale-105 transition-all duration-300 overflow-hidden relative"
+            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300 relative"
+            style={{
+              background: 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type="events"
             data-modal-section="home"
             data-testid="button-home-events"
           >
-            {/* Background image */}
-            <img 
-              src={getShkiaButtonBackground()} 
-              alt="" 
-              className="absolute inset-0 w-full h-full object-cover"
-              style={{ zIndex: 0, opacity: 0.3 }}
-            />
-            {/* Content overlay */}
-            <div className="relative z-10">
-              <div className="flex items-center justify-center mb-1">
-                <div className="bg-white/60 p-1.5 rounded-full">
-                  <Clock className="text-black" size={12} />
-                </div>
+            {/* TEMPORARILY HIDDEN: Weather badge - Apple glass style, tappable to toggle C/F */}
+            {/* {weather && (
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTempUnit();
+                }}
+                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.8)',
+                  backdropFilter: 'blur(10px)',
+                  WebkitBackdropFilter: 'blur(10px)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
+                  border: '1px solid rgba(255, 255, 255, 0.5)',
+                }}
+              >
+                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
+                <span className="platypi-bold text-[10px] text-black/80">
+                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
+                </span>
               </div>
-              <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            )} */}
+            <div className="flex items-center justify-center mb-1">
+              <div className="bg-white/70 p-1.5 rounded-full">
+                <Clock className="text-black" size={12} />
+              </div>
             </div>
+            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
 
@@ -716,7 +765,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             src={getGardenBackground()} 
             alt="" 
             className="absolute inset-0 w-full h-full z-0"
-            style={{ objectFit: 'cover', opacity: 0.4 }}
+            style={{ objectFit: 'cover', opacity: 0.3 }}
             loading="lazy"
           />
           
