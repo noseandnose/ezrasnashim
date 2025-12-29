@@ -428,7 +428,7 @@ export default function TableSection() {
               <GraduationCap className={`${!currentLifeClass ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>
-              Life Classes
+              Practical Parenting
             </h3>
             <p className={`platypi-regular text-xs leading-relaxed ${!currentLifeClass ? 'text-gray-400' : 'text-black/60'}`}>
               {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
