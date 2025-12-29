@@ -857,7 +857,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 </button>
               </PopoverTrigger>
               <PopoverContent side="bottom" className="max-w-[200px] text-center p-2">
-                <p className="text-xs">Each mitzvah plants a flower in your garden. Reach 10, 20, or 30 mitzvos to grow a special tree.</p>
+                <p className="text-xs">Each mitzvah plants a flower in your garden.</p>
               </PopoverContent>
             </Popover>
           </div>
