@@ -390,9 +390,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('gave_elsewhere') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
             <div className="heart-explosion-container relative">
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
