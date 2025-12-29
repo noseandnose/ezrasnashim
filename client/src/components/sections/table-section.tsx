@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, GraduationCap } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -425,7 +425,7 @@ export default function TableSection() {
                 ? 'bg-gray-300' 
                 : isModalComplete('life-class') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <GraduationCap className={`${!currentLifeClass ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+              <Home className={`${!currentLifeClass ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
             </div>
             <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>
               Practical Parenting
