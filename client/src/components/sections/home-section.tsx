@@ -103,9 +103,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return count;
   }, [completedModals]);
 
-  const tzedakaFlowerCount = useMemo(() => {
-    return tzedakaCompleted ? 1 : 0;
-  }, [tzedakaCompleted]);
+  // Get tzedaka flower count from the store - tracks multiple "Gave Elsewhere" clicks
+  const tzedakaFlowerCount = useDailyCompletionStore((state) => state.tzedakaFlowerCount || 0);
 
   // TEMPORARY: Time period state for automatic background updates
   // Updates every minute to catch time-of-day transitions

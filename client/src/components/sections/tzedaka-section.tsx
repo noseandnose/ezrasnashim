@@ -131,7 +131,17 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const isTzedakaButtonCompleted = (buttonType: TzedakaButtonType): boolean => {
     const today = getLocalDateString();
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    // For gave_elsewhere, check if count > 0
+    if (buttonType === 'gave_elsewhere') {
+      return (completions[today]?.gave_elsewhere_count || 0) > 0;
+    }
     return completions[today]?.[buttonType] === true;
+  };
+
+  const getGaveElsewhereCount = (): number => {
+    const today = getLocalDateString();
+    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    return completions[today]?.gave_elsewhere_count || 0;
   };
 
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
@@ -142,7 +152,12 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
       completions[today] = {};
     }
     
-    completions[today][buttonType] = true;
+    // For gave_elsewhere, increment count instead of setting boolean
+    if (buttonType === 'gave_elsewhere') {
+      completions[today].gave_elsewhere_count = (completions[today].gave_elsewhere_count || 0) + 1;
+    } else {
+      completions[today][buttonType] = true;
+    }
     
     // Clean up old data (keep only last 2 days)
     const yesterday = new Date();
@@ -166,12 +181,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
 
   const handleTzedakaButtonClick = (buttonType: TzedakaButtonType) => {
-    // Only prevent "gave_elsewhere" from being clicked again (it's a one-time acknowledgment)
-    // Allow donation buttons to be clicked multiple times
-    if (buttonType === 'gave_elsewhere' && isTzedakaButtonCompleted(buttonType)) {
-      return;
-    }
-    
+    // Allow "gave_elsewhere" to be clicked multiple times - each counts as a mitzvah
     if (buttonType === 'gave_elsewhere') {
       // No money - just confirm and mark complete
       playCoinSound();
@@ -392,7 +402,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               </div>
               <h3 className="platypi-bold text-xs text-black mb-1">Gave Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                {isTzedakaButtonCompleted('gave_elsewhere') ? 'Completed' : 'Mark as complete'}
+                {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()} today` : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>
