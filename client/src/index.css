@@ -1300,8 +1300,8 @@ html, body, #root {
 
 .garden-sparkle {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 6px;
+  height: 6px;
   pointer-events: none;
   z-index: 5;
 }
@@ -1310,9 +1310,8 @@ html, body, #root {
 .garden-sparkle::after {
   content: '';
   position: absolute;
-  background: linear-gradient(135deg, #fff 0%, #ffcce0 50%, #fff 100%);
-  border-radius: 2px;
-  box-shadow: 0 0 6px rgba(255, 182, 213, 0.8);
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 1px;
 }
 
 .garden-sparkle::before {
