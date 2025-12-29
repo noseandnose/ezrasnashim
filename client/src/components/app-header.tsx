@@ -126,7 +126,7 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full transition-colors focus:outline-none relative ${
+                  className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
@@ -272,7 +272,7 @@ export default function AppHeader() {
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full transition-colors"
+              className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
               data-action="header-search"
