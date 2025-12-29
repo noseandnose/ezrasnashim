@@ -353,7 +353,26 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
       >
         
         {/* Total Tehillim Said Card */}
-        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10">
+        <div className="bg-white/70 rounded-2xl p-3 border border-blush/10 relative">
+          {/* Apple Glass Style Find Button - Top Right Corner */}
+          <button
+            onClick={handleFindToggle}
+            className={`absolute top-2 right-2 rounded-full backdrop-blur-md border border-white/30 shadow-lg transition-all flex items-center justify-center ${chainView === 'find' ? 'bg-blush/40' : 'bg-white/60'}`}
+            style={{ 
+              backdropFilter: 'blur(12px)', 
+              WebkitBackdropFilter: 'blur(12px)',
+              width: '24px',
+              height: '24px',
+              padding: 0,
+              minWidth: '24px',
+              minHeight: '24px'
+            }}
+            aria-label="Find Chain"
+            data-testid="button-chain-find-icon"
+          >
+            <Search size={14} className="text-blush" />
+          </button>
+          
           {/* Header Row - Title and Subheading */}
           <div className="flex items-center mb-3">
             <div className="flex items-center space-x-3">
@@ -373,28 +392,17 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
           >
             {/* Buttons Row */}
-            <div className="flex items-center justify-center space-x-3 mb-2">
+            <div className="flex items-center justify-center space-x-4 mb-2">
             <Button
               type="button"
               onClick={handleCreateToggle}
-              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'border-blush' : ''}`}
+              className={`text-base px-6 py-3 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'border-blush' : ''}`}
               data-testid="button-chain-create"
             >
-              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
-                <Plus size={16} className="text-white" />
+              <div className="flex h-8 w-8 items-center justify-center bg-gradient-feminine rounded-full mr-2 shrink-0">
+                <Plus size={18} className="text-white" />
               </div>
               Create
-            </Button>
-            <Button
-              type="button"
-              onClick={handleFindToggle}
-              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'find' ? 'border-blush' : ''}`}
-              data-testid="button-chain-find"
-            >
-              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
-                <Search size={16} className="text-white" />
-              </div>
-              Find
             </Button>
             <Button
               type="button"
@@ -418,11 +426,11 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                   setIsLoadingRandom(false);
                 }
               }}
-              className={`text-sm px-4 py-2 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`text-base px-6 py-3 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${isLoadingRandom ? 'opacity-50 cursor-not-allowed' : ''}`}
               data-testid="button-chain-random"
             >
-              <div className="flex h-7 w-7 items-center justify-center bg-gradient-feminine rounded-full mr-1 shrink-0">
-                <Shuffle size={16} className={`text-white ${isLoadingRandom ? 'animate-spin' : ''}`} />
+              <div className="flex h-8 w-8 items-center justify-center bg-gradient-feminine rounded-full mr-2 shrink-0">
+                <Shuffle size={18} className={`text-white ${isLoadingRandom ? 'animate-spin' : ''}`} />
               </div>
               {isLoadingRandom ? 'Loading...' : 'Random'}
             </Button>

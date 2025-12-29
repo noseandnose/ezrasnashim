@@ -7,6 +7,7 @@ import type { Section } from "@/pages/home";
 import BottomNavigation from "@/components/bottom-navigation";
 import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
+import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 
 type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
 
@@ -346,6 +347,11 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   if (simplified) {
     return (
       <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8">
+        <img 
+          src={logoImage} 
+          alt="Ezras Nashim" 
+          className="w-full max-w-2xl h-auto mb-6"
+        />
         <h1 className="platypi-bold text-3xl text-black mb-8 text-center">All Time Statistics</h1>
         
         <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
