@@ -223,6 +223,7 @@ export default function Statistics() {
     "sponsor-day": "Day Sponsorship",
     refuah: "Refuah Names",
     "womens-prayer": "Women's Prayers",
+    "life-class": "Life Class",
 
     // Other
     donate: "Donations",
@@ -274,6 +275,7 @@ export default function Statistics() {
     inspiration: Star,
     "sponsor-day": Trophy,
     refuah: Heart,
+    "life-class": BookOpen,
     
     // Other
     donate: HandCoins,
