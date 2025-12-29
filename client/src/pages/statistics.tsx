@@ -74,9 +74,10 @@ function getWeekStartDate(): string {
 
 interface StatisticsProps {
   initialPeriod?: TimePeriod;
+  simplified?: boolean;
 }
 
-export default function Statistics({ initialPeriod = 'today' }: StatisticsProps) {
+export default function Statistics({ initialPeriod = 'today', simplified = false }: StatisticsProps) {
   const [, setLocation] = useLocation();
   const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(initialPeriod);
   const isPageVisible = usePageVisible();
@@ -336,6 +337,74 @@ export default function Statistics({ initialPeriod = 'today' }: StatisticsProps)
               <div className="text-xs platypi-medium text-warm-gray">Money Raised</div>
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Simplified view for office display - just 4 big stats
+  if (simplified) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8">
+        <h1 className="platypi-bold text-3xl text-black mb-8 text-center">All Time Statistics</h1>
+        
+        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+          {/* Mitzvas Completed */}
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10"
+               style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
+            <div className="flex items-center justify-center mb-4">
+              <TrendingUp className="h-10 w-10 text-blush" />
+            </div>
+            <div className="text-5xl platypi-bold text-black text-center mb-2">
+              {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
+            </div>
+            <div className="text-lg platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
+          </div>
+          
+          {/* Women Visited */}
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-4">
+              <Users className="h-10 w-10 text-peach" />
+            </div>
+            <div className="text-5xl platypi-bold text-black text-center mb-2">
+              {currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
+            </div>
+            <div className="text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
+          </div>
+          
+          {/* Tehillim Said */}
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-4">
+              <ScrollText className="h-10 w-10 text-lavender" />
+            </div>
+            <div className="text-5xl platypi-bold text-black text-center mb-2">
+              {currentLoading ? "..." : (() => {
+                const modalCompletions = (currentData as any)?.totalModalCompletions || {};
+                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
+                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
+                const chainTehillim = modalCompletions['chain-tehillim'] || 0;
+                const specialTehillim = modalCompletions['special-tehillim'] || 0;
+                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+                return (globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim).toLocaleString();
+              })()}
+            </div>
+            <div className="text-lg platypi-medium text-warm-gray text-center">Tehillim Said</div>
+          </div>
+          
+          {/* Tehillim Chains */}
+          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-4">
+              <Heart className="h-10 w-10 text-sage" />
+            </div>
+            <div className="text-5xl platypi-bold text-black text-center mb-2">
+              {activeCampaigns.toLocaleString()}
+            </div>
+            <div className="text-lg platypi-medium text-warm-gray text-center">Tehillim Chains</div>
+          </div>
+        </div>
+        
+        <div className="mt-8 text-sm text-warm-gray platypi-medium">
+          Auto-refreshes every 2 minutes
         </div>
       </div>
     );
