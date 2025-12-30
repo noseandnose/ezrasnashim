@@ -109,6 +109,11 @@ export default function LifeClassModal() {
                 audioUrl={lifeClass.audioUrl} 
                 title={lifeClass.title || 'Life Class'}
                 duration="0:00"
+                onAudioEnded={() => {
+                  if (!isCompleted) {
+                    handleComplete();
+                  }
+                }}
               />
             </div>
           )}
