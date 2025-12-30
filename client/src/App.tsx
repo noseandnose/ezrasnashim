@@ -86,6 +86,13 @@ function Router() {
     window.addEventListener('resize', updateNavOffset, { passive: true });
     window.addEventListener('orientationchange', updateNavOffset, { passive: true });
     
+    // CRITICAL: Listen to visualViewport resize directly for keyboard dismiss
+    // Window resize events don't always fire in WebViews when keyboard closes
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateNavOffset, { passive: true });
+      window.visualViewport.addEventListener('scroll', updateNavOffset, { passive: true });
+    }
+    
     // Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOS = /iphone|ipod|ipad/.test(userAgent);
@@ -243,6 +250,10 @@ function Router() {
     return () => {
       window.removeEventListener('resize', updateNavOffset);
       window.removeEventListener('orientationchange', updateNavOffset);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateNavOffset);
+        window.visualViewport.removeEventListener('scroll', updateNavOffset);
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow as EventListener);
       window.removeEventListener('focus', handleFocus);
