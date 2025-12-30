@@ -137,7 +137,7 @@ export default function AppHeader() {
                     data-action="menu-login"
                   >
                     <User className="h-5 w-5 mr-2" />
-                    Create Profile
+                    Sign Up / Log In
                   </DropdownMenuItem>
                 )}
                 {isAuthenticated && user && (

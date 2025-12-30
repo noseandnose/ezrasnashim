@@ -155,6 +155,17 @@ export default function Login() {
       </header>
       
       <div className="flex flex-col items-center p-6 pt-32 pb-28">
+        <div className="mb-6 text-center">
+          <div 
+            className="inline-flex items-center justify-center px-8 py-3 rounded-full shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #E8B4BC 0%, #C8A2C8 100%)'
+            }}
+          >
+            <span className="platypi-bold text-xl text-white drop-shadow-sm">Welcome Home</span>
+          </div>
+        </div>
+        
         <div 
           className="w-full max-w-sm rounded-2xl p-6 border border-gray-100 shadow-sm"
         >

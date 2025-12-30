@@ -392,7 +392,7 @@ export default function Profile() {
         </div>
       </header>
       
-      <div className="relative p-3 pt-24 pb-20 space-y-2">
+      <div className="relative p-3 pb-20 space-y-2" style={{ paddingTop: 'calc(var(--safe-area-top, 0px) + 80px)' }}>
         <div 
           className="rounded-2xl p-3 border border-white/30"
           style={{ 
