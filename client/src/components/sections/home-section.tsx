@@ -25,9 +25,9 @@ import nightBackground from "@assets/Night_Garden_1767032602702.png";
 // import milestone30Tree from "@assets/30_1766688255351.png";
 
 // TEMPORARY: New section background images for testing
-import sectionMorningBg from "@assets/Morning_1767097444174.png";
-import sectionAfternoonBg from "@assets/Afternoon_1767097444173.png";
-import sectionNightBg from "@assets/Night_1767097444169.png";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
