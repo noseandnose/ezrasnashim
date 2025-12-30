@@ -526,8 +526,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 opacity: currentPrayer.disabled ? 1 : 0.7,
               }}
             >
-              <PrayerIcon className="text-white" size={10} />
-              <p className="platypi-bold text-[10px] text-white">
+              <PrayerIcon className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">
                 {currentPrayer.title}
               </p>
             </div>
@@ -558,8 +558,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 opacity: 0.7,
               }}
             >
-              <MapPin className="text-white" size={10} />
-              <p className="platypi-bold text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <MapPin className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
