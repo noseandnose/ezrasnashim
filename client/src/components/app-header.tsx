@@ -1,16 +1,14 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
-import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
-import { getLocalDateString } from "@/lib/dateUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +25,6 @@ export default function AppHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -41,19 +38,6 @@ export default function AppHeader() {
     isIOS,
     isWebview,
   } = useInstallHighlight();
-  
-  const today = getLocalDateString();
-  
-  // Use batched home summary for better performance
-  const { data: homeSummary } = useHomeSummary();
-  const todayMessage = homeSummary?.message;
-  
-  // Check if user has read today's message
-  useEffect(() => {
-    const readKey = `message-read-${today}`;
-    setHasReadMessage(localStorage.getItem(readKey) === 'true');
-  }, [today]);
-  
 
   const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight
@@ -126,21 +110,22 @@ export default function AppHeader() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className={`p-2 rounded-full transition-colors focus:outline-none relative ${
+                  className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
                     shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
                   style={{
+                    width: '36px',
+                    height: '36px',
+                    minWidth: '36px',
+                    minHeight: '36px',
                     background: 'rgba(255, 255, 255, 0.6)',
                     backdropFilter: 'blur(12px)',
                     WebkitBackdropFilter: 'blur(12px)'
                   }}
                 >
                   <Menu className="h-5 w-5 text-black/70" />
-                  {!!todayMessage && !hasReadMessage && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-menu" />
-                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
@@ -209,18 +194,6 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setLocation('/feed')}
-                  className="cursor-pointer relative"
-                  data-testid="menu-item-feed"
-                  data-action="menu-feed"
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  Feed
-                  {!!todayMessage && !hasReadMessage && (
-                    <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
-                  )}
-                </DropdownMenuItem>
 {/* Hidden until ready to launch - Create Profile feature
                 {!authLoading && !isAuthenticated && (
                   <DropdownMenuItem
@@ -272,11 +245,15 @@ export default function AppHeader() {
           <div className="flex items-center gap-1 flex-1 justify-end">
             <button
               onClick={() => setShowSearchModal(true)}
-              className="p-2 rounded-full transition-colors"
+              className="flex items-center justify-center rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
               data-action="header-search"
               style={{
+                width: '36px',
+                height: '36px',
+                minWidth: '36px',
+                minHeight: '36px',
                 background: 'rgba(255, 255, 255, 0.6)',
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)'

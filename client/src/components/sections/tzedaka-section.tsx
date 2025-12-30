@@ -3,9 +3,9 @@ import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } fr
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
@@ -131,7 +131,17 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const isTzedakaButtonCompleted = (buttonType: TzedakaButtonType): boolean => {
     const today = getLocalDateString();
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    // For gave_elsewhere, check if count > 0
+    if (buttonType === 'gave_elsewhere') {
+      return (completions[today]?.gave_elsewhere_count || 0) > 0;
+    }
     return completions[today]?.[buttonType] === true;
+  };
+
+  const getGaveElsewhereCount = (): number => {
+    const today = getLocalDateString();
+    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    return completions[today]?.gave_elsewhere_count || 0;
   };
 
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
@@ -142,7 +152,12 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
       completions[today] = {};
     }
     
-    completions[today][buttonType] = true;
+    // For gave_elsewhere, increment count instead of setting boolean
+    if (buttonType === 'gave_elsewhere') {
+      completions[today].gave_elsewhere_count = (completions[today].gave_elsewhere_count || 0) + 1;
+    } else {
+      completions[today][buttonType] = true;
+    }
     
     // Clean up old data (keep only last 2 days)
     const yesterday = new Date();
@@ -166,12 +181,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
 
   const handleTzedakaButtonClick = (buttonType: TzedakaButtonType) => {
-    // Only prevent "gave_elsewhere" from being clicked again (it's a one-time acknowledgment)
-    // Allow donation buttons to be clicked multiple times
-    if (buttonType === 'gave_elsewhere' && isTzedakaButtonCompleted(buttonType)) {
-      return;
-    }
-    
+    // Allow "gave_elsewhere" to be clicked multiple times - each counts as a mitzvah
     if (buttonType === 'gave_elsewhere') {
       // No money - just confirm and mark complete
       playCoinSound();
@@ -260,9 +270,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
       >
         <button 
           onClick={() => handleTzedakaButtonClick('active_campaign')}
-          className={`w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left ${
-            isTzedakaButtonCompleted('active_campaign') ? 'bg-sage/20' : 'bg-white/85'
-          }`}
+          className="w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left bg-white/85"
         >
         {isLoading ? (
           <div className="animate-pulse">
@@ -331,11 +339,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         {/* Put a Coin in Tzedaka - Long Button at Top */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className={`w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 ${
-            isTzedakaButtonCompleted('put_a_coin') 
-              ? 'bg-sage/20 border-sage/30' 
-              : 'bg-white border-blush/30'
-          }`}
+          className="w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
               ? 'gentle-glow-green 3s ease-in-out infinite' 
@@ -362,9 +366,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Left: Sponsor a Day */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
             <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
               isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage' : 'bg-gradient-feminine'
@@ -380,9 +382,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isTzedakaButtonCompleted('gave_elsewhere') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
           >
             <div className="heart-explosion-container relative">
               <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
@@ -392,7 +392,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               </div>
               <h3 className="platypi-bold text-xs text-black mb-1">Gave Elsewhere</h3>
               <p className="platypi-regular text-xs text-black/60 leading-relaxed">
-                {isTzedakaButtonCompleted('gave_elsewhere') ? 'Completed' : 'Mark as complete'}
+                {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()}X today` : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
             </div>

@@ -124,7 +124,7 @@ export function StandardModalButton({
     <Button
       onClick={onClick}
       disabled={disabled}
-      className={`${baseClasses} ${variantClasses[variant]} ${className} ${disabled ? 'opacity-70 cursor-not-allowed' : ''}`}
+      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
     >
       {children}
     </Button>

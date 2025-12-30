@@ -1005,7 +1005,7 @@ export default function TableModals() {
                   disabled={isModalComplete('recipe')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('recipe') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
@@ -1183,7 +1183,7 @@ export default function TableModals() {
                   disabled={isModalComplete('inspiration')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('inspiration') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
@@ -1232,7 +1232,7 @@ export default function TableModals() {
                   disabled={isModalComplete('marriage-insights')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('marriage-insights') 
-                      ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                      ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >

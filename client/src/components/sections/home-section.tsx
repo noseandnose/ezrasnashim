@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo, useEffect } from "react";
@@ -13,26 +13,21 @@ import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
 import grassImage from "@assets/Grass2_1766588526836.png";
-import torahFlower from "@assets/Torah_1766581824736.png";
-import tefillaFlower from "@assets/Tefilla_1766581824746.png";
-import tzedakaFlower from "@assets/Tzedaka_1766581824745.png";
-import morningBackground from "@assets/Morning_1766585201516.png";
-import afternoonBackground from "@assets/Afternoon_Garden_1766949757852.jpg";
-import nightBackground from "@assets/Night_Garden_1766942692566.jpg";
-import milestone10Tree from "@assets/10_1766688255354.png";
-import milestone20Tree from "@assets/20_1766688255353.png";
-import milestone30Tree from "@assets/30_1766688255351.png";
-import prayerMorningBg from "@assets/Morning_1766585505566.png";
-import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
-import prayerNightBg from "@assets/Night_1766585505565.png";
-import shkiaMorningBg from "@assets/Morning_1766586713115.png";
-import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
-import shkiaNightBg from "@assets/Night_1766586713110.png";
+import torahFlower from "@assets/Torah_1767035380484.png";
+import tefillaFlower from "@assets/Tefilla_1767035380485.png";
+import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
+import morningBackground from "@assets/Morning_Garden_1767032602705.png";
+import afternoonBackground from "@assets/Afternoon_Garden_1767032602705.png";
+import nightBackground from "@assets/Night_Garden_1767032602702.png";
+// Milestone tree images temporarily removed - will be replaced with new ones later
+// import milestone10Tree from "@assets/10_1766688255354.png";
+// import milestone20Tree from "@assets/20_1766688255353.png";
+// import milestone30Tree from "@assets/30_1766688255351.png";
 
 // TEMPORARY: New section background images for testing
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -102,9 +97,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return count;
   }, [completedModals]);
 
-  const tzedakaFlowerCount = useMemo(() => {
-    return tzedakaCompleted ? 1 : 0;
-  }, [tzedakaCompleted]);
+  // Get tzedaka flower count from the store - tracks multiple "Gave Elsewhere" clicks
+  const tzedakaFlowerCount = useDailyCompletionStore((state) => state.tzedakaFlowerCount || 0);
 
   // TEMPORARY: Time period state for automatic background updates
   // Updates every minute to catch time-of-day transitions
@@ -168,7 +162,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
   // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
-  const { coordinates, permissionDenied } = useGeolocation();
+  useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
   const { data: weather } = useWeather();
   const { unit: tempUnit, toggle: toggleTempUnit } = useTemperatureUnit();
@@ -195,12 +189,56 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return now >= tzaisTime;
   };
 
-  // Get time-appropriate greeting (evening starts at tzais hakochavim)
+  // Helper to check if current time is after naitz (sunrise)
+  const isAfterNaitz = (): boolean => {
+    const sunriseStr = jewishTimesQuery.data?.sunrise;
+    if (!sunriseStr) return new Date().getHours() >= 6; // Fallback to 6 AM if no data
+    
+    const now = new Date();
+    const match = sunriseStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return now.getHours() >= 6;
+    
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    const sunriseTime = new Date(now);
+    sunriseTime.setHours(hours, minutes, 0, 0);
+    
+    return now >= sunriseTime;
+  };
+
+  // Helper to check if current time is after mincha gedolah (start of afternoon)
+  const isAfterMinchaGedolah = (): boolean => {
+    const minchaStr = jewishTimesQuery.data?.minchaGedolah;
+    if (!minchaStr) return new Date().getHours() >= 12; // Fallback to noon if no data
+    
+    const now = new Date();
+    const match = minchaStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return now.getHours() >= 12;
+    
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    const minchaTime = new Date(now);
+    minchaTime.setHours(hours, minutes, 0, 0);
+    
+    return now >= minchaTime;
+  };
+
+  // Get time-appropriate greeting (morning at naitz, afternoon at mincha gedolah, evening at tzais)
   const getGreeting = () => {
-    const hour = new Date().getHours();
     let greeting = "";
-    if (hour < 12) greeting = "Good Morning";
+    if (!isAfterNaitz()) greeting = "Good Evening"; // Before sunrise = still night
     else if (isAfterTzais()) greeting = "Good Evening";
+    else if (!isAfterMinchaGedolah()) greeting = "Good Morning";
     else greeting = "Good Afternoon";
     
     // Add user's first name if logged in
@@ -211,35 +249,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return greeting;
   };
 
-  // Get time-appropriate background for garden
+  // Get time-appropriate background for garden (night until naitz, afternoon at mincha gedolah)
   const getGardenBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return morningBackground;
+    if (!isAfterNaitz()) return nightBackground; // Before sunrise = night
     if (isAfterTzais()) return nightBackground;
+    if (!isAfterMinchaGedolah()) return morningBackground;
     return afternoonBackground;
   };
 
-  // Get time-appropriate background for prayer button
-  const getPrayerButtonBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return prayerMorningBg;
-    if (isAfterTzais()) return prayerNightBg;
-    return prayerAfternoonBg;
-  };
-
-  // Get time-appropriate background for shkia button
-  const getShkiaButtonBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return shkiaMorningBg;
-    if (isAfterTzais()) return shkiaNightBg;
-    return shkiaAfternoonBg;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section
+  // TEMPORARY: Get time-appropriate background for main section (night until naitz, afternoon at mincha gedolah)
   const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
+    if (!isAfterNaitz()) return sectionNightBg; // Before sunrise = night
     if (isAfterTzais()) return sectionNightBg;
+    if (!isAfterMinchaGedolah()) return sectionMorningBg;
     return sectionAfternoonBg;
   };
 
@@ -247,6 +269,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
   const sponsor = homeSummary?.sponsor;
   const todaysSpecial = homeSummary?.todaysSpecial;
+  const todayMessage = homeSummary?.message;
+  
+  // Check if user has read today's message
+  const [hasReadMessage, setHasReadMessage] = useState(false);
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const readKey = `message-read-${today}`;
+    setHasReadMessage(localStorage.getItem(readKey) === 'true');
+  }, []);
 
   // Today's Special state
   const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
@@ -404,22 +435,31 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           zIndex: 2
         }}
       >
-        {/* Greeting and Date in one row */}
+        {/* Greeting with Feed button */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
-          <div className="text-right">
-            <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
-            <button 
-              onClick={() => openModal('location', 'home')}
-              className={`flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors h-auto ${(permissionDenied || !coordinates) ? 'animate-pulse border-2 border-blush bg-blush/10' : 'border border-gray-200 bg-white/60'}`}
-              style={{ height: 'auto', minHeight: 'auto' }}
-              data-modal-type="location"
-              data-modal-section="home"
-              data-testid="button-home-location"
+          <div className="relative shrink-0">
+            <button
+              onClick={() => window.location.href = '/feed'}
+              className="flex items-center justify-center rounded-full active:scale-95 transition-transform"
+              style={{
+                width: '32px',
+                height: '32px',
+                minWidth: '32px',
+                minHeight: '32px',
+                background: 'rgba(255, 255, 255, 0.6)',
+                backdropFilter: 'blur(12px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+              }}
+              data-testid="button-feed"
             >
-              <MapPin className="text-gray-600" size={10} />
-              <p className="platypi-medium text-xs text-gray-700">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <Mail className="text-black/70" size={16} />
             </button>
+            {!!todayMessage && !hasReadMessage && (
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-blush rounded-full border-2 border-white" data-testid="indicator-unread-feed" />
+            )}
           </div>
         </div>
         
@@ -435,11 +475,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             sponsor ? 'hover:bg-white/70 cursor-pointer' : 'cursor-default opacity-70'
           }`}
         >
-          <div className="flex items-center space-x-1 mb-1">
-            <Heart className="text-black/60" size={12} strokeWidth={1.5} />
-            <h4 className="platypi-semibold text-xs text-black tracking-wide">
-              Today is sponsored {sponsorLoading && '(Loading...)'}
-            </h4>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center space-x-1">
+              <Heart className="text-black/60" size={12} strokeWidth={1.5} />
+              <h4 className="platypi-semibold text-xs text-black tracking-wide">
+                Today is sponsored {sponsorLoading && '(Loading...)'}
+              </h4>
+            </div>
+            <p className="font-hebrew text-xs text-black/70" dir="rtl">{hebrewDate || "Loading..."}</p>
           </div>
           <p className="platypi-regular text-xs text-black/80 leading-tight">
             {sponsorLoading ? 
@@ -474,18 +517,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="tefilla"
             data-testid="button-home-prayer"
           >
-            <div className="flex items-center justify-center mb-1">
-              <div className={`p-1.5 rounded-full mr-1 ${
-                currentPrayer.disabled 
-                  ? 'bg-gray-300' 
-                  : 'bg-white/70'
-              }`}>
-                <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
-              </div>
+            <div 
+              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 ${
+                currentPrayer.disabled ? 'bg-gray-300' : 'bg-gradient-feminine'
+              }`}
+              style={{
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              <PrayerIcon className="text-white" size={10} />
+              <p className="platypi-bold text-[10px] text-white">
+                {currentPrayer.title}
+              </p>
             </div>
-            <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-              {currentPrayer.title}
-            </p>
             <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
               {currentPrayer.subtitle}
             </p>
@@ -506,35 +550,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="home"
             data-testid="button-home-events"
           >
-            {/* TEMPORARILY HIDDEN: Weather badge - Apple glass style, tappable to toggle C/F */}
-            {/* {weather && (
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleTempUnit();
-                }}
-                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-                  border: '1px solid rgba(255, 255, 255, 0.5)',
-                }}
-              >
-                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
-                <span className="platypi-bold text-[10px] text-black/80">
-                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
-                </span>
-              </div>
-            )} */}
-            <div className="flex items-center justify-center mb-1">
-              <div className="bg-white/70 p-1.5 rounded-full">
-                <Clock className="text-black" size={12} />
-              </div>
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
+              style={{
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              <MapPin className="text-white" size={10} />
+              <p className="platypi-bold text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
 
@@ -701,10 +726,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Torah Bar */}
         <button
           onClick={() => navigateToSection('torah')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-            <BookOpen className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+            <BookOpen className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
@@ -720,10 +745,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Tefilla Bar */}
         <button
           onClick={() => navigateToSection('tefilla')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
-            <HandHeart className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
+            <HandHeart className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
@@ -739,10 +764,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Tzedaka Bar */}
         <button
           onClick={() => navigateToSection('tzedaka')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
-            <Coins className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
+            <Coins className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
@@ -780,30 +805,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <img 
               key={`${flower.type}-${index}`}
               src={
-                flower.overallIndex === 10 ? milestone10Tree :
-                flower.overallIndex === 20 ? milestone20Tree :
-                flower.overallIndex === 30 ? milestone30Tree :
                 flower.type === 'torah' ? torahFlower : 
                 flower.type === 'tefilla' ? tefillaFlower : 
                 tzedakaFlower
               } 
-              alt={
-                flower.overallIndex === 10 ? '10th milestone tree!' :
-                flower.overallIndex === 20 ? '20th milestone tree!' :
-                flower.overallIndex === 30 ? '30th milestone tree!' :
-                `${flower.type} flower`
-              } 
+              alt={`${flower.type} flower`} 
               className={`absolute ${
-                flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30 ? 'z-[0]' : 
                 flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
                 'z-[1]'
               }`}
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: flower.overallIndex === 10 || flower.overallIndex === 20 || flower.overallIndex === 30
-                  ? '95px'  // Trees are fixed size
-                  : `${64 * flower.scale}px`,
+                width: `${64 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
@@ -841,8 +855,30 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             </div>
           </div>
           
-          {/* Info icon - Top right corner */}
-          <div className="absolute top-2 right-2 z-10">
+          {/* Info icon and Weather - Top right corner */}
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+            {/* Weather badge */}
+            {weather && (
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTempUnit();
+                }}
+                className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(12px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                }}
+              >
+                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
+                <span className="platypi-bold text-[10px] text-black/80">
+                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
+                </span>
+              </div>
+            )}
             <Popover>
               <PopoverTrigger asChild>
                 <button
@@ -867,10 +903,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 </button>
               </PopoverTrigger>
               <PopoverContent side="bottom" className="max-w-[200px] text-center p-2">
-                <p className="text-xs">Each mitzvah plants a flower in your garden. Reach 10, 20, or 30 mitzvos to grow a special tree.</p>
+                <p className="text-xs">Each mitzvah plants a flower in your garden.</p>
               </PopoverContent>
             </Popover>
           </div>
+          
         </div>
       </div>
     </div>

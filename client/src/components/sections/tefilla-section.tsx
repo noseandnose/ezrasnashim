@@ -3,9 +3,9 @@ import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRig
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 import type { Section } from "@/pages/home";
 import { useLocation } from "wouter";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
@@ -357,20 +357,13 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Apple Glass Style Find Button - Top Right Corner */}
           <button
             onClick={handleFindToggle}
-            className={`absolute top-2 right-2 rounded-full backdrop-blur-md border border-white/30 shadow-lg transition-all flex items-center justify-center ${chainView === 'find' ? 'bg-blush/40' : 'bg-white/60'}`}
-            style={{ 
-              backdropFilter: 'blur(12px)', 
-              WebkitBackdropFilter: 'blur(12px)',
-              width: '24px',
-              height: '24px',
-              padding: 0,
-              minWidth: '24px',
-              minHeight: '24px'
-            }}
+            className={`absolute top-2 right-2 rounded-xl border border-gray-200 shadow-sm transition-all flex items-center space-x-1 px-2 py-1 ${chainView === 'find' ? 'bg-blush/20 border-blush' : 'bg-white/60 hover:bg-white/80'}`}
+            style={{ height: 'auto', minHeight: 'auto' }}
             aria-label="Find Chain"
             data-testid="button-chain-find-icon"
           >
-            <Search size={14} className="text-blush" />
+            <Search size={10} className="text-gray-600" />
+            <span className="text-gray-700 text-xs platypi-medium">Find</span>
           </button>
           
           {/* Header Row - Title and Subheading */}
@@ -606,9 +599,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="grid grid-cols-2 gap-2">
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="brochas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-brochas"
@@ -626,9 +617,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              hasAnyTehillimCompleted() ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="special-tehillim"
             data-modal-section="tefilla"
             data-testid="button-tefilla-tehillim"
@@ -649,9 +638,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => openModal('womens-tefillas', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              false ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="womens-tefillas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-womens"
@@ -665,9 +652,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           <button 
             onClick={() => openModal('nishmas-campaign', 'tefilla')}
-            className={`rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 ${
-              isModalComplete('nishmas-campaign') ? 'bg-sage/20' : 'bg-white'
-            }`}
+            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
             data-modal-type="nishmas-campaign"
             data-modal-section="tefilla"
             data-testid="button-tefilla-nishmas"

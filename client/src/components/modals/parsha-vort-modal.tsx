@@ -155,7 +155,7 @@ export default function ParshaVortModal() {
             disabled={isCompleted}
             className={`w-full py-3 rounded-xl platypi-medium border-0 ${
               isCompleted 
-                ? 'bg-sage text-white cursor-not-allowed opacity-70' 
+                ? 'bg-sage text-white' 
                 : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
             }`}
             data-testid={isCompleted ? 'button-parsha-completed' : 'button-complete-parsha'}

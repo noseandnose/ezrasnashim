@@ -4,9 +4,9 @@ import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from 
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1766951959427.jpg";
-import sectionAfternoonBg from "@assets/Afternoon_1766951959426.jpg";
-import sectionNightBg from "@assets/Maariv_1766951959425.jpg";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -406,7 +406,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             return (
               <button
                 key={id}
-                className={`${isCompleted ? 'bg-sage/20' : hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
+                className={`${hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
                 onClick={(event) => {
                   if (!hasContent) return;
                   
@@ -531,11 +531,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {gemsOfGratitude && (
           <button
             onClick={() => openModal('gems-of-gratitude', 'torah')}
-            className={`w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 ${
-              isModalComplete('gems-of-gratitude') 
-                ? 'bg-sage/20 border-sage/30' 
-                : 'bg-white/80 border-blush/20'
-            }`}
+            className="w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 bg-white/80 border-blush/20"
             data-testid="button-gems-of-gratitude"
           >
             <div className="flex items-center gap-3 p-3">
