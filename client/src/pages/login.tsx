@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star, Trophy, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -328,6 +328,33 @@ export default function Login() {
                 Back to sign in
               </button>
             )}
+          </div>
+        </div>
+        
+        <div className="w-full max-w-sm mt-6">
+          <p className="platypi-regular text-sm text-black/60 mb-4 text-center">
+            Track your spiritual journey and see your growth over time.
+          </p>
+          
+          <div className="space-y-2.5">
+            <div className="flex items-center gap-3 bg-blush/10 rounded-xl p-3">
+              <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center flex-shrink-0">
+                <Trophy className="w-4 h-4 text-blush" />
+              </div>
+              <span className="platypi-regular text-sm text-black/70">Track your daily mitzvos</span>
+            </div>
+            <div className="flex items-center gap-3 bg-lavender/10 rounded-xl p-3">
+              <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center flex-shrink-0">
+                <Flame className="w-4 h-4 text-lavender" />
+              </div>
+              <span className="platypi-regular text-sm text-black/70">Build your daily streak</span>
+            </div>
+            <div className="flex items-center gap-3 bg-sage/10 rounded-xl p-3">
+              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
+                <Sparkles className="w-4 h-4 text-sage" />
+              </div>
+              <span className="platypi-regular text-sm text-black/70">Personalized greeting</span>
+            </div>
           </div>
         </div>
       </div>

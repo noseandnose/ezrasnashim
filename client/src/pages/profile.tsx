@@ -1,6 +1,5 @@
 import { useLocation } from "wouter";
-import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
@@ -261,96 +260,8 @@ export default function Profile() {
   }
   
   if (!isAuthenticated) {
-    return (
-      <div 
-        className="min-h-screen relative"
-        style={{ 
-          backgroundImage: `url(${backgroundImage})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        <div 
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 100%)'
-          }}
-        />
-        
-        <header 
-          className="fixed top-0 left-0 right-0 z-50 px-4"
-          style={{ 
-            paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-            background: 'rgba(255,255,255,0.7)',
-            backdropFilter: 'blur(20px) saturate(180%)',
-            WebkitBackdropFilter: 'blur(20px) saturate(180%)'
-          }}
-        >
-          <div className="flex items-center h-12">
-            <button 
-              onClick={() => setLocation("/")} 
-              className="p-2 -ml-2 text-black"
-              data-testid="button-back"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="flex-1 text-center platypi-bold text-black">My Profile</h1>
-            <div className="w-9" />
-          </div>
-        </header>
-        
-        <div className="relative flex flex-col items-center justify-center p-4 pt-24 pb-28">
-          <div 
-            className="w-full max-w-sm rounded-3xl p-6 border border-white/30"
-            style={{ 
-              background: 'rgba(255,255,255,0.85)',
-              backdropFilter: 'blur(20px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
-            }}
-          >
-            <div className="w-20 h-20 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-5 shadow-lg">
-              <User className="w-10 h-10 text-white" />
-            </div>
-            <h2 className="platypi-bold text-xl text-black mb-2 text-center">Create Your Profile</h2>
-            <p className="platypi-regular text-sm text-black/60 mb-5 text-center">
-              Track your spiritual journey and see your growth over time.
-            </p>
-            
-            <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-3 bg-blush/10 rounded-xl p-3">
-                <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center flex-shrink-0">
-                  <Trophy className="w-4 h-4 text-blush" />
-                </div>
-                <span className="platypi-regular text-sm text-black/70">Track your daily mitzvos</span>
-              </div>
-              <div className="flex items-center gap-3 bg-lavender/10 rounded-xl p-3">
-                <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center flex-shrink-0">
-                  <Flame className="w-4 h-4 text-lavender" />
-                </div>
-                <span className="platypi-regular text-sm text-black/70">Build your daily streak</span>
-              </div>
-              <div className="flex items-center gap-3 bg-sage/10 rounded-xl p-3">
-                <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-4 h-4 text-sage" />
-                </div>
-                <span className="platypi-regular text-sm text-black/70">Personalized greeting</span>
-              </div>
-            </div>
-            
-            <Button 
-              onClick={() => setLocation('/login')}
-              className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-xl py-3 platypi-bold shadow-lg"
-              data-testid="button-login"
-            >
-              Get Started
-            </Button>
-          </div>
-        </div>
-        <BottomNavigation activeSection="home" onSectionChange={handleSectionChange} />
-      </div>
-    );
+    setLocation('/login');
+    return null;
   }
   
   return (
