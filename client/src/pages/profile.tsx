@@ -238,6 +238,13 @@ export default function Profile() {
     setLocation(`/${section === 'home' ? '' : section}`);
   };
   
+  // Redirect to login if not authenticated (after loading completes)
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      setLocation('/login');
+    }
+  }, [isLoading, isAuthenticated, setLocation]);
+  
   if (isLoading) {
     return (
       <div 
@@ -260,7 +267,6 @@ export default function Profile() {
   }
   
   if (!isAuthenticated) {
-    setLocation('/login');
     return null;
   }
   
