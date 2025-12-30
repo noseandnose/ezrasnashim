@@ -138,6 +138,17 @@ export function useMitzvahSync() {
   const syncTriggerCounter = useSyncTrigger((state) => state.counter);
   const hasSyncedRef = useRef(false);
   const lastSyncedDataRef = useRef<string>('');
+  const prevAuthRef = useRef(isAuthenticated);
+  
+  // Reset sync state when user logs out so re-login triggers sync
+  useEffect(() => {
+    if (prevAuthRef.current && !isAuthenticated) {
+      console.log('[MitzvahSync] User logged out, resetting sync state');
+      hasSyncedRef.current = false;
+      lastSyncedDataRef.current = '';
+    }
+    prevAuthRef.current = isAuthenticated;
+  }, [isAuthenticated]);
   
   const syncToCloud = useCallback(async () => {
     if (!isAuthenticated || !session?.access_token) return;
@@ -160,15 +171,26 @@ export function useMitzvahSync() {
   }, [isAuthenticated, session?.access_token, completedModals]);
   
   useEffect(() => {
-    if (!isAuthenticated || !session?.access_token || hasSyncedRef.current) return;
+    if (!isAuthenticated || !session?.access_token || hasSyncedRef.current) {
+      if (hasSyncedRef.current) {
+        console.log('[MitzvahSync] Skipping login sync - already synced this session');
+      }
+      return;
+    }
     
     const syncOnLogin = async () => {
+      console.log('[MitzvahSync] Starting login sync...');
       hasSyncedRef.current = true;
       
       // Migrate legacy tzedaka key if needed
       migrateLegacyTzedakaKey();
       
       const cloudProgress = await fetchCloudProgress(session.access_token);
+      console.log('[MitzvahSync] Cloud progress fetched:', cloudProgress ? {
+        modalDates: Object.keys(cloudProgress.modalCompletions).length,
+        tzedakaDates: Object.keys(cloudProgress.tzedakaCompletions).length,
+        version: cloudProgress.version
+      } : 'null');
       
       // Get current local state
       const localModals = useModalCompletionStore.getState().completedModals;
