@@ -3811,7 +3811,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User Mitzvah Progress endpoints (for authenticated users)
   app.get("/api/user/mitzvah-progress", optionalAuth, async (req, res) => {
     try {
-      const userId = (req as any).auth?.userId;
+      const userId = req.supabaseUser?.id;
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }
@@ -3833,7 +3833,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/user/mitzvah-progress", optionalAuth, async (req, res) => {
     try {
-      const userId = (req as any).auth?.userId;
+      const userId = req.supabaseUser?.id;
       if (!userId) {
         return res.status(401).json({ message: "Authentication required" });
       }

@@ -104,6 +104,11 @@ async function pushCloudProgress(
   tzedakaCompletions: Record<string, Record<string, number>>
 ): Promise<boolean> {
   try {
+    console.log('[MitzvahSync] Pushing to cloud:', {
+      modalDates: Object.keys(modalCompletions).length,
+      tzedakaDates: Object.keys(tzedakaCompletions).length
+    });
+    
     const response = await fetch('/api/user/mitzvah-progress', {
       method: 'PUT',
       headers: {
@@ -113,9 +118,16 @@ async function pushCloudProgress(
       body: JSON.stringify({ modalCompletions, tzedakaCompletions })
     });
     
-    return response.ok;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[MitzvahSync] Push failed:', response.status, errorText);
+      return false;
+    }
+    
+    console.log('[MitzvahSync] Push successful');
+    return true;
   } catch (error) {
-    console.error('Error pushing cloud progress:', error);
+    console.error('[MitzvahSync] Error pushing cloud progress:', error);
     return false;
   }
 }
@@ -182,9 +194,7 @@ export function useMitzvahSync() {
       const updatedModals = useModalCompletionStore.getState().completedModals;
       const updatedTzedaka = getTzedakaCompletions();
       const serializedModals = serializeModalCompletions(updatedModals);
-      
-      // Set lastSyncedDataRef to current state to prevent immediate re-sync
-      lastSyncedDataRef.current = JSON.stringify({ 
+      const dataString = JSON.stringify({ 
         modals: serializedModals, 
         tzedaka: updatedTzedaka 
       });
@@ -196,8 +206,14 @@ export function useMitzvahSync() {
          Object.keys(cloudProgress.tzedakaCompletions).length === 0);
       
       if (hasLocalData && cloudWasEmpty) {
-        console.log('Pushing local data to empty cloud...');
-        await pushCloudProgress(session.access_token, serializedModals, updatedTzedaka);
+        console.log('[MitzvahSync] Pushing local data to empty cloud...');
+        const success = await pushCloudProgress(session.access_token, serializedModals, updatedTzedaka);
+        if (success) {
+          lastSyncedDataRef.current = dataString;
+        }
+      } else {
+        // Cloud had data, set ref to merged state
+        lastSyncedDataRef.current = dataString;
       }
     };
     
