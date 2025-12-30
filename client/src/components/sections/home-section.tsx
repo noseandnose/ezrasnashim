@@ -472,7 +472,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 Today is sponsored {sponsorLoading && '(Loading...)'}
               </h4>
             </div>
-            <p className="platypi-regular text-xs text-black/70">{hebrewDate || "Loading..."}</p>
+            <p className="font-hebrew text-xs text-black/70" dir="rtl">{hebrewDate || "Loading..."}</p>
           </div>
           <p className="platypi-regular text-xs text-black/80 leading-tight">
             {sponsorLoading ? 
