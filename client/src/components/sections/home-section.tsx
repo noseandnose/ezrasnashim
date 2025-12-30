@@ -453,10 +453,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
           <button
             onClick={() => window.location.href = '/feed'}
-            className="flex items-center justify-center rounded-full active:scale-95 transition-transform"
+            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0"
             style={{
-              width: '28px',
-              height: '28px',
+              width: '32px',
+              height: '32px',
+              minWidth: '32px',
+              minHeight: '32px',
               background: 'rgba(255, 255, 255, 0.6)',
               backdropFilter: 'blur(12px) saturate(180%)',
               WebkitBackdropFilter: 'blur(12px) saturate(180%)',
@@ -465,7 +467,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             }}
             data-testid="button-feed"
           >
-            <Mail className="text-black/70" size={14} />
+            <Mail className="text-black/70" size={16} />
           </button>
         </div>
         
