@@ -148,27 +148,36 @@ export default function Profile() {
       if (dayData?.repeatables) {
         Object.entries(dayData.repeatables).forEach(([key, value]) => {
           const count = value as number;
-          if (key.startsWith('individual-tehillim-') || 
+          // Torah content
+          if (key === 'halacha' || key === 'chizuk' || key === 'emuna' || 
+              key === 'featured' || key === 'pirkei-avot' || key === 'gems-of-gratitude' ||
+              key.includes('story') || key.includes('daily-wisdom') || key.includes('torah-class')) {
+            torah += count;
+          }
+          // Tefilla content
+          else if (key.startsWith('individual-tehillim-') || 
               key.startsWith('chain-tehillim-') ||
               key.startsWith('brocha-') ||
               key.startsWith('womens-prayer-') ||
               key === 'global-tehillim-chain' ||
               key === 'tehillim-text' ||
-              key.startsWith('meditation-')) {
+              key.startsWith('meditation-') ||
+              key === 'al-hamichiya' ||
+              key === 'birkat-hamazon' ||
+              key === 'nishmas-campaign') {
             tefilla += count;
-          } else if (key.startsWith('tzedaka-')) {
+          } 
+          // Tzedaka content
+          else if (key.startsWith('tzedaka-')) {
             tzedaka += count;
           }
         });
       }
       
+      // Singles are only for morning-brochas, mincha, maariv
       if (dayData?.singles) {
         dayData.singles.forEach((id: string) => {
-          if (id.includes('halacha') || id.includes('chizuk') || id.includes('emuna') || 
-              id.includes('story') || id.includes('daily-wisdom') || id.includes('pirkei')) {
-            torah++;
-          } else if (id.includes('mincha') || id.includes('shacharis') || id.includes('maariv') ||
-                     id.includes('birkat') || id.includes('nishmas') || id.includes('prayer')) {
+          if (id === 'mincha' || id === 'morning-brochas' || id === 'maariv') {
             tefilla++;
           }
         });
