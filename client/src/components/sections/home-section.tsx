@@ -539,12 +539,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="home"
             data-testid="button-home-events"
           >
-            <div className="flex items-center justify-center mb-1">
-              <div className="bg-white/70 p-1.5 rounded-full">
-                <MapPin className="text-black" size={12} />
-              </div>
+            <div 
+              className="inline-flex items-center justify-center px-2 py-0.5 rounded-full mb-1"
+              style={{
+                background: 'rgba(255, 255, 255, 0.5)',
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              <p className="platypi-medium text-[10px] text-black/80">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
             <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
