@@ -465,11 +465,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             sponsor ? 'hover:bg-white/70 cursor-pointer' : 'cursor-default opacity-70'
           }`}
         >
-          <div className="flex items-center space-x-1 mb-1">
-            <Heart className="text-black/60" size={12} strokeWidth={1.5} />
-            <h4 className="platypi-semibold text-xs text-black tracking-wide">
-              Today is sponsored {sponsorLoading && '(Loading...)'}
-            </h4>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center space-x-1">
+              <Heart className="text-black/60" size={12} strokeWidth={1.5} />
+              <h4 className="platypi-semibold text-xs text-black tracking-wide">
+                Today is sponsored {sponsorLoading && '(Loading...)'}
+              </h4>
+            </div>
+            <p className="platypi-regular text-xs text-black/70">{hebrewDate || "Loading..."}</p>
           </div>
           <p className="platypi-regular text-xs text-black/80 leading-tight">
             {sponsorLoading ? 
