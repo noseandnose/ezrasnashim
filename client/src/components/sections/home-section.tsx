@@ -550,8 +550,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="home"
             data-testid="button-home-events"
           >
-            {/* TEMPORARILY HIDDEN: Weather badge - Apple glass style, tappable to toggle C/F */}
-            {/* {weather && (
+            {/* Weather badge - Apple glass style, tappable to toggle C/F */}
+            {weather && (
               <div 
                 onClick={(e) => {
                   e.stopPropagation();
@@ -571,7 +571,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                   {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
                 </span>
               </div>
-            )} */}
+            )}
             <div className="flex items-center justify-center mb-1">
               <div className="bg-white/70 p-1.5 rounded-full">
                 <Clock className="text-black" size={12} />
