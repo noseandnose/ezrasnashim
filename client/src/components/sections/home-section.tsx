@@ -507,18 +507,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="tefilla"
             data-testid="button-home-prayer"
           >
-            <div className="flex items-center justify-center mb-1">
-              <div className={`p-1.5 rounded-full mr-1 ${
-                currentPrayer.disabled 
-                  ? 'bg-gray-300' 
-                  : 'bg-white/70'
-              }`}>
-                <PrayerIcon className={currentPrayer.disabled ? "text-gray-500" : "text-black"} size={12} />
-              </div>
+            <div 
+              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 ${
+                currentPrayer.disabled ? 'bg-gray-300' : 'bg-gradient-feminine'
+              }`}
+              style={{
+                border: '1px solid rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              <PrayerIcon className="text-white" size={10} />
+              <p className="platypi-bold text-[10px] text-white">
+                {currentPrayer.title}
+              </p>
             </div>
-            <p className={`platypi-bold text-sm mb-0.5 ${currentPrayer.disabled ? 'text-gray-500' : 'text-black'}`}>
-              {currentPrayer.title}
-            </p>
             <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
               {currentPrayer.subtitle}
             </p>
@@ -540,12 +541,13 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-events"
           >
             <div 
-              className="inline-flex items-center justify-center px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
               style={{
                 border: '1px solid rgba(255, 255, 255, 0.6)',
               }}
             >
-              <p className="platypi-medium text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <MapPin className="text-white" size={10} />
+              <p className="platypi-bold text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
             <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
