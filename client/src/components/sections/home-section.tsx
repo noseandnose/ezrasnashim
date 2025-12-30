@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info } from "lucide-react";
+import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo, useEffect } from "react";
@@ -448,9 +448,25 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           zIndex: 2
         }}
       >
-        {/* Greeting */}
-        <div className="mb-3">
+        {/* Greeting with Feed button */}
+        <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
+          <button
+            onClick={() => window.location.href = '/feed'}
+            className="flex items-center justify-center rounded-full active:scale-95 transition-transform"
+            style={{
+              width: '28px',
+              height: '28px',
+              background: 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(12px) saturate(180%)',
+              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+            }}
+            data-testid="button-feed"
+          >
+            <Mail className="text-black/70" size={14} />
+          </button>
         </div>
         
         {/* Sponsor Section */}

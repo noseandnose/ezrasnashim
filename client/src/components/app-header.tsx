@@ -213,18 +213,6 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setLocation('/feed')}
-                  className="cursor-pointer relative"
-                  data-testid="menu-item-feed"
-                  data-action="menu-feed"
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  Feed
-                  {!!todayMessage && !hasReadMessage && (
-                    <span className="ml-auto w-2 h-2 bg-blush rounded-full" />
-                  )}
-                </DropdownMenuItem>
 {/* Hidden until ready to launch - Create Profile feature
                 {!authLoading && !isAuthenticated && (
                   <DropdownMenuItem
