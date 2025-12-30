@@ -137,7 +137,10 @@ export default function Profile() {
     let totalTzedaka = 0;
     const totalDays = allDates.length;
     
-    const countForDay = (dayData: any) => {
+    // Get tzedaka button completions from separate storage
+    const tzedakaButtonCompletions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    
+    const countForDay = (dayData: any, date: string) => {
       let torah = 0;
       let tefilla = 0;
       let tzedaka = 0;
@@ -162,7 +165,7 @@ export default function Profile() {
       if (dayData?.singles) {
         dayData.singles.forEach((id: string) => {
           if (id.includes('halacha') || id.includes('chizuk') || id.includes('emuna') || 
-              id.includes('story') || id.includes('daily-wisdom')) {
+              id.includes('story') || id.includes('daily-wisdom') || id.includes('pirkei')) {
             torah++;
           } else if (id.includes('mincha') || id.includes('shacharis') || id.includes('maariv') ||
                      id.includes('birkat') || id.includes('nishmas') || id.includes('prayer')) {
@@ -171,11 +174,25 @@ export default function Profile() {
         });
       }
       
+      // Add tzedaka from separate storage for this date
+      const dayTzedakaData = tzedakaButtonCompletions[date];
+      if (dayTzedakaData) {
+        tzedaka += dayTzedakaData.gave_elsewhere_count || 0;
+        if (dayTzedakaData.put_a_coin) tzedaka++;
+        if (dayTzedakaData.sponsor_a_day) tzedaka++;
+        if (dayTzedakaData.active_campaign) tzedaka++;
+      }
+      
       return { torah, tefilla, tzedaka };
     };
     
-    Object.entries(completedModals).forEach(([date, dayData]) => {
-      const counts = countForDay(dayData);
+    // Combine dates from both storages
+    const tzedakaDates = Object.keys(tzedakaButtonCompletions);
+    const allUniqueDates = Array.from(new Set([...allDates, ...tzedakaDates])).sort();
+    
+    allUniqueDates.forEach((date) => {
+      const dayData = completedModals[date] || {};
+      const counts = countForDay(dayData, date);
       totalTorah += counts.torah;
       totalTefilla += counts.tefilla;
       totalTzedaka += counts.tzedaka;
@@ -193,7 +210,7 @@ export default function Profile() {
       const checkDate = new Date(todayDate);
       checkDate.setDate(checkDate.getDate() - i);
       const dateStr = checkDate.toISOString().split('T')[0];
-      if (completedModals[dateStr]) {
+      if (completedModals[dateStr] || tzedakaButtonCompletions[dateStr]) {
         currentStreak++;
       } else if (i > 0) {
         break;
