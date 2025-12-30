@@ -449,8 +449,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         }}
       >
         {/* Greeting and Date in one row */}
-        <div className="flex items-center justify-between mb-3">
-          <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
+        <div className="flex items-start justify-between mb-3">
+          <div>
+            <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
+            <p className="platypi-regular text-xs text-black/60">Daily Torah, Tefilla and Tzedaka</p>
+          </div>
           <div className="text-right">
             <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
             <button 
