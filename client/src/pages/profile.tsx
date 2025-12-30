@@ -217,29 +217,51 @@ export default function Profile() {
           </div>
         </header>
         
-        <div className="flex flex-col items-center justify-center p-6 pt-28 pb-28">
+        <div className="flex flex-col items-center justify-center p-4 pt-24 pb-28">
           <div 
-            className="w-full max-w-sm rounded-3xl p-8 text-center border border-blush/10"
+            className="w-full max-w-sm rounded-3xl p-6 border border-blush/10"
             style={{ 
-              background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+              background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
             }}
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-5 shadow-lg">
               <User className="w-10 h-10 text-white" />
             </div>
-            <h2 className="platypi-bold text-xl text-black mb-2">Create Your Profile</h2>
-            <p className="platypi-regular text-sm text-black/60 mb-6">
-              Sign in to save your progress across devices and access personalized features.
+            <h2 className="platypi-bold text-xl text-black mb-2 text-center">Create Your Profile</h2>
+            <p className="platypi-regular text-sm text-black/60 mb-5 text-center">
+              Track your spiritual journey and see your growth over time.
             </p>
+            
+            <div className="space-y-2.5 mb-6">
+              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-4 h-4 text-blush" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Track your daily mitzvos</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-4 h-4 text-lavender" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Build your daily streak</span>
+              </div>
+              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-4 h-4 text-sage" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Personalized greeting</span>
+              </div>
+            </div>
+            
             <Button 
               onClick={() => setLocation('/login')}
-              className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-xl py-3 platypi-bold"
+              className="w-full bg-gradient-feminine hover:opacity-90 text-white rounded-xl py-3 platypi-bold shadow-lg"
               data-testid="button-login"
             >
-              Sign In to Get Started
+              Get Started
             </Button>
           </div>
         </div>
@@ -247,6 +269,12 @@ export default function Profile() {
       </div>
     );
   }
+  
+  const getInitials = () => {
+    const first = user?.firstName?.charAt(0)?.toUpperCase() || '';
+    const last = user?.lastName?.charAt(0)?.toUpperCase() || '';
+    return first + last || user?.email?.charAt(0)?.toUpperCase() || '?';
+  };
   
   return (
     <div 
@@ -279,27 +307,41 @@ export default function Profile() {
       
       <div className="p-4 pt-20 pb-24 space-y-3">
         <div 
-          className="rounded-3xl p-4 border border-blush/10"
+          className="rounded-3xl p-5 border border-blush/10"
           style={{ 
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
           }}
         >
           {!isEditing ? (
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <h2 className="platypi-bold text-lg text-black">
-                  {user?.firstName} {user?.lastName}
-                </h2>
-                {user?.hebrewName && (
-                  <p className="platypi-regular text-sm text-black/70" dir="rtl">
-                    <Star className="w-3 h-3 inline-block mr-1 text-amber-500" />
-                    {user.hebrewName}
-                  </p>
-                )}
-                <p className="platypi-regular text-xs text-black/50">{user?.email}</p>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-feminine flex items-center justify-center flex-shrink-0 shadow-lg">
+                <span className="platypi-bold text-xl text-white">{getInitials()}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="platypi-bold text-lg text-black">
+                      {user?.firstName} {user?.lastName}
+                    </h2>
+                    {user?.hebrewName && (
+                      <p className="font-hebrew text-sm text-black/70 mt-0.5" dir="rtl">
+                        <Star className="w-3 h-3 inline-block ml-1 text-amber-500" />
+                        {user.hebrewName}
+                      </p>
+                    )}
+                  </div>
+                  <button 
+                    onClick={startEditing}
+                    className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
+                    data-testid="button-edit-profile"
+                  >
+                    <Pencil className="w-4 h-4 text-blush" />
+                  </button>
+                </div>
+                <p className="platypi-regular text-xs text-black/50 mt-2 truncate">{user?.email}</p>
                 {user?.birthday && (
                   <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1">
                     <Calendar className="w-3 h-3" />
@@ -307,73 +349,75 @@ export default function Profile() {
                   </p>
                 )}
               </div>
-              <button 
-                onClick={startEditing}
-                className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
-                data-testid="button-edit-profile"
-              >
-                <Pencil className="w-4 h-4 text-blush" />
-              </button>
             </div>
           ) : (
-            <div>
-              <div className="flex justify-end mb-3">
-                <div className="flex gap-2">
-                  <button 
-                    onClick={cancelEditing}
-                    className="p-2 rounded-full bg-white/50 hover:bg-white/70 transition-colors"
-                    disabled={isSaving}
-                    data-testid="button-cancel-edit"
-                  >
-                    <X className="w-4 h-4 text-gray-500" />
-                  </button>
-                  <button 
-                    onClick={saveProfile}
-                    className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors"
-                    disabled={isSaving}
-                    data-testid="button-save-profile"
-                  >
-                    <Check className="w-4 h-4 text-green-600" />
-                  </button>
-                </div>
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-full bg-gradient-feminine flex items-center justify-center flex-shrink-0 shadow-lg">
+                <span className="platypi-bold text-xl text-white">{getInitials()}</span>
               </div>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
+              <div className="flex-1">
+                <div className="flex justify-end mb-3">
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={cancelEditing}
+                      className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
+                      disabled={isSaving}
+                      data-testid="button-cancel-edit"
+                    >
+                      <X className="w-4 h-4 text-gray-500" />
+                    </button>
+                    <button 
+                      onClick={saveProfile}
+                      className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors shadow-sm"
+                      disabled={isSaving}
+                      data-testid="button-save-profile"
+                    >
+                      {isSaving ? (
+                        <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4 text-green-600" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2.5">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      type="text"
+                      placeholder="First name"
+                      value={editFirstName}
+                      onChange={(e) => setEditFirstName(e.target.value)}
+                      className="bg-white/80 border-blush/20 rounded-xl text-sm"
+                      data-testid="input-edit-first-name"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Last name"
+                      value={editLastName}
+                      onChange={(e) => setEditLastName(e.target.value)}
+                      className="bg-white/80 border-blush/20 rounded-xl text-sm"
+                      data-testid="input-edit-last-name"
+                    />
+                  </div>
                   <Input
                     type="text"
-                    placeholder="First name"
-                    value={editFirstName}
-                    onChange={(e) => setEditFirstName(e.target.value)}
-                    className="bg-white/70 border-blush/20 rounded-xl"
-                    data-testid="input-edit-first-name"
+                    placeholder="Hebrew name"
+                    value={editHebrewName}
+                    onChange={(e) => setEditHebrewName(e.target.value)}
+                    className="bg-white/80 border-blush/20 rounded-xl text-sm font-hebrew"
+                    dir="rtl"
+                    data-testid="input-edit-hebrew-name"
                   />
                   <Input
-                    type="text"
-                    placeholder="Last name"
-                    value={editLastName}
-                    onChange={(e) => setEditLastName(e.target.value)}
-                    className="bg-white/70 border-blush/20 rounded-xl"
-                    data-testid="input-edit-last-name"
+                    type="date"
+                    placeholder="Birthday"
+                    value={editBirthday}
+                    onChange={(e) => setEditBirthday(e.target.value)}
+                    max={getTodayString()}
+                    className="bg-white/80 border-blush/20 rounded-xl text-sm"
+                    data-testid="input-edit-birthday"
                   />
                 </div>
-                <Input
-                  type="text"
-                  placeholder="Hebrew name"
-                  value={editHebrewName}
-                  onChange={(e) => setEditHebrewName(e.target.value)}
-                  className="bg-white/70 border-blush/20 rounded-xl"
-                  dir="rtl"
-                  data-testid="input-edit-hebrew-name"
-                />
-                <Input
-                  type="date"
-                  placeholder="Birthday"
-                  value={editBirthday}
-                  onChange={(e) => setEditBirthday(e.target.value)}
-                  max={getTodayString()}
-                  className="bg-white/70 border-blush/20 rounded-xl"
-                  data-testid="input-edit-birthday"
-                />
               </div>
             </div>
           )}
