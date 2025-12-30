@@ -22,7 +22,7 @@ export default function AppHeader() {
   useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -194,8 +194,7 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
-{/* Hidden until ready to launch - Create Profile feature
-                {!authLoading && !isAuthenticated && (
+                {!isLoading && !isAuthenticated && (
                   <DropdownMenuItem
                     onClick={() => setLocation('/login')}
                     className="cursor-pointer"
@@ -206,7 +205,6 @@ export default function AppHeader() {
                     Create Profile
                   </DropdownMenuItem>
                 )}
-*/}
                 {isAuthenticated && user && (
                   <>
                     <DropdownMenuItem
