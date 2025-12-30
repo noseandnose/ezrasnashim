@@ -345,9 +345,9 @@ export default function Profile() {
         </div>
       </header>
       
-      <div className="relative p-4 pt-20 pb-24 space-y-3">
+      <div className="relative p-3 pt-16 pb-20 space-y-2">
         <div 
-          className="rounded-3xl p-5 border border-white/30"
+          className="rounded-2xl p-3 border border-white/30"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -454,7 +454,7 @@ export default function Profile() {
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-white/30"
+          className="rounded-2xl p-3 border border-white/30"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -462,42 +462,42 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
-          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-gradient-feminine">
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+          <h3 className="platypi-bold text-xs text-black mb-2 flex items-center gap-1.5">
+            <div className="p-1 rounded-full bg-gradient-feminine">
+              <Sparkles className="w-3 h-3 text-white" />
             </div>
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-blush/10 rounded-xl p-2.5 text-center">
-              <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-1">
-                <BookOpen className="w-4 h-4 text-blush" />
+          <div className="grid grid-cols-3 gap-1.5">
+            <div className="bg-blush/10 rounded-lg p-2 text-center">
+              <div className="w-6 h-6 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-0.5">
+                <BookOpen className="w-3 h-3 text-blush" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
             </div>
             
-            <div className="bg-lavender/10 rounded-xl p-2.5 text-center">
-              <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-1">
-                <Heart className="w-4 h-4 text-lavender" />
+            <div className="bg-lavender/10 rounded-lg p-2 text-center">
+              <div className="w-6 h-6 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-0.5">
+                <Heart className="w-3 h-3 text-lavender" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
             </div>
             
-            <div className="bg-sage/10 rounded-xl p-2.5 text-center">
-              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-1">
-                <HandCoins className="w-4 h-4 text-sage" />
+            <div className="bg-sage/10 rounded-lg p-2 text-center">
+              <div className="w-6 h-6 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-0.5">
+                <HandCoins className="w-3 h-3 text-sage" />
               </div>
-              <div className="platypi-bold text-xl text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
+              <div className="platypi-bold text-lg text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
             </div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-white/30"
+          className="rounded-2xl p-3 border border-white/30"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -505,36 +505,36 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
-          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-gradient-feminine">
-              <Trophy className="w-3.5 h-3.5 text-white" />
+          <h3 className="platypi-bold text-xs text-black mb-2 flex items-center gap-1.5">
+            <div className="p-1 rounded-full bg-gradient-feminine">
+              <Trophy className="w-3 h-3 text-white" />
             </div>
             All-Time Stats
           </h3>
           
-          <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-blush/10 rounded-xl p-2.5 text-center">
-              <div className="platypi-bold text-xl text-blush">{stats.totalTorah}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
+          <div className="grid grid-cols-3 gap-1.5 mb-2">
+            <div className="bg-blush/10 rounded-lg p-2 text-center">
+              <div className="platypi-bold text-lg text-blush">{stats.totalTorah}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
             </div>
-            <div className="bg-lavender/10 rounded-xl p-2.5 text-center">
-              <div className="platypi-bold text-xl text-lavender">{stats.totalTefilla}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
+            <div className="bg-lavender/10 rounded-lg p-2 text-center">
+              <div className="platypi-bold text-lg text-lavender">{stats.totalTefilla}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
             </div>
-            <div className="bg-sage/10 rounded-xl p-2.5 text-center">
-              <div className="platypi-bold text-xl text-sage">{stats.totalTzedaka}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
+            <div className="bg-sage/10 rounded-lg p-2 text-center">
+              <div className="platypi-bold text-lg text-sage">{stats.totalTzedaka}</div>
+              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
             </div>
           </div>
           
-          <div className="bg-gradient-feminine rounded-xl p-4 text-center shadow-lg">
-            <div className="platypi-bold text-3xl text-white">{stats.totalMitzvos}</div>
-            <div className="platypi-regular text-sm text-white/90">Total Mitzvos Completed</div>
+          <div className="bg-gradient-feminine rounded-lg p-3 text-center shadow-lg">
+            <div className="platypi-bold text-2xl text-white">{stats.totalMitzvos}</div>
+            <div className="platypi-regular text-xs text-white/90">Total Mitzvos Completed</div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-white/30"
+          className="rounded-2xl p-3 border border-white/30"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
@@ -542,27 +542,27 @@ export default function Profile() {
             boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
-          <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-gradient-feminine">
-              <Flame className="w-3.5 h-3.5 text-white" />
+          <h3 className="platypi-bold text-xs text-black mb-2 flex items-center gap-1.5">
+            <div className="p-1 rounded-full bg-gradient-feminine">
+              <Flame className="w-3 h-3 text-white" />
             </div>
             Your Journey
           </h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-gradient-to-br from-blush/20 to-blush/10 rounded-xl p-4 text-center">
-              <div className="platypi-bold text-3xl text-blush">{stats.currentStreak}</div>
-              <div className="platypi-regular text-xs text-black/60">Day Streak</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-gradient-to-br from-blush/20 to-blush/10 rounded-lg p-3 text-center">
+              <div className="platypi-bold text-2xl text-blush">{stats.currentStreak}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Day Streak</div>
             </div>
-            <div className="bg-gradient-to-br from-lavender/20 to-lavender/10 rounded-xl p-4 text-center">
-              <div className="platypi-bold text-3xl text-lavender">{stats.totalDays}</div>
-              <div className="platypi-regular text-xs text-black/60">Active Days</div>
+            <div className="bg-gradient-to-br from-lavender/20 to-lavender/10 rounded-lg p-3 text-center">
+              <div className="platypi-bold text-2xl text-lavender">{stats.totalDays}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Active Days</div>
             </div>
           </div>
         </div>
         
         <button 
           onClick={() => logout()}
-          className="w-full rounded-xl p-3 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
+          className="w-full rounded-lg p-2.5 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px)',
