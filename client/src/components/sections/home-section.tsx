@@ -462,7 +462,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
           <button
             onClick={() => window.location.href = '/feed'}
-            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0 relative"
+            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0 relative overflow-visible"
             style={{
               width: '32px',
               height: '32px',
@@ -478,7 +478,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             <Mail className="text-black/70" size={16} />
             {!!todayMessage && !hasReadMessage && (
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blush rounded-full" data-testid="indicator-unread-feed" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-blush rounded-full border-2 border-white" style={{ zIndex: 10 }} data-testid="indicator-unread-feed" />
             )}
           </button>
         </div>
