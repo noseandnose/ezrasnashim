@@ -2,7 +2,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
@@ -22,7 +22,7 @@ export default function AppHeader() {
   useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
-  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -141,26 +141,15 @@ export default function AppHeader() {
                   </DropdownMenuItem>
                 )}
                 {isAuthenticated && user && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setLocation("/profile")}
-                      className="cursor-pointer"
-                      data-testid="menu-item-profile"
-                      data-action="menu-profile"
-                    >
-                      <User className="h-5 w-5 mr-2" />
-                      My Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => logout()}
-                      className="cursor-pointer"
-                      data-testid="menu-item-logout"
-                      data-action="menu-logout"
-                    >
-                      <LogOut className="h-5 w-5 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
+                  <DropdownMenuItem
+                    onClick={() => setLocation("/profile")}
+                    className="cursor-pointer"
+                    data-testid="menu-item-profile"
+                    data-action="menu-profile"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
