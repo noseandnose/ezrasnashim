@@ -3,9 +3,9 @@ import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRig
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 
 // TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_1767097697251.png";
-import sectionAfternoonBg from "@assets/Afternoon_1767097697250.png";
-import sectionNightBg from "@assets/Night_1767097697247.png";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 import type { Section } from "@/pages/home";
 import { useLocation } from "wouter";
 import { useJewishTimes } from "@/hooks/use-jewish-times";

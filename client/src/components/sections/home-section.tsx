@@ -16,18 +16,18 @@ import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
 import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
-import morningBackground from "@assets/Morning_Garden_1767032602705.png";
-import afternoonBackground from "@assets/Afternoon_Garden_1767032602705.png";
-import nightBackground from "@assets/Night_Garden_1767032602702.png";
+import morningBackground from "@assets/Morning_1767097697251.png";
+import afternoonBackground from "@assets/Afternoon_1767097697250.png";
+import nightBackground from "@assets/Night_1767097697247.png";
 // Milestone tree images temporarily removed - will be replaced with new ones later
 // import milestone10Tree from "@assets/10_1766688255354.png";
 // import milestone20Tree from "@assets/20_1766688255353.png";
 // import milestone30Tree from "@assets/30_1766688255351.png";
 
 // TEMPORARY: New section background images for testing
-import sectionMorningBg from "@assets/Morning_1767097697251.png";
-import sectionAfternoonBg from "@assets/Afternoon_1767097697250.png";
-import sectionNightBg from "@assets/Night_1767097697247.png";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
