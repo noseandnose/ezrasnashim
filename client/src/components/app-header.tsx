@@ -1,16 +1,14 @@
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
-import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart3, Info, Share2, Heart, Mail, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
-import { getLocalDateString } from "@/lib/dateUtils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +25,6 @@ export default function AppHeader() {
   const { user, isAuthenticated, logout } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
-  const [hasReadMessage, setHasReadMessage] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -41,19 +38,6 @@ export default function AppHeader() {
     isIOS,
     isWebview,
   } = useInstallHighlight();
-  
-  const today = getLocalDateString();
-  
-  // Use batched home summary for better performance
-  const { data: homeSummary } = useHomeSummary();
-  const todayMessage = homeSummary?.message;
-  
-  // Check if user has read today's message
-  useEffect(() => {
-    const readKey = `message-read-${today}`;
-    setHasReadMessage(localStorage.getItem(readKey) === 'true');
-  }, [today]);
-  
 
   const handleInstallClick = () => {
     // User has engaged with install - dismiss the highlight

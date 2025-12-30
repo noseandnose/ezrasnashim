@@ -1,4 +1,4 @@
-import { Clock, Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
+import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo, useEffect } from "react";
@@ -23,12 +23,6 @@ import nightBackground from "@assets/Night_Garden_1767032602702.png";
 // import milestone10Tree from "@assets/10_1766688255354.png";
 // import milestone20Tree from "@assets/20_1766688255353.png";
 // import milestone30Tree from "@assets/30_1766688255351.png";
-import prayerMorningBg from "@assets/Morning_1766585505566.png";
-import prayerAfternoonBg from "@assets/Afternoon_1766585505566.png";
-import prayerNightBg from "@assets/Night_1766585505565.png";
-import shkiaMorningBg from "@assets/Morning_1766586713115.png";
-import shkiaAfternoonBg from "@assets/Afternoon_1766588062516.png";
-import shkiaNightBg from "@assets/Night_1766586713110.png";
 
 // TEMPORARY: New section background images for testing
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
@@ -168,7 +162,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
   // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
-  const { coordinates, permissionDenied } = useGeolocation();
+  useGeolocation();
   const { data: hebrewDate } = useHebrewDateWithShkia(jewishTimesQuery.data?.shkia);
   const { data: weather } = useWeather();
   const { unit: tempUnit, toggle: toggleTempUnit } = useTemperatureUnit();
@@ -261,22 +255,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (isAfterTzais()) return nightBackground;
     if (!isAfterMinchaGedolah()) return morningBackground;
     return afternoonBackground;
-  };
-
-  // Get time-appropriate background for prayer button (night until naitz, afternoon at mincha gedolah)
-  const getPrayerButtonBackground = () => {
-    if (!isAfterNaitz()) return prayerNightBg; // Before sunrise = night
-    if (isAfterTzais()) return prayerNightBg;
-    if (!isAfterMinchaGedolah()) return prayerMorningBg;
-    return prayerAfternoonBg;
-  };
-
-  // Get time-appropriate background for shkia button (night until naitz, afternoon at mincha gedolah)
-  const getShkiaButtonBackground = () => {
-    if (!isAfterNaitz()) return shkiaNightBg; // Before sunrise = night
-    if (isAfterTzais()) return shkiaNightBg;
-    if (!isAfterMinchaGedolah()) return shkiaMorningBg;
-    return shkiaAfternoonBg;
   };
 
   // TEMPORARY: Get time-appropriate background for main section (night until naitz, afternoon at mincha gedolah)
