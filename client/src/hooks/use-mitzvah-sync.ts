@@ -78,7 +78,12 @@ function mergeModalCompletions(
   return result;
 }
 
-async function fetchCloudProgress(accessToken: string): Promise<CloudProgress | null> {
+// Result types for fetch to distinguish between "no data" and "error"
+type FetchResult = 
+  | { success: true; data: CloudProgress | null }
+  | { success: false; error: string };
+
+async function fetchCloudProgress(accessToken: string): Promise<FetchResult> {
   try {
     const response = await axiosClient.get('/api/user/mitzvah-progress', {
       headers: {
@@ -86,11 +91,15 @@ async function fetchCloudProgress(accessToken: string): Promise<CloudProgress | 
       }
     });
     
-    return response.data;
+    return { success: true, data: response.data };
   } catch (error: any) {
-    if (error?.response?.status === 401) return null;
-    console.error('Error fetching cloud progress:', error);
-    return null;
+    if (error?.response?.status === 401) {
+      // User not authenticated or no record exists - this is safe, means no cloud data
+      return { success: true, data: null };
+    }
+    // Any other error (network, 5xx, etc.) - DO NOT allow push, could overwrite data
+    console.error('[MitzvahSync] Fetch failed - blocking push to prevent data loss:', error);
+    return { success: false, error: error?.message || 'Network error' };
   }
 }
 
@@ -149,14 +158,48 @@ export function useMitzvahSync() {
     
     if (dataString === lastSyncedDataRef.current) return;
     
+    // Fetch cloud state first to ensure we don't overwrite newer data
+    const fetchResult = await fetchCloudProgress(session.access_token);
+    if (!fetchResult.success) {
+      console.warn('[MitzvahSync] Could not fetch cloud state before push, skipping to prevent data loss');
+      return;
+    }
+    
+    // Re-merge with latest cloud data before pushing
+    let finalModalData = serialized;
+    let finalTzedakaData = tzedakaCompletions;
+    
+    if (fetchResult.data) {
+      // Merge cloud into current local state
+      const mergedModals = mergeModalCompletions(completedModals, fetchResult.data.modalCompletions);
+      finalModalData = serializeModalCompletions(mergedModals);
+      
+      // Merge tzedaka
+      const mergedTzedaka: Record<string, Record<string, number>> = {};
+      const allDates = Array.from(new Set([
+        ...Object.keys(tzedakaCompletions), 
+        ...Object.keys(fetchResult.data.tzedakaCompletions)
+      ]));
+      for (const date of allDates) {
+        const local = tzedakaCompletions[date] || {};
+        const cloud = fetchResult.data.tzedakaCompletions[date] || {};
+        const allKeys = Array.from(new Set([...Object.keys(local), ...Object.keys(cloud)]));
+        mergedTzedaka[date] = {};
+        for (const key of allKeys) {
+          mergedTzedaka[date][key] = Math.max(local[key] || 0, cloud[key] || 0);
+        }
+      }
+      finalTzedakaData = mergedTzedaka;
+    }
+    
     const success = await pushCloudProgress(
       session.access_token,
-      serialized,
-      tzedakaCompletions
+      finalModalData,
+      finalTzedakaData
     );
     
     if (success) {
-      lastSyncedDataRef.current = dataString;
+      lastSyncedDataRef.current = JSON.stringify({ modals: finalModalData, tzedaka: finalTzedakaData });
     }
   }, [isAuthenticated, session?.access_token, completedModals]);
   
@@ -175,12 +218,22 @@ export function useMitzvahSync() {
       // Migrate legacy tzedaka key if needed
       migrateLegacyTzedakaKey();
       
-      const cloudProgress = await fetchCloudProgress(session.access_token);
+      const fetchResult = await fetchCloudProgress(session.access_token);
+      
+      // If fetch failed, do NOT push - we could overwrite cloud data
+      if (!fetchResult.success) {
+        console.error('[MitzvahSync] Fetch failed, aborting sync to prevent data loss:', fetchResult.error);
+        // Reset hasSyncedRef so we can retry on next mount/trigger
+        hasSyncedRef.current = false;
+        return;
+      }
+      
+      const cloudProgress = fetchResult.data;
       console.log('[MitzvahSync] Cloud progress fetched:', cloudProgress ? {
         modalDates: Object.keys(cloudProgress.modalCompletions).length,
         tzedakaDates: Object.keys(cloudProgress.tzedakaCompletions).length,
         version: cloudProgress.version
-      } : 'null');
+      } : 'null (no cloud data)');
       
       // Get current local state
       const localModals = useModalCompletionStore.getState().completedModals;
