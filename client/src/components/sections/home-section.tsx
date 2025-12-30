@@ -540,13 +540,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-events"
           >
             <div 
-              className="inline-flex items-center justify-center px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
               style={{
-                background: 'rgba(255, 255, 255, 0.5)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
               }}
             >
-              <p className="platypi-medium text-[10px] text-black/80">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <p className="platypi-medium text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
             <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
