@@ -132,14 +132,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F2DDD4] to-[#E4C5B8]">
+    <div className="min-h-screen bg-white">
       <header 
-        className="fixed top-0 left-0 right-0 z-50 px-4"
+        className="fixed top-0 left-0 right-0 z-50 px-4 bg-white"
         style={{ 
-          paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-          background: 'rgba(186, 137, 160, 0.12)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
+          paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)'
         }}
       >
         <div className="flex items-center h-12">
@@ -157,14 +154,9 @@ export default function Login() {
         </div>
       </header>
       
-      <div className="flex flex-col items-center justify-center p-6 pt-24 pb-28">
+      <div className="flex flex-col items-center p-6 pt-32 pb-28">
         <div 
-          className="w-full max-w-sm rounded-2xl p-6"
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
-          }}
+          className="w-full max-w-sm rounded-2xl p-6 border border-gray-100 shadow-sm"
         >
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {mode === 'signup' && (
