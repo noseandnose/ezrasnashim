@@ -144,6 +144,7 @@ export interface ModalCompletionState {
   getCompletionCount: (modalId: string) => number;
   isSingleCompletionPrayer: (modalId: string) => boolean;
   resetModalCompletions: () => void;
+  setCompletionsForDate: (date: string, data: { singles: Set<string>; repeatables: Record<string, number> }) => void;
 }
 
 export const useModalCompletionStore = create<ModalCompletionState>((set, get) => {
@@ -165,40 +166,30 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
       const stored = localStorage.getItem('modalCompletions');
       if (stored) {
         const parsed = JSON.parse(stored);
-        const today = getLocalDateString();
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayYear = yesterday.getFullYear();
-        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
-        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
-        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
-        
         const completedModals: Record<string, DailyCompletionData> = {};
         
+        // Load ALL dates to preserve cloud-synced history for streaks/totals
         for (const [date, data] of Object.entries(parsed)) {
-          // Only load today's and yesterday's data (for midnight transition)
-          if (date === today || date === yesterdayStr) {
-            // Check if this is old format (array) or new format (object with singles/repeatables)
-            if (Array.isArray(data)) {
-              // Migrate from old format: convert array to new structure
-              completedModals[date] = {
-                singles: new Set(data.filter((id: string) => isSingleCompletionPrayer(id))),
-                repeatables: {}
-              };
-              // Initialize repeatable counters from old data
-              data.forEach((id: string) => {
-                if (!isSingleCompletionPrayer(id)) {
-                  completedModals[date].repeatables[id] = 1;
-                }
-              });
-            } else if (data && typeof data === 'object') {
-              // New format: restore Sets and counters
-              const typedData = data as any;
-              completedModals[date] = {
-                singles: new Set(typedData.singles || []),
-                repeatables: typedData.repeatables || {}
-              };
-            }
+          // Check if this is old format (array) or new format (object with singles/repeatables)
+          if (Array.isArray(data)) {
+            // Migrate from old format: convert array to new structure
+            completedModals[date] = {
+              singles: new Set(data.filter((id: string) => isSingleCompletionPrayer(id))),
+              repeatables: {}
+            };
+            // Initialize repeatable counters from old data
+            data.forEach((id: string) => {
+              if (!isSingleCompletionPrayer(id)) {
+                completedModals[date].repeatables[id] = 1;
+              }
+            });
+          } else if (data && typeof data === 'object') {
+            // New format: restore Sets and counters
+            const typedData = data as any;
+            completedModals[date] = {
+              singles: new Set(typedData.singles || []),
+              repeatables: typedData.repeatables || {}
+            };
           }
         }
         return completedModals;
@@ -259,19 +250,8 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
           newState[today].repeatables[modalId] = (newState[today].repeatables[modalId] || 0) + 1;
         }
         
-        // Clean up old dates (keep only today and yesterday for transition period)
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayYear = yesterday.getFullYear();
-        const yesterdayMonth = String(yesterday.getMonth() + 1).padStart(2, '0');
-        const yesterdayDay = String(yesterday.getDate()).padStart(2, '0');
-        const yesterdayStr = `${yesterdayYear}-${yesterdayMonth}-${yesterdayDay}`;
-        
-        for (const date in newState) {
-          if (date !== today && date !== yesterdayStr) {
-            delete newState[date];
-          }
-        }
+        // Note: No longer pruning old dates to preserve cloud-synced history
+        // Historical data is needed for streak calculations and profile stats
         
         saveToStorage(newState);
         return { completedModals: newState };
@@ -304,6 +284,36 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
     resetModalCompletions: () => {
       localStorage.removeItem('modalCompletions');
       set({ completedModals: {} });
+    },
+    
+    setCompletionsForDate: (date: string, data: { singles: Set<string>; repeatables: Record<string, number> }) => {
+      set(state => {
+        const newState = { ...state.completedModals };
+        
+        const existingData = newState[date];
+        if (existingData) {
+          const mergedSingles = new Set(Array.from(existingData.singles));
+          Array.from(data.singles).forEach(id => mergedSingles.add(id));
+          
+          const mergedRepeatables = { ...existingData.repeatables };
+          for (const [id, count] of Object.entries(data.repeatables)) {
+            mergedRepeatables[id] = Math.max(mergedRepeatables[id] || 0, count);
+          }
+          
+          newState[date] = {
+            singles: mergedSingles,
+            repeatables: mergedRepeatables
+          };
+        } else {
+          newState[date] = {
+            singles: new Set(Array.from(data.singles)),
+            repeatables: { ...data.repeatables }
+          };
+        }
+        
+        saveToStorage(newState);
+        return { completedModals: newState };
+      });
     }
   };
 });

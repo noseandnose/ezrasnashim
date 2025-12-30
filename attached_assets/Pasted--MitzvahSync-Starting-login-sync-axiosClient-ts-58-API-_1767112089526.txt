@@ -1,0 +1,21 @@
+[MitzvahSync] Starting login sync...
+axiosClient.ts:58 [API Request] GET https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/user/mitzvah-progress
+use-mitzvah-sync.ts:103 [MitzvahSync] Pushing to cloud: {modalDates: 0, tzedakaDates: 1}
+axiosClient.ts:58 [API Request] PUT https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/user/mitzvah-progress
+axiosClient.ts:61 [API Request Data] {modalCompletions: {…}, tzedakaCompletions: {…}}
+axiosClient.ts:75 [API Response] 200 GET /api/user/mitzvah-progress
+axiosClient.ts:78 [API Response Data] {id: 1, userId: '67804150-3ff7-4935-96ca-e7961e805d86', modalCompletions: {…}, tzedakaCompletions: {…}, updatedAt: '2025-12-30T16:27:14.575Z', …}
+use-mitzvah-sync.ts:179 [MitzvahSync] Cloud progress fetched: {modalDates: 0, tzedakaDates: 1, version: 4}
+axiosClient.ts:75 [API Response] 200 PUT /api/user/mitzvah-progress
+axiosClient.ts:78 [API Response Data] {id: 1, userId: '67804150-3ff7-4935-96ca-e7961e805d86', modalCompletions: {…}, tzedakaCompletions: {…}, updatedAt: '2025-12-30T16:27:47.639Z', …}
+use-mitzvah-sync.ts:117 [MitzvahSync] Push successful
+use-torah-summary.ts:71 [useTorahSummary] Query state: {isLoading: false, isError: false, hasData: true, pirkeiAvot: 'This is the way of Torah: Eat '}
+use-torah-summary.ts:71 [useTorahSummary] Query state: {isLoading: false, isError: false, hasData: true, pirkeiAvot: 'This is the way of Torah: Eat '}
+use-torah-summary.ts:71 [useTorahSummary] Query state: {isLoading: false, isError: false, hasData: true, pirkeiAvot: 'This is the way of Torah: Eat '}
+use-torah-summary.ts:71 [useTorahSummary] Query state: {isLoading: false, isError: false, hasData: true, pirkeiAvot: 'This is the way of Torah: Eat '}
+use-mitzvah-sync.ts:103 [MitzvahSync] Pushing to cloud: {modalDates: 0, tzedakaDates: 2}
+axiosClient.ts:58 [API Request] PUT https://ea367e04-e505-47ab-af76-4df2facf13dc-00-2yasdnevarltu.pike.replit.dev:5000/api/user/mitzvah-progress
+axiosClient.ts:61 [API Request Data] {modalCompletions: {…}, tzedakaCompletions: {…}}
+axiosClient.ts:75 [API Response] 200 PUT /api/user/mitzvah-progress
+axiosClient.ts:78 [API Response Data] {id: 1, userId: '67804150-3ff7-4935-96ca-e7961e805d86', modalCompletions: {…}, tzedakaCompletions: {…}, updatedAt: '2025-12-30T16:27:58.661Z', …}
+use-mitzvah-sync.ts:117 [MitzvahSync] Push successful

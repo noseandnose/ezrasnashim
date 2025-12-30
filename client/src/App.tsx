@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSafeArea } from "@/hooks/use-safe-area";
 import { useBackButton } from "@/hooks/use-back-button";
+import { useMitzvahSync } from "@/hooks/use-mitzvah-sync";
 import { initializeCache } from "@/lib/cache";
 import { lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
@@ -56,6 +57,9 @@ function Router() {
   // Handle Android back button navigation
   useBackButton();
   
+  // Sync mitzvah progress for authenticated users
+  useMitzvahSync();
+  
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
     // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
@@ -81,6 +85,13 @@ function Router() {
     updateNavOffset();
     window.addEventListener('resize', updateNavOffset, { passive: true });
     window.addEventListener('orientationchange', updateNavOffset, { passive: true });
+    
+    // CRITICAL: Listen to visualViewport resize directly for keyboard dismiss
+    // Window resize events don't always fire in WebViews when keyboard closes
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateNavOffset, { passive: true });
+      window.visualViewport.addEventListener('scroll', updateNavOffset, { passive: true });
+    }
     
     // Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
     const userAgent = navigator.userAgent.toLowerCase();
@@ -124,35 +135,55 @@ function Router() {
     
     // WebView resume handler for FlutterFlow apps
     // Fixes untappable buttons by reloading after returning from background
-    // FlutterFlow WebViews may fire blur/pagehide WITHOUT visibilitychange,
-    // so we track background time on multiple events
+    // visibilitychange is UNRELIABLE in Flutter WebViews - use multiple detection methods
     let lastBackgroundTime: number | null = null;
+    let isReloading = false; // Prevent double-reload
+    let resumeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
     const BACKGROUND_THRESHOLD = 3000; // 3 seconds - reliable for WebView recovery
+    const RESUME_DEBOUNCE = 200; // Debounce resume detection
     
     const markBackground = () => {
-      if (isInWebview && lastBackgroundTime === null) {
+      if (isInWebview) {
+        // ALWAYS update the time - multiple events may fire, use the latest
         lastBackgroundTime = Date.now();
+        console.log('[WebView] Marked background at', new Date().toISOString());
       }
     };
     
     const handleResume = () => {
-      // Only refresh in webview to fix untappable buttons
-      if (isInWebview && lastBackgroundTime !== null) {
-        const timeInBackground = Date.now() - lastBackgroundTime;
-        lastBackgroundTime = null; // Reset immediately to prevent double-reload
-        
-        if (timeInBackground > BACKGROUND_THRESHOLD) {
-          console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, refreshing...');
-          // Reset scroll lock that might have been left on
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-          window.location.reload();
-        } else {
-          // Just reset scroll lock without reloading for short background times
-          document.body.style.overflow = '';
-          document.documentElement.style.overflow = '';
-        }
+      // Prevent double-reload and ensure we're in webview
+      if (!isInWebview || isReloading) return;
+      
+      // Clear any pending debounce
+      if (resumeDebounceTimer) {
+        clearTimeout(resumeDebounceTimer);
       }
+      
+      // Debounce to let all resume events settle
+      resumeDebounceTimer = setTimeout(() => {
+        if (lastBackgroundTime !== null && !isReloading) {
+          const timeInBackground = Date.now() - lastBackgroundTime;
+          
+          if (timeInBackground > BACKGROUND_THRESHOLD) {
+            isReloading = true;
+            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, refreshing...');
+            // Reset scroll lock that might have been left on
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.setProperty('--nav-offset', '0px');
+            window.location.reload();
+          } else {
+            // Just reset scroll lock without reloading for short background times
+            console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting UI');
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            document.documentElement.style.setProperty('--nav-offset', '0px');
+          }
+          
+          // Reset background time after handling
+          lastBackgroundTime = null;
+        }
+      }, RESUME_DEBOUNCE);
     };
     
     const handleVisibilityChange = () => {
@@ -181,13 +212,36 @@ function Router() {
     
     // Listen to focus for when WebView regains focus without visibility change
     const handleFocus = () => {
-      // Small delay to let visibilitychange fire first if it's going to
-      setTimeout(() => {
-        if (lastBackgroundTime !== null) {
-          handleResume();
-        }
-      }, 50);
+      handleResume();
     };
+    
+    // FALLBACK: Use requestAnimationFrame polling as a last resort
+    // If the WebView is frozen, rAF won't fire. When it resumes, it will.
+    let lastRafTime = Date.now();
+    let rafId: number;
+    const rafCheck = () => {
+      const now = Date.now();
+      const elapsed = now - lastRafTime;
+      
+      // If more than BACKGROUND_THRESHOLD has passed since last rAF, we were in background
+      if (elapsed > BACKGROUND_THRESHOLD && isInWebview && !isReloading) {
+        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, refreshing...');
+        isReloading = true;
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        document.documentElement.style.setProperty('--nav-offset', '0px');
+        window.location.reload();
+        return;
+      }
+      
+      lastRafTime = now;
+      rafId = requestAnimationFrame(rafCheck);
+    };
+    
+    // Only use rAF fallback in WebView
+    if (isInWebview) {
+      rafId = requestAnimationFrame(rafCheck);
+    }
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
@@ -239,11 +293,21 @@ function Router() {
     return () => {
       window.removeEventListener('resize', updateNavOffset);
       window.removeEventListener('orientationchange', updateNavOffset);
+      if (window.visualViewport) {
+        window.visualViewport.removeEventListener('resize', updateNavOffset);
+        window.visualViewport.removeEventListener('scroll', updateNavOffset);
+      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow as EventListener);
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('pagehide', handlePageHide);
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      if (resumeDebounceTimer) {
+        clearTimeout(resumeDebounceTimer);
+      }
     };
   }, []);
   

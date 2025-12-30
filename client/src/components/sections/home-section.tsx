@@ -16,9 +16,9 @@ import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
 import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
-import morningBackground from "@assets/Morning_Garden_1767032602705.png";
-import afternoonBackground from "@assets/Afternoon_Garden_1767032602705.png";
-import nightBackground from "@assets/Night_Garden_1767032602702.png";
+import morningBackground from "@assets/Morning_1767097697251.png";
+import afternoonBackground from "@assets/Afternoon_1767097697250.png";
+import nightBackground from "@assets/Night_1767097697247.png";
 // Milestone tree images temporarily removed - will be replaced with new ones later
 // import milestone10Tree from "@assets/10_1766688255354.png";
 // import milestone20Tree from "@assets/20_1766688255353.png";
@@ -518,15 +518,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-prayer"
           >
             <div 
-              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 ${
-                currentPrayer.disabled ? 'bg-gray-300' : 'bg-gradient-feminine'
-              }`}
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
-                border: '1px solid rgba(255, 255, 255, 0.6)',
+                background: currentPrayer.disabled 
+                  ? 'rgb(209, 213, 219)' 
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <PrayerIcon className="text-white" size={10} />
-              <p className="platypi-bold text-[10px] text-white">
+              <PrayerIcon className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">
                 {currentPrayer.title}
               </p>
             </div>
@@ -551,13 +552,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-events"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
-                border: '1px solid rgba(255, 255, 255, 0.6)',
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <MapPin className="text-white" size={10} />
-              <p className="platypi-bold text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <MapPin className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>

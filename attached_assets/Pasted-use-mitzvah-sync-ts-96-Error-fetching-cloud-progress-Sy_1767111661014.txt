@@ -1,0 +1,48 @@
+use-mitzvah-sync.ts:96 Error fetching cloud progress: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+fetchCloudProgress @ use-mitzvah-sync.ts:96
+await in fetchCloudProgress
+syncOnLogin @ use-mitzvah-sync.ts:188
+(anonymous) @ use-mitzvah-sync.ts:242
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=21681db2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=21681db2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=21681db2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=21681db2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=21681db2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=21681db2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=21681db2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=21681db2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=21681db2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=21681db2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=21681db2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=21681db2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=21681db2:18718
+workLoop @ chunk-RPCDYKBN.js?v=21681db2:197
+flushWork @ chunk-RPCDYKBN.js?v=21681db2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=21681db2:384Understand this error
+use-mitzvah-sync.ts:189 [MitzvahSync] Cloud progress fetched: null
+use-mitzvah-sync.ts:231 [MitzvahSync] Pushing local data to empty cloud...
+use-mitzvah-sync.ts:107 [MitzvahSync] Pushing to cloud: {modalDates: 1, tzedakaDates: 1}
+use-mitzvah-sync.ts:123 [MitzvahSync] Push failed: 404 
+pushCloudProgress @ use-mitzvah-sync.ts:123
+await in pushCloudProgress
+syncOnLogin @ use-mitzvah-sync.ts:232
+await in syncOnLogin
+(anonymous) @ use-mitzvah-sync.ts:242
+commitHookEffectListMount @ chunk-RPCDYKBN.js?v=21681db2:16915
+commitPassiveMountOnFiber @ chunk-RPCDYKBN.js?v=21681db2:18156
+commitPassiveMountEffects_complete @ chunk-RPCDYKBN.js?v=21681db2:18129
+commitPassiveMountEffects_begin @ chunk-RPCDYKBN.js?v=21681db2:18119
+commitPassiveMountEffects @ chunk-RPCDYKBN.js?v=21681db2:18109
+flushPassiveEffectsImpl @ chunk-RPCDYKBN.js?v=21681db2:19490
+flushPassiveEffects @ chunk-RPCDYKBN.js?v=21681db2:19447
+performSyncWorkOnRoot @ chunk-RPCDYKBN.js?v=21681db2:18868
+flushSyncCallbacks @ chunk-RPCDYKBN.js?v=21681db2:9119
+commitRootImpl @ chunk-RPCDYKBN.js?v=21681db2:19432
+commitRoot @ chunk-RPCDYKBN.js?v=21681db2:19277
+finishConcurrentRender @ chunk-RPCDYKBN.js?v=21681db2:18805
+performConcurrentWorkOnRoot @ chunk-RPCDYKBN.js?v=21681db2:18718
+workLoop @ chunk-RPCDYKBN.js?v=21681db2:197
+flushWork @ chunk-RPCDYKBN.js?v=21681db2:176
+performWorkUntilDeadline @ chunk-RPCDYKBN.js?v=21681db2:384Understand this error
+use-mitzvah-sync.ts:107 [MitzvahSync] Pushing to cloud: {modalDates: 1, tzedakaDates: 1}
+use-mitzvah-sync.ts:123 [MitzvahSync] Push failed: 404 

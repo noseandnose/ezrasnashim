@@ -974,5 +974,22 @@ export const insertAppVersionSchema = createInsertSchema(appVersions).omit({ id:
 export type AppVersion = typeof appVersions.$inferSelect;
 export type InsertAppVersion = z.infer<typeof insertAppVersionSchema>;
 
+// User Mitzvah Progress - stores completion data for authenticated users
+// Syncs with localStorage format for seamless cross-device experience
+export const userMitzvahProgress = pgTable("user_mitzvah_progress", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique(), // Supabase auth user ID
+  modalCompletions: jsonb("modal_completions").notNull().default('{}'), // Format: { "2025-01-01": { singles: ["mincha"], repeatables: { "tehillim-1": 2 } } }
+  tzedakaCompletions: jsonb("tzedaka_completions").notNull().default('{}'), // Format: { "2025-01-01": { gave_elsewhere: 1, put_a_coin: 2 } }
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  version: integer("version").default(1).notNull(), // For optimistic concurrency control
+}, (table) => ({
+  userIdIdx: index("user_mitzvah_progress_user_id_idx").on(table.userId),
+}));
+
+export const insertUserMitzvahProgressSchema = createInsertSchema(userMitzvahProgress).omit({ id: true, updatedAt: true });
+export type UserMitzvahProgress = typeof userMitzvahProgress.$inferSelect;
+export type InsertUserMitzvahProgress = z.infer<typeof insertUserMitzvahProgressSchema>;
+
 // Auth models (users, sessions) - required for Replit Auth
 export * from "./models/auth";

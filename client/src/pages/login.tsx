@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star } from "lucide-react";
+import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star, Trophy, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -23,8 +23,22 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Redirect authenticated users to profile (in effect to avoid React warning)
+  useEffect(() => {
+    if (isAuthenticated) {
+      setLocation('/profile');
+    }
+  }, [isAuthenticated, setLocation]);
+  
+  // Reset nav-offset when inputs lose focus (keyboard dismissed)
+  const handleInputBlur = useCallback(() => {
+    // Give the keyboard time to fully dismiss before resetting
+    setTimeout(() => {
+      document.documentElement.style.setProperty('--nav-offset', '0px');
+    }, 100);
+  }, []);
+
   if (isAuthenticated) {
-    setLocation('/profile');
     return null;
   }
 
@@ -132,14 +146,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F2DDD4] to-[#E4C5B8]">
+    <div className="min-h-screen bg-white">
       <header 
-        className="fixed top-0 left-0 right-0 z-50 px-4"
+        className="fixed top-0 left-0 right-0 z-50 px-4 bg-white"
         style={{ 
-          paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-          background: 'rgba(186, 137, 160, 0.12)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
+          paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)'
         }}
       >
         <div className="flex items-center h-12">
@@ -157,14 +168,20 @@ export default function Login() {
         </div>
       </header>
       
-      <div className="flex flex-col items-center justify-center p-6 pt-24 pb-28">
+      <div className="flex flex-col items-center p-6 pt-32 pb-28">
+        <div className="mb-6 text-center">
+          <div 
+            className="inline-flex items-center justify-center px-8 py-3 rounded-full shadow-lg"
+            style={{
+              background: 'linear-gradient(135deg, #E8B4BC 0%, #C8A2C8 100%)'
+            }}
+          >
+            <span className="platypi-bold text-xl text-white drop-shadow-sm">Welcome Home</span>
+          </div>
+        </div>
+        
         <div 
-          className="w-full max-w-sm rounded-2xl p-6"
-          style={{ 
-            background: 'rgba(255, 255, 255, 0.8)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)'
-          }}
+          className="w-full max-w-sm rounded-2xl p-6 border border-gray-100 shadow-sm"
         >
           <form onSubmit={handleEmailAuth} className="space-y-4">
             {mode === 'signup' && (
@@ -177,6 +194,7 @@ export default function Login() {
                       placeholder="First name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
+                      onBlur={handleInputBlur}
                       className="pl-9"
                       data-testid="input-first-name"
                     />
@@ -188,6 +206,7 @@ export default function Login() {
                       placeholder="Last name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
+                      onBlur={handleInputBlur}
                       className="pl-9"
                       data-testid="input-last-name"
                     />
@@ -200,6 +219,7 @@ export default function Login() {
                     placeholder="Hebrew name (optional)"
                     value={hebrewName}
                     onChange={(e) => setHebrewName(e.target.value)}
+                    onBlur={handleInputBlur}
                     className="pl-9"
                     dir="rtl"
                     data-testid="input-hebrew-name"
@@ -212,6 +232,7 @@ export default function Login() {
                       type="date"
                       value={birthday}
                       onChange={(e) => setBirthday(e.target.value)}
+                      onBlur={handleInputBlur}
                       max={new Date().toISOString().split('T')[0]}
                       className="pl-9"
                       data-testid="input-birthday"
@@ -224,6 +245,7 @@ export default function Login() {
                         e.target.type = 'date';
                         e.target.max = new Date().toISOString().split('T')[0];
                       }}
+                      onBlur={handleInputBlur}
                       className="pl-9"
                       data-testid="input-birthday"
                       onChange={(e) => setBirthday(e.target.value)}
@@ -240,6 +262,7 @@ export default function Login() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleInputBlur}
                 required
                 className="pl-9"
                 data-testid="input-email"
@@ -254,6 +277,7 @@ export default function Login() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onBlur={handleInputBlur}
                   required
                   className="pl-9 pr-10"
                   data-testid="input-password"
@@ -327,6 +351,35 @@ export default function Login() {
             )}
           </div>
         </div>
+        
+        {mode === 'signup' && (
+          <div className="w-full max-w-sm mt-6">
+            <p className="platypi-regular text-sm text-black/60 mb-3 text-center">
+              Track your spiritual journey and see your growth over time.
+            </p>
+            
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-3 bg-blush/10 rounded-xl p-2.5">
+                <div className="w-7 h-7 rounded-full bg-blush/20 flex items-center justify-center flex-shrink-0">
+                  <Trophy className="w-3.5 h-3.5 text-blush" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Track your daily mitzvos</span>
+              </div>
+              <div className="flex items-center gap-3 bg-lavender/10 rounded-xl p-2.5">
+                <div className="w-7 h-7 rounded-full bg-lavender/20 flex items-center justify-center flex-shrink-0">
+                  <Flame className="w-3.5 h-3.5 text-lavender" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Build your daily streak</span>
+              </div>
+              <div className="flex items-center gap-3 bg-sage/10 rounded-xl p-2.5">
+                <div className="w-7 h-7 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-sage" />
+                </div>
+                <span className="platypi-regular text-sm text-black/70">Personalized greeting</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       
       <BottomNavigation activeSection="home" onSectionChange={handleSectionChange} />

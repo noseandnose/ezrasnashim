@@ -124,6 +124,11 @@ export default function TorahClassModal() {
                 audioUrl={torahClass.audioUrl} 
                 title={torahClass.title || 'Torah Class'}
                 duration="0:00"
+                onAudioEnded={() => {
+                  if (!isCompleted) {
+                    handleComplete();
+                  }
+                }}
               />
             </div>
           )}

@@ -578,6 +578,11 @@ export default function TableModals() {
                               audioUrl={currentMedia.url || ''} 
                               title="Creative Jewish Living Audio"
                               duration="0:00"
+                              onAudioEnded={() => {
+                                if (!isModalComplete('inspiration')) {
+                                  handleComplete('inspiration');
+                                }
+                              }}
                             />
                           </div>
                         </div>
@@ -814,6 +819,11 @@ export default function TableModals() {
             title={parshaContent?.title || "Parsha Shiur"}
             duration={parshaContent?.duration || "0:00"}
             audioUrl={parshaContent?.audioUrl || ""}
+            onAudioEnded={() => {
+              if (!isModalComplete('parsha')) {
+                handleComplete('parsha');
+              }
+            }}
           />
 
           <Button 

@@ -2,7 +2,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, LogOut } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
@@ -22,7 +22,7 @@ export default function AppHeader() {
   useHebrewDate();
   const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
@@ -111,7 +111,7 @@ export default function AppHeader() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
-                    shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
+                    (shouldHighlight || (!isLoading && !isAuthenticated)) ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
@@ -129,6 +129,28 @@ export default function AppHeader() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
+                {!isLoading && !isAuthenticated && (
+                  <DropdownMenuItem
+                    onClick={() => setLocation('/login')}
+                    className="cursor-pointer"
+                    data-testid="menu-item-login"
+                    data-action="menu-login"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    Sign Up / Log In
+                  </DropdownMenuItem>
+                )}
+                {isAuthenticated && user && (
+                  <DropdownMenuItem
+                    onClick={() => setLocation("/profile")}
+                    className="cursor-pointer"
+                    data-testid="menu-item-profile"
+                    data-action="menu-profile"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
@@ -137,15 +159,6 @@ export default function AppHeader() {
                 >
                   <BarChart3 className="h-5 w-5 mr-2" />
                   Analytics
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openModal('about', 'about')}
-                  className="cursor-pointer"
-                  data-testid="menu-item-info"
-                  data-action="menu-info"
-                >
-                  <Info className="h-5 w-5 mr-2" />
-                  Info
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openModal('date-calculator-fullscreen', 'table')}
@@ -194,41 +207,15 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
-{/* Hidden until ready to launch - Create Profile feature
-                {!authLoading && !isAuthenticated && (
-                  <DropdownMenuItem
-                    onClick={() => setLocation('/login')}
-                    className="cursor-pointer"
-                    data-testid="menu-item-login"
-                    data-action="menu-login"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Create Profile
-                  </DropdownMenuItem>
-                )}
-*/}
-                {isAuthenticated && user && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setLocation("/profile")}
-                      className="cursor-pointer"
-                      data-testid="menu-item-profile"
-                      data-action="menu-profile"
-                    >
-                      <User className="h-5 w-5 mr-2" />
-                      My Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => logout()}
-                      className="cursor-pointer"
-                      data-testid="menu-item-logout"
-                      data-action="menu-logout"
-                    >
-                      <LogOut className="h-5 w-5 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
-                )}
+                <DropdownMenuItem
+                  onClick={() => openModal('about', 'about')}
+                  className="cursor-pointer"
+                  data-testid="menu-item-info"
+                  data-action="menu-info"
+                >
+                  <Info className="h-5 w-5 mr-2" />
+                  Info
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -242,7 +229,8 @@ export default function AppHeader() {
               draggable={false}
             />
           </div>
-          <div className="flex items-center gap-1 flex-1 justify-end">
+          <div className="flex flex-col items-end flex-1">
+            <span className="font-hebrew text-[8px] text-black/50 leading-none" dir="rtl">בס״ד</span>
             <button
               onClick={() => setShowSearchModal(true)}
               className="flex items-center justify-center rounded-full transition-colors"

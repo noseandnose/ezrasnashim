@@ -133,6 +133,11 @@ export default function ParshaVortModal() {
                 audioUrl={parshaVort.audioUrl} 
                 title={parshaVort.title || 'Weekly Parsha Vort'}
                 duration="0:00"
+                onAudioEnded={() => {
+                  if (!isCompleted) {
+                    handleComplete();
+                  }
+                }}
               />
             </div>
           )}
