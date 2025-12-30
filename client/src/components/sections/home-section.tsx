@@ -460,27 +460,29 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Greeting with Feed button */}
         <div className="flex items-center justify-between mb-3">
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
-          <button
-            onClick={() => window.location.href = '/feed'}
-            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0 relative overflow-visible"
-            style={{
-              width: '32px',
-              height: '32px',
-              minWidth: '32px',
-              minHeight: '32px',
-              background: 'rgba(255, 255, 255, 0.6)',
-              backdropFilter: 'blur(12px) saturate(180%)',
-              WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-              border: '1px solid rgba(255, 255, 255, 0.4)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
-            }}
-            data-testid="button-feed"
-          >
-            <Mail className="text-black/70" size={16} />
+          <div className="relative shrink-0">
+            <button
+              onClick={() => window.location.href = '/feed'}
+              className="flex items-center justify-center rounded-full active:scale-95 transition-transform"
+              style={{
+                width: '32px',
+                height: '32px',
+                minWidth: '32px',
+                minHeight: '32px',
+                background: 'rgba(255, 255, 255, 0.6)',
+                backdropFilter: 'blur(12px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+              }}
+              data-testid="button-feed"
+            >
+              <Mail className="text-black/70" size={16} />
+            </button>
             {!!todayMessage && !hasReadMessage && (
-              <span className="absolute -top-1 -right-1 w-3 h-3 bg-blush rounded-full border-2 border-white" style={{ zIndex: 10 }} data-testid="indicator-unread-feed" />
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-blush rounded-full border-2 border-white" data-testid="indicator-unread-feed" />
             )}
-          </button>
+          </div>
         </div>
         
         {/* Sponsor Section */}

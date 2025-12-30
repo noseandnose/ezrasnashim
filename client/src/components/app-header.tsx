@@ -142,9 +142,6 @@ export default function AppHeader() {
                   }}
                 >
                   <Menu className="h-5 w-5 text-black/70" />
-                  {!!todayMessage && !hasReadMessage && (
-                    <span className="absolute top-1 right-1 w-2 h-2 bg-blush rounded-full" data-testid="indicator-unread-menu" />
-                  )}
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
