@@ -522,7 +522,7 @@ export default function Profile() {
           }}
         >
           <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-amber-400">
+            <div className="p-1.5 rounded-full bg-gradient-feminine">
               <Trophy className="w-3.5 h-3.5 text-white" />
             </div>
             All-Time Stats
@@ -559,7 +559,7 @@ export default function Profile() {
           }}
         >
           <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1.5 rounded-full bg-orange-400">
+            <div className="p-1.5 rounded-full bg-gradient-feminine">
               <Flame className="w-3.5 h-3.5 text-white" />
             </div>
             Your Journey
