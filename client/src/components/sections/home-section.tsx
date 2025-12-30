@@ -745,10 +745,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Torah Bar */}
         <button
           onClick={() => navigateToSection('torah')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-            <BookOpen className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+            <BookOpen className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Torah</h3>
@@ -764,10 +764,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Tefilla Bar */}
         <button
           onClick={() => navigateToSection('tefilla')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
-            <HandHeart className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
+            <HandHeart className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tefilla</h3>
@@ -783,10 +783,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         {/* Daily Tzedaka Bar */}
         <button
           onClick={() => navigateToSection('tzedaka')}
-          className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
+          className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
-          <div className={`p-3 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
-            <Coins className="text-white" size={20} strokeWidth={1.5} />
+          <div className={`p-2.5 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>
+            <Coins className="text-white" size={18} strokeWidth={1.5} />
           </div>
           <div className="flex-grow">
             <h3 className="platypi-bold text-sm text-black">Daily Tzedaka</h3>
