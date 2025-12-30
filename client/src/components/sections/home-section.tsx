@@ -291,6 +291,15 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
   const sponsor = homeSummary?.sponsor;
   const todaysSpecial = homeSummary?.todaysSpecial;
+  const todayMessage = homeSummary?.message;
+  
+  // Check if user has read today's message
+  const [hasReadMessage, setHasReadMessage] = useState(false);
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    const readKey = `message-read-${today}`;
+    setHasReadMessage(localStorage.getItem(readKey) === 'true');
+  }, []);
 
   // Today's Special state
   const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
@@ -453,7 +462,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
           <button
             onClick={() => window.location.href = '/feed'}
-            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0"
+            className="flex items-center justify-center rounded-full active:scale-95 transition-transform shrink-0 relative"
             style={{
               width: '32px',
               height: '32px',
@@ -468,6 +477,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-feed"
           >
             <Mail className="text-black/70" size={16} />
+            {!!todayMessage && !hasReadMessage && (
+              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-blush rounded-full" data-testid="indicator-unread-feed" />
+            )}
           </button>
         </div>
         
