@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './use-auth';
 import { useModalCompletionStore } from '@/lib/types';
 import { create } from 'zustand';
+import axiosClient from '@/lib/axiosClient';
 
 const useSyncTrigger = create<{ counter: number; trigger: () => void }>((set) => ({
   counter: 0,
@@ -79,20 +80,15 @@ function mergeModalCompletions(
 
 async function fetchCloudProgress(accessToken: string): Promise<CloudProgress | null> {
   try {
-    const response = await fetch('/api/user/mitzvah-progress', {
+    const response = await axiosClient.get('/api/user/mitzvah-progress', {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${accessToken}`
       }
     });
     
-    if (!response.ok) {
-      if (response.status === 401) return null;
-      throw new Error('Failed to fetch cloud progress');
-    }
-    
-    return await response.json();
-  } catch (error) {
+    return response.data;
+  } catch (error: any) {
+    if (error?.response?.status === 401) return null;
     console.error('Error fetching cloud progress:', error);
     return null;
   }
@@ -109,25 +105,19 @@ async function pushCloudProgress(
       tzedakaDates: Object.keys(tzedakaCompletions).length
     });
     
-    const response = await fetch('/api/user/mitzvah-progress', {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ modalCompletions, tzedakaCompletions })
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[MitzvahSync] Push failed:', response.status, errorText);
-      return false;
-    }
+    await axiosClient.put('/api/user/mitzvah-progress', 
+      { modalCompletions, tzedakaCompletions },
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      }
+    );
     
     console.log('[MitzvahSync] Push successful');
     return true;
-  } catch (error) {
-    console.error('[MitzvahSync] Error pushing cloud progress:', error);
+  } catch (error: any) {
+    console.error('[MitzvahSync] Push failed:', error?.response?.status, error?.response?.data);
     return false;
   }
 }
