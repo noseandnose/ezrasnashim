@@ -6,6 +6,7 @@ import {
   dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
+  userMitzvahProgress,
 
   type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -42,7 +43,8 @@ import {
   type TehillimChain, type InsertTehillimChain,
   type TehillimChainReading,
   type TodaysSpecial, type InsertTodaysSpecial,
-  type GiftOfChatzos, type InsertGiftOfChatzos
+  type GiftOfChatzos, type InsertGiftOfChatzos,
+  type UserMitzvahProgress
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, isNull } from "drizzle-orm";
@@ -373,6 +375,10 @@ export interface IStorage {
   markSubscriptionInvalid(endpoint: string, errorCode?: number, errorMessage?: string): Promise<void>;
   getSubscriptionsNeedingValidation(hoursThreshold?: number): Promise<PushSubscription[]>;
   getAllSubscriptions(): Promise<PushSubscription[]>;
+  
+  // User Mitzvah Progress methods (for authenticated users)
+  getUserMitzvahProgress(userId: string): Promise<UserMitzvahProgress | undefined>;
+  upsertUserMitzvahProgress(userId: string, modalCompletions: Record<string, any>, tzedakaCompletions: Record<string, any>): Promise<UserMitzvahProgress>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -3672,6 +3678,51 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(pushSubscriptions)
       .orderBy(sql`${pushSubscriptions.createdAt} DESC`);
+  }
+  
+  // User Mitzvah Progress methods
+  async getUserMitzvahProgress(userId: string): Promise<UserMitzvahProgress | undefined> {
+    const [progress] = await db
+      .select()
+      .from(userMitzvahProgress)
+      .where(eq(userMitzvahProgress.userId, userId))
+      .limit(1);
+    return progress || undefined;
+  }
+  
+  async upsertUserMitzvahProgress(
+    userId: string, 
+    modalCompletions: Record<string, any>, 
+    tzedakaCompletions: Record<string, any>
+  ): Promise<UserMitzvahProgress> {
+    const existing = await this.getUserMitzvahProgress(userId);
+    
+    if (existing) {
+      // Update existing record
+      const [updated] = await db
+        .update(userMitzvahProgress)
+        .set({
+          modalCompletions: modalCompletions,
+          tzedakaCompletions: tzedakaCompletions,
+          updatedAt: new Date(),
+          version: existing.version + 1
+        })
+        .where(eq(userMitzvahProgress.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      // Insert new record
+      const [created] = await db
+        .insert(userMitzvahProgress)
+        .values({
+          userId,
+          modalCompletions: modalCompletions,
+          tzedakaCompletions: tzedakaCompletions,
+          version: 1
+        })
+        .returning();
+      return created;
+    }
   }
 }
 
