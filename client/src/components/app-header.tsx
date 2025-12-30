@@ -111,7 +111,7 @@ export default function AppHeader() {
               <DropdownMenuTrigger asChild>
                 <button
                   className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
-                    shouldHighlight ? 'animate-pulse border-2 border-blush shadow-lg' : ''
+                    (shouldHighlight || (!isLoading && !isAuthenticated)) ? 'animate-pulse border-2 border-blush shadow-lg' : ''
                   }`}
                   aria-label="Menu"
                   data-testid="button-menu"
