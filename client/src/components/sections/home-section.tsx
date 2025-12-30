@@ -518,12 +518,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-prayer"
           >
             <div 
-              className={`inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 ${
-                currentPrayer.disabled ? 'bg-gray-300' : 'bg-gradient-feminine'
-              }`}
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
+                background: currentPrayer.disabled 
+                  ? 'rgb(209, 213, 219)' 
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.6) 0%, rgba(200, 162, 200, 0.6) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
-                opacity: currentPrayer.disabled ? 1 : 0.7,
               }}
             >
               <PrayerIcon className="text-black" size={10} />
@@ -552,10 +552,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-events"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.6) 0%, rgba(200, 162, 200, 0.6) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.6)',
-                opacity: 0.7,
               }}
             >
               <MapPin className="text-black" size={10} />
