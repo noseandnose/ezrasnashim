@@ -523,6 +523,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               }`}
               style={{
                 border: '1px solid rgba(255, 255, 255, 0.6)',
+                opacity: currentPrayer.disabled ? 1 : 0.7,
               }}
             >
               <PrayerIcon className="text-white" size={10} />
@@ -554,6 +555,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1 bg-gradient-feminine"
               style={{
                 border: '1px solid rgba(255, 255, 255, 0.6)',
+                opacity: 0.7,
               }}
             >
               <MapPin className="text-white" size={10} />
