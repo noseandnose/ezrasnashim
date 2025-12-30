@@ -539,34 +539,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-modal-section="home"
             data-testid="button-home-events"
           >
-            {/* Weather badge - Apple glass style, tappable to toggle C/F */}
-            {weather && (
-              <div 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleTempUnit();
-                }}
-                className="absolute top-1.5 right-1.5 z-20 flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.8)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.5)',
-                  border: '1px solid rgba(255, 255, 255, 0.5)',
-                }}
-              >
-                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
-                <span className="platypi-bold text-[10px] text-black/80">
-                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
-                </span>
-              </div>
-            )}
             <div className="flex items-center justify-center mb-1">
               <div className="bg-white/70 p-1.5 rounded-full">
-                <Clock className="text-black" size={12} />
+                <MapPin className="text-black" size={12} />
               </div>
             </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
+            <p className="platypi-bold text-sm text-black mb-0.5">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
@@ -863,8 +841,30 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             </div>
           </div>
           
-          {/* Info icon - Top right corner */}
-          <div className="absolute top-2 right-2 z-10">
+          {/* Info icon and Weather - Top right corner */}
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+            {/* Weather badge */}
+            {weather && (
+              <div 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleTempUnit();
+                }}
+                className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full cursor-pointer active:scale-95 transition-transform"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.6)',
+                  backdropFilter: 'blur(12px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(12px) saturate(180%)',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                }}
+              >
+                <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
+                <span className="platypi-bold text-[10px] text-black/80">
+                  {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
+                </span>
+              </div>
+            )}
             <Popover>
               <PopoverTrigger asChild>
                 <button
