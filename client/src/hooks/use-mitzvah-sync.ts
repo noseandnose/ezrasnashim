@@ -153,11 +153,18 @@ export function useMitzvahSync() {
     const syncOnLogin = async () => {
       hasSyncedRef.current = true;
       
+      // Migrate legacy tzedaka key if needed
+      migrateLegacyTzedakaKey();
+      
       const cloudProgress = await fetchCloudProgress(session.access_token);
       
+      // Get current local state
+      const localModals = useModalCompletionStore.getState().completedModals;
+      
       if (cloudProgress) {
+        // Merge cloud data with local if cloud has data
         if (Object.keys(cloudProgress.modalCompletions).length > 0) {
-          const merged = mergeModalCompletions(completedModals, cloudProgress.modalCompletions);
+          const merged = mergeModalCompletions(localModals, cloudProgress.modalCompletions);
           
           const store = useModalCompletionStore.getState();
           
@@ -169,13 +176,28 @@ export function useMitzvahSync() {
         if (cloudProgress.tzedakaCompletions && Object.keys(cloudProgress.tzedakaCompletions).length > 0) {
           mergeTzedakaCompletions(cloudProgress.tzedakaCompletions);
         }
-        
-        const updatedModals = useModalCompletionStore.getState().completedModals;
-        const updatedTzedaka = getTzedakaCompletions();
-        lastSyncedDataRef.current = JSON.stringify({ 
-          modals: serializeModalCompletions(updatedModals), 
-          tzedaka: updatedTzedaka 
-        });
+      }
+      
+      // Get the final merged state
+      const updatedModals = useModalCompletionStore.getState().completedModals;
+      const updatedTzedaka = getTzedakaCompletions();
+      const serializedModals = serializeModalCompletions(updatedModals);
+      
+      // Set lastSyncedDataRef to current state to prevent immediate re-sync
+      lastSyncedDataRef.current = JSON.stringify({ 
+        modals: serializedModals, 
+        tzedaka: updatedTzedaka 
+      });
+      
+      // If local has data that cloud doesn't, push to cloud immediately
+      const hasLocalData = Object.keys(updatedModals).length > 0 || Object.keys(updatedTzedaka).length > 0;
+      const cloudWasEmpty = !cloudProgress || 
+        (Object.keys(cloudProgress.modalCompletions).length === 0 && 
+         Object.keys(cloudProgress.tzedakaCompletions).length === 0);
+      
+      if (hasLocalData && cloudWasEmpty) {
+        console.log('Pushing local data to empty cloud...');
+        await pushCloudProgress(session.access_token, serializedModals, updatedTzedaka);
       }
     };
     
@@ -211,6 +233,42 @@ function getTzedakaCompletions(): Record<string, Record<string, number>> {
     console.error('Error reading tzedaka completions:', e);
   }
   return {};
+}
+
+function migrateLegacyTzedakaKey(): void {
+  try {
+    const legacyKey = 'tzedakaCompletions';
+    const newKey = 'tzedaka_button_completions';
+    
+    const legacyData = localStorage.getItem(legacyKey);
+    if (!legacyData) return;
+    
+    const existingData = localStorage.getItem(newKey);
+    
+    if (!existingData) {
+      localStorage.setItem(newKey, legacyData);
+    } else {
+      const legacy = JSON.parse(legacyData);
+      const current = JSON.parse(existingData);
+      
+      for (const [date, data] of Object.entries(legacy)) {
+        if (!current[date]) {
+          current[date] = data;
+        } else {
+          for (const [key, count] of Object.entries(data as Record<string, number>)) {
+            current[date][key] = Math.max(current[date][key] || 0, count);
+          }
+        }
+      }
+      
+      localStorage.setItem(newKey, JSON.stringify(current));
+    }
+    
+    localStorage.removeItem(legacyKey);
+    console.log('Migrated legacy tzedaka data');
+  } catch (e) {
+    console.error('Error migrating legacy tzedaka key:', e);
+  }
 }
 
 function mergeTzedakaCompletions(
