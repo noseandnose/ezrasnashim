@@ -144,6 +144,7 @@ export interface ModalCompletionState {
   getCompletionCount: (modalId: string) => number;
   isSingleCompletionPrayer: (modalId: string) => boolean;
   resetModalCompletions: () => void;
+  setCompletionsForDate: (date: string, data: { singles: Set<string>; repeatables: Record<string, number> }) => void;
 }
 
 export const useModalCompletionStore = create<ModalCompletionState>((set, get) => {
@@ -304,6 +305,36 @@ export const useModalCompletionStore = create<ModalCompletionState>((set, get) =
     resetModalCompletions: () => {
       localStorage.removeItem('modalCompletions');
       set({ completedModals: {} });
+    },
+    
+    setCompletionsForDate: (date: string, data: { singles: Set<string>; repeatables: Record<string, number> }) => {
+      set(state => {
+        const newState = { ...state.completedModals };
+        
+        const existingData = newState[date];
+        if (existingData) {
+          const mergedSingles = new Set(Array.from(existingData.singles));
+          Array.from(data.singles).forEach(id => mergedSingles.add(id));
+          
+          const mergedRepeatables = { ...existingData.repeatables };
+          for (const [id, count] of Object.entries(data.repeatables)) {
+            mergedRepeatables[id] = Math.max(mergedRepeatables[id] || 0, count);
+          }
+          
+          newState[date] = {
+            singles: mergedSingles,
+            repeatables: mergedRepeatables
+          };
+        } else {
+          newState[date] = {
+            singles: new Set(Array.from(data.singles)),
+            repeatables: { ...data.repeatables }
+          };
+        }
+        
+        saveToStorage(newState);
+        return { completedModals: newState };
+      });
     }
   };
 });

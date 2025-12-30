@@ -1,6 +1,14 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './use-auth';
 import { useModalCompletionStore } from '@/lib/types';
+import { create } from 'zustand';
+
+const useSyncTrigger = create<{ counter: number; trigger: () => void }>((set) => ({
+  counter: 0,
+  trigger: () => set((state) => ({ counter: state.counter + 1 }))
+}));
+
+export const triggerMitzvahSync = () => useSyncTrigger.getState().trigger();
 
 interface CloudProgress {
   modalCompletions: Record<string, { singles: string[]; repeatables: Record<string, number> }>;
@@ -115,6 +123,7 @@ async function pushCloudProgress(
 export function useMitzvahSync() {
   const { session, isAuthenticated } = useAuth();
   const completedModals = useModalCompletionStore((state) => state.completedModals);
+  const syncTriggerCounter = useSyncTrigger((state) => state.counter);
   const hasSyncedRef = useRef(false);
   const lastSyncedDataRef = useRef<string>('');
   
@@ -122,11 +131,10 @@ export function useMitzvahSync() {
     if (!isAuthenticated || !session?.access_token) return;
     
     const serialized = serializeModalCompletions(completedModals);
-    const dataString = JSON.stringify(serialized);
+    const tzedakaCompletions = getTzedakaCompletions();
+    const dataString = JSON.stringify({ modals: serialized, tzedaka: tzedakaCompletions });
     
     if (dataString === lastSyncedDataRef.current) return;
-    
-    const tzedakaCompletions = getTzedakaCompletions();
     
     const success = await pushCloudProgress(
       session.access_token,
@@ -147,30 +155,27 @@ export function useMitzvahSync() {
       
       const cloudProgress = await fetchCloudProgress(session.access_token);
       
-      if (cloudProgress && Object.keys(cloudProgress.modalCompletions).length > 0) {
-        const merged = mergeModalCompletions(completedModals, cloudProgress.modalCompletions);
-        
-        const store = useModalCompletionStore.getState();
-        const currentData = store.completedModals;
-        
-        for (const [date, data] of Object.entries(merged)) {
-          if (!currentData[date]) {
-            for (const modalId of Array.from(data.singles)) {
-              store.markModalComplete(modalId);
-            }
-            for (const [modalId, count] of Object.entries(data.repeatables)) {
-              const currentCount = store.getCompletionCount(modalId);
-              for (let i = currentCount; i < count; i++) {
-                store.markModalComplete(modalId);
-              }
-            }
+      if (cloudProgress) {
+        if (Object.keys(cloudProgress.modalCompletions).length > 0) {
+          const merged = mergeModalCompletions(completedModals, cloudProgress.modalCompletions);
+          
+          const store = useModalCompletionStore.getState();
+          
+          for (const [date, data] of Object.entries(merged)) {
+            store.setCompletionsForDate(date, data);
           }
         }
         
-        const updatedData = useModalCompletionStore.getState().completedModals;
-        lastSyncedDataRef.current = JSON.stringify(serializeModalCompletions(updatedData));
+        if (cloudProgress.tzedakaCompletions && Object.keys(cloudProgress.tzedakaCompletions).length > 0) {
+          mergeTzedakaCompletions(cloudProgress.tzedakaCompletions);
+        }
         
-        mergeTzedakaCompletions(cloudProgress.tzedakaCompletions);
+        const updatedModals = useModalCompletionStore.getState().completedModals;
+        const updatedTzedaka = getTzedakaCompletions();
+        lastSyncedDataRef.current = JSON.stringify({ 
+          modals: serializeModalCompletions(updatedModals), 
+          tzedaka: updatedTzedaka 
+        });
       }
     };
     
@@ -180,12 +185,18 @@ export function useMitzvahSync() {
   useEffect(() => {
     if (!isAuthenticated || !session?.access_token) return;
     
+    const tzedakaData = getTzedakaCompletions();
+    const serialized = serializeModalCompletions(completedModals);
+    const currentData = JSON.stringify({ modals: serialized, tzedaka: tzedakaData });
+    
+    if (currentData === lastSyncedDataRef.current) return;
+    
     const timeoutId = setTimeout(() => {
       syncToCloud();
     }, 2000);
     
     return () => clearTimeout(timeoutId);
-  }, [completedModals, isAuthenticated, session?.access_token, syncToCloud]);
+  }, [completedModals, syncTriggerCounter, isAuthenticated, session?.access_token, syncToCloud]);
   
   return { syncToCloud };
 }
@@ -238,6 +249,8 @@ export function saveTzedakaCompletion(type: string): void {
     current[today][type] = (current[today][type] || 0) + 1;
     
     localStorage.setItem('tzedakaCompletions', JSON.stringify(current));
+    
+    triggerMitzvahSync();
   } catch (e) {
     console.error('Error saving tzedaka completion:', e);
   }

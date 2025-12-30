@@ -3698,12 +3698,51 @@ export class DatabaseStorage implements IStorage {
     const existing = await this.getUserMitzvahProgress(userId);
     
     if (existing) {
-      // Update existing record
+      // Merge incoming data with existing cloud data (preserve history, take max values)
+      const existingModals = (existing.modalCompletions || {}) as Record<string, any>;
+      const existingTzedaka = (existing.tzedakaCompletions || {}) as Record<string, any>;
+      
+      // Merge modal completions - preserve all dates, take max for repeatables
+      const mergedModals: Record<string, any> = { ...existingModals };
+      for (const [date, data] of Object.entries(modalCompletions)) {
+        if (!mergedModals[date]) {
+          mergedModals[date] = data;
+        } else {
+          // Merge singles (union)
+          const existingSingles = new Set(mergedModals[date].singles || []);
+          (data.singles || []).forEach((s: string) => existingSingles.add(s));
+          
+          // Merge repeatables (max values)
+          const mergedRepeatables = { ...mergedModals[date].repeatables };
+          for (const [modalId, count] of Object.entries(data.repeatables || {})) {
+            mergedRepeatables[modalId] = Math.max(mergedRepeatables[modalId] || 0, count as number);
+          }
+          
+          mergedModals[date] = {
+            singles: Array.from(existingSingles),
+            repeatables: mergedRepeatables
+          };
+        }
+      }
+      
+      // Merge tzedaka completions - preserve all dates, take max values
+      const mergedTzedaka: Record<string, any> = { ...existingTzedaka };
+      for (const [date, data] of Object.entries(tzedakaCompletions)) {
+        if (!mergedTzedaka[date]) {
+          mergedTzedaka[date] = data;
+        } else {
+          for (const [key, count] of Object.entries(data as Record<string, number>)) {
+            mergedTzedaka[date][key] = Math.max(mergedTzedaka[date][key] || 0, count);
+          }
+        }
+      }
+      
+      // Update existing record with merged data
       const [updated] = await db
         .update(userMitzvahProgress)
         .set({
-          modalCompletions: modalCompletions,
-          tzedakaCompletions: tzedakaCompletions,
+          modalCompletions: mergedModals,
+          tzedakaCompletions: mergedTzedaka,
           updatedAt: new Date(),
           version: existing.version + 1
         })
