@@ -579,8 +579,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               <MapPin className="text-white" size={10} />
               <p className="platypi-bold text-[10px] text-white">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
-            <p className="platypi-bold text-sm text-black mb-0.5">Shkia</p>
-            <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="platypi-bold text-sm text-black">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
 
