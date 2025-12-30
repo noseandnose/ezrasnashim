@@ -306,12 +306,6 @@ export default function Profile() {
     );
   }
   
-  const getInitials = () => {
-    const first = user?.firstName?.charAt(0)?.toUpperCase() || '';
-    const last = user?.lastName?.charAt(0)?.toUpperCase() || '';
-    return first + last || user?.email?.charAt(0)?.toUpperCase() || '?';
-  };
-  
   return (
     <div 
       className="min-h-screen relative"
@@ -362,46 +356,37 @@ export default function Profile() {
           }}
         >
           {!isEditing ? (
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-feminine flex items-center justify-center flex-shrink-0 shadow-lg">
-                <span className="platypi-bold text-xl text-white">{getInitials()}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="platypi-bold text-lg text-black">
-                      {user?.firstName} {user?.lastName}
-                    </h2>
-                    {user?.hebrewName && (
-                      <p className="font-hebrew text-sm text-black/70 mt-0.5" dir="rtl">
-                        <Star className="w-3 h-3 inline-block ml-1 text-amber-500" />
-                        {user.hebrewName}
-                      </p>
-                    )}
-                  </div>
-                  <button 
-                    onClick={startEditing}
-                    className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
-                    data-testid="button-edit-profile"
-                  >
-                    <Pencil className="w-4 h-4 text-blush" />
-                  </button>
+            <div>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="platypi-bold text-lg text-black">
+                    {user?.firstName} {user?.lastName}
+                  </h2>
+                  {user?.hebrewName && (
+                    <p className="font-hebrew text-sm text-black/70 mt-0.5" dir="rtl">
+                      <Star className="w-3 h-3 inline-block ml-1 text-amber-500" />
+                      {user.hebrewName}
+                    </p>
+                  )}
                 </div>
-                <p className="platypi-regular text-xs text-black/50 mt-2 truncate">{user?.email}</p>
-                {user?.birthday && (
-                  <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatBirthday(user.birthday)}
-                  </p>
-                )}
+                <button 
+                  onClick={startEditing}
+                  className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
+                  data-testid="button-edit-profile"
+                >
+                  <Pencil className="w-4 h-4 text-blush" />
+                </button>
               </div>
+              <p className="platypi-regular text-xs text-black/50 mt-2 truncate">{user?.email}</p>
+              {user?.birthday && (
+                <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1">
+                  <Calendar className="w-3 h-3" />
+                  {formatBirthday(user.birthday)}
+                </p>
+              )}
             </div>
           ) : (
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-feminine flex items-center justify-center flex-shrink-0 shadow-lg">
-                <span className="platypi-bold text-xl text-white">{getInitials()}</span>
-              </div>
-              <div className="flex-1">
+            <div>
                 <div className="flex justify-end mb-3">
                   <div className="flex gap-2">
                     <button 
@@ -464,7 +449,6 @@ export default function Profile() {
                     data-testid="input-edit-birthday"
                   />
                 </div>
-              </div>
             </div>
           )}
         </div>
