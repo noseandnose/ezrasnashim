@@ -5,10 +5,20 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
+import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
+import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
+import sectionNightBg from "@assets/background_night_1767034895431.png";
+
+const getTimeBasedBackground = () => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) return sectionMorningBg;
+  if (hour >= 12 && hour < 18) return sectionAfternoonBg;
+  return sectionNightBg;
+};
 
 export default function Profile() {
   const [, setLocation] = useLocation();
@@ -16,7 +26,15 @@ export default function Profile() {
   const completedModals = useModalCompletionStore((state) => state.completedModals);
   const { toast } = useToast();
   
+  const [backgroundImage, setBackgroundImage] = useState(getTimeBasedBackground);
   const [isEditing, setIsEditing] = useState(false);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBackgroundImage(getTimeBasedBackground());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
   const [isSaving, setIsSaving] = useState(false);
   const [editFirstName, setEditFirstName] = useState('');
   const [editLastName, setEditLastName] = useState('');
@@ -177,12 +195,20 @@ export default function Profile() {
   if (isLoading) {
     return (
       <div 
-        className="min-h-screen flex items-center justify-center"
+        className="min-h-screen flex items-center justify-center relative"
         style={{ 
-          background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
         }}
       >
-        <div className="animate-pulse text-black/60">Loading...</div>
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 100%)'
+          }}
+        />
+        <div className="relative w-12 h-12 border-4 border-blush border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -190,16 +216,26 @@ export default function Profile() {
   if (!isAuthenticated) {
     return (
       <div 
-        className="min-h-screen"
+        className="min-h-screen relative"
         style={{ 
-          background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+          backgroundImage: `url(${backgroundImage})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed'
         }}
       >
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 100%)'
+          }}
+        />
+        
         <header 
           className="fixed top-0 left-0 right-0 z-50 px-4"
           style={{ 
             paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            background: 'rgba(255,255,255,0.7)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)'
           }}
@@ -217,14 +253,14 @@ export default function Profile() {
           </div>
         </header>
         
-        <div className="flex flex-col items-center justify-center p-4 pt-24 pb-28">
+        <div className="relative flex flex-col items-center justify-center p-4 pt-24 pb-28">
           <div 
-            className="w-full max-w-sm rounded-3xl p-6 border border-blush/10"
+            className="w-full max-w-sm rounded-3xl p-6 border border-white/30"
             style={{ 
-              background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
+              background: 'rgba(255,255,255,0.85)',
               backdropFilter: 'blur(20px) saturate(180%)',
               WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
             }}
           >
             <div className="w-20 h-20 rounded-full bg-gradient-feminine flex items-center justify-center mx-auto mb-5 shadow-lg">
@@ -236,19 +272,19 @@ export default function Profile() {
             </p>
             
             <div className="space-y-2.5 mb-6">
-              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+              <div className="flex items-center gap-3 bg-blush/10 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center flex-shrink-0">
                   <Trophy className="w-4 h-4 text-blush" />
                 </div>
                 <span className="platypi-regular text-sm text-black/70">Track your daily mitzvos</span>
               </div>
-              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+              <div className="flex items-center gap-3 bg-lavender/10 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center flex-shrink-0">
                   <Flame className="w-4 h-4 text-lavender" />
                 </div>
                 <span className="platypi-regular text-sm text-black/70">Build your daily streak</span>
               </div>
-              <div className="flex items-center gap-3 bg-white/50 rounded-xl p-3">
+              <div className="flex items-center gap-3 bg-sage/10 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center flex-shrink-0">
                   <Sparkles className="w-4 h-4 text-sage" />
                 </div>
@@ -278,16 +314,26 @@ export default function Profile() {
   
   return (
     <div 
-      className="min-h-screen"
+      className="min-h-screen relative"
       style={{ 
-        background: 'linear-gradient(180deg, hsl(350, 45%, 98%) 0%, hsl(260, 30%, 98%) 50%, hsl(350, 45%, 96%) 100%)'
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
       }}
     >
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.2) 100%)'
+        }}
+      />
+      
       <header 
         className="fixed top-0 left-0 right-0 z-50 px-4"
         style={{ 
           paddingTop: 'calc(var(--safe-area-top, 0px) + 8px)',
-          background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+          background: 'rgba(255,255,255,0.7)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)'
         }}
@@ -305,14 +351,14 @@ export default function Profile() {
         </div>
       </header>
       
-      <div className="p-4 pt-20 pb-24 space-y-3">
+      <div className="relative p-4 pt-20 pb-24 space-y-3">
         <div 
-          className="rounded-3xl p-5 border border-blush/10"
+          className="rounded-3xl p-5 border border-white/30"
           style={{ 
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.15) 0%, rgba(186,137,160,0.08) 100%)',
+            background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
           {!isEditing ? (
@@ -424,119 +470,124 @@ export default function Profile() {
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-blush/10"
+          className="rounded-3xl p-4 border border-white/30"
           style={{ 
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
           <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1 rounded-full bg-gradient-feminine">
+            <div className="p-1.5 rounded-full bg-gradient-feminine">
               <Sparkles className="w-3.5 h-3.5 text-white" />
             </div>
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
-              <div className="w-6 h-6 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-0.5">
-                <BookOpen className="w-3 h-3 text-blush" />
+          <div className="grid grid-cols-3 gap-2">
+            <div className="bg-blush/10 rounded-xl p-2.5 text-center">
+              <div className="w-8 h-8 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-1">
+                <BookOpen className="w-4 h-4 text-blush" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Torah</div>
             </div>
             
-            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
-              <div className="w-6 h-6 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-0.5">
-                <Heart className="w-3 h-3 text-lavender" />
+            <div className="bg-lavender/10 rounded-xl p-2.5 text-center">
+              <div className="w-8 h-8 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-1">
+                <Heart className="w-4 h-4 text-lavender" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
             </div>
             
-            <div className="bg-white/70 rounded-lg p-1.5 text-center border border-blush/10">
-              <div className="w-6 h-6 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-0.5">
-                <HandCoins className="w-3 h-3 text-sage" />
+            <div className="bg-sage/10 rounded-xl p-2.5 text-center">
+              <div className="w-8 h-8 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-1">
+                <HandCoins className="w-4 h-4 text-sage" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
+              <div className="platypi-bold text-xl text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
             </div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-blush/10"
+          className="rounded-3xl p-4 border border-white/30"
           style={{ 
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
           <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1 rounded-full bg-blush">
+            <div className="p-1.5 rounded-full bg-amber-400">
               <Trophy className="w-3.5 h-3.5 text-white" />
             </div>
             All-Time Stats
           </h3>
           
           <div className="grid grid-cols-3 gap-2 mb-3">
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="platypi-bold text-lg text-blush">{stats.totalTorah}</div>
+            <div className="bg-blush/10 rounded-xl p-2.5 text-center">
+              <div className="platypi-bold text-xl text-blush">{stats.totalTorah}</div>
               <div className="platypi-regular text-[10px] text-black/60">Torah</div>
             </div>
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="platypi-bold text-lg text-lavender">{stats.totalTefilla}</div>
+            <div className="bg-lavender/10 rounded-xl p-2.5 text-center">
+              <div className="platypi-bold text-xl text-lavender">{stats.totalTefilla}</div>
               <div className="platypi-regular text-[10px] text-black/60">Tefilla</div>
             </div>
-            <div className="bg-white/70 rounded-xl p-2 text-center border border-blush/10">
-              <div className="platypi-bold text-lg text-sage">{stats.totalTzedaka}</div>
+            <div className="bg-sage/10 rounded-xl p-2.5 text-center">
+              <div className="platypi-bold text-xl text-sage">{stats.totalTzedaka}</div>
               <div className="platypi-regular text-[10px] text-black/60">Tzedaka</div>
             </div>
           </div>
           
-          <div className="bg-gradient-feminine rounded-xl p-3 text-center">
-            <div className="platypi-bold text-2xl text-white">{stats.totalMitzvos}</div>
-            <div className="platypi-regular text-xs text-white/80">Total Mitzvos Completed</div>
+          <div className="bg-gradient-feminine rounded-xl p-4 text-center shadow-lg">
+            <div className="platypi-bold text-3xl text-white">{stats.totalMitzvos}</div>
+            <div className="platypi-regular text-sm text-white/90">Total Mitzvos Completed</div>
           </div>
         </div>
         
         <div 
-          className="rounded-3xl p-4 border border-blush/10"
+          className="rounded-3xl p-4 border border-white/30"
           style={{ 
-            background: 'linear-gradient(180deg, rgba(186,137,160,0.12) 0%, rgba(186,137,160,0.06) 100%)',
+            background: 'rgba(255,255,255,0.85)',
             backdropFilter: 'blur(20px) saturate(180%)',
             WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
           }}
         >
           <h3 className="platypi-bold text-sm text-black mb-3 flex items-center gap-2">
-            <div className="p-1 rounded-full bg-blush">
+            <div className="p-1.5 rounded-full bg-orange-400">
               <Flame className="w-3.5 h-3.5 text-white" />
             </div>
             Your Journey
           </h3>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white/70 rounded-xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-2xl text-blush">{stats.currentStreak}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Day Streak</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gradient-to-br from-blush/20 to-blush/10 rounded-xl p-4 text-center">
+              <div className="platypi-bold text-3xl text-blush">{stats.currentStreak}</div>
+              <div className="platypi-regular text-xs text-black/60">Day Streak</div>
             </div>
-            <div className="bg-white/70 rounded-xl p-3 text-center border border-blush/10">
-              <div className="platypi-bold text-2xl text-blush">{stats.totalDays}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Total Active Days</div>
+            <div className="bg-gradient-to-br from-lavender/20 to-lavender/10 rounded-xl p-4 text-center">
+              <div className="platypi-bold text-3xl text-lavender">{stats.totalDays}</div>
+              <div className="platypi-regular text-xs text-black/60">Active Days</div>
             </div>
           </div>
         </div>
         
         <button 
           onClick={() => logout()}
-          className="w-full bg-white/70 rounded-xl p-3 border border-blush/10 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
+          className="w-full rounded-xl p-3 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
+          style={{ 
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
           data-testid="button-sign-out"
         >
-          <LogOut className="w-4 h-4 text-black/60" />
-          <span className="platypi-regular text-xs text-black/60">Sign Out</span>
+          <LogOut className="w-4 h-4 text-black/50" />
+          <span className="platypi-regular text-sm text-black/60">Sign Out</span>
         </button>
       </div>
       
