@@ -129,6 +129,39 @@ export default function AppHeader() {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-48">
+                {!isLoading && !isAuthenticated && (
+                  <DropdownMenuItem
+                    onClick={() => setLocation('/login')}
+                    className="cursor-pointer"
+                    data-testid="menu-item-login"
+                    data-action="menu-login"
+                  >
+                    <User className="h-5 w-5 mr-2" />
+                    Create Profile
+                  </DropdownMenuItem>
+                )}
+                {isAuthenticated && user && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setLocation("/profile")}
+                      className="cursor-pointer"
+                      data-testid="menu-item-profile"
+                      data-action="menu-profile"
+                    >
+                      <User className="h-5 w-5 mr-2" />
+                      My Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => logout()}
+                      className="cursor-pointer"
+                      data-testid="menu-item-logout"
+                      data-action="menu-logout"
+                    >
+                      <LogOut className="h-5 w-5 mr-2" />
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={() => setLocation("/statistics")}
                   className="cursor-pointer"
@@ -137,15 +170,6 @@ export default function AppHeader() {
                 >
                   <BarChart3 className="h-5 w-5 mr-2" />
                   Analytics
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openModal('about', 'about')}
-                  className="cursor-pointer"
-                  data-testid="menu-item-info"
-                  data-action="menu-info"
-                >
-                  <Info className="h-5 w-5 mr-2" />
-                  Info
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => openModal('date-calculator-fullscreen', 'table')}
@@ -194,39 +218,15 @@ export default function AppHeader() {
                   <MessageSquare className="h-5 w-5 mr-2" />
                   Community Feedback
                 </DropdownMenuItem>
-                {!isLoading && !isAuthenticated && (
-                  <DropdownMenuItem
-                    onClick={() => setLocation('/login')}
-                    className="cursor-pointer"
-                    data-testid="menu-item-login"
-                    data-action="menu-login"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Create Profile
-                  </DropdownMenuItem>
-                )}
-                {isAuthenticated && user && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={() => setLocation("/profile")}
-                      className="cursor-pointer"
-                      data-testid="menu-item-profile"
-                      data-action="menu-profile"
-                    >
-                      <User className="h-5 w-5 mr-2" />
-                      My Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => logout()}
-                      className="cursor-pointer"
-                      data-testid="menu-item-logout"
-                      data-action="menu-logout"
-                    >
-                      <LogOut className="h-5 w-5 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
-                )}
+                <DropdownMenuItem
+                  onClick={() => openModal('about', 'about')}
+                  className="cursor-pointer"
+                  data-testid="menu-item-info"
+                  data-action="menu-info"
+                >
+                  <Info className="h-5 w-5 mr-2" />
+                  Info
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
