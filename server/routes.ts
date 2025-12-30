@@ -3808,6 +3808,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User Mitzvah Progress endpoints (for authenticated users)
+  app.get("/api/user/mitzvah-progress", optionalAuth, async (req, res) => {
+    try {
+      const userId = (req as any).auth?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const progress = await storage.getUserMitzvahProgress(userId);
+      if (!progress) {
+        return res.json({ 
+          modalCompletions: {}, 
+          tzedakaCompletions: {},
+          version: 0 
+        });
+      }
+      return res.json(progress);
+    } catch (error) {
+      console.error("Error fetching user mitzvah progress:", error);
+      return res.status(500).json({ message: "Failed to fetch mitzvah progress" });
+    }
+  });
+
+  app.put("/api/user/mitzvah-progress", optionalAuth, async (req, res) => {
+    try {
+      const userId = (req as any).auth?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const { modalCompletions, tzedakaCompletions } = req.body;
+      
+      if (typeof modalCompletions !== 'object' || typeof tzedakaCompletions !== 'object') {
+        return res.status(400).json({ message: "Invalid data format" });
+      }
+      
+      const updated = await storage.upsertUserMitzvahProgress(
+        userId, 
+        modalCompletions || {}, 
+        tzedakaCompletions || {}
+      );
+      return res.json(updated);
+    } catch (error) {
+      console.error("Error updating user mitzvah progress:", error);
+      return res.status(500).json({ message: "Failed to update mitzvah progress" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
