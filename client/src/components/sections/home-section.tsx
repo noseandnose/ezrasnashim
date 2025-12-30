@@ -522,8 +522,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               style={{
                 background: currentPrayer.disabled 
                   ? 'rgb(209, 213, 219)' 
-                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.6) 0%, rgba(200, 162, 200, 0.6) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
               <PrayerIcon className="text-black" size={10} />
@@ -554,8 +554,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             <div 
               className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
-                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.6) 0%, rgba(200, 162, 200, 0.6) 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
               <MapPin className="text-black" size={10} />
