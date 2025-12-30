@@ -1,12 +1,14 @@
 import { useLocation } from "wouter";
-import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
+import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { useMemo, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
@@ -40,12 +42,14 @@ export default function Profile() {
   const [editLastName, setEditLastName] = useState('');
   const [editHebrewName, setEditHebrewName] = useState('');
   const [editBirthday, setEditBirthday] = useState('');
+  const [editAfterSunset, setEditAfterSunset] = useState(false);
   
   const startEditing = () => {
     setEditFirstName(user?.firstName || '');
     setEditLastName(user?.lastName || '');
     setEditHebrewName(user?.hebrewName || '');
     setEditBirthday(user?.birthday || '');
+    setEditAfterSunset(user?.birthdayAfterSunset || false);
     setIsEditing(true);
   };
   
@@ -75,6 +79,7 @@ export default function Profile() {
         lastName: editLastName.trim(),
         hebrewName: editHebrewName.trim(),
         birthday: editBirthday,
+        birthdayAfterSunset: editAfterSunset,
       });
       toast({ title: "Profile updated", description: "Your changes have been saved." });
       setIsEditing(false);
@@ -98,6 +103,23 @@ export default function Profile() {
       return dateStr;
     }
   };
+
+  const { data: hebrewBirthday } = useQuery({
+    queryKey: ['/api/hebrew-date/birthday', user?.birthday, user?.birthdayAfterSunset],
+    enabled: !!user?.birthday,
+    queryFn: async (): Promise<{ hebrew: string } | null> => {
+      if (!user?.birthday) return null;
+      const [year, month, day] = user.birthday.split('-').map(Number);
+      const afterSunset = user.birthdayAfterSunset ? 1 : 0;
+      const res = await fetch(
+        `https://www.hebcal.com/converter?cfg=json&gy=${year}&gm=${month}&gd=${day}&g2h=1&gs=${afterSunset}`
+      );
+      if (!res.ok) throw new Error('Failed to fetch Hebrew date');
+      const data = await res.json();
+      return { hebrew: data.hebrew as string };
+    },
+    staleTime: Infinity,
+  });
   
   const getTodayString = () => {
     const today = new Date();
@@ -379,10 +401,18 @@ export default function Profile() {
               </div>
               <p className="platypi-regular text-xs text-black/50 mt-2 truncate">{user?.email}</p>
               {user?.birthday && (
-                <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1">
-                  <Calendar className="w-3 h-3" />
-                  {formatBirthday(user.birthday)}
-                </p>
+                <div className="mt-1">
+                  <p className="platypi-regular text-xs text-black/50 flex items-center gap-1">
+                    <Calendar className="w-3 h-3" />
+                    {formatBirthday(user.birthday)}
+                  </p>
+                  {hebrewBirthday?.hebrew && (
+                    <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-0.5 font-hebrew" dir="rtl">
+                      <Sun className="w-3 h-3 ml-1" />
+                      {hebrewBirthday.hebrew}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           ) : (
@@ -448,6 +478,21 @@ export default function Profile() {
                     className="bg-white/80 border-blush/20 rounded-xl text-sm"
                     data-testid="input-edit-birthday"
                   />
+                  <div className="flex items-center gap-2 pl-1">
+                    <Checkbox
+                      id="after-sunset"
+                      checked={editAfterSunset}
+                      onCheckedChange={(checked) => setEditAfterSunset(checked === true)}
+                      className="border-blush/40 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                      data-testid="checkbox-after-sunset"
+                    />
+                    <label 
+                      htmlFor="after-sunset" 
+                      className="platypi-regular text-xs text-black/60 cursor-pointer"
+                    >
+                      Born after sunset
+                    </label>
+                  </div>
                 </div>
             </div>
           )}
