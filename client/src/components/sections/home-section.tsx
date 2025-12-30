@@ -448,26 +448,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           zIndex: 2
         }}
       >
-        {/* Greeting and Date in one row */}
-        <div className="flex items-start justify-between mb-3">
-          <div>
-            <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
-            <p className="platypi-regular text-xs text-black/60">Daily Torah, Tefilla and Tzedaka</p>
-          </div>
-          <div className="text-right">
-            <p className="platypi-regular text-xs text-black">{hebrewDate || "Loading..."}</p>
-            <button 
-              onClick={() => openModal('location', 'home')}
-              className={`flex items-center justify-end space-x-1 hover:bg-white/80 px-2 py-1 rounded-xl transition-colors h-auto ${(permissionDenied || !coordinates) ? 'animate-pulse border-2 border-blush bg-blush/10' : 'border border-gray-200 bg-white/60'}`}
-              style={{ height: 'auto', minHeight: 'auto' }}
-              data-modal-type="location"
-              data-modal-section="home"
-              data-testid="button-home-location"
-            >
-              <MapPin className="text-gray-600" size={10} />
-              <p className="platypi-medium text-xs text-gray-700">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
-            </button>
-          </div>
+        {/* Greeting */}
+        <div className="mb-3">
+          <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
         </div>
         
         {/* Sponsor Section */}
