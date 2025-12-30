@@ -195,12 +195,34 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return now >= tzaisTime;
   };
 
-  // Get time-appropriate greeting (evening starts at tzais hakochavim)
+  // Helper to check if current time is after naitz (sunrise)
+  const isAfterNaitz = (): boolean => {
+    const sunriseStr = jewishTimesQuery.data?.sunrise;
+    if (!sunriseStr) return new Date().getHours() >= 6; // Fallback to 6 AM if no data
+    
+    const now = new Date();
+    const match = sunriseStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
+    if (!match) return now.getHours() >= 6;
+    
+    let hours = parseInt(match[1]);
+    const minutes = parseInt(match[2]);
+    const isPM = match[3].toUpperCase() === 'PM';
+    
+    if (isPM && hours !== 12) hours += 12;
+    if (!isPM && hours === 12) hours = 0;
+    
+    const sunriseTime = new Date(now);
+    sunriseTime.setHours(hours, minutes, 0, 0);
+    
+    return now >= sunriseTime;
+  };
+
+  // Get time-appropriate greeting (morning starts at naitz, evening at tzais hakochavim)
   const getGreeting = () => {
-    const hour = new Date().getHours();
     let greeting = "";
-    if (hour < 12) greeting = "Good Morning";
+    if (!isAfterNaitz()) greeting = "Good Evening"; // Before sunrise = still night
     else if (isAfterTzais()) greeting = "Good Evening";
+    else if (new Date().getHours() < 12) greeting = "Good Morning";
     else greeting = "Good Afternoon";
     
     // Add user's first name if logged in
@@ -211,35 +233,35 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return greeting;
   };
 
-  // Get time-appropriate background for garden
+  // Get time-appropriate background for garden (night until naitz/sunrise)
   const getGardenBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return morningBackground;
+    if (!isAfterNaitz()) return nightBackground; // Before sunrise = night
     if (isAfterTzais()) return nightBackground;
+    if (new Date().getHours() < 12) return morningBackground;
     return afternoonBackground;
   };
 
-  // Get time-appropriate background for prayer button
+  // Get time-appropriate background for prayer button (night until naitz/sunrise)
   const getPrayerButtonBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return prayerMorningBg;
+    if (!isAfterNaitz()) return prayerNightBg; // Before sunrise = night
     if (isAfterTzais()) return prayerNightBg;
+    if (new Date().getHours() < 12) return prayerMorningBg;
     return prayerAfternoonBg;
   };
 
-  // Get time-appropriate background for shkia button
+  // Get time-appropriate background for shkia button (night until naitz/sunrise)
   const getShkiaButtonBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return shkiaMorningBg;
+    if (!isAfterNaitz()) return shkiaNightBg; // Before sunrise = night
     if (isAfterTzais()) return shkiaNightBg;
+    if (new Date().getHours() < 12) return shkiaMorningBg;
     return shkiaAfternoonBg;
   };
 
-  // TEMPORARY: Get time-appropriate background for main section
+  // TEMPORARY: Get time-appropriate background for main section (night until naitz/sunrise)
   const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
+    if (!isAfterNaitz()) return sectionNightBg; // Before sunrise = night
     if (isAfterTzais()) return sectionNightBg;
+    if (new Date().getHours() < 12) return sectionMorningBg;
     return sectionAfternoonBg;
   };
 
