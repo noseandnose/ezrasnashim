@@ -488,7 +488,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <button 
             onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
             disabled={currentPrayer.disabled}
-            className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 ${
+            className={`w-full h-full rounded-xl p-2 text-center transition-all duration-300 ${
               currentPrayer.disabled 
                 ? 'opacity-60 cursor-not-allowed' 
                 : 'hover:scale-105'
@@ -524,7 +524,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           {/* Shkia - Clickable to open Events - Apple Glass Style */}
           <button 
             onClick={() => openModal('events', 'home')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300 relative"
+            className="w-full h-full rounded-xl p-2 text-center hover:scale-105 transition-all duration-300 relative"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
