@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles, Sun } from "lucide-react";
+import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -401,18 +401,16 @@ export default function Profile() {
               </div>
               <p className="platypi-regular text-xs text-black/50 mt-2 truncate">{user?.email}</p>
               {user?.birthday && (
-                <div className="mt-1">
-                  <p className="platypi-regular text-xs text-black/50 flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatBirthday(user.birthday)}
-                  </p>
+                <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-1 flex-wrap">
+                  <Calendar className="w-3 h-3" />
+                  <span>{formatBirthday(user.birthday)}</span>
                   {hebrewBirthday?.hebrew && (
-                    <p className="platypi-regular text-xs text-black/50 flex items-center gap-1 mt-0.5 font-hebrew" dir="rtl">
-                      <Sun className="w-3 h-3 ml-1" />
-                      {hebrewBirthday.hebrew}
-                    </p>
+                    <>
+                      <span className="text-black/30">•</span>
+                      <span className="font-hebrew">{hebrewBirthday.hebrew}</span>
+                    </>
                   )}
-                </div>
+                </p>
               )}
             </div>
           ) : (
@@ -483,7 +481,7 @@ export default function Profile() {
                       id="after-sunset"
                       checked={editAfterSunset}
                       onCheckedChange={(checked) => setEditAfterSunset(checked === true)}
-                      className="border-blush/40 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
+                      className="h-4 w-4 rounded-full border-blush/40 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
                       data-testid="checkbox-after-sunset"
                     />
                     <label 
