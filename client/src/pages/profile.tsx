@@ -2,7 +2,6 @@ import { useLocation } from "wouter";
 import { User, BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
 import { getLocalDateString } from "@/lib/dateUtils";
@@ -467,29 +466,38 @@ export default function Profile() {
                     dir="rtl"
                     data-testid="input-edit-hebrew-name"
                   />
-                  <Input
-                    type="date"
-                    placeholder="Birthday"
-                    value={editBirthday}
-                    onChange={(e) => setEditBirthday(e.target.value)}
-                    max={getTodayString()}
-                    className="bg-white/80 border-blush/20 rounded-xl text-sm"
-                    data-testid="input-edit-birthday"
-                  />
-                  <div className="flex items-center gap-2 pl-1">
-                    <Checkbox
-                      id="after-sunset"
-                      checked={editAfterSunset}
-                      onCheckedChange={(checked) => setEditAfterSunset(checked === true)}
-                      className="h-4 w-4 rounded-full border-blush/40 data-[state=checked]:bg-blush data-[state=checked]:border-blush"
-                      data-testid="checkbox-after-sunset"
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="date"
+                      placeholder="Birthday"
+                      value={editBirthday}
+                      onChange={(e) => setEditBirthday(e.target.value)}
+                      max={getTodayString()}
+                      className="bg-white/80 border-blush/20 rounded-xl text-sm flex-1"
+                      data-testid="input-edit-birthday"
                     />
-                    <label 
-                      htmlFor="after-sunset" 
-                      className="platypi-regular text-xs text-black/60 cursor-pointer"
-                    >
-                      Born after sunset
-                    </label>
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setEditAfterSunset(!editAfterSunset)}
+                        className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                          editAfterSunset 
+                            ? 'bg-blush border-blush' 
+                            : 'bg-white/80 border-blush/40'
+                        }`}
+                        data-testid="checkbox-after-sunset"
+                      >
+                        {editAfterSunset && (
+                          <Check className="w-3 h-3 text-white" />
+                        )}
+                      </button>
+                      <label 
+                        onClick={() => setEditAfterSunset(!editAfterSunset)}
+                        className="platypi-regular text-[10px] text-black/60 cursor-pointer whitespace-nowrap"
+                      >
+                        After sunset
+                      </label>
+                    </div>
                   </div>
                 </div>
             </div>
