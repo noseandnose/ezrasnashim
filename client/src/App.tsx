@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSafeArea } from "@/hooks/use-safe-area";
 import { useBackButton } from "@/hooks/use-back-button";
+import { useMitzvahSync } from "@/hooks/use-mitzvah-sync";
 import { initializeCache } from "@/lib/cache";
 import { lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
@@ -55,6 +56,9 @@ function Router() {
   
   // Handle Android back button navigation
   useBackButton();
+  
+  // Sync mitzvah progress for authenticated users
+  useMitzvahSync();
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
