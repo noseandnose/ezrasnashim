@@ -153,7 +153,7 @@ export default function Profile() {
               key === 'tehillim-text' ||
               key.startsWith('meditation-')) {
             tefilla += count;
-          } else if (key === 'tzedaka-daily' || key === 'tzedaka-donation') {
+          } else if (key.startsWith('tzedaka-')) {
             tzedaka += count;
           }
         });
