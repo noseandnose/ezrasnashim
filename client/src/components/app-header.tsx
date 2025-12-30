@@ -229,7 +229,8 @@ export default function AppHeader() {
               draggable={false}
             />
           </div>
-          <div className="flex items-center gap-1 flex-1 justify-end">
+          <div className="flex flex-col items-end flex-1">
+            <span className="font-hebrew text-[8px] text-black/50 leading-none" dir="rtl">בס״ד</span>
             <button
               onClick={() => setShowSearchModal(true)}
               className="flex items-center justify-center rounded-full transition-colors"
