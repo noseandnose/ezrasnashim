@@ -203,7 +203,7 @@ export function useMitzvahSync() {
 
 function getTzedakaCompletions(): Record<string, Record<string, number>> {
   try {
-    const stored = localStorage.getItem('tzedakaCompletions');
+    const stored = localStorage.getItem('tzedaka_button_completions');
     if (stored) {
       return JSON.parse(stored);
     }
@@ -232,7 +232,7 @@ function mergeTzedakaCompletions(
       }
     }
     
-    localStorage.setItem('tzedakaCompletions', JSON.stringify(merged));
+    localStorage.setItem('tzedaka_button_completions', JSON.stringify(merged));
   } catch (e) {
     console.error('Error merging tzedaka completions:', e);
   }
@@ -248,7 +248,7 @@ export function saveTzedakaCompletion(type: string): void {
     }
     current[today][type] = (current[today][type] || 0) + 1;
     
-    localStorage.setItem('tzedakaCompletions', JSON.stringify(current));
+    localStorage.setItem('tzedaka_button_completions', JSON.stringify(current));
     
     triggerMitzvahSync();
   } catch (e) {

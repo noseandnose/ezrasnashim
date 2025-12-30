@@ -12,6 +12,7 @@ import { playCoinSound } from "@/utils/sounds";
 import { useAnalytics } from "@/hooks/use-analytics";
 import type { Section } from "@/pages/home";
 import { useTzedakaSummary } from "@/hooks/use-tzedaka-summary";
+import { triggerMitzvahSync } from "@/hooks/use-mitzvah-sync";
 
 interface CommunityImpact {
   id: number;
@@ -159,18 +160,13 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
       completions[today][buttonType] = true;
     }
     
-    // Clean up old data (keep only last 2 days)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toLocaleDateString('en-CA');
-    
-    Object.keys(completions).forEach(date => {
-      if (date !== today && date !== yesterdayStr) {
-        delete completions[date];
-      }
-    });
+    // Note: No longer pruning old data to preserve cloud-synced history
+    // Historical data is needed for streak calculations and profile stats
     
     localStorage.setItem('tzedaka_button_completions', JSON.stringify(completions));
+    
+    // Trigger cloud sync for authenticated users
+    triggerMitzvahSync();
   };
 
   // Reset explosion state when modal changes and check daily reset

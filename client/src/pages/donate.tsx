@@ -10,6 +10,7 @@ import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } fr
 // TzedakaButtonType definition
 type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | 'sponsor_a_day';
 import { playCoinSound } from "@/utils/sounds";
+import { triggerMitzvahSync } from "@/hooks/use-mitzvah-sync";
 // Removed Apple Pay button import - now using integrated PaymentElement
 
 // Add Apple Pay types
@@ -437,18 +438,13 @@ export default function Donate() {
     
     completions[today][buttonType] = true;
     
-    // Clean up old data (keep only last 2 days)
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toLocaleDateString('en-CA');
-    
-    Object.keys(completions).forEach(date => {
-      if (date !== today && date !== yesterdayStr) {
-        delete completions[date];
-      }
-    });
+    // Note: No longer pruning old data to preserve cloud-synced history
+    // Historical data is needed for streak calculations and profile stats
     
     localStorage.setItem('tzedaka_button_completions', JSON.stringify(completions));
+    
+    // Trigger cloud sync for authenticated users
+    triggerMitzvahSync();
   };
 
   // Function to call backend payment confirmation endpoint (idempotent)
