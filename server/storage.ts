@@ -2729,15 +2729,16 @@ export class DatabaseStorage implements IStorage {
 
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0, meditationsCompleted: number = 0): number {
-    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim'];
+    const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-class'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
+    const lifeActs = ['life-class', 'marriage-insights'];
     
     let totalActs = 0;
     
     // Count modal acts
     for (const [modalType, count] of Object.entries(modalCompletions || {})) {
-      if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType)) {
+      if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType) || lifeActs.includes(modalType)) {
         totalActs += count;
       }
       // Also count individual tehillim, chain tehillim (with psalm number), womens prayers, and individual brochas

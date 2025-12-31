@@ -13,7 +13,6 @@ import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
-import { apiRequest } from "@/lib/queryClient";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -52,21 +51,16 @@ export default function TableModals() {
     window.location.hash = '#/?section=home&scrollToProgress=true';
   };
 
-  // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
+  // Separate handler for marriage insights
   const handleMarriageInsightComplete = () => {
     if (isCompletingMarriage) return; // Prevent double-click
     setIsCompletingMarriage(true);
     
-    // Track feature usage in Google Analytics
-    trackFeatureUsage('marriage-insights');
+    // Track modal completion for analytics (counts toward total acts)
+    trackModalComplete('marriage-insights');
     
-    // Log to backend for analytics (fire and forget - don't wait)
-    apiRequest('POST', '/api/feature-usage', {
-      featureName: 'marriage-insights',
-      category: 'torah'
-    }).catch(error => {
-      console.error('Error logging marriage insights usage:', error);
-    });
+    // Also track as feature usage for Google Analytics
+    trackFeatureUsage('marriage-insights');
     
     // Mark as complete in local storage
     markModalComplete('marriage-insights');
