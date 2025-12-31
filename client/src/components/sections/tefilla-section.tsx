@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 
@@ -624,7 +624,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? (
                 <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Star className="text-black" size={10} />
+                <BookOpen className="text-black" size={10} />
               )}
               <p className="platypi-bold text-[10px] text-black">Siddur</p>
             </div>
