@@ -374,7 +374,7 @@ export default function TableSection() {
               ) : (
                 <Utensils className={!recipeContent ? 'text-gray-500' : 'text-black'} size={10} />
               )}
-              <p className={`platypi-bold text-[11px] ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
+              <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
             </div>
             <p className={`platypi-bold text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
               {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
@@ -410,7 +410,7 @@ export default function TableSection() {
               ) : (
                 <Heart className="text-black" size={10} />
               )}
-              <p className="platypi-bold text-[11px] text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
+              <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
               {isModalComplete('marriage-insights') ? 'Completed' : 'by Devora Levy'}
@@ -464,7 +464,7 @@ export default function TableSection() {
               ) : (
                 <Home className={!currentLifeClass ? 'text-gray-500' : 'text-black'} size={10} />
               )}
-              <p className={`platypi-bold text-[11px] ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
+              <p className={`platypi-bold text-xs ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
             </div>
             <p className={`platypi-bold text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
               {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
@@ -494,7 +494,7 @@ export default function TableSection() {
               }}
             >
               <Brain className="text-black" size={10} />
-              <p className="platypi-bold text-[11px] text-black">Meditation</p>
+              <p className="platypi-bold text-xs text-black">Meditation</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">
               Calm your mind

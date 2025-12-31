@@ -459,7 +459,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   ) : (
                     <Icon className="text-black" size={10} />
                   )}
-                  <p className="platypi-bold text-[11px] text-black">{title}</p>
+                  <p className="platypi-bold text-xs text-black">{title}</p>
                 </div>
                 
                 {/* Subtitle */}
