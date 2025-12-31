@@ -594,83 +594,148 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
       </div>
 
       {/* OTHER SECTIONS BELOW - SEPARATE FROM MAIN */}
-      <div className="py-2 space-y-2">
-        {/* Top Row: Siddur and Tehillim */}
+      <div className="py-2">
+        {/* 2x2 Grid: Siddur, Tehillim, Women's Tefillas, Nishmas - Apple Glass Style */}
         <div className="grid grid-cols-2 gap-2">
+          {/* Siddur */}
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type="brochas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-brochas"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Star className="text-white" size={18} />
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              style={{
+                background: (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon'))
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? (
+                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Star className="text-black" size={10} />
+              )}
+              <p className="platypi-bold text-[10px] text-black">Siddur</p>
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Siddur</h3>
-            <p className="platypi-regular text-xs text-black/60">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas and Brochas'}
+            <p className="platypi-bold text-xs text-black leading-tight">
+              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas & Brochas'}
             </p>
           </button>
 
+          {/* Tehillim */}
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type="special-tehillim"
             data-modal-section="tefilla"
             data-testid="button-tefilla-tehillim"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              hasAnyTehillimCompleted() ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Stars className="text-white" size={18} />
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              style={{
+                background: hasAnyTehillimCompleted()
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {hasAnyTehillimCompleted() ? (
+                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Stars className="text-black" size={10} />
+              )}
+              <p className="platypi-bold text-[10px] text-black">Tehillim</p>
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Tehillim</h3>
-            <p className="platypi-regular text-xs text-black/60">
+            <p className="platypi-bold text-xs text-black leading-tight">
               {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
             </p>
           </button>
-        </div>
 
-        {/* Bottom Row: Women's Tefillas and Nishmas */}
-        <div className="grid grid-cols-2 gap-2">
+          {/* Women's Tefillas */}
           <button
             onClick={() => openModal('womens-tefillas', 'tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type="womens-tefillas"
             data-modal-section="tefilla"
             data-testid="button-tefilla-womens"
           >
-            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
-              <HandHeart className="text-white" size={18} />
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              style={{
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              <HandHeart className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">Women's Tefillas</p>
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Women's Tefillas</h3>
-            <p className="platypi-regular text-xs text-black/60">Special Prayers</p>
+            <p className="platypi-bold text-xs text-black leading-tight">Special Prayers</p>
           </button>
 
+          {/* Nishmas Kol Chai */}
           <button 
             onClick={() => openModal('nishmas-campaign', 'tefilla')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             data-modal-type="nishmas-campaign"
             data-modal-section="tefilla"
             data-testid="button-tefilla-nishmas"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('nishmas-campaign') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Heart className="text-white" size={18} />
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              style={{
+                background: isModalComplete('nishmas-campaign')
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {isModalComplete('nishmas-campaign') ? (
+                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Heart className="text-black" size={10} />
+              )}
+              <p className="platypi-bold text-[10px] text-black">Nishmas Kol Chai</p>
             </div>
-            <h3 className="platypi-bold text-sm text-black mb-1">Nishmas Kol Chai</h3>
-            <p className="platypi-regular text-xs text-black/60">
+            <p className="platypi-bold text-xs text-black leading-tight">
               {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}
             </p>
           </button>
         </div>
 
         {/* The Kotel Compass Section */}
-        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg">
+        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg mt-2">
           <Button
             variant="ghost"
             onClick={handleOpenCompass}
