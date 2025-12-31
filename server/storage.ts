@@ -2488,11 +2488,13 @@ export class DatabaseStorage implements IStorage {
     if (!recordedSessionsPerDay.has(today)) {
       recordedSessionsPerDay.set(today, new Set());
       // Clean up old dates to prevent memory leak
-      for (const key of recordedSessionsPerDay.keys()) {
+      const keysToDelete: string[] = [];
+      recordedSessionsPerDay.forEach((_, key) => {
         if (key !== today) {
-          recordedSessionsPerDay.delete(key);
+          keysToDelete.push(key);
         }
-      }
+      });
+      keysToDelete.forEach(key => recordedSessionsPerDay.delete(key));
     }
     
     const todaySessions = recordedSessionsPerDay.get(today)!;
