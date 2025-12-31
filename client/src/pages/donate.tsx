@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
+import { useAnalytics } from "@/hooks/use-analytics";
 
 // TzedakaButtonType definition
 type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | 'sponsor_a_day';
@@ -406,6 +407,7 @@ export default function Donate() {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const {  addCompletedDonation } = useDonationCompletionStore();
   const { openModal } = useModalStore();
+  const { trackEvent } = useAnalytics();
   
   // Use ref to track if payment intent has been created
   const paymentIntentCreatedRef = useRef(false);
@@ -510,6 +512,13 @@ export default function Donate() {
         // CRITICAL FIX: Also complete the overall daily tzedaka task
         completeTask('tzedaka');
         
+        // Track donation for analytics (counts toward total acts)
+        trackEvent('tzedaka_completion', {
+          buttonType: buttonType,
+          amount: amount,
+          date: new Date().toISOString().split('T')[0]
+        });
+        
         // ENHANCED CACHE INVALIDATION: Force refresh ALL donation-related data immediately
         const today = new Date().toISOString().split('T')[0];
         // Campaign data
@@ -546,6 +555,12 @@ export default function Donate() {
       markTzedakaButtonCompleted(buttonType as TzedakaButtonType);
       // Also complete the overall daily tzedaka task
       completeTask('tzedaka');
+      // Track donation for analytics even when backend fails
+      trackEvent('tzedaka_completion', {
+        buttonType: buttonType,
+        amount: amount,
+        date: new Date().toISOString().split('T')[0]
+      });
     }
   };
 

@@ -60,11 +60,21 @@ async function syncPendingEvents(): Promise<void> {
   }
 }
 
-// Generate or retrieve session ID
+// Generate or retrieve device ID (persistent across sessions)
+const getDeviceId = () => {
+  let deviceId = localStorage.getItem("ezras_nashim_device_id");
+  if (!deviceId) {
+    deviceId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem("ezras_nashim_device_id", deviceId);
+  }
+  return deviceId;
+};
+
+// Generate or retrieve session ID (per browser session for event tracking)
 const getSessionId = () => {
   let sessionId = sessionStorage.getItem("analytics_session_id");
   if (!sessionId) {
-    sessionId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    sessionId = `${getDeviceId()}-${Date.now()}`;
     sessionStorage.setItem("analytics_session_id", sessionId);
   }
   return sessionId;
@@ -124,17 +134,29 @@ export const useAnalytics = () => {
     },
   });
 
-  // Track unique session/user activity efficiently (once per session)
+  // Track unique user activity efficiently (once per device per day)
   useEffect(() => {
-    const sessionKey = `session_tracked_${getSessionId()}`;
-    if (!sessionStorage.getItem(sessionKey)) {
-      // Track this unique session only once
+    const today = getLocalDateString();
+    const deviceId = getDeviceId();
+    const dailyTrackKey = `ezras_nashim_daily_tracked_${today}`;
+    
+    // Only track user once per day per device (using localStorage for persistence)
+    if (!localStorage.getItem(dailyTrackKey)) {
+      // Track this unique user for today
       fetch(`${import.meta.env.VITE_API_URL || ''}/api/analytics/session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: getSessionId() }),
+        body: JSON.stringify({ sessionId: `${deviceId}-${today}` }),
       });
-      sessionStorage.setItem(sessionKey, "true");
+      localStorage.setItem(dailyTrackKey, "true");
+      
+      // Clean up old daily tracking keys (keep only today's)
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('ezras_nashim_daily_tracked_') && key !== dailyTrackKey) {
+          localStorage.removeItem(key);
+        }
+      }
     }
     
     // Sync any pending events on mount

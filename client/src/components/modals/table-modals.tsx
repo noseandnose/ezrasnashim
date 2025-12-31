@@ -13,7 +13,6 @@ import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
-import { apiRequest } from "@/lib/queryClient";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -32,6 +31,7 @@ export default function TableModals() {
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
   const [fontSize, setFontSize] = useState(16);
+  const [isCompletingMarriage, setIsCompletingMarriage] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const lastArrowTouchTime = useRef<number>(0);
@@ -51,41 +51,33 @@ export default function TableModals() {
     window.location.hash = '#/?section=home&scrollToProgress=true';
   };
 
-  // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
-  const handleMarriageInsightComplete = async () => {
-    try {
-      // Track feature usage in Google Analytics
-      trackFeatureUsage('marriage-insights');
-      
-      // Log to backend for analytics
-      await apiRequest('POST', '/api/feature-usage', {
-        featureName: 'marriage-insights',
-        category: 'torah'
-      });
-      
-      // Mark as complete in local storage
-      markModalComplete('marriage-insights');
-      
-      // Complete the Torah daily task
-      completeTask('torah');
-      
-      // Reset fullscreen content state
-      if (fullscreenContent.isOpen) {
-        setFullscreenContent({ isOpen: false, title: '', content: null });
-      }
-      
-      closeModal();
-      
-      // Navigate to home and scroll to progress to show flower growth
-      window.location.hash = '#/?section=home&scrollToProgress=true';
-    } catch (error) {
-      console.error('Error completing marriage insights:', error);
-      // Still mark as complete locally even if backend logging fails
-      markModalComplete('marriage-insights');
-      completeTask('torah');
-      closeModal();
-      window.location.hash = '#/?section=home&scrollToProgress=true';
+  // Separate handler for marriage insights
+  const handleMarriageInsightComplete = () => {
+    if (isCompletingMarriage) return; // Prevent double-click
+    setIsCompletingMarriage(true);
+    
+    // Track modal completion for analytics (counts toward total acts)
+    trackModalComplete('marriage-insights');
+    
+    // Also track as feature usage for Google Analytics
+    trackFeatureUsage('marriage-insights');
+    
+    // Mark as complete in local storage
+    markModalComplete('marriage-insights');
+    
+    // Complete the Life daily task (Marriage Insights uses Life flowers)
+    completeTask('life');
+    
+    // Reset fullscreen content state
+    if (fullscreenContent.isOpen) {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
     }
+    
+    closeModal();
+    setIsCompletingMarriage(false);
+    
+    // Navigate to home and scroll to progress to show flower growth
+    window.location.hash = '#/?section=home&scrollToProgress=true';
   };
   
 

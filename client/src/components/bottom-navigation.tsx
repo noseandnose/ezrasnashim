@@ -1,5 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -11,6 +11,29 @@ export default function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      setIsKeyboardOpen(false);
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+    };
+  }, []);
+
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah" },
     { id: "tefilla" as Section, icon: HandHeart, label: "Tefilla" },
@@ -21,6 +44,10 @@ export default function BottomNavigation({
 
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
+
+  if (isKeyboardOpen) {
+    return null;
+  }
 
   return (
     <nav

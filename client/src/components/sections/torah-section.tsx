@@ -283,7 +283,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             data-testid="button-torah-class"
           >
             <div className="flex items-center gap-3">
-              {/* Image */}
+              {/* Image or Icon with completion state */}
               {currentTorahClass.imageUrl ? (
                 <img 
                   src={currentTorahClass.imageUrl} 
@@ -292,7 +292,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   loading="lazy"
                 />
               ) : (
-                <div className="bg-gradient-feminine p-2 rounded-full">
+                <div className={`p-2 rounded-full ${isModalComplete('torah-class') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
                   <GraduationCap className="text-white" size={16} />
                 </div>
               )}
@@ -300,13 +300,17 @@ function TorahSectionComponent({}: TorahSectionProps) {
               {/* Title and Subtitle */}
               <div className="flex-grow">
                 <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
-                {currentTorahClass.subtitle && (
-                  <p className="platypi-regular text-xs text-black/70">{currentTorahClass.subtitle}</p>
-                )}
+                <p className="platypi-regular text-xs text-black/70">
+                  {isModalComplete('torah-class') ? 'Completed' : (currentTorahClass.subtitle || '')}
+                </p>
               </div>
               
-              {/* Arrow indicator */}
-              <ChevronRight className="text-black/40" size={18} />
+              {/* Checkmark when completed, arrow when not */}
+              {isModalComplete('torah-class') ? (
+                <Check className="text-sage" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40" size={18} />
+              )}
             </div>
           </button>
         )}
@@ -317,7 +321,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
       <div className="p-2 space-y-1">
         <div className="grid grid-cols-2 gap-2 mb-1">
           {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
-            const isCompleted = isModalComplete(id);
+            // Map button IDs to modal IDs for completion tracking
+            // 'speakers' button opens parsha-vort modal, so check that ID
+            const modalId = id === 'speakers' ? 'parsha-vort' : id;
+            const isCompleted = isModalComplete(modalId);
             
             // Get content for each button
             let hasContent = false;
