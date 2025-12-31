@@ -626,7 +626,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               ) : (
                 <BookOpen className="text-black" size={10} />
               )}
-              <p className="platypi-bold text-[10px] text-black">Siddur</p>
+              <p className="platypi-bold text-[11px] text-black">Siddur</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">
               {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas & Brochas'}
@@ -662,7 +662,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               ) : (
                 <Stars className="text-black" size={10} />
               )}
-              <p className="platypi-bold text-[10px] text-black">Tehillim</p>
+              <p className="platypi-bold text-[11px] text-black">Tehillim</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">
               {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
@@ -692,7 +692,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               }}
             >
               <HandHeart className="text-black" size={10} />
-              <p className="platypi-bold text-[10px] text-black">Women's Tefillas</p>
+              <p className="platypi-bold text-[11px] text-black">Women's Tefillas</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Special Prayers</p>
           </button>
@@ -726,7 +726,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               ) : (
                 <Heart className="text-black" size={10} />
               )}
-              <p className="platypi-bold text-[10px] text-black">Nishmas Kol Chai</p>
+              <p className="platypi-bold text-[11px] text-black">Nishmas Kol Chai</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">
               {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}

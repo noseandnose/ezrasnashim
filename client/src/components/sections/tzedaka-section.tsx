@@ -385,7 +385,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               ) : (
                 <HandCoins className="text-black" size={10} />
               )}
-              <p className="platypi-bold text-[10px] text-black">Sponsor a Day</p>
+              <p className="platypi-bold text-[11px] text-black">Sponsor a Day</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">
               {isTzedakaButtonCompleted('sponsor_a_day') ? 'Completed' : 'Dedicate mitzvas'}
@@ -419,7 +419,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
                 ) : (
                   <HandCoins className="text-black" size={10} />
                 )}
-                <p className="platypi-bold text-[10px] text-black">Gave Elsewhere</p>
+                <p className="platypi-bold text-[11px] text-black">Gave Elsewhere</p>
               </div>
               <p className="platypi-bold text-xs text-black leading-tight">
                 {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()}X today` : 'Mark as complete'}

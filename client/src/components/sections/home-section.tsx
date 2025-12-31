@@ -536,7 +536,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               }}
             >
               <PrayerIcon className="text-black" size={10} />
-              <p className="platypi-bold text-[10px] text-black">
+              <p className="platypi-bold text-[11px] text-black">
                 {currentPrayer.title}
               </p>
             </div>
@@ -568,7 +568,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               }}
             >
               <MapPin className="text-black" size={10} />
-              <p className="platypi-bold text-[10px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <p className="platypi-bold text-[11px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
