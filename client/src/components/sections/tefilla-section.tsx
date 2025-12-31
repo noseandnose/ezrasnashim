@@ -735,24 +735,22 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         </div>
 
         {/* The Kotel Compass Section */}
-        <div className="bg-gradient-soft rounded-3xl p-4 shadow-lg mt-2">
-          <Button
-            variant="ghost"
-            onClick={handleOpenCompass}
-            className="w-full bg-white/70 rounded-2xl p-3 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left h-auto"
-            data-testid="button-open-compass"
-          >
-            <div className="flex items-center space-x-3">
-              <div className="bg-gradient-feminine p-3 rounded-full">
-                <Compass className="text-white" size={20} />
-              </div>
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-lg text-black">The Kotel Compass</h3>
-                <p className="platypi-regular text-sm text-black/70">Direct your Heart Home</p>
-              </div>
+        <Button
+          variant="ghost"
+          onClick={handleOpenCompass}
+          className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 hover:bg-white/90 transition-all duration-300 text-left h-auto mt-2"
+          data-testid="button-open-compass"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-feminine p-2 rounded-full">
+              <Compass className="text-white" size={16} />
             </div>
-          </Button>
-        </div>
+            <div className="flex-grow">
+              <h3 className="platypi-bold text-sm text-black">The Kotel Compass</h3>
+              <p className="platypi-regular text-xs text-black/70">Direct your Heart Home</p>
+            </div>
+          </div>
+        </Button>
 
         {/* Bottom padding */}
         <div className="h-16"></div>
