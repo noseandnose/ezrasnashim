@@ -335,7 +335,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         {/* Put a Coin in Tzedaka - Long Bar style */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className="w-full h-full rounded-xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
+          className="w-full h-[88px] rounded-xl text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
               ? 'gentle-glow-green 3s ease-in-out infinite' 
@@ -362,7 +362,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Left: Sponsor a Day */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -395,7 +395,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
