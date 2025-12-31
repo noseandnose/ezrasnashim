@@ -32,6 +32,7 @@ export default function TableModals() {
     contentType?: string;
   }>({ isOpen: false, title: '', content: null });
   const [fontSize, setFontSize] = useState(16);
+  const [isCompletingMarriage, setIsCompletingMarriage] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const lastArrowTouchTime = useRef<number>(0);
@@ -53,6 +54,9 @@ export default function TableModals() {
 
   // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
   const handleMarriageInsightComplete = async () => {
+    if (isCompletingMarriage) return; // Prevent double-click
+    setIsCompletingMarriage(true);
+    
     try {
       // Track feature usage in Google Analytics
       trackFeatureUsage('marriage-insights');
@@ -75,6 +79,7 @@ export default function TableModals() {
       }
       
       closeModal();
+      setIsCompletingMarriage(false);
       
       // Navigate to home and scroll to progress to show flower growth
       window.location.hash = '#/?section=home&scrollToProgress=true';
@@ -84,6 +89,7 @@ export default function TableModals() {
       markModalComplete('marriage-insights');
       completeTask('life');
       closeModal();
+      setIsCompletingMarriage(false);
       window.location.hash = '#/?section=home&scrollToProgress=true';
     }
   };

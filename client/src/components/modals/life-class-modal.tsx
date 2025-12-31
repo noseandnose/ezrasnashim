@@ -17,6 +17,7 @@ export default function LifeClassModal() {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const isOpen = activeModal === 'life-class';
   const isCompleted = isModalComplete('life-class');
@@ -33,12 +34,16 @@ export default function LifeClassModal() {
   });
 
   const handleComplete = () => {
+    if (isCompleting) return; // Prevent double-click
+    setIsCompleting(true);
+    
     trackModalComplete('life-class');
     markModalComplete('life-class');
     completeTask('life'); // Award Life flower for life lessons
     setShowHeartExplosion(true);
     setTimeout(() => {
       setShowHeartExplosion(false);
+      setIsCompleting(false);
       
       if (checkAndShowCongratulations()) {
         openModal('congratulations', 'table');
