@@ -362,7 +362,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Left: Sponsor a Day */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -372,7 +372,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
             }}
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: isTzedakaButtonCompleted('sponsor_a_day')
                   ? 'rgba(139, 169, 131, 0.35)'
@@ -381,9 +381,9 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               }}
             >
               {isTzedakaButtonCompleted('sponsor_a_day') ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <HandCoins className="text-black" size={10} />
+                <HandCoins className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black">Sponsor a Day</p>
             </div>
@@ -395,7 +395,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -406,7 +406,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           >
             <div className="heart-explosion-container relative">
               <div 
-                className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
                 style={{
                   background: isTzedakaButtonCompleted('gave_elsewhere')
                     ? 'rgba(139, 169, 131, 0.35)'
@@ -415,9 +415,9 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
                 }}
               >
                 {isTzedakaButtonCompleted('gave_elsewhere') ? (
-                  <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 ) : (
-                  <HandCoins className="text-black" size={10} />
+                  <HandCoins className="text-black" size={12} />
                 )}
                 <p className="platypi-bold text-xs text-black">Gave Elsewhere</p>
               </div>

@@ -327,7 +327,7 @@ export default function TableSection() {
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Daily Recipe Button */}
           <button
-            className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 relative ${
+            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
               !recipeContent ? 'cursor-not-allowed' : 'hover:scale-105'
             }`}
             style={{
@@ -359,7 +359,7 @@ export default function TableSection() {
             )}
             
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: !recipeContent
                   ? 'rgba(150, 150, 150, 0.35)'
@@ -370,9 +370,9 @@ export default function TableSection() {
               }}
             >
               {isModalComplete('recipe') ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Utensils className={!recipeContent ? 'text-gray-500' : 'text-black'} size={10} />
+                <Utensils className={!recipeContent ? 'text-gray-500' : 'text-black'} size={12} />
               )}
               <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
             </div>
@@ -384,7 +384,7 @@ export default function TableSection() {
           {/* Marriage Insights Button */}
           <button
             data-testid="button-marriage-insights"
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -397,7 +397,7 @@ export default function TableSection() {
             data-modal-section="table"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: isModalComplete('marriage-insights')
                   ? 'rgba(139, 169, 131, 0.35)'
@@ -406,9 +406,9 @@ export default function TableSection() {
               }}
             >
               {isModalComplete('marriage-insights') ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Heart className="text-black" size={10} />
+                <Heart className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
@@ -422,7 +422,7 @@ export default function TableSection() {
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Life Classes Button */}
           <button
-            className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 relative ${
+            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
               !currentLifeClass ? 'cursor-not-allowed' : 'hover:scale-105'
             }`}
             style={{
@@ -449,7 +449,7 @@ export default function TableSection() {
             )}
             
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: !currentLifeClass
                   ? 'rgba(150, 150, 150, 0.35)'
@@ -460,9 +460,9 @@ export default function TableSection() {
               }}
             >
               {isModalComplete('life-class') ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Home className={!currentLifeClass ? 'text-gray-500' : 'text-black'} size={10} />
+                <Home className={!currentLifeClass ? 'text-gray-500' : 'text-black'} size={12} />
               )}
               <p className={`platypi-bold text-xs ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
             </div>
@@ -473,7 +473,7 @@ export default function TableSection() {
 
           {/* Meditation Button */}
           <button
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -487,13 +487,13 @@ export default function TableSection() {
             data-modal-section="table"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <Brain className="text-black" size={10} />
+              <Brain className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Meditation</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">

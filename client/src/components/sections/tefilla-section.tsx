@@ -600,7 +600,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Siddur */}
           <button 
             onClick={() => openModal('brochas', 'tefilla')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -613,7 +613,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             data-testid="button-tefilla-brochas"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon'))
                   ? 'rgba(139, 169, 131, 0.35)'
@@ -622,9 +622,9 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               }}
             >
               {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <BookOpen className="text-black" size={10} />
+                <BookOpen className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black">Siddur</p>
             </div>
@@ -636,7 +636,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Tehillim */}
           <button 
             onClick={() => openModal('special-tehillim', 'tefilla')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -649,7 +649,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             data-testid="button-tefilla-tehillim"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: hasAnyTehillimCompleted()
                   ? 'rgba(139, 169, 131, 0.35)'
@@ -658,9 +658,9 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               }}
             >
               {hasAnyTehillimCompleted() ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Stars className="text-black" size={10} />
+                <Stars className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black">Tehillim</p>
             </div>
@@ -672,7 +672,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Women's Tefillas */}
           <button
             onClick={() => openModal('womens-tefillas', 'tefilla')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -685,13 +685,13 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             data-testid="button-tefilla-womens"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <HandHeart className="text-black" size={10} />
+              <HandHeart className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Women's Tefillas</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Special Prayers</p>
@@ -700,7 +700,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
           {/* Nishmas Kol Chai */}
           <button 
             onClick={() => openModal('nishmas-campaign', 'tefilla')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -713,7 +713,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             data-testid="button-tefilla-nishmas"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: isModalComplete('nishmas-campaign')
                   ? 'rgba(139, 169, 131, 0.35)'
@@ -722,9 +722,9 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               }}
             >
               {isModalComplete('nishmas-campaign') ? (
-                <svg className="text-black" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Heart className="text-black" size={10} />
+                <Heart className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black">Nishmas Kol Chai</p>
             </div>

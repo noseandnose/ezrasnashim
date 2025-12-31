@@ -392,7 +392,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             return (
               <button
                 key={id}
-                className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 relative ${
+                className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
                   !hasContent ? 'cursor-not-allowed opacity-60' : 'hover:scale-105'
                 }`}
                 style={{
@@ -437,7 +437,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 
                 {/* Icon + Title Badge (like home page prayer buttons) */}
                 <div 
-                  className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+                  className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
                   style={{
                     background: isCompleted 
                       ? 'rgba(139, 169, 131, 0.35)'
@@ -451,13 +451,13 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     <img 
                       src={customCandleIcon} 
                       alt="" 
-                      className="w-[10px] h-[10px] object-contain"
+                      className="w-3 h-3 object-contain"
                       loading="lazy"
                     />
                   ) : isCompleted ? (
-                    <Check className="text-black" size={10} />
+                    <Check className="text-black" size={12} />
                   ) : (
-                    <Icon className="text-black" size={10} />
+                    <Icon className="text-black" size={12} />
                   )}
                   <p className="platypi-bold text-xs text-black">{title}</p>
                 </div>
