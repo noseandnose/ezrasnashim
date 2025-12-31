@@ -50,6 +50,9 @@ import { db } from "./db";
 import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, isNull } from "drizzle-orm";
 import { formatDate } from './typeHelpers';
 
+// Module-level session deduplication (persists across requests)
+const recordedSessionsPerDay: Map<string, Set<string>> = new Map();
+
 export interface IStorage {
   
   getAllShopItems(): Promise<ShopItem[]>;
@@ -2478,14 +2481,34 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Efficient session tracking - only record unique sessions once per day
-  async recordActiveSession(_sessionId: string): Promise<void> {
+  async recordActiveSession(sessionId: string): Promise<void> {
     const today = formatDate(new Date());
+    
+    // Check if this session was already recorded today (server-side deduplication using module-level map)
+    if (!recordedSessionsPerDay.has(today)) {
+      recordedSessionsPerDay.set(today, new Set());
+      // Clean up old dates to prevent memory leak
+      for (const key of recordedSessionsPerDay.keys()) {
+        if (key !== today) {
+          recordedSessionsPerDay.delete(key);
+        }
+      }
+    }
+    
+    const todaySessions = recordedSessionsPerDay.get(today)!;
+    if (todaySessions.has(sessionId)) {
+      // Already recorded this session today, skip
+      return;
+    }
+    
+    // Mark this session as recorded
+    todaySessions.add(sessionId);
     
     // Update daily stats to include this unique session
     const existing = await this.getDailyStats(today);
     
     if (existing) {
-      // Increment unique users count by 1 (simple approach for session-based counting)
+      // Increment unique users count by 1
       await db
         .update(dailyStats)
         .set({
