@@ -335,22 +335,22 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         {/* Put a Coin in Tzedaka - Long Button at Top */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className="w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
+          className="w-full rounded-2xl p-2.5 text-center hover:scale-[1.01] transition-all duration-300 shadow-md border bg-white border-blush/20"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
               ? 'gentle-glow-green 3s ease-in-out infinite' 
               : 'gentle-glow-pink 3s ease-in-out infinite'
           }}
         >
-          <div className="flex items-center justify-center space-x-4">
-            <div className={`p-3 rounded-full ${
+          <div className="flex items-center justify-center space-x-3">
+            <div className={`p-2 rounded-full ${
               isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <HandCoins className="text-white" size={24} strokeWidth={1.5} />
+              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
             </div>
             <div className="text-left">
-              <h3 className="platypi-bold text-lg text-black mb-1">Put a Coin in Tzedaka</h3>
-              <p className="platypi-regular text-sm text-black/60">
+              <h3 className="platypi-bold text-base text-black leading-tight">Put a Coin in Tzedaka</h3>
+              <p className="platypi-regular text-[11px] text-black/60 leading-tight">
                 {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'Approved Women Organizations and Kollels'}
               </p>
             </div>
