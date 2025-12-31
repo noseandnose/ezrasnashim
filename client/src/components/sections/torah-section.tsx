@@ -317,10 +317,9 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
       </div>
 
-      {/* Daily Torah Content - Separate Section */}
-      <div className="p-2 space-y-1">
-        <div className="grid grid-cols-2 gap-2 mb-1">
-          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
+      {/* Daily Torah Content - Separate Section with Apple Glass Style */}
+      <div className="p-2 space-y-2">
+          {torahItems.map(({ id, icon: Icon, title, subtitle, iconBg, iconColor, contentType }) => {
             // Map button IDs to modal IDs for completion tracking
             // 'speakers' button opens parsha-vort modal, so check that ID
             const modalId = id === 'speakers' ? 'parsha-vort' : id;
@@ -329,10 +328,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
             // Get content for each button
             let hasContent = false;
             let displaySubtitle = subtitle;
-            let readingTime = '';
             
             let isError = false;
             let isLoading = false;
+            let dynamicContentType = contentType;
             
             switch(id) {
               case 'halacha':
@@ -394,16 +393,16 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 // Determine content type dynamically: video > audio > text > none
                 if (hasContent && firstVort) {
                   if (firstVort.videoUrl) {
-                    contentType = 'video';
+                    dynamicContentType = 'video';
                   } else if (firstVort.audioUrl) {
-                    contentType = 'audio';
+                    dynamicContentType = 'audio';
                   } else if (firstVort.content || firstVort.imageUrl) {
-                    contentType = 'text';
+                    dynamicContentType = 'text';
                   } else {
-                    contentType = ''; // No icon if no content
+                    dynamicContentType = ''; // No icon if no content
                   }
                 } else {
-                  contentType = ''; // No icon if no content
+                  dynamicContentType = ''; // No icon if no content
                 }
                 break;
             }
@@ -413,7 +412,16 @@ function TorahSectionComponent({}: TorahSectionProps) {
             return (
               <button
                 key={id}
-                className={`${hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
+                className={`w-full rounded-xl py-2.5 px-3 text-left transition-all duration-300 relative ${
+                  !hasContent ? 'cursor-not-allowed opacity-60' : 'hover:scale-[1.02]'
+                }`}
+                style={{
+                  background: hasContent ? 'rgba(255, 255, 255, 0.85)' : 'rgba(200, 200, 200, 0.5)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                }}
                 onClick={(event) => {
                   if (!hasContent) return;
                   
@@ -442,55 +450,57 @@ function TorahSectionComponent({}: TorahSectionProps) {
               >
                 {/* Coming Soon Overlay */}
                 {showComingSoon && (
-                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center z-10">
+                  <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center z-10">
                     <div className="bg-white/90 rounded-xl px-3 py-1.5 shadow-lg">
                       <p className="platypi-bold text-xs text-black">Coming Soon</p>
                     </div>
                   </div>
                 )}
                 
-                {/* Content Type Indicator - only show if there's content and a valid type */}
-                {contentType && hasContent && (
-                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    {contentType === 'video' ? (
-                      <Video className="w-2.5 h-2.5" />
-                    ) : contentType === 'audio' ? (
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : contentType === 'text' ? (
-                      <span className="platypi-bold text-xs">T</span>
-                    ) : null}
+                <div className="flex items-center gap-3">
+                  {/* Icon */}
+                  <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full shrink-0`}>
+                    {id === 'halacha' ? (
+                      <img 
+                        src={customCandleIcon} 
+                        alt="Learn Shabbos" 
+                        className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                    )}
                   </div>
-                )}
-                
-                <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full mx-auto mb-2 w-fit`}>
-                  {id === 'halacha' ? (
-                    <img 
-                      src={customCandleIcon} 
-                      alt="Learn Shabbos" 
-                      className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                  
+                  {/* Title and Subtitle */}
+                  <div className="flex-grow min-w-0">
+                    <h3 className={`platypi-bold text-sm text-black tracking-wide ${showComingSoon ? 'opacity-60' : ''}`}>{title}</h3>
+                    <p className={`platypi-regular text-xs text-black/60 truncate ${showComingSoon ? 'opacity-60' : ''}`}>
+                      {isCompleted ? 'Completed' : displaySubtitle}
+                    </p>
+                  </div>
+                  
+                  {/* Content Type Indicator */}
+                  {dynamicContentType && hasContent && (
+                    <div className="bg-white/80 text-black text-xs rounded-full w-6 h-6 flex items-center justify-center shadow-sm shrink-0">
+                      {dynamicContentType === 'video' ? (
+                        <Video className="w-3 h-3" />
+                      ) : dynamicContentType === 'audio' ? (
+                        <Triangle className="w-3 h-3 fill-current rotate-90" />
+                      ) : dynamicContentType === 'text' ? (
+                        <span className="platypi-bold text-xs">T</span>
+                      ) : null}
+                    </div>
                   )}
-                </div>
-                <h3 className={`platypi-bold text-xs text-black mb-1 tracking-wide ${showComingSoon ? 'opacity-60' : ''}`}>{title}</h3>
-                <div className={`platypi-regular text-xs text-black/60 leading-relaxed ${showComingSoon ? 'opacity-60' : ''}`}>
-                  {isCompleted ? (
-                    'Completed'
-                  ) : (
-                    <>
-                      <div>{displaySubtitle}</div>
-                      {readingTime && (
-                        <div className="text-xs text-black/50 mt-0.5">({readingTime})</div>
-                      )}
-                    </>
+                  
+                  {/* Completion checkmark */}
+                  {isCompleted && (
+                    <Check className="text-sage shrink-0" size={18} />
                   )}
                 </div>
               </button>
             );
           })}
-        </div>
 
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
