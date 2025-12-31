@@ -122,10 +122,12 @@ export interface DailyCompletionState {
   torahCompleted: boolean;
   tefillaCompleted: boolean;
   tzedakaCompleted: boolean;
+  lifeCompleted: boolean;
   tzedakaFlowerCount: number; // Track multiple tzedaka completions for garden flowers
+  lifeFlowerCount: number; // Track multiple life completions for garden flowers
   congratulationsShown: boolean;
   completionDate: string;
-  completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => void;
+  completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => void;
   markTefillaComplete: () => void;
   resetDaily: () => void;
   checkAndShowCongratulations: () => boolean;
@@ -331,19 +333,22 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       torahCompleted: false,
       tefillaCompleted: false,
       tzedakaCompleted: false,
+      lifeCompleted: false,
       tzedakaFlowerCount: 0,
+      lifeFlowerCount: 0,
       congratulationsShown: false,
       completionDate: today
     };
     
     return {
       ...initial,
-      completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => {
+      completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => {
         const state = get();
         const newState = {
           ...state,
           [`${task}Completed`]: true,
           ...(task === 'tzedaka' ? { tzedakaFlowerCount: (state.tzedakaFlowerCount || 0) + 1 } : {}),
+          ...(task === 'life' ? { lifeFlowerCount: (state.lifeFlowerCount || 0) + 1 } : {}),
         };
         set(newState);
       },
@@ -360,13 +365,16 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
           torahCompleted: false,
           tefillaCompleted: false,
           tzedakaCompleted: false,
+          lifeCompleted: false,
           tzedakaFlowerCount: 0,
+          lifeFlowerCount: 0,
           completionDate: today,
         };
         set(newState);
       },
       checkAndShowCongratulations: () => {
         const state = get();
+        // Only check Torah, Tefilla, Tzedaka for congratulations (3 pillars)
         const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
         
         if (allCompleted && !state.congratulationsShown) {
@@ -394,7 +402,9 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     torahCompleted: false,
     tefillaCompleted: false,
     tzedakaCompleted: false,
+    lifeCompleted: false,
     tzedakaFlowerCount: 0,
+    lifeFlowerCount: 0,
     congratulationsShown: false,
     completionDate: today
   };
@@ -404,7 +414,9 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     initial.torahCompleted = false;
     initial.tefillaCompleted = false;
     initial.tzedakaCompleted = false;
+    initial.lifeCompleted = false;
     initial.tzedakaFlowerCount = 0;
+    initial.lifeFlowerCount = 0;
     initial.congratulationsShown = false;
     initial.completionDate = today;
   }
@@ -414,15 +426,27 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     initial.tzedakaFlowerCount = initial.tzedakaCompleted ? 1 : 0;
   }
   
+  // Ensure lifeCompleted exists for older localStorage data
+  if (initial.lifeCompleted === undefined) {
+    initial.lifeCompleted = false;
+  }
+  
+  // Ensure lifeFlowerCount exists for older localStorage data
+  if (initial.lifeFlowerCount === undefined) {
+    initial.lifeFlowerCount = initial.lifeCompleted ? 1 : 0;
+  }
+  
   return {
     ...initial,
-    completeTask: (task: 'torah' | 'tefilla' | 'tzedaka') => {
+    completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => {
       const state = get();
       const newState = {
         ...state,
         [`${task}Completed`]: true,
         // For tzedaka, also increment flower count (allows multiple flowers per day)
         ...(task === 'tzedaka' ? { tzedakaFlowerCount: (state.tzedakaFlowerCount || 0) + 1 } : {}),
+        // For life, also increment flower count (allows multiple flowers per day)
+        ...(task === 'life' ? { lifeFlowerCount: (state.lifeFlowerCount || 0) + 1 } : {}),
       };
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));
@@ -441,7 +465,9 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         torahCompleted: false,
         tefillaCompleted: false,
         tzedakaCompleted: false,
+        lifeCompleted: false,
         tzedakaFlowerCount: 0,
+        lifeFlowerCount: 0,
         congratulationsShown: false,
         completionDate: today,
       };
@@ -450,6 +476,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     },
     checkAndShowCongratulations: () => {
       const state = get();
+      // Only check Torah, Tefilla, Tzedaka for congratulations (3 pillars)
       const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
       
       if (allCompleted && !state.congratulationsShown) {

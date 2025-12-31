@@ -35,7 +35,7 @@ export default function LifeClassModal() {
   const handleComplete = () => {
     trackModalComplete('life-class');
     markModalComplete('life-class');
-    completeTask('torah'); // Award Torah flower for life lessons
+    completeTask('life'); // Award Life flower for life lessons
     setShowHeartExplosion(true);
     setTimeout(() => {
       setShowHeartExplosion(false);

@@ -53,7 +53,7 @@ Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed
 - **CDN Integration**: Objects served via CDN or Express `/objects/` route.
 
 ### Core Application Features
-- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka tracked with offline support.
+- **Daily Completion Tracking**: Torah, Tefilla, Tzedaka, Life tracked with offline support. The 3-pillar system (Torah, Tefilla, Tzedaka) triggers congratulations; Life flowers are separate bonus rewards for Marriage Insights and Life Classes.
 - **Jewish Times Integration**: Real-time zmanim (Hebcal.com).
 - **Content Management**: Daily Torah, prayers (Mincha, Nishmas, Tehillim, Morning Brochas, Birkat Hamazon, Maariv), Shabbat resources, Pirkei Avot, Torah Classes.
 - **Torah Classes**: Daily Torah classes section with series content from multiple providers, displayed conditionally when content exists for the day, using date range filtering (fromDate/untilDate) to support scheduled content series.
@@ -68,7 +68,7 @@ Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Unified Admin Interface**: Comprehensive dashboard for content management (Messages, Recipes, Table Inspirations, Notifications) with CRUD and secure image upload.
 - **Audio Auto-Completion**: Daily Chizuk and Emuna audio content.
-- **Marriage Insights**: Daily wisdom content with search, font controls, and completion tracking.
+- **Marriage Insights**: Daily wisdom content with search, font controls, and completion tracking. Awards Life flowers (peach rose) instead of Torah flowers.
 - **Mobile App Support**: Enhanced detection for mobile app wrappers.
 - **PWA Enhancements**: Bottom navigation, service worker cache updates, haptic feedback, smart install prompts.
 - **Performance**: Lazy loading, code splitting, compression, optimized build, font optimization, splash screen optimization, server-side in-memory caching.

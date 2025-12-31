@@ -16,6 +16,7 @@ import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
 import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
+import lifeFlower from "@assets/Life_1767176917530.png";
 import morningBackground from "@assets/Morning_1767097697251.png";
 import afternoonBackground from "@assets/Afternoon_1767097697250.png";
 import nightBackground from "@assets/Night_1767097697247.png";
@@ -99,6 +100,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
   // Get tzedaka flower count from the store - tracks multiple "Gave Elsewhere" clicks
   const tzedakaFlowerCount = useDailyCompletionStore((state) => state.tzedakaFlowerCount || 0);
+  
+  // Get life flower count from the store - tracks Marriage Insights and Life Classes
+  const lifeFlowerCount = useDailyCompletionStore((state) => state.lifeFlowerCount || 0);
 
   // TEMPORARY: Time period state for automatic background updates
   // Updates every minute to catch time-of-day transitions
@@ -113,12 +117,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   // Generate stable but randomized positions for flowers - like a natural garden
   // Each flower has a fixed position based on its type and index (stable across re-renders)
   const flowerPositions = useMemo(() => {
-    const positions: { type: 'torah' | 'tefilla' | 'tzedaka'; left: number; bottom: number; flipped: boolean; scale: number; overallIndex: number }[] = [];
+    const positions: { type: 'torah' | 'tefilla' | 'tzedaka' | 'life'; left: number; bottom: number; flipped: boolean; scale: number; overallIndex: number }[] = [];
     
     // Create a seeded random generator for a specific flower
     const getFlowerRandom = (type: string, index: number, overallIdx: number) => {
       // Unique seed combining type, index, and overall position for more variety
-      const baseSeed = type === 'torah' ? 100 : type === 'tefilla' ? 200 : 300;
+      const baseSeed = type === 'torah' ? 100 : type === 'tefilla' ? 200 : type === 'tzedaka' ? 300 : 400;
       let seed = baseSeed + index * 17 + overallIdx * 37;
       return () => {
         seed = (seed * 9301 + 49297) % 233280;
@@ -129,7 +133,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     let overallFlowerIndex = 1; // 1-based overall index for milestone tracking
     
     // Helper to add a flower with truly random position
-    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka', index: number) => {
+    const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka' | 'life', index: number) => {
       const random = getFlowerRandom(type, index, overallFlowerIndex);
       // Random scale for size variation (0.65 to 1.05)
       const scale = 0.65 + (random() * 0.4);
@@ -152,13 +156,18 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       addFlower('tzedaka', i);
     }
     
+    // Place Life flowers (Marriage Insights, Life Classes)
+    for (let i = 0; i < lifeFlowerCount; i++) {
+      addFlower('life', i);
+    }
+    
     // Place Tefilla flowers last
     for (let i = 0; i < tefillaFlowerCount; i++) {
       addFlower('tefilla', i);
     }
     
     return positions;
-  }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount]);
+  }, [torahFlowerCount, tefillaFlowerCount, tzedakaFlowerCount, lifeFlowerCount]);
 
   // Load location immediately on startup for accurate times
   const jewishTimesQuery = useJewishTimes();
@@ -809,11 +818,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               src={
                 flower.type === 'torah' ? torahFlower : 
                 flower.type === 'tefilla' ? tefillaFlower : 
+                flower.type === 'life' ? lifeFlower :
                 tzedakaFlower
               } 
               alt={`${flower.type} flower`} 
               className={`absolute ${
-                flower.type === 'torah' || flower.type === 'tzedaka' ? 'z-[2]' : 
+                flower.type === 'torah' || flower.type === 'tzedaka' || flower.type === 'life' ? 'z-[2]' : 
                 'z-[1]'
               }`}
               style={{ 

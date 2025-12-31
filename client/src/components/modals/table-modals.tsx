@@ -66,8 +66,8 @@ export default function TableModals() {
       // Mark as complete in local storage
       markModalComplete('marriage-insights');
       
-      // Complete the Torah daily task
-      completeTask('torah');
+      // Complete the Life daily task (Marriage Insights uses Life flowers)
+      completeTask('life');
       
       // Reset fullscreen content state
       if (fullscreenContent.isOpen) {
@@ -82,7 +82,7 @@ export default function TableModals() {
       console.error('Error completing marriage insights:', error);
       // Still mark as complete locally even if backend logging fails
       markModalComplete('marriage-insights');
-      completeTask('torah');
+      completeTask('life');
       closeModal();
       window.location.hash = '#/?section=home&scrollToProgress=true';
     }
