@@ -323,18 +323,22 @@ export default function TableSection() {
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="py-2 space-y-1">
-        {/* Top Row: Daily Recipe and Date Converter */}
+        {/* Top Row: Daily Recipe and Marriage Insights - Apple Glass Style */}
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Daily Recipe Button */}
           <button
-            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
-              !recipeContent 
-                ? 'bg-gray-100 cursor-not-allowed' 
-                : 'bg-white hover:scale-105'
+            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
+              !recipeContent ? 'cursor-not-allowed' : 'hover:scale-105'
             }`}
+            style={{
+              background: !recipeContent ? 'rgba(200, 200, 200, 0.5)' : 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             onClick={() => {
               if (recipeContent) {
-                // Open directly in fullscreen without setting activeModal
                 const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
                   detail: {
                     modalKey: 'recipe',
@@ -346,26 +350,33 @@ export default function TableSection() {
             }}
             disabled={!recipeContent}
           >
-            {/* Banner overlay for when no content */}
             {!recipeContent && (
-              <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="platypi-regular text-xs text-black platypi-medium">Recipe coming soon</p>
+                  <p className="platypi-medium text-xs text-black">Coming soon</p>
                 </div>
               </div>
             )}
             
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              !recipeContent 
-                ? 'bg-gray-300' 
-                : isModalComplete('recipe') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Utensils className={`${!recipeContent ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: !recipeContent
+                  ? 'rgba(150, 150, 150, 0.35)'
+                  : isModalComplete('recipe')
+                    ? 'rgba(139, 169, 131, 0.35)'
+                    : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {isModalComplete('recipe') ? (
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Utensils className={!recipeContent ? 'text-gray-500' : 'text-black'} size={12} />
+              )}
+              <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
             </div>
-            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>
-              Daily Recipe
-            </h3>
-            <p className={`platypi-regular text-xs leading-relaxed ${!recipeContent ? 'text-gray-400' : 'text-black/60'}`}>
+            <p className={`platypi-bold text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
               {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
             </p>
           </button>
@@ -373,34 +384,54 @@ export default function TableSection() {
           {/* Marriage Insights Button */}
           <button
             data-testid="button-marriage-insights"
-            className="rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative bg-white hover:scale-105"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             onClick={() => openModal('marriage-insights', 'table')}
             data-modal-type="marriage-insights"
             data-modal-section="table"
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isModalComplete('marriage-insights') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Heart className="text-white" size={18} strokeWidth={1.5} />
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: isModalComplete('marriage-insights')
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {isModalComplete('marriage-insights') ? (
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Heart className="text-black" size={12} />
+              )}
+              <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
-            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold" data-testid="text-marriage-insights-title">Marriage Insights</h3>
-            <p className={`platypi-regular text-xs leading-relaxed ${
-              isModalComplete('marriage-insights') ? 'text-black/60' : 'text-black/60'
-            }`} data-testid="text-marriage-insights-subtitle">
+            <p className="platypi-bold text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
               {isModalComplete('marriage-insights') ? 'Completed' : 'by Devora Levy'}
             </p>
           </button>
         </div>
 
-        {/* Bottom Row: Life Classes and Meditation */}
+        {/* Bottom Row: Life Classes and Meditation - Apple Glass Style */}
         <div className="grid grid-cols-2 gap-2 mb-2">
           {/* Life Classes Button */}
           <button
-            className={`rounded-3xl p-3 text-center transition-all duration-300 shadow-lg border border-blush/10 relative ${
-              !currentLifeClass 
-                ? 'bg-gray-100 cursor-not-allowed' 
-                : 'bg-white hover:scale-105'
+            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
+              !currentLifeClass ? 'cursor-not-allowed' : 'hover:scale-105'
             }`}
+            style={{
+              background: !currentLifeClass ? 'rgba(200, 200, 200, 0.5)' : 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             onClick={() => {
               if (currentLifeClass) {
                 openModal('life-class', 'table');
@@ -409,43 +440,63 @@ export default function TableSection() {
             disabled={!currentLifeClass}
             data-testid="button-life-class"
           >
-            {/* Banner overlay for when no content */}
             {!currentLifeClass && (
-              <div className="absolute inset-0 bg-black/20 rounded-3xl flex items-center justify-center z-10">
+              <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="platypi-regular text-xs text-black platypi-medium">Coming Soon</p>
+                  <p className="platypi-medium text-xs text-black">Coming Soon</p>
                 </div>
               </div>
             )}
             
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              !currentLifeClass 
-                ? 'bg-gray-300' 
-                : isModalComplete('life-class') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <Home className={`${!currentLifeClass ? 'text-gray-500' : 'text-white'}`} size={18} strokeWidth={1.5} />
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: !currentLifeClass
+                  ? 'rgba(150, 150, 150, 0.35)'
+                  : isModalComplete('life-class')
+                    ? 'rgba(139, 169, 131, 0.35)'
+                    : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {isModalComplete('life-class') ? (
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <Home className={!currentLifeClass ? 'text-gray-500' : 'text-black'} size={12} />
+              )}
+              <p className={`platypi-bold text-xs ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
             </div>
-            <h3 className={`platypi-bold text-xs mb-1 platypi-bold ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>
-              Practical Parenting
-            </h3>
-            <p className={`platypi-regular text-xs leading-relaxed ${!currentLifeClass ? 'text-gray-400' : 'text-black/60'}`}>
+            <p className={`platypi-bold text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
               {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
             </p>
           </button>
 
           {/* Meditation Button */}
           <button
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
             onClick={() => openModal('meditation-categories', 'table')}
             data-testid="button-meditation"
             data-modal-type="meditation-categories"
             data-modal-section="table"
           >
-            <div className="p-2 rounded-full mx-auto mb-2 w-fit bg-gradient-feminine">
-              <Brain className="text-white" size={18} strokeWidth={1.5} />
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              <Brain className="text-black" size={12} />
+              <p className="platypi-bold text-xs text-black">Meditation</p>
             </div>
-            <h3 className="platypi-bold text-xs text-black mb-1 platypi-bold">Meditation</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
+            <p className="platypi-bold text-xs text-black leading-tight">
               Calm your mind
             </p>
           </button>

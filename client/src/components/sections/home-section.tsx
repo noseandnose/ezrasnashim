@@ -510,7 +510,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <button 
             onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
             disabled={currentPrayer.disabled}
-            className={`w-full h-full rounded-xl p-3 text-center transition-all duration-300 ${
+            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 ${
               currentPrayer.disabled 
                 ? 'opacity-60 cursor-not-allowed' 
                 : 'hover:scale-105'
@@ -527,7 +527,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-prayer"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: currentPrayer.disabled 
                   ? 'rgb(209, 213, 219)' 
@@ -535,8 +535,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <PrayerIcon className="text-black" size={10} />
-              <p className="platypi-bold text-[10px] text-black">
+              <PrayerIcon className="text-black" size={12} />
+              <p className="platypi-bold text-xs text-black">
                 {currentPrayer.title}
               </p>
             </div>
@@ -548,7 +548,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           {/* Shkia - Clickable to open Events - Apple Glass Style */}
           <button 
             onClick={() => openModal('events', 'home')}
-            className="w-full h-full rounded-xl p-3 text-center hover:scale-105 transition-all duration-300 relative"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -561,14 +561,14 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             data-testid="button-home-events"
           >
             <div 
-              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <MapPin className="text-black" size={10} />
-              <p className="platypi-bold text-[10px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+              <MapPin className="text-black" size={12} />
+              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
             <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>

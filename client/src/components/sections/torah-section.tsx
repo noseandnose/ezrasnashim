@@ -317,20 +317,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
       </div>
 
-      {/* Daily Torah Content - Separate Section */}
-      <div className="p-2 space-y-1">
-        <div className="grid grid-cols-2 gap-2 mb-1">
-          {torahItems.map(({ id, icon: Icon, title, subtitle, gradient, iconBg, iconColor, border, contentType }) => {
-            // Map button IDs to modal IDs for completion tracking
-            // 'speakers' button opens parsha-vort modal, so check that ID
+      {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
+      <div className="p-2 grid grid-cols-2 gap-2">
+          {torahItems.map(({ id, icon: Icon, title, subtitle }) => {
             const modalId = id === 'speakers' ? 'parsha-vort' : id;
             const isCompleted = isModalComplete(modalId);
             
-            // Get content for each button
             let hasContent = false;
             let displaySubtitle = subtitle;
-            let readingTime = '';
-            
             let isError = false;
             let isLoading = false;
             
@@ -343,7 +337,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   const camelCaseTitle = toCamelCase(halachaContent.title || '');
                   displaySubtitle = camelCaseTitle || 'Learn Shabbos';
                 } else if (isError) {
-                  displaySubtitle = 'Temporarily unavailable';
+                  displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
                 }
@@ -355,7 +349,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 if (hasContent && !isCompleted && chizukContent) {
                   displaySubtitle = toCamelCase(chizukContent.title || '') || subtitle;
                 } else if (isError) {
-                  displaySubtitle = 'Temporarily unavailable';
+                  displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
                 }
@@ -367,13 +361,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 if (hasContent && !isCompleted && emunaContent) {
                   displaySubtitle = toCamelCase(emunaContent.title || '') || subtitle;
                 } else if (isError) {
-                  displaySubtitle = 'Temporarily unavailable';
+                  displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
                 }
                 break;
               case 'speakers':
-                // Filter vorts to only show currently active ones based on date range
                 const todayStr = new Date().toISOString().split('T')[0];
                 const activeVortsForButton = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
                   if (!parsha.fromDate || !parsha.untilDate) return false;
@@ -387,23 +380,9 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 if (hasContent && !isCompleted && firstVort) {
                   displaySubtitle = firstVort.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom';
                 } else if (isError) {
-                  displaySubtitle = 'Temporarily unavailable';
+                  displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
-                }
-                // Determine content type dynamically: video > audio > text > none
-                if (hasContent && firstVort) {
-                  if (firstVort.videoUrl) {
-                    contentType = 'video';
-                  } else if (firstVort.audioUrl) {
-                    contentType = 'audio';
-                  } else if (firstVort.content || firstVort.imageUrl) {
-                    contentType = 'text';
-                  } else {
-                    contentType = ''; // No icon if no content
-                  }
-                } else {
-                  contentType = ''; // No icon if no content
                 }
                 break;
             }
@@ -413,15 +392,22 @@ function TorahSectionComponent({}: TorahSectionProps) {
             return (
               <button
                 key={id}
-                className={`${hasContent ? gradient : 'bg-gray-100'} rounded-3xl p-3 text-center ${hasContent ? 'glow-hover' : ''} transition-gentle shadow-lg border ${hasContent ? border : 'border-gray-200'} relative ${!hasContent ? 'cursor-not-allowed' : ''}`}
+                className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
+                  !hasContent ? 'cursor-not-allowed opacity-60' : 'hover:scale-105'
+                }`}
+                style={{
+                  background: hasContent ? 'rgba(255, 255, 255, 0.85)' : 'rgba(200, 200, 200, 0.5)',
+                  backdropFilter: 'blur(12px)',
+                  WebkitBackdropFilter: 'blur(12px)',
+                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                }}
                 onClick={(event) => {
                   if (!hasContent) return;
                   
-                  // For halacha content, open directly in fullscreen
                   if (id === 'halacha') {
                     handleDirectFullscreen(id, event);
                   } else if (id === 'speakers') {
-                    // For speakers, open the first available vort
                     const todayStr = new Date().toISOString().split('T')[0];
                     const activeVortsForClick = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
                       if (!parsha.fromDate || !parsha.untilDate) return false;
@@ -442,56 +428,51 @@ function TorahSectionComponent({}: TorahSectionProps) {
               >
                 {/* Coming Soon Overlay */}
                 {showComingSoon && (
-                  <div className="absolute inset-0 bg-black/50 rounded-3xl flex items-center justify-center z-10">
+                  <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center z-10">
                     <div className="bg-white/90 rounded-xl px-3 py-1.5 shadow-lg">
                       <p className="platypi-bold text-xs text-black">Coming Soon</p>
                     </div>
                   </div>
                 )}
                 
-                {/* Content Type Indicator - only show if there's content and a valid type */}
-                {contentType && hasContent && (
-                  <div className="absolute top-2 left-2 bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                    {contentType === 'video' ? (
-                      <Video className="w-2.5 h-2.5" />
-                    ) : contentType === 'audio' ? (
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : contentType === 'text' ? (
-                      <span className="platypi-bold text-xs">T</span>
-                    ) : null}
-                  </div>
-                )}
-                
-                <div className={`${isCompleted ? 'bg-sage' : hasContent ? iconBg : 'bg-gray-300'} p-2 rounded-full mx-auto mb-2 w-fit`}>
+                {/* Icon + Title Badge (like home page prayer buttons) */}
+                <div 
+                  className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+                  style={{
+                    background: isCompleted 
+                      ? 'rgba(139, 169, 131, 0.35)'
+                      : hasContent 
+                        ? 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)'
+                        : 'rgb(209, 213, 219)',
+                    border: '1px solid rgba(255, 255, 255, 0.4)',
+                  }}
+                >
                   {id === 'halacha' ? (
                     <img 
                       src={customCandleIcon} 
-                      alt="Learn Shabbos" 
-                      className={`w-[18px] h-[18px] object-contain ${showComingSoon ? 'opacity-60' : ''}`}
+                      alt="" 
+                      className="w-3 h-3 object-contain"
                       loading="lazy"
                     />
+                  ) : isCompleted ? (
+                    <Check className="text-black" size={12} />
                   ) : (
-                    <Icon className={`${hasContent ? iconColor : 'text-gray-500'}`} size={18} strokeWidth={1.5} />
+                    <Icon className="text-black" size={12} />
                   )}
+                  <p className="platypi-bold text-[11px] text-black whitespace-nowrap">{title}</p>
                 </div>
-                <h3 className={`platypi-bold text-xs text-black mb-1 tracking-wide ${showComingSoon ? 'opacity-60' : ''}`}>{title}</h3>
-                <div className={`platypi-regular text-xs text-black/60 leading-relaxed ${showComingSoon ? 'opacity-60' : ''}`}>
-                  {isCompleted ? (
-                    'Completed'
-                  ) : (
-                    <>
-                      <div>{displaySubtitle}</div>
-                      {readingTime && (
-                        <div className="text-xs text-black/50 mt-0.5">({readingTime})</div>
-                      )}
-                    </>
-                  )}
-                </div>
+                
+                {/* Subtitle */}
+                <p className={`platypi-bold text-xs leading-tight ${!hasContent ? 'text-gray-400' : 'text-black'}`}>
+                  {isCompleted ? 'Completed' : displaySubtitle}
+                </p>
               </button>
             );
           })}
-        </div>
+      </div>
 
+      {/* Full-width bars section */}
+      <div className="p-2 space-y-2">
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;

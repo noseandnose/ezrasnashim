@@ -332,10 +332,10 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           </p>
         </div>
         
-        {/* Put a Coin in Tzedaka - Long Button at Top */}
+        {/* Put a Coin in Tzedaka - Long Bar style */}
         <button
           onClick={() => handleTzedakaButtonClick('put_a_coin')}
-          className="w-full rounded-3xl p-4 text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
+          className="w-full h-[88px] rounded-xl text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
               ? 'gentle-glow-green 3s ease-in-out infinite' 
@@ -343,13 +343,13 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           }}
         >
           <div className="flex items-center justify-center space-x-4">
-            <div className={`p-3 rounded-full ${
+            <div className={`p-2 rounded-full ${
               isTzedakaButtonCompleted('put_a_coin') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
               <HandCoins className="text-white" size={24} strokeWidth={1.5} />
             </div>
             <div className="text-left">
-              <h3 className="platypi-bold text-lg text-black mb-1">Put a Coin in Tzedaka</h3>
+              <h3 className="platypi-bold text-lg text-black">Put a Coin in Tzedaka</h3>
               <p className="platypi-regular text-sm text-black/60">
                 {isTzedakaButtonCompleted('put_a_coin') ? 'Completed' : 'Approved Women Organizations and Kollels'}
               </p>
@@ -357,20 +357,37 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           </div>
         </button>
 
-        {/* Two Buttons Underneath */}
+        {/* Two Buttons Underneath - Apple Glass Style */}
         <div className="grid grid-cols-2 gap-2">
           {/* Left: Sponsor a Day */}
           <button
             onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
           >
-            <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-              isTzedakaButtonCompleted('sponsor_a_day') ? 'bg-sage' : 'bg-gradient-feminine'
-            }`}>
-              <HandCoins className="text-white" size={18} strokeWidth={1.5} />
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: isTzedakaButtonCompleted('sponsor_a_day')
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              {isTzedakaButtonCompleted('sponsor_a_day') ? (
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <HandCoins className="text-black" size={12} />
+              )}
+              <p className="platypi-bold text-xs text-black">Sponsor a Day</p>
             </div>
-            <h3 className="platypi-bold text-xs text-black mb-1">Sponsor a Day</h3>
-            <p className="platypi-regular text-xs text-black/60 leading-relaxed">
+            <p className="platypi-bold text-xs text-black leading-tight">
               {isTzedakaButtonCompleted('sponsor_a_day') ? 'Completed' : 'Dedicate mitzvas'}
             </p>
           </button>
@@ -378,16 +395,33 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
             onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
-            className="rounded-3xl p-3 text-center hover:scale-105 transition-all duration-300 shadow-lg border border-blush/10 bg-white"
+            className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            style={{
+              background: 'rgba(255, 255, 255, 0.85)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+              boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+              border: '1px solid rgba(255, 255, 255, 0.4)',
+            }}
           >
             <div className="heart-explosion-container relative">
-              <div className={`p-2 rounded-full mx-auto mb-2 w-fit ${
-                isTzedakaButtonCompleted('gave_elsewhere') ? 'bg-sage' : 'bg-gradient-feminine'
-              }`}>
-                <HandCoins className="text-white" size={18} strokeWidth={1.5} />
+              <div 
+                className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+                style={{
+                  background: isTzedakaButtonCompleted('gave_elsewhere')
+                    ? 'rgba(139, 169, 131, 0.35)'
+                    : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                  border: '1px solid rgba(255, 255, 255, 0.4)',
+                }}
+              >
+                {isTzedakaButtonCompleted('gave_elsewhere') ? (
+                  <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                ) : (
+                  <HandCoins className="text-black" size={12} />
+                )}
+                <p className="platypi-bold text-xs text-black">Gave Elsewhere</p>
               </div>
-              <h3 className="platypi-bold text-xs text-black mb-1">Gave Elsewhere</h3>
-              <p className="platypi-regular text-xs text-black/60 leading-relaxed">
+              <p className="platypi-bold text-xs text-black leading-tight">
                 {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()}X today` : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />
