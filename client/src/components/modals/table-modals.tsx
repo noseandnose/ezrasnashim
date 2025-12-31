@@ -53,45 +53,37 @@ export default function TableModals() {
   };
 
   // Separate handler for marriage insights (tracks as feature usage, not mitzvah)
-  const handleMarriageInsightComplete = async () => {
+  const handleMarriageInsightComplete = () => {
     if (isCompletingMarriage) return; // Prevent double-click
     setIsCompletingMarriage(true);
     
-    try {
-      // Track feature usage in Google Analytics
-      trackFeatureUsage('marriage-insights');
-      
-      // Log to backend for analytics
-      await apiRequest('POST', '/api/feature-usage', {
-        featureName: 'marriage-insights',
-        category: 'torah'
-      });
-      
-      // Mark as complete in local storage
-      markModalComplete('marriage-insights');
-      
-      // Complete the Life daily task (Marriage Insights uses Life flowers)
-      completeTask('life');
-      
-      // Reset fullscreen content state
-      if (fullscreenContent.isOpen) {
-        setFullscreenContent({ isOpen: false, title: '', content: null });
-      }
-      
-      closeModal();
-      setIsCompletingMarriage(false);
-      
-      // Navigate to home and scroll to progress to show flower growth
-      window.location.hash = '#/?section=home&scrollToProgress=true';
-    } catch (error) {
-      console.error('Error completing marriage insights:', error);
-      // Still mark as complete locally even if backend logging fails
-      markModalComplete('marriage-insights');
-      completeTask('life');
-      closeModal();
-      setIsCompletingMarriage(false);
-      window.location.hash = '#/?section=home&scrollToProgress=true';
+    // Track feature usage in Google Analytics
+    trackFeatureUsage('marriage-insights');
+    
+    // Log to backend for analytics (fire and forget - don't wait)
+    apiRequest('POST', '/api/feature-usage', {
+      featureName: 'marriage-insights',
+      category: 'torah'
+    }).catch(error => {
+      console.error('Error logging marriage insights usage:', error);
+    });
+    
+    // Mark as complete in local storage
+    markModalComplete('marriage-insights');
+    
+    // Complete the Life daily task (Marriage Insights uses Life flowers)
+    completeTask('life');
+    
+    // Reset fullscreen content state
+    if (fullscreenContent.isOpen) {
+      setFullscreenContent({ isOpen: false, title: '', content: null });
     }
+    
+    closeModal();
+    setIsCompletingMarriage(false);
+    
+    // Navigate to home and scroll to progress to show flower growth
+    window.location.hash = '#/?section=home&scrollToProgress=true';
   };
   
 
