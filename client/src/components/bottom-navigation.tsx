@@ -34,9 +34,6 @@ export default function BottomNavigation({
     };
   }, []);
 
-  if (isKeyboardOpen) {
-    return null;
-  }
   const navItems = [
     { id: "torah" as Section, icon: BookOpen, label: "Torah" },
     { id: "tefilla" as Section, icon: HandHeart, label: "Tefilla" },
@@ -47,6 +44,10 @@ export default function BottomNavigation({
 
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
+
+  if (isKeyboardOpen) {
+    return null;
+  }
 
   return (
     <nav
