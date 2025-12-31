@@ -469,7 +469,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
               </button>
             );
           })}
+      </div>
 
+      {/* Full-width bars section */}
+      <div className="p-2 space-y-2">
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
