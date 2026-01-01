@@ -2,7 +2,7 @@ import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
   tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
-  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos,
+  dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos, torahChallenges,
   dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
@@ -44,6 +44,7 @@ import {
   type TehillimChainReading,
   type TodaysSpecial, type InsertTodaysSpecial,
   type GiftOfChatzos, type InsertGiftOfChatzos,
+  type TorahChallenge, type InsertTorahChallenge,
   type UserMitzvahProgress
 } from "../shared/schema";
 import { db } from "./db";
@@ -81,6 +82,12 @@ export interface IStorage {
   createGiftOfChatzos(gift: InsertGiftOfChatzos): Promise<GiftOfChatzos>;
   updateGiftOfChatzos(id: number, gift: Partial<InsertGiftOfChatzos>): Promise<GiftOfChatzos | undefined>;
   getAllGiftOfChatzos(): Promise<GiftOfChatzos[]>;
+  
+  // Torah Challenge methods
+  getTorahChallengeByDate(date: string): Promise<TorahChallenge | undefined>;
+  createTorahChallenge(challenge: InsertTorahChallenge): Promise<TorahChallenge>;
+  updateTorahChallenge(id: number, challenge: Partial<InsertTorahChallenge>): Promise<TorahChallenge | undefined>;
+  getAllTorahChallenges(): Promise<TorahChallenge[]>;
   
   // Pirkei Avot methods
   getAllPirkeiAvot(): Promise<PirkeiAvot[]>;
@@ -1718,6 +1725,33 @@ export class DatabaseStorage implements IStorage {
 
   async getAllGiftOfChatzos(): Promise<GiftOfChatzos[]> {
     return await db.select().from(giftOfChatzos).orderBy(giftOfChatzos.dayOfWeek);
+  }
+
+  // Torah Challenge methods
+  async getTorahChallengeByDate(date: string): Promise<TorahChallenge | undefined> {
+    try {
+      const [result] = await db.select().from(torahChallenges)
+        .where(eq(torahChallenges.date, date))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch torah challenge:', error);
+      return undefined;
+    }
+  }
+
+  async createTorahChallenge(insertChallenge: InsertTorahChallenge): Promise<TorahChallenge> {
+    const [challenge] = await db.insert(torahChallenges).values(insertChallenge).returning();
+    return challenge;
+  }
+
+  async updateTorahChallenge(id: number, challenge: Partial<InsertTorahChallenge>): Promise<TorahChallenge | undefined> {
+    const [updated] = await db.update(torahChallenges).set(challenge).where(eq(torahChallenges.id, id)).returning();
+    return updated;
+  }
+
+  async getAllTorahChallenges(): Promise<TorahChallenge[]> {
+    return await db.select().from(torahChallenges).orderBy(desc(torahChallenges.date));
   }
 
   // Pirkei Avot methods  
