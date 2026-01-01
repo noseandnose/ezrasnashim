@@ -482,6 +482,29 @@ export const insertGiftOfChatzosSchema = createInsertSchema(giftOfChatzos).omit(
 export type InsertGiftOfChatzos = z.infer<typeof insertGiftOfChatzosSchema>;
 export type GiftOfChatzos = typeof giftOfChatzos.$inferSelect;
 
+// Torah Challenge - date-specific content for Torah page with completion tracking
+export const torahChallenges = pgTable("torah_challenges", {
+  id: serial("id").primaryKey(),
+  date: date("date").notNull().unique(), // Specific date for this challenge
+  title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  imageUrl: text("image_url"),
+  contentEnglish: text("content_english"),
+  contentHebrew: text("content_hebrew"),
+  linkTitle: text("link_title"),
+  url: text("url"),
+  thankYouMessage: text("thank_you_message"),
+  attributionLogoUrl: text("attribution_logo_url"),
+  attributionAboutText: text("attribution_about_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateIdx: index("torah_challenges_date_idx").on(table.date),
+}));
+
+export const insertTorahChallengeSchema = createInsertSchema(torahChallenges).omit({ id: true, createdAt: true });
+export type InsertTorahChallenge = z.infer<typeof insertTorahChallengeSchema>;
+export type TorahChallenge = typeof torahChallenges.$inferSelect;
+
 // Pirkei Avot table for internal content management
 export const pirkeiAvot = pgTable("pirkei_avot", {
   id: serial("id").primaryKey(),
