@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
@@ -84,6 +84,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const featuredContent = torahSummary?.featured;
   const torahClasses = torahSummary?.torahClasses || [];
   const gemsOfGratitude = torahSummary?.gemsOfGratitude;
+  const torahChallenge = torahSummary?.torahChallenge;
   
   // Extract per-section errors for UI fallbacks
   const sectionErrors = torahSummary?.errors || {};
@@ -514,6 +515,37 @@ function TorahSectionComponent({}: TorahSectionProps) {
             </div>
           ) : null;
         })()}
+
+        {/* Torah Challenge Button - Only show when database content exists for this date */}
+        {torahChallenge && (
+          <button
+            onClick={() => openModal('torah-challenge', 'torah')}
+            className="w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 bg-white/80 border-blush/20"
+            data-testid="button-torah-challenge"
+          >
+            <div className="flex items-center gap-3 p-3">
+              {/* Icon */}
+              <div className={`p-2 rounded-full ${
+                isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <Trophy className="text-white" size={16} />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">Torah Challenge</h3>
+                <p className="platypi-regular text-xs text-black/70">{torahChallenge.title || 'Daily Challenge'}</p>
+              </div>
+              
+              {/* Arrow or Checkmark */}
+              {isModalComplete('torah-challenge') ? (
+                <Check className="text-sage" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40" size={18} />
+              )}
+            </div>
+          </button>
+        )}
 
         {/* Gems of Gratitude Button - Only show when database content exists */}
         {gemsOfGratitude && (
