@@ -476,7 +476,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       </div>
 
       {/* Full-width bars section */}
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
@@ -522,14 +522,18 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {/* Bitachon Challenge - Expandable Card (Only show when database content exists for this date) */}
         {torahChallenge && (
           <div 
-            className="rounded-xl mb-3 overflow-hidden border border-blush/10 shadow-lg"
-            style={{ backgroundColor: '#ffffff', mixBlendMode: 'normal' }}
+            className="rounded-xl mb-3 overflow-hidden border border-blush/10 shadow-lg relative"
+            style={{ 
+              backgroundColor: '#ffffff', 
+              isolation: 'isolate',
+              zIndex: 10
+            }}
           >
             {/* Collapsed/Header Bar */}
             <button
               onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-              className="w-full p-3 text-left transition-colors"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full p-3 text-left transition-colors relative"
+              style={{ backgroundColor: '#ffffff', zIndex: 11 }}
               data-testid="button-torah-challenge-toggle"
             >
               <div className="flex items-center gap-3">
@@ -563,7 +567,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             
             {/* Expanded Content - Force white background */}
             {torahChallengeExpanded && (
-              <div className="px-3 pb-3" style={{ backgroundColor: '#ffffff' }}>
+              <div className="px-3 pb-3 relative" style={{ backgroundColor: '#ffffff', zIndex: 11 }}>
                 {/* Image */}
                 {torahChallenge.imageUrl && (
                   <img 
