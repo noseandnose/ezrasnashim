@@ -53,7 +53,7 @@ export function AttributionSection({
   
   if (!hasExpandableContent) {
     return (
-      <div className={`${isWhite ? 'bg-white border-gray-200' : 'bg-gradient-to-r from-blush/10 to-lavender/10 border-blush/20'} rounded-2xl p-4 border ${className}`}>
+      <div className={`${isWhite ? 'bg-solid-white border-gray-200' : 'bg-gradient-to-r from-blush/10 to-lavender/10 border-blush/20'} rounded-2xl p-4 border ${className}`}>
         {labelHtml ? (
           <p 
             className="text-sm platypi-medium text-black text-center"
@@ -70,7 +70,7 @@ export function AttributionSection({
 
   return (
     <div className={`mb-1 ${className}`}>
-      <div className={`${isWhite ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'} rounded-2xl border border-gray-200 transition-colors overflow-hidden`}>
+      <div className={`${isWhite ? 'bg-solid-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'} rounded-2xl border border-gray-200 transition-colors overflow-hidden`}>
         <button
           onClick={() => setIsExpanded(prev => !prev)}
           className="w-full text-left p-3"
@@ -92,7 +92,7 @@ export function AttributionSection({
         </button>
         
         {isExpanded && (
-          <div className="bg-white overflow-hidden" data-testid="content-attribution-expanded">
+          <div className="bg-solid-white overflow-hidden" data-testid="content-attribution-expanded">
             <div className="flex">
               {logoUrl && !imageError && (
                 <div className="flex-shrink-0 w-24 self-stretch flex items-center justify-center" style={{ backgroundColor: '#ba89a0' }}>

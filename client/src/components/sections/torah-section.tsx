@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, ChevronUp, ChevronDown, Sparkles } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, ChevronUp, ChevronDown } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
@@ -607,11 +607,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         }, 100);
                         window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
                       }}
-                      className="flex-1 py-1.5 rounded-lg bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300 flex items-center justify-center gap-1"
+                      className="flex-1 py-1.5 rounded-lg bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                       data-testid="button-torah-challenge-raffle"
                     >
-                      <Sparkles size={14} />
-                      <span>Complete + Enter Raffle</span>
+                      Complete + Enter Raffle
                     </button>
                   </div>
                 )}
