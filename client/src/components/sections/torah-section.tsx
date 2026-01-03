@@ -12,6 +12,7 @@ import { useState, useRef, useCallback, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -369,7 +370,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 }
                 break;
               case 'speakers':
-                const todayStr = new Date().toISOString().split('T')[0];
+                const todayStr = getLocalDateString();
                 const activeVortsForButton = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
                   if (!parsha.fromDate || !parsha.untilDate) return false;
                   return todayStr >= parsha.fromDate && todayStr <= parsha.untilDate;
@@ -410,7 +411,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   if (id === 'halacha') {
                     handleDirectFullscreen(id, event);
                   } else if (id === 'speakers') {
-                    const todayStr = new Date().toISOString().split('T')[0];
+                    const todayStr = getLocalDateString();
                     const activeVortsForClick = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
                       if (!parsha.fromDate || !parsha.untilDate) return false;
                       return todayStr >= parsha.fromDate && todayStr <= parsha.untilDate;
