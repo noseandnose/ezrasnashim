@@ -580,7 +580,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 
                 {/* Complete Buttons - Side by Side */}
                 {!isModalComplete('torah-challenge') && (
-                  <div className="flex gap-2 mb-4">
+                  <div className="flex gap-2 mb-3">
                     <button
                       onClick={() => {
                         markModalComplete('torah-challenge');
@@ -591,7 +591,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                           checkAndShowCongratulations();
                         }, 100);
                       }}
-                      className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
+                      className="flex-1 px-3 py-1 bg-gradient-feminine text-white rounded-lg platypi-medium text-xs"
                       data-testid="button-torah-challenge-complete"
                     >
                       Complete
@@ -607,10 +607,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         }, 100);
                         window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
                       }}
-                      className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm flex items-center justify-center gap-1"
+                      className="flex-1 px-3 py-1 bg-sage text-white rounded-lg platypi-medium text-xs flex items-center justify-center gap-1"
                       data-testid="button-torah-challenge-raffle"
                     >
-                      <Sparkles size={14} />
+                      <Sparkles size={12} />
                       <span>Complete + Enter Raffle</span>
                     </button>
                   </div>
