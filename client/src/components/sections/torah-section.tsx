@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, ChevronUp, ChevronDown } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, ChevronUp, ChevronDown, Sparkles } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
@@ -517,7 +517,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
           ) : null;
         })()}
 
-        {/* Torah Challenge - Expandable Card (Only show when database content exists for this date) */}
+        {/* Bitachon Challenge - Expandable Card (Only show when database content exists for this date) */}
         {torahChallenge && (
           <div className="bg-white rounded-xl mb-3 overflow-hidden border border-blush/20">
             {/* Collapsed/Header Bar */}
@@ -536,7 +536,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 
                 {/* Title and Subtitle */}
                 <div className="flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Torah Challenge</h3>
+                  <h3 className="platypi-bold text-sm text-black">Bitachon Challenge</h3>
                   <p className="platypi-regular text-xs text-black/70">{torahChallenge.title || 'Daily Challenge'}</p>
                 </div>
                 
@@ -562,7 +562,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 {torahChallenge.imageUrl && (
                   <img 
                     src={torahChallenge.imageUrl} 
-                    alt={torahChallenge.title || "Torah Challenge"} 
+                    alt={torahChallenge.title || "Bitachon Challenge"} 
                     className="w-full rounded-xl object-cover mb-3"
                     loading="lazy"
                   />
@@ -589,7 +589,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                           checkAndShowCongratulations();
                         }, 100);
                       }}
-                      className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm"
+                      className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
                       data-testid="button-torah-challenge-complete"
                     >
                       Complete
@@ -603,14 +603,13 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         setTimeout(() => {
                           checkAndShowCongratulations();
                         }, 100);
-                        if (torahChallenge.url) {
-                          window.open(torahChallenge.url, '_blank');
-                        }
+                        window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
                       }}
-                      className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
+                      className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm flex items-center justify-center gap-1"
                       data-testid="button-torah-challenge-raffle"
                     >
-                      Complete + Enter Raffle
+                      <Sparkles size={14} />
+                      <span>Complete + Enter Raffle</span>
                     </button>
                   </div>
                 )}
