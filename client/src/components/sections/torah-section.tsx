@@ -591,7 +591,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                           checkAndShowCongratulations();
                         }, 100);
                       }}
-                      className="flex-1 py-1.5 rounded-lg bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
+                      className="flex-1 py-1.5 rounded-2xl bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
                       data-testid="button-torah-challenge-complete"
                     >
                       Complete
@@ -607,7 +607,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         }, 100);
                         window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
                       }}
-                      className="flex-1 py-1.5 rounded-lg bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                      className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                       data-testid="button-torah-challenge-raffle"
                     >
                       Complete + Enter Raffle
