@@ -10,6 +10,7 @@ interface AttributionSectionProps {
   websiteLabel?: string | null | undefined;
   emailAddress?: string | null | undefined;
   className?: string;
+  variant?: 'default' | 'white';
 }
 
 export function AttributionSection({
@@ -20,7 +21,8 @@ export function AttributionSection({
   websiteUrl,
   websiteLabel,
   emailAddress,
-  className = ""
+  className = "",
+  variant = 'default'
 }: AttributionSectionProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -47,9 +49,11 @@ export function AttributionSection({
     (labelHtml && label.includes('<a'))
   );
 
+  const isWhite = variant === 'white';
+  
   if (!hasExpandableContent) {
     return (
-      <div className={`bg-gradient-to-r from-blush/10 to-lavender/10 rounded-2xl p-4 border border-blush/20 ${className}`}>
+      <div className={`${isWhite ? 'bg-white border-gray-200' : 'bg-gradient-to-r from-blush/10 to-lavender/10 border-blush/20'} rounded-2xl p-4 border ${className}`}>
         {labelHtml ? (
           <p 
             className="text-sm platypi-medium text-black text-center"
@@ -66,7 +70,7 @@ export function AttributionSection({
 
   return (
     <div className={`mb-1 ${className}`}>
-      <div className="bg-gray-50 hover:bg-gray-100 rounded-2xl border border-gray-200 transition-colors overflow-hidden">
+      <div className={`${isWhite ? 'bg-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'} rounded-2xl border border-gray-200 transition-colors overflow-hidden`}>
         <button
           onClick={() => setIsExpanded(prev => !prev)}
           className="w-full text-left p-3"
