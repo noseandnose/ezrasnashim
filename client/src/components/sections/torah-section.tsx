@@ -558,73 +558,78 @@ function TorahSectionComponent({}: TorahSectionProps) {
               </div>
             </button>
             
-            {/* Expanded Content */}
+            {/* Expanded Content - White background wrapper */}
             {torahChallengeExpanded && (
-              <div className="px-3 pb-3 rounded-b-xl" style={{ backgroundColor: '#ffffff' }}>
-                {/* Image */}
-                {torahChallenge.imageUrl && (
-                  <img 
-                    src={torahChallenge.imageUrl} 
-                    alt={torahChallenge.title || "Bitachon Challenge"} 
-                    className="w-full rounded-xl object-cover mb-3"
-                    loading="lazy"
-                  />
-                )}
-                
-                {/* Content - using Platypi font for English */}
-                <div 
-                  className="platypi-regular text-black leading-relaxed text-left mb-4"
-                  style={{ fontSize: '16px' }}
-                >
-                  {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
-                </div>
-                
-                {/* Complete Buttons - Side by Side */}
-                {!isModalComplete('torah-challenge') && (
-                  <div className="flex gap-2 mb-4">
-                    <button
-                      onClick={() => {
-                        markModalComplete('torah-challenge');
-                        completeTask('torah');
-                        trackModalComplete('torah-challenge');
-                        setShowHeartExplosion(true);
-                        setTimeout(() => {
-                          checkAndShowCongratulations();
-                        }, 100);
-                      }}
-                      className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
-                      data-testid="button-torah-challenge-complete"
-                    >
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => {
-                        markModalComplete('torah-challenge');
-                        completeTask('torah');
-                        trackModalComplete('torah-challenge');
-                        setShowHeartExplosion(true);
-                        setTimeout(() => {
-                          checkAndShowCongratulations();
-                        }, 100);
-                        window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
-                      }}
-                      className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm flex items-center justify-center gap-1"
-                      data-testid="button-torah-challenge-raffle"
-                    >
-                      <Sparkles size={14} />
-                      <span>Complete + Enter Raffle</span>
-                    </button>
+              <div className="bg-white">
+                <div className="px-3 pb-3">
+                  {/* Image */}
+                  {torahChallenge.imageUrl && (
+                    <img 
+                      src={torahChallenge.imageUrl} 
+                      alt={torahChallenge.title || "Bitachon Challenge"} 
+                      className="w-full rounded-xl object-cover mb-3"
+                      loading="lazy"
+                    />
+                  )}
+                  
+                  {/* Content - using Platypi font for English */}
+                  <div 
+                    className="platypi-regular text-black leading-relaxed text-left mb-4"
+                    style={{ fontSize: '16px' }}
+                  >
+                    {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
                   </div>
-                )}
-                
-                {/* Attribution Section - With expandable dropdown like other modals */}
-                {torahChallenge.thankYouMessage && (
-                  <AttributionSection
-                    label={torahChallenge.thankYouMessage}
-                    logoUrl={torahChallenge.attributionLogoUrl}
-                    aboutText={torahChallenge.attributionAboutText}
-                  />
-                )}
+                  
+                  {/* Complete Buttons - Side by Side */}
+                  {!isModalComplete('torah-challenge') && (
+                    <div className="flex gap-2 mb-4">
+                      <button
+                        onClick={() => {
+                          markModalComplete('torah-challenge');
+                          completeTask('torah');
+                          trackModalComplete('torah-challenge');
+                          setShowHeartExplosion(true);
+                          setTimeout(() => {
+                            checkAndShowCongratulations();
+                          }, 100);
+                        }}
+                        className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
+                        data-testid="button-torah-challenge-complete"
+                      >
+                        Complete
+                      </button>
+                      <button
+                        onClick={() => {
+                          markModalComplete('torah-challenge');
+                          completeTask('torah');
+                          trackModalComplete('torah-challenge');
+                          setShowHeartExplosion(true);
+                          setTimeout(() => {
+                            checkAndShowCongratulations();
+                          }, 100);
+                          window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
+                        }}
+                        className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm flex items-center justify-center gap-1"
+                        data-testid="button-torah-challenge-raffle"
+                      >
+                        <Sparkles size={14} />
+                        <span>Complete + Enter Raffle</span>
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* Attribution Section - With expandable dropdown like other modals */}
+                  {torahChallenge.thankYouMessage && (
+                    <div className="bg-white">
+                      <AttributionSection
+                        label={torahChallenge.thankYouMessage}
+                        logoUrl={torahChallenge.attributionLogoUrl}
+                        aboutText={torahChallenge.attributionAboutText}
+                        className="!bg-white"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
