@@ -13,6 +13,7 @@ import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
 import { getLocalDateString } from "@/lib/dateUtils";
+import { AttributionSection } from "@/components/ui/attribution-section";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -558,7 +559,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             
             {/* Expanded Content */}
             {torahChallengeExpanded && (
-              <div className="px-3 pb-3">
+              <div className="px-3 pb-3 bg-white rounded-b-xl">
                 {/* Image */}
                 {torahChallenge.imageUrl && (
                   <img 
@@ -615,35 +616,13 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   </div>
                 )}
                 
-                {/* Attribution Section - Like other modals */}
-                {(torahChallenge.thankYouMessage || torahChallenge.attributionLogoUrl || torahChallenge.attributionAboutText) && (
-                  <div className="border-t border-blush/20 pt-3 mt-2">
-                    {/* Thank You Message */}
-                    {torahChallenge.thankYouMessage && (
-                      <p className="platypi-regular text-sm text-black/70 text-center mb-3">
-                        {torahChallenge.thankYouMessage}
-                      </p>
-                    )}
-                    
-                    {/* Attribution Logo and Text */}
-                    {(torahChallenge.attributionLogoUrl || torahChallenge.attributionAboutText) && (
-                      <div className="flex items-center gap-3 justify-center">
-                        {torahChallenge.attributionLogoUrl && (
-                          <img 
-                            src={torahChallenge.attributionLogoUrl} 
-                            alt="Attribution" 
-                            className="w-10 h-10 rounded-lg object-cover"
-                            loading="lazy"
-                          />
-                        )}
-                        {torahChallenge.attributionAboutText && (
-                          <p className="platypi-regular text-xs text-black/50">
-                            {torahChallenge.attributionAboutText}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                {/* Attribution Section - With expandable dropdown like other modals */}
+                {torahChallenge.thankYouMessage && (
+                  <AttributionSection
+                    label={torahChallenge.thankYouMessage}
+                    logoUrl={torahChallenge.attributionLogoUrl}
+                    aboutText={torahChallenge.attributionAboutText}
+                  />
                 )}
               </div>
             )}
