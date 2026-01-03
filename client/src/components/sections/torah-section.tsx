@@ -519,11 +519,11 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
         {/* Torah Challenge - Expandable Card (Only show when database content exists for this date) */}
         {torahChallenge && (
-          <div className="bg-white/85 rounded-xl mb-3 overflow-hidden border border-blush/20">
+          <div className="bg-white rounded-xl mb-3 overflow-hidden border border-blush/20">
             {/* Collapsed/Header Bar */}
             <button
               onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              className="w-full p-3 text-left hover:bg-gray-50 transition-colors"
               data-testid="button-torah-challenge-toggle"
             >
               <div className="flex items-center gap-3">
@@ -568,38 +568,82 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   />
                 )}
                 
-                {/* Content */}
+                {/* Content - using Platypi font for English */}
                 <div 
-                  className="platypi-regular text-black/80 leading-relaxed text-left mb-4"
+                  className="platypi-regular text-black leading-relaxed text-left mb-4"
                   style={{ fontSize: '16px' }}
                 >
                   {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
                 </div>
                 
-                {/* Complete Button */}
+                {/* Complete Buttons - Side by Side */}
                 {!isModalComplete('torah-challenge') && (
-                  <button
-                    onClick={() => {
-                      markModalComplete('torah-challenge');
-                      completeTask('torah');
-                      trackModalComplete('torah-challenge');
-                      setShowHeartExplosion(true);
-                      setTimeout(() => {
-                        checkAndShowCongratulations();
-                      }, 100);
-                    }}
-                    className="w-full py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
-                    data-testid="button-torah-challenge-complete"
-                  >
-                    Complete Challenge
-                  </button>
+                  <div className="flex gap-2 mb-4">
+                    <button
+                      onClick={() => {
+                        markModalComplete('torah-challenge');
+                        completeTask('torah');
+                        trackModalComplete('torah-challenge');
+                        setShowHeartExplosion(true);
+                        setTimeout(() => {
+                          checkAndShowCongratulations();
+                        }, 100);
+                      }}
+                      className="flex-1 py-3 bg-sage text-white rounded-xl platypi-bold text-sm"
+                      data-testid="button-torah-challenge-complete"
+                    >
+                      Complete
+                    </button>
+                    <button
+                      onClick={() => {
+                        markModalComplete('torah-challenge');
+                        completeTask('torah');
+                        trackModalComplete('torah-challenge');
+                        setShowHeartExplosion(true);
+                        setTimeout(() => {
+                          checkAndShowCongratulations();
+                        }, 100);
+                        if (torahChallenge.url) {
+                          window.open(torahChallenge.url, '_blank');
+                        }
+                      }}
+                      className="flex-1 py-3 bg-gradient-feminine text-white rounded-xl platypi-bold text-sm"
+                      data-testid="button-torah-challenge-raffle"
+                    >
+                      Complete + Enter Raffle
+                    </button>
+                  </div>
                 )}
                 
-                {/* Attribution */}
-                {torahChallenge.attributionAboutText && (
-                  <p className="platypi-regular text-xs text-black/50 mt-3 text-center">
-                    {torahChallenge.attributionAboutText}
-                  </p>
+                {/* Attribution Section - Like other modals */}
+                {(torahChallenge.thankYouMessage || torahChallenge.attributionLogoUrl || torahChallenge.attributionAboutText) && (
+                  <div className="border-t border-blush/20 pt-3 mt-2">
+                    {/* Thank You Message */}
+                    {torahChallenge.thankYouMessage && (
+                      <p className="platypi-regular text-sm text-black/70 text-center mb-3">
+                        {torahChallenge.thankYouMessage}
+                      </p>
+                    )}
+                    
+                    {/* Attribution Logo and Text */}
+                    {(torahChallenge.attributionLogoUrl || torahChallenge.attributionAboutText) && (
+                      <div className="flex items-center gap-3 justify-center">
+                        {torahChallenge.attributionLogoUrl && (
+                          <img 
+                            src={torahChallenge.attributionLogoUrl} 
+                            alt="Attribution" 
+                            className="w-10 h-10 rounded-lg object-cover"
+                            loading="lazy"
+                          />
+                        )}
+                        {torahChallenge.attributionAboutText && (
+                          <p className="platypi-regular text-xs text-black/50">
+                            {torahChallenge.attributionAboutText}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
