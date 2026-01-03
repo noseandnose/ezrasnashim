@@ -167,27 +167,10 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         const daysToSubtract = dayOfWeek;
         currentDate.setDate(currentDate.getDate() - daysToSubtract);
         
-        // Calculate the first day of the current month
-        const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const firstOfMonthStr = firstOfMonth.toISOString().split('T')[0];
-        
-        // Clamp week start to not go before the first of the month
-        // This ensures weekly stats are always a subset of monthly stats
-        const calculatedWeekStart = currentDate.toISOString().split('T')[0];
-        weekStart = calculatedWeekStart < firstOfMonthStr ? firstOfMonthStr : calculatedWeekStart;
+        weekStart = currentDate.toISOString().split('T')[0];
       }
       
-      // Use getDateRangeStats instead of getWeeklyStats for clamped week calculation
-      // End date is today (or yesterday if before 2 AM)
-      const endNow = new Date();
-      const endHours = endNow.getHours();
-      const todayDate = new Date(endNow);
-      if (endHours < 2) {
-        todayDate.setDate(todayDate.getDate() - 1);
-      }
-      const weekEnd = todayDate.toISOString().split('T')[0];
-      
-      const weeklyStats = await storage.getDateRangeStats(weekStart, weekEnd);
+      const weeklyStats = await storage.getWeeklyStats(weekStart);
       return res.json(weeklyStats);
     } catch (error) {
       console.error('Error fetching weekly stats:', error);
@@ -205,27 +188,9 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       });
       
       const now = new Date();
-      const hours = now.getHours();
       const year = parseInt(req.query.year as string) || now.getFullYear();
       const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
       
-      // For current month, only count up to today (or yesterday if before 2 AM)
-      const isCurrentMonth = year === now.getFullYear() && month === (now.getMonth() + 1);
-      
-      if (isCurrentMonth) {
-        // Use getDateRangeStats for current month to only count up to today
-        const monthStart = `${year}-${month.toString().padStart(2, '0')}-01`;
-        const todayDate = new Date(now);
-        if (hours < 2) {
-          todayDate.setDate(todayDate.getDate() - 1);
-        }
-        const monthEnd = todayDate.toISOString().split('T')[0];
-        
-        const monthlyStats = await storage.getDateRangeStats(monthStart, monthEnd);
-        return res.json(monthlyStats);
-      }
-      
-      // For past months, use the full month stats
       const monthlyStats = await storage.getMonthlyStats(year, month);
       return res.json(monthlyStats);
     } catch (error) {
