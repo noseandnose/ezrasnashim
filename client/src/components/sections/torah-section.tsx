@@ -522,14 +522,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {/* Bitachon Challenge - Expandable Card (Only show when database content exists for this date) */}
         {torahChallenge && (
           <div 
-            className="rounded-xl mb-3 overflow-hidden border border-blush/10"
-            style={{ backgroundColor: '#ffffff' }}
+            className="rounded-xl mb-3 overflow-hidden border border-blush/10 !bg-white"
+            style={{ background: '#ffffff !important', backgroundColor: '#ffffff' }}
           >
             {/* Collapsed/Header Bar */}
             <button
               onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-              className="w-full p-3 text-left transition-colors"
-              style={{ backgroundColor: '#ffffff' }}
+              className="w-full p-3 text-left transition-colors !bg-white"
+              style={{ background: '#ffffff', backgroundColor: '#ffffff' }}
               data-testid="button-torah-challenge-toggle"
             >
               <div className="flex items-center gap-3">
@@ -561,9 +561,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
               </div>
             </button>
             
-            {/* Expanded Content */}
+            {/* Expanded Content - Force white background */}
             {torahChallengeExpanded && (
-              <div className="px-3 pb-3" style={{ backgroundColor: '#ffffff' }}>
+              <div 
+                className="px-3 pb-3 !bg-white"
+                style={{ background: '#ffffff', backgroundColor: '#ffffff' }}
+              >
                 {/* Image */}
                 {torahChallenge.imageUrl && (
                   <img 
@@ -582,9 +585,9 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
                 </div>
                 
-                {/* Complete Buttons - Side by Side - Match chain page styling exactly */}
+                {/* Complete Buttons - Smaller with magical styling */}
                 {!isModalComplete('torah-challenge') && (
-                  <div className="flex gap-3 mb-3">
+                  <div className="flex gap-2 mb-3">
                     <button
                       onClick={() => {
                         markModalComplete('torah-challenge');
@@ -595,7 +598,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                           checkAndShowCongratulations();
                         }, 100);
                       }}
-                      className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium hover:scale-105 transition-transform complete-button-pulse"
+                      className="flex-1 py-2.5 rounded-xl bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
                       data-testid="button-torah-challenge-complete"
                     >
                       Complete
@@ -611,10 +614,10 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         }, 100);
                         window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
                       }}
-                      className="flex-1 py-4 rounded-2xl bg-sage text-white platypi-medium hover:scale-105 transition-transform flex items-center justify-center gap-1.5"
+                      className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300 flex items-center justify-center gap-1"
                       data-testid="button-torah-challenge-raffle"
                     >
-                      <Sparkles size={16} />
+                      <Sparkles size={14} />
                       <span>Complete + Enter Raffle</span>
                     </button>
                   </div>
