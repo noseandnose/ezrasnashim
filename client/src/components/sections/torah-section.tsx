@@ -521,11 +521,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
         {/* Bitachon Challenge - Expandable Card (Only show when database content exists for this date) */}
         {torahChallenge && (
-          <div className="rounded-xl mb-3 overflow-hidden border border-blush/10 bg-solid-white">
+          <div 
+            className="rounded-xl mb-3 overflow-hidden border border-blush/10"
+            style={{ background: '#ffffff', backgroundColor: '#ffffff' }}
+          >
             {/* Collapsed/Header Bar */}
             <button
               onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-              className="w-full p-3 text-left transition-colors bg-solid-white"
+              className="w-full p-3 text-left transition-colors"
+              style={{ background: '#ffffff', backgroundColor: '#ffffff' }}
               data-testid="button-torah-challenge-toggle"
             >
               <div className="flex items-center gap-3">
@@ -559,7 +563,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             
             {/* Expanded Content - Force white background */}
             {torahChallengeExpanded && (
-              <div className="px-3 pb-3 bg-solid-white">
+              <div className="px-3 pb-3" style={{ background: '#ffffff', backgroundColor: '#ffffff' }}>
                 {/* Image */}
                 {torahChallenge.imageUrl && (
                   <img 
