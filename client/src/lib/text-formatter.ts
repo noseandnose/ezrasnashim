@@ -227,7 +227,11 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
     formatted = applyFootnoteSuperscripts(formatted, footnoteNumbers);
   }
   
-  // Convert newlines to HTML breaks FIRST before any other processing
+  // Process bullet points BEFORE converting newlines to <br />
+  // Lines starting with * or - followed by space become styled bullet items
+  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 4px 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
+  
+  // Convert newlines to HTML breaks AFTER bullet processing
   formatted = formatted.replace(/\n/g, '<br />');
   
   // Replace --- with line breaks (double breaks for spacing)
@@ -298,10 +302,6 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Process markdown-style links [text](url)
   formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
     '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">$1</a>');
-  
-  // Process bullet points: lines starting with * or - followed by space
-  // Convert to styled list items with bullet character
-  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 4px 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
   
   let result = formatted;
   
