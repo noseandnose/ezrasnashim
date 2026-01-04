@@ -3294,6 +3294,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Date parameter required (YYYY-MM-DD format)" });
       }
 
+      // Check server-side cache first (2 minute TTL)
+      const cacheKey = `home-summary:${date}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) {
+        res.set({ 'Cache-Control': 'public, max-age=120', 'X-Cache': 'HIT' });
+        return res.json(cached);
+      }
+
       const errors: { field: string; error: string }[] = [];
       
       // Fetch all data in parallel with individual error handling
@@ -3322,9 +3330,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fetchedAt: new Date().toISOString()
       };
 
+      // Store in server-side cache (2 minute TTL)
+      cache.set(cacheKey, summary, { ttl: 120 });
+
       // Set caching: 2 minutes for messages (check frequently)
       res.set({
         'Cache-Control': 'public, max-age=120', // 2 minutes
+        'X-Cache': 'MISS'
       });
 
       return res.json(summary);
