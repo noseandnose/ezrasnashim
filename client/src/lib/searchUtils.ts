@@ -1,4 +1,4 @@
-import MiniSearch from 'minisearch';
+import type MiniSearch from 'minisearch';
 import { normalizeHebrew, transliterateHebrew, containsHebrew, expandSearchTerm } from './hebrewUtils';
 
 export interface SearchRecord {
@@ -25,9 +25,13 @@ interface SearchDocument {
 
 /**
  * Create a MiniSearch instance with fuzzy matching and Hebrew support
+ * Returns a Promise to support dynamic import of MiniSearch
  */
-export function createSearchIndex(records: SearchRecord[]): MiniSearch<SearchDocument> {
-  const miniSearch = new MiniSearch<SearchDocument>({
+export async function createSearchIndex(records: SearchRecord[]): Promise<MiniSearch<SearchDocument>> {
+  const MiniSearchModule = await import('minisearch');
+  const MiniSearchClass = MiniSearchModule.default;
+  
+  const miniSearch = new MiniSearchClass<SearchDocument>({
     fields: ['title', 'titleTransliterated', 'secondary', 'secondaryTransliterated', 'keywords', 'category'],
     storeFields: ['id'],
     searchOptions: {

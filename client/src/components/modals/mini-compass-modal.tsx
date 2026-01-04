@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { X, Heart } from 'lucide-react';
-import { SimpleCompass, CompassState } from '@/lib/compass';
+import type { SimpleCompass as SimpleCompassType, CompassState } from '@/lib/compass';
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
 import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ interface MiniCompassModalProps {
 }
 
 export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
-  const [compass, setCompass] = useState(() => new SimpleCompass());
+  const [compass, setCompass] = useState<SimpleCompassType | null>(null);
   const [state, setState] = useState<CompassState>({
     deviceHeading: 0,
     bearing: 0,
@@ -23,6 +23,8 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   });
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -35,6 +37,29 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
 
   useEffect(() => {
     if (!isOpen) return;
+    let mounted = true;
+    setIsLoading(true);
+    setLoadError(null);
+    import('@/lib/compass')
+      .then(({ SimpleCompass }) => {
+        if (mounted) {
+          const newCompass = new SimpleCompass();
+          setCompass(newCompass);
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('[MiniCompass] Failed to load compass module:', error);
+        if (mounted) {
+          setLoadError('Failed to load compass. Please try again.');
+          setIsLoading(false);
+        }
+      });
+    return () => { mounted = false; };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !compass) return;
 
     const unsubscribe = compass.subscribe(setState);
     return () => {
@@ -62,11 +87,11 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   }, [state.isAligned, isIOS, isStandalone, isOpen]);
 
   const handleEnableCompass = async () => {
-    await compass.requestPermission();
+    if (compass) await compass.requestPermission();
   };
 
   const handleRetry = async () => {
-    compass.dispose();
+    if (compass) compass.dispose();
     setState({
       deviceHeading: 0,
       bearing: 0,
@@ -76,6 +101,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
       isSupported: false,
       error: null
     });
+    const { SimpleCompass } = await import('@/lib/compass');
     const newCompass = new SimpleCompass();
     setCompass(newCompass);
     await newCompass.requestPermission();
@@ -120,7 +146,21 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
           </button>
         </div>
 
-        {!state.isSupported ? (
+        {isLoading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin w-8 h-8 border-3 border-blush/20 border-t-blush rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading compass...</p>
+          </div>
+        ) : loadError ? (
+          <div className="text-center py-6">
+            <div className="bg-red-50 rounded-2xl p-4 mb-4">
+              <p className="text-red-700 text-sm">{loadError}</p>
+            </div>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              Refresh Page
+            </Button>
+          </div>
+        ) : !state.isSupported ? (
           <div className="text-center py-8">
             <p className="text-gray-600">Compass not supported on this device</p>
           </div>

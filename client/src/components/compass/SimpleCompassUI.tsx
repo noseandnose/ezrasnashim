@@ -3,9 +3,9 @@
  * Single transform, minimal logic, clean design
  */
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { SimpleCompass, CompassState } from '@/lib/compass';
+import type { SimpleCompass as SimpleCompassType, CompassState } from '@/lib/compass';
 import { MapPin, Compass as CompassIcon, Heart } from 'lucide-react';
 
 // Import compass icons
@@ -13,7 +13,7 @@ import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
 import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
 
 export function SimpleCompassUI() {
-  const [compass, setCompass] = useState(() => new SimpleCompass());
+  const [compass, setCompass] = useState<SimpleCompassType | null>(null);
   const [state, setState] = useState<CompassState>({
     deviceHeading: 0,
     bearing: 0,
@@ -26,6 +26,7 @@ export function SimpleCompassUI() {
   const [debugMode] = useState(new URLSearchParams(window.location.search).get('debug') === 'compass');
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     // Detect iOS and standalone mode
@@ -37,7 +38,30 @@ export function SimpleCompassUI() {
     setIsStandalone(standalone);
   }, []);
   
+  const [loadError, setLoadError] = useState<string | null>(null);
+  
   useEffect(() => {
+    let mounted = true;
+    import('@/lib/compass')
+      .then(({ SimpleCompass }) => {
+        if (mounted) {
+          const newCompass = new SimpleCompass();
+          setCompass(newCompass);
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        console.error('[Compass] Failed to load compass module:', error);
+        if (mounted) {
+          setLoadError('Failed to load compass. Please refresh the page.');
+          setIsLoading(false);
+        }
+      });
+    return () => { mounted = false; };
+  }, []);
+  
+  useEffect(() => {
+    if (!compass) return;
     const unsubscribe = compass.subscribe(setState);
     return () => {
       unsubscribe();
@@ -72,12 +96,12 @@ export function SimpleCompassUI() {
   // Removed device-specific detection
   
   const handleEnableCompass = async () => {
-    await compass.requestPermission();
+    if (compass) await compass.requestPermission();
   };
 
   const handleRetry = async () => {
     // Clean up old compass
-    compass.dispose();
+    if (compass) compass.dispose();
     
     // Clear current error state
     setState({
@@ -91,6 +115,7 @@ export function SimpleCompassUI() {
     });
     
     // Create new compass instance to fully restart
+    const { SimpleCompass } = await import('@/lib/compass');
     const newCompass = new SimpleCompass();
     setCompass(newCompass);
     
@@ -124,6 +149,29 @@ export function SimpleCompassUI() {
   };
   
   const renderCompass = () => {
+    if (isLoading) {
+      return (
+        <div className="text-center py-8">
+          <div className="animate-spin w-8 h-8 border-3 border-blush/20 border-t-blush rounded-full mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading compass...</p>
+        </div>
+      );
+    }
+    
+    if (loadError) {
+      return (
+        <div className="text-center py-8">
+          <div className="bg-red-50 rounded-2xl p-4 mb-4">
+            <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
+            <p className="text-red-700 text-sm">{loadError}</p>
+          </div>
+          <Button onClick={() => window.location.reload()} variant="outline">
+            Refresh Page
+          </Button>
+        </div>
+      );
+    }
+    
     if (!state.isSupported) {
       return (
         <div className="text-center py-8">
