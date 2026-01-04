@@ -613,7 +613,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
           const hasAnyContent = hasVideo || hasAudio || hasText;
 
           return hasAnyContent ? (
-            <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 mb-3 relative">
+            <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 relative">
               <div 
                 className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
                 onClick={(event) => {
