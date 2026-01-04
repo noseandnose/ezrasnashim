@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { ArrowLeft, Mail, Lock, User, Eye, EyeOff, Calendar, Star, Trophy, Flame, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,13 +30,6 @@ export default function Login() {
     }
   }, [isAuthenticated, setLocation]);
   
-  // Reset nav-offset when inputs lose focus (keyboard dismissed)
-  const handleInputBlur = useCallback(() => {
-    // Give the keyboard time to fully dismiss before resetting
-    setTimeout(() => {
-      document.documentElement.style.setProperty('--nav-offset', '0px');
-    }, 100);
-  }, []);
 
   if (isAuthenticated) {
     return null;
@@ -194,7 +187,7 @@ export default function Login() {
                       placeholder="First name"
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      onBlur={handleInputBlur}
+                      
                       className="pl-9"
                       data-testid="input-first-name"
                     />
@@ -206,7 +199,7 @@ export default function Login() {
                       placeholder="Last name"
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      onBlur={handleInputBlur}
+                      
                       className="pl-9"
                       data-testid="input-last-name"
                     />
@@ -219,7 +212,7 @@ export default function Login() {
                     placeholder="Hebrew name (optional)"
                     value={hebrewName}
                     onChange={(e) => setHebrewName(e.target.value)}
-                    onBlur={handleInputBlur}
+                    
                     className="pl-9"
                     dir="rtl"
                     data-testid="input-hebrew-name"
@@ -232,7 +225,7 @@ export default function Login() {
                       type="date"
                       value={birthday}
                       onChange={(e) => setBirthday(e.target.value)}
-                      onBlur={handleInputBlur}
+                      
                       max={new Date().toISOString().split('T')[0]}
                       className="pl-9"
                       data-testid="input-birthday"
@@ -245,7 +238,7 @@ export default function Login() {
                         e.target.type = 'date';
                         e.target.max = new Date().toISOString().split('T')[0];
                       }}
-                      onBlur={handleInputBlur}
+                      
                       className="pl-9"
                       data-testid="input-birthday"
                       onChange={(e) => setBirthday(e.target.value)}
@@ -262,7 +255,7 @@ export default function Login() {
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                onBlur={handleInputBlur}
+                
                 required
                 className="pl-9"
                 data-testid="input-email"
@@ -277,7 +270,7 @@ export default function Login() {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onBlur={handleInputBlur}
+                  
                   required
                   className="pl-9 pr-10"
                   data-testid="input-password"

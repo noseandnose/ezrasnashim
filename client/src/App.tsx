@@ -62,69 +62,6 @@ function Router() {
   
   // Initialize critical systems - defer non-critical operations
   useEffect(() => {
-    // CRITICAL FIX: Reset --nav-offset on mount to clear any stale cached values
-    document.documentElement.style.setProperty('--nav-offset', '0px');
-    
-    // Dynamically adjust nav offset based on actual viewport comparison
-    // Only apply offset when browser UI is visibly consuming vertical space
-    const updateNavOffset = () => {
-      // CRITICAL: Skip calculation when page is hidden (backgrounded WebView)
-      // visualViewport reports 0 or wrong values when hidden, causing navbar to jump
-      if (document.visibilityState !== 'visible') {
-        return;
-      }
-      
-      const visualHeight = window.visualViewport?.height || window.innerHeight;
-      const fullHeight = window.innerHeight;
-      
-      // Sanity check: if visualHeight is 0 or unreasonably small, don't update
-      // This can happen during WebView transitions
-      if (visualHeight < 100) {
-        return;
-      }
-      
-      // CRITICAL: Sanity check - visualHeight should never be dramatically smaller
-      // If the difference is more than 50% of screen height, something is wrong
-      // This prevents navbar from jumping to middle of page in FlutterFlow WebViews
-      const heightDifference = fullHeight - visualHeight;
-      const maxReasonableOffset = Math.min(400, fullHeight * 0.4); // Max 400px or 40% of screen
-      
-      // If visual viewport is smaller than inner height, browser UI is visible
-      // This works across all browsers and standalone modes
-      if (visualHeight < fullHeight && heightDifference <= maxReasonableOffset) {
-        document.documentElement.style.setProperty('--nav-offset', `${heightDifference}px`);
-      } else {
-        // Either heights are equal OR the difference is too large (likely an error)
-        document.documentElement.style.setProperty('--nav-offset', '0px');
-      }
-    };
-    
-    // Handler for visibility changes - recalculate when page becomes visible
-    const handleNavVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // Reset to 0 first, then recalculate after a brief delay
-        // This ensures we start fresh after returning from background
-        document.documentElement.style.setProperty('--nav-offset', '0px');
-        setTimeout(updateNavOffset, 100);
-      }
-    };
-    
-    // Run on mount and when viewport changes
-    updateNavOffset();
-    window.addEventListener('resize', updateNavOffset, { passive: true });
-    window.addEventListener('orientationchange', updateNavOffset, { passive: true });
-    document.addEventListener('visibilitychange', handleNavVisibilityChange);
-    
-    // Safety timeout: recalculate after page fully loads in case initial calc was wrong
-    setTimeout(updateNavOffset, 300);
-    
-    // CRITICAL: Listen to visualViewport resize directly for keyboard dismiss
-    // Window resize events don't always fire in WebViews when keyboard closes
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateNavOffset, { passive: true });
-      window.visualViewport.addEventListener('scroll', updateNavOffset, { passive: true });
-    }
-    
     // Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
     const userAgent = navigator.userAgent.toLowerCase();
     const isIOS = /iphone|ipod|ipad/.test(userAgent);
@@ -202,14 +139,12 @@ function Router() {
             // Reset scroll lock that might have been left on
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
-            document.documentElement.style.setProperty('--nav-offset', '0px');
             window.location.reload();
           } else {
             // Just reset scroll lock without reloading for short background times
             console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting UI');
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
-            document.documentElement.style.setProperty('--nav-offset', '0px');
           }
           
           // Reset background time after handling
@@ -261,7 +196,6 @@ function Router() {
         isReloading = true;
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
-        document.documentElement.style.setProperty('--nav-offset', '0px');
         window.location.reload();
         return;
       }
@@ -323,13 +257,6 @@ function Router() {
     
     // Cleanup function for event listeners
     return () => {
-      window.removeEventListener('resize', updateNavOffset);
-      window.removeEventListener('orientationchange', updateNavOffset);
-      document.removeEventListener('visibilitychange', handleNavVisibilityChange);
-      if (window.visualViewport) {
-        window.visualViewport.removeEventListener('resize', updateNavOffset);
-        window.visualViewport.removeEventListener('scroll', updateNavOffset);
-      }
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('pageshow', handlePageShow as EventListener);
       window.removeEventListener('focus', handleFocus);
