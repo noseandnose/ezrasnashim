@@ -14,6 +14,7 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { AttributionSection } from "@/components/ui/attribution-section";
+import { formatTextContent } from "@/lib/text-formatter";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -534,13 +535,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 />
               )}
               
-              {/* Content - using Platypi font for English, whitespace-pre-line preserves line breaks */}
+              {/* Content - using Platypi font for English, formatted with text-formatter */}
               <div 
-                className="platypi-regular text-black leading-relaxed text-left mb-4 whitespace-pre-line"
+                className="platypi-regular text-black leading-relaxed text-left mb-4"
                 style={{ fontSize: '16px' }}
-              >
-                {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
-              </div>
+                dangerouslySetInnerHTML={{ 
+                  __html: formatTextContent(torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available') 
+                }}
+              />
               
               {/* Complete Buttons - Thin with magical styling */}
               {!isModalComplete('torah-challenge') && (
