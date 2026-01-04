@@ -868,7 +868,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           </div>
           
           {/* Info icon and Weather - Top right corner */}
-          <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+          <div className="absolute top-2 right-2 z-10 flex items-center gap-2">
             {/* Weather badge */}
             {weather && (
               <div 
