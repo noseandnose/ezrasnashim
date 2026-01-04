@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
  */
 export function sanitizeHTML(htmlContent: string): string {
   return DOMPurify.sanitize(htmlContent, {
-    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3', 'a'],
+    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3', 'a', 'ul', 'li'],
     ALLOWED_ATTR: ['style', 'class', 'href', 'target', 'rel'],
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     RETURN_DOM_FRAGMENT: false,
@@ -288,8 +288,8 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Process ~~ (grey) markers
   formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8; font-family: inherit;">$1</span>');
   
-  // Process ++ (bold text) markers 
-  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong style="font-family: inherit;">$1</strong>');
+  // Process ++ (larger text) markers - 1.2em size
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<span style="font-size: 1.2em; font-family: inherit;">$1</span>');
   
   // Process -- (smaller text) markers - but avoid conflicts with line breaks
   // Use negative lookahead to avoid matching --- (line breaks)
@@ -298,6 +298,10 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Process markdown-style links [text](url)
   formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
     '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">$1</a>');
+  
+  // Process bullet points: lines starting with * or - followed by space
+  // Convert to styled list items with bullet character
+  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 4px 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
   
   let result = formatted;
   

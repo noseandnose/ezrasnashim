@@ -573,7 +573,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                       const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
                       window.open(whatsappUrl, '_blank');
                     }}
-                    className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                    className="flex-1 py-1.5 px-2 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-xs shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                     data-testid="button-torah-challenge-raffle"
                   >
                     Complete + Enter Raffle
