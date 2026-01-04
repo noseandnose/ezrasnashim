@@ -337,9 +337,9 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   />
                 )}
                 
-                {/* Content - using Platypi font for English */}
+                {/* Content - using Platypi font for English, whitespace-pre-line preserves line breaks */}
                 <div 
-                  className="platypi-regular text-black leading-relaxed text-left mb-4"
+                  className="platypi-regular text-black leading-relaxed text-left mb-4 whitespace-pre-line"
                   style={{ fontSize: '16px' }}
                 >
                   {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
