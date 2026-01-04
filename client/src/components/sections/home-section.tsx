@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
-import DOMPurify from "dompurify";
+import { sanitizeHTML } from "@/lib/text-formatter";
 import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
@@ -94,7 +94,7 @@ function formatMarkdownText(text: string | null | undefined, times?: { shkia?: s
     .replace(/\{\{havdalah\}\}/gi, times?.havdalah || '');
   result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
   result = result.replace(/\n/g, '<br>');
-  return DOMPurify.sanitize(result);
+  return sanitizeHTML(result);
 }
 
 // ============ TYPES ============
