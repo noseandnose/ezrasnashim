@@ -83,12 +83,18 @@ function Router() {
         return;
       }
       
+      // CRITICAL: Sanity check - visualHeight should never be dramatically smaller
+      // If the difference is more than 50% of screen height, something is wrong
+      // This prevents navbar from jumping to middle of page in FlutterFlow WebViews
+      const heightDifference = fullHeight - visualHeight;
+      const maxReasonableOffset = Math.min(400, fullHeight * 0.4); // Max 400px or 40% of screen
+      
       // If visual viewport is smaller than inner height, browser UI is visible
       // This works across all browsers and standalone modes
-      if (visualHeight < fullHeight) {
-        const offset = fullHeight - visualHeight;
-        document.documentElement.style.setProperty('--nav-offset', `${offset}px`);
+      if (visualHeight < fullHeight && heightDifference <= maxReasonableOffset) {
+        document.documentElement.style.setProperty('--nav-offset', `${heightDifference}px`);
       } else {
+        // Either heights are equal OR the difference is too large (likely an error)
         document.documentElement.style.setProperty('--nav-offset', '0px');
       }
     };
