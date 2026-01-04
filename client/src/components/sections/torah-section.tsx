@@ -278,134 +278,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
           </div>
         )}
 
-        {/* Bitachon Challenge - Expandable Card (Only show when database content exists for this date) */}
-        {torahChallenge && (
-          <div 
-            className="rounded-xl mt-3 overflow-hidden border border-blush/10 shadow-lg relative"
-            style={{ 
-              backgroundColor: '#ffffff', 
-              isolation: 'isolate',
-              zIndex: 10
-            }}
-          >
-            {/* Collapsed/Header Bar */}
-            <button
-              onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-              className="w-full p-3 text-left transition-colors relative"
-              style={{ backgroundColor: '#ffffff', zIndex: 11 }}
-              data-testid="button-torah-challenge-toggle"
-            >
-              <div className="flex items-center gap-3">
-                {/* Icon */}
-                <div className={`p-2 rounded-full ${
-                  isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
-                }`}>
-                  <Trophy className="text-white" size={16} />
-                </div>
-                
-                {/* Title and Subtitle */}
-                <div className="flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">Bitachon Challenge</h3>
-                  <p className="platypi-regular text-xs text-black/70">{torahChallenge.title || 'Daily Challenge'}</p>
-                </div>
-                
-                {/* Expand/Collapse Icon or Checkmark */}
-                {isModalComplete('torah-challenge') ? (
-                  <Check className="text-sage" size={18} />
-                ) : (
-                  <div className="p-1 rounded-full bg-blush/20">
-                    {torahChallengeExpanded ? (
-                      <ChevronUp className="text-lavender" size={16} />
-                    ) : (
-                      <ChevronDown className="text-lavender" size={16} />
-                    )}
-                  </div>
-                )}
-              </div>
-            </button>
-            
-            {/* Expanded Content - Force white background */}
-            {torahChallengeExpanded && (
-              <div className="px-3 pb-3 relative" style={{ backgroundColor: '#ffffff', zIndex: 11 }}>
-                {/* Image */}
-                {torahChallenge.imageUrl && (
-                  <img 
-                    src={torahChallenge.imageUrl} 
-                    alt={torahChallenge.title || "Bitachon Challenge"} 
-                    className="w-full rounded-xl object-cover mb-3"
-                    loading="lazy"
-                  />
-                )}
-                
-                {/* Content - using Platypi font for English, whitespace-pre-line preserves line breaks */}
-                <div 
-                  className="platypi-regular text-black leading-relaxed text-left mb-4 whitespace-pre-line"
-                  style={{ fontSize: '16px' }}
-                >
-                  {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
-                </div>
-                
-                {/* Complete Buttons - Thin with magical styling */}
-                {!isModalComplete('torah-challenge') && (
-                  <div className="flex gap-2 mb-3">
-                    <button
-                      onClick={() => {
-                        markModalComplete('torah-challenge');
-                        completeTask('torah');
-                        trackModalComplete('torah-challenge');
-                        setShowHeartExplosion(true);
-                        setTimeout(() => {
-                          checkAndShowCongratulations();
-                        }, 100);
-                      }}
-                      className="flex-1 py-1.5 rounded-2xl bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
-                      data-testid="button-torah-challenge-complete"
-                    >
-                      Complete
-                    </button>
-                    <button
-                      onClick={() => {
-                        markModalComplete('torah-challenge');
-                        completeTask('torah');
-                        trackModalComplete('torah-challenge');
-                        setShowHeartExplosion(true);
-                        setTimeout(() => {
-                          checkAndShowCongratulations();
-                        }, 100);
-                        // Try to open WhatsApp in external browser/app
-                        const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
-                        // Create a temporary link with attributes that signal external navigation
-                        const link = document.createElement('a');
-                        link.href = whatsappUrl;
-                        link.target = '_system'; // iOS/Android WebView hint for external browser
-                        link.rel = 'noopener noreferrer external';
-                        link.setAttribute('data-action', 'external');
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                      }}
-                      className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
-                      data-testid="button-torah-challenge-raffle"
-                    >
-                      Complete + Enter Raffle
-                    </button>
-                  </div>
-                )}
-                
-                {/* Attribution Section - With expandable dropdown, white variant */}
-                {torahChallenge.thankYouMessage && (
-                  <AttributionSection
-                    label={torahChallenge.thankYouMessage}
-                    logoUrl={torahChallenge.attributionLogoUrl}
-                    aboutText={torahChallenge.attributionAboutText}
-                    variant="white"
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Torah Classes Bar - Only shown when content exists */}
         {currentTorahClass && (
           <button 
@@ -603,8 +475,136 @@ function TorahSectionComponent({}: TorahSectionProps) {
           })}
       </div>
 
+      {/* Bitachon Challenge - Below 4 buttons */}
+      {torahChallenge && (
+        <div 
+          className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative"
+          style={{ 
+            backgroundColor: '#ffffff', 
+            isolation: 'isolate',
+            zIndex: 10
+          }}
+        >
+          {/* Collapsed/Header Bar */}
+          <button
+            onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
+            className="w-full p-3 text-left transition-colors relative"
+            style={{ backgroundColor: '#ffffff', zIndex: 11 }}
+            data-testid="button-torah-challenge-toggle"
+          >
+            <div className="flex items-center gap-3">
+              {/* Icon */}
+              <div className={`p-2 rounded-full ${
+                isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
+              }`}>
+                <Trophy className="text-white" size={16} />
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div className="flex-grow">
+                <h3 className="platypi-bold text-sm text-black">Bitachon Challenge</h3>
+                <p className="platypi-regular text-xs text-black/70">{torahChallenge.title || 'Daily Challenge'}</p>
+              </div>
+              
+              {/* Expand/Collapse Icon or Checkmark */}
+              {isModalComplete('torah-challenge') ? (
+                <Check className="text-sage" size={18} />
+              ) : (
+                <div className="p-1 rounded-full bg-blush/20">
+                  {torahChallengeExpanded ? (
+                    <ChevronUp className="text-lavender" size={16} />
+                  ) : (
+                    <ChevronDown className="text-lavender" size={16} />
+                  )}
+                </div>
+              )}
+            </div>
+          </button>
+          
+          {/* Expanded Content - Force white background */}
+          {torahChallengeExpanded && (
+            <div className="px-3 pb-3 relative" style={{ backgroundColor: '#ffffff', zIndex: 11 }}>
+              {/* Image */}
+              {torahChallenge.imageUrl && (
+                <img 
+                  src={torahChallenge.imageUrl} 
+                  alt={torahChallenge.title || "Bitachon Challenge"} 
+                  className="w-full rounded-xl object-cover mb-3"
+                  loading="lazy"
+                />
+              )}
+              
+              {/* Content - using Platypi font for English, whitespace-pre-line preserves line breaks */}
+              <div 
+                className="platypi-regular text-black leading-relaxed text-left mb-4 whitespace-pre-line"
+                style={{ fontSize: '16px' }}
+              >
+                {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
+              </div>
+              
+              {/* Complete Buttons - Thin with magical styling */}
+              {!isModalComplete('torah-challenge') && (
+                <div className="flex gap-2 mb-3">
+                  <button
+                    onClick={() => {
+                      markModalComplete('torah-challenge');
+                      completeTask('torah');
+                      trackModalComplete('torah-challenge');
+                      setShowHeartExplosion(true);
+                      setTimeout(() => {
+                        checkAndShowCongratulations();
+                      }, 100);
+                    }}
+                    className="flex-1 py-1.5 rounded-2xl bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
+                    data-testid="button-torah-challenge-complete"
+                  >
+                    Complete
+                  </button>
+                  <button
+                    onClick={() => {
+                      markModalComplete('torah-challenge');
+                      completeTask('torah');
+                      trackModalComplete('torah-challenge');
+                      setShowHeartExplosion(true);
+                      setTimeout(() => {
+                        checkAndShowCongratulations();
+                      }, 100);
+                      // Try to open WhatsApp in external browser/app
+                      const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
+                      // Create a temporary link with attributes that signal external navigation
+                      const link = document.createElement('a');
+                      link.href = whatsappUrl;
+                      link.target = '_system'; // iOS/Android WebView hint for external browser
+                      link.rel = 'noopener noreferrer external';
+                      link.setAttribute('data-action', 'external');
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                    className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                    data-testid="button-torah-challenge-raffle"
+                  >
+                    Complete + Enter Raffle
+                  </button>
+                </div>
+              )}
+              
+              {/* Attribution Section - With expandable dropdown, white variant */}
+              {torahChallenge.thankYouMessage && (
+                <AttributionSection
+                  label={torahChallenge.thankYouMessage}
+                  logoUrl={torahChallenge.attributionLogoUrl}
+                  aboutText={torahChallenge.attributionAboutText}
+                  variant="white"
+                />
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Full-width bars section */}
-      <div className="p-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
+      <div className="px-2 pt-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
