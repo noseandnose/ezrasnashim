@@ -372,7 +372,17 @@ function TorahSectionComponent({}: TorahSectionProps) {
                         setTimeout(() => {
                           checkAndShowCongratulations();
                         }, 100);
-                        window.open('https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F', '_blank');
+                        // Try to open WhatsApp in external browser/app
+                        const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
+                        // Create a temporary link with attributes that signal external navigation
+                        const link = document.createElement('a');
+                        link.href = whatsappUrl;
+                        link.target = '_system'; // iOS/Android WebView hint for external browser
+                        link.rel = 'noopener noreferrer external';
+                        link.setAttribute('data-action', 'external');
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
                       }}
                       className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                       data-testid="button-torah-challenge-raffle"
