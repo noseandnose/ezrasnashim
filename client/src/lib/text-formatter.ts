@@ -229,7 +229,7 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   
   // Process bullet points BEFORE converting newlines to <br />
   // Lines starting with * or - followed by space become styled bullet items
-  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 4px 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
+  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 1px 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
   
   // Convert newlines to HTML breaks AFTER bullet processing
   formatted = formatted.replace(/\n/g, '<br />');
