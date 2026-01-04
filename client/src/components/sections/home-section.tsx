@@ -1,7 +1,7 @@
 import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState, memo, useEffect } from "react";
+import { useState, memo, useEffect, useMemo } from "react";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useJewishTimes, useGeolocation } from "@/hooks/use-jewish-times";
 import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
@@ -9,7 +9,6 @@ import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
-import { useMemo } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
 import DOMPurify from "dompurify";
 import grassImage from "@assets/Grass2_1766588526836.png";
@@ -20,15 +19,85 @@ import lifeFlower from "@assets/Life_1767176917530.png";
 import morningBackground from "@assets/Morning_1767097697251.png";
 import afternoonBackground from "@assets/Afternoon_1767097697250.png";
 import nightBackground from "@assets/Night_1767097697247.png";
-// Milestone tree images temporarily removed - will be replaced with new ones later
-// import milestone10Tree from "@assets/10_1766688255354.png";
-// import milestone20Tree from "@assets/20_1766688255353.png";
-// import milestone30Tree from "@assets/30_1766688255351.png";
-
-// TEMPORARY: New section background images for testing
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
 import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
 import sectionNightBg from "@assets/background_night_1767034895431.png";
+
+// ============ PURE UTILITY FUNCTIONS (extracted for performance) ============
+
+// Parse time string like "6:30 AM" into a Date object for today
+function parseTimeToday(timeStr: string | undefined): Date | null {
+  if (!timeStr) return null;
+  const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+  if (!match) return null;
+  
+  let hours = parseInt(match[1]);
+  const minutes = parseInt(match[2]);
+  const period = match[3].toUpperCase();
+  
+  if (period === 'PM' && hours !== 12) hours += 12;
+  else if (period === 'AM' && hours === 12) hours = 0;
+  
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date;
+}
+
+// Check if current time is after a given time string
+function isAfterTimeString(timeStr: string | undefined, fallbackHour: number): boolean {
+  const now = new Date();
+  const targetTime = parseTimeToday(timeStr);
+  if (!targetTime) return now.getHours() >= fallbackHour;
+  return now >= targetTime;
+}
+
+// Get time period based on Jewish times
+function getTimePeriod(times: { tzaitHakochavim?: string; sunrise?: string; minchaGedolah?: string } | undefined): 'night' | 'morning' | 'afternoon' {
+  const isAfterNaitz = isAfterTimeString(times?.sunrise, 6);
+  const isAfterTzais = isAfterTimeString(times?.tzaitHakochavim, 18);
+  const isAfterMinchaGedolah = isAfterTimeString(times?.minchaGedolah, 12);
+  
+  if (!isAfterNaitz) return 'night';
+  if (isAfterTzais) return 'night';
+  if (!isAfterMinchaGedolah) return 'morning';
+  return 'afternoon';
+}
+
+// Get appropriate greeting based on time period
+function getGreetingText(timePeriod: 'night' | 'morning' | 'afternoon', firstName?: string): string {
+  const greetings = { night: 'Good Evening', morning: 'Good Morning', afternoon: 'Good Afternoon' };
+  let greeting = greetings[timePeriod];
+  if (firstName) greeting += `, ${firstName}`;
+  return greeting;
+}
+
+// Get garden background based on time period
+function getGardenBg(timePeriod: 'night' | 'morning' | 'afternoon') {
+  const backgrounds = { night: nightBackground, morning: morningBackground, afternoon: afternoonBackground };
+  return backgrounds[timePeriod];
+}
+
+// Get section background based on time period
+function getSectionBg(timePeriod: 'night' | 'morning' | 'afternoon') {
+  const backgrounds = { night: sectionNightBg, morning: sectionMorningBg, afternoon: sectionAfternoonBg };
+  return backgrounds[timePeriod];
+}
+
+// Format markdown with placeholder replacement
+function formatMarkdownText(text: string | null | undefined, times?: { shkia?: string; sunrise?: string; minchaGedolah?: string; candleLighting?: string; havdalah?: string }): string {
+  if (!text) return '';
+  let result = text
+    .replace(/\{\{shkia\}\}/gi, times?.shkia || '')
+    .replace(/\{\{sunrise\}\}/gi, times?.sunrise || '')
+    .replace(/\{\{mincha\}\}/gi, times?.minchaGedolah || '')
+    .replace(/\{\{candleLighting\}\}/gi, times?.candleLighting || '')
+    .replace(/\{\{havdalah\}\}/gi, times?.havdalah || '');
+  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  result = result.replace(/\n/g, '<br>');
+  return DOMPurify.sanitize(result);
+}
+
+// ============ TYPES ============
 
 interface HomeSectionProps {
   onSectionChange?: (section: Section) => void;
@@ -106,10 +175,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
   // TEMPORARY: Time period state for automatic background updates
   // Updates every minute to catch time-of-day transitions
-  const [, setTimeUpdate] = useState(Date.now());
+  // Using minute-granularity key to trigger recalculations
+  const [currentMinute, setCurrentMinute] = useState(() => Math.floor(Date.now() / 60000));
   useEffect(() => {
     const interval = setInterval(() => {
-      setTimeUpdate(Date.now());
+      setCurrentMinute(Math.floor(Date.now() / 60000));
     }, 60000); // Check every minute
     return () => clearInterval(interval);
   }, []);
@@ -176,103 +246,19 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const { data: weather } = useWeather();
   const { unit: tempUnit, toggle: toggleTempUnit } = useTemperatureUnit();
 
-  // Helper to check if current time is after tzais hakochavim (nightfall)
-  const isAfterTzais = (): boolean => {
-    const tzaisStr = jewishTimesQuery.data?.tzaitHakochavim;
-    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM if no data
-    
-    const now = new Date();
-    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!match) return now.getHours() >= 18;
-    
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const isPM = match[3].toUpperCase() === 'PM';
-    
-    if (isPM && hours !== 12) hours += 12;
-    if (!isPM && hours === 12) hours = 0;
-    
-    const tzaisTime = new Date(now);
-    tzaisTime.setHours(hours, minutes, 0, 0);
-    
-    return now >= tzaisTime;
-  };
-
-  // Helper to check if current time is after naitz (sunrise)
-  const isAfterNaitz = (): boolean => {
-    const sunriseStr = jewishTimesQuery.data?.sunrise;
-    if (!sunriseStr) return new Date().getHours() >= 6; // Fallback to 6 AM if no data
-    
-    const now = new Date();
-    const match = sunriseStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!match) return now.getHours() >= 6;
-    
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const isPM = match[3].toUpperCase() === 'PM';
-    
-    if (isPM && hours !== 12) hours += 12;
-    if (!isPM && hours === 12) hours = 0;
-    
-    const sunriseTime = new Date(now);
-    sunriseTime.setHours(hours, minutes, 0, 0);
-    
-    return now >= sunriseTime;
-  };
-
-  // Helper to check if current time is after mincha gedolah (start of afternoon)
-  const isAfterMinchaGedolah = (): boolean => {
-    const minchaStr = jewishTimesQuery.data?.minchaGedolah;
-    if (!minchaStr) return new Date().getHours() >= 12; // Fallback to noon if no data
-    
-    const now = new Date();
-    const match = minchaStr.match(/(\d+):(\d+)\s*(AM|PM)/i);
-    if (!match) return now.getHours() >= 12;
-    
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const isPM = match[3].toUpperCase() === 'PM';
-    
-    if (isPM && hours !== 12) hours += 12;
-    if (!isPM && hours === 12) hours = 0;
-    
-    const minchaTime = new Date(now);
-    minchaTime.setHours(hours, minutes, 0, 0);
-    
-    return now >= minchaTime;
-  };
-
-  // Get time-appropriate greeting (morning at naitz, afternoon at mincha gedolah, evening at tzais)
-  const getGreeting = () => {
-    let greeting = "";
-    if (!isAfterNaitz()) greeting = "Good Evening"; // Before sunrise = still night
-    else if (isAfterTzais()) greeting = "Good Evening";
-    else if (!isAfterMinchaGedolah()) greeting = "Good Morning";
-    else greeting = "Good Afternoon";
-    
-    // Add user's first name if logged in
-    if (isAuthenticated && user?.firstName) {
-      greeting += `, ${user.firstName}`;
-    }
-    
-    return greeting;
-  };
-
-  // Get time-appropriate background for garden (night until naitz, afternoon at mincha gedolah)
-  const getGardenBackground = () => {
-    if (!isAfterNaitz()) return nightBackground; // Before sunrise = night
-    if (isAfterTzais()) return nightBackground;
-    if (!isAfterMinchaGedolah()) return morningBackground;
-    return afternoonBackground;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section (night until naitz, afternoon at mincha gedolah)
-  const getSectionBackground = () => {
-    if (!isAfterNaitz()) return sectionNightBg; // Before sunrise = night
-    if (isAfterTzais()) return sectionNightBg;
-    if (!isAfterMinchaGedolah()) return sectionMorningBg;
-    return sectionAfternoonBg;
-  };
+  // Memoized time period calculation (uses extracted utility functions)
+  // Depends on currentMinute to update across time-of-day transitions
+  const timePeriod = useMemo(() => getTimePeriod(jewishTimesQuery.data), [jewishTimesQuery.data, currentMinute]);
+  
+  // Memoized greeting text
+  const greeting = useMemo(() => 
+    getGreetingText(timePeriod, isAuthenticated && user?.firstName ? user.firstName : undefined),
+    [timePeriod, isAuthenticated, user?.firstName]
+  );
+  
+  // Memoized backgrounds - depend on timePeriod which updates with currentMinute
+  const gardenBackground = useMemo(() => getGardenBg(timePeriod), [timePeriod]);
+  const sectionBackground = useMemo(() => getSectionBg(timePeriod), [timePeriod]);
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
   const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
@@ -298,8 +284,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
   
-  // Helper function to replace placeholders in Today's Special text
-  const replacePlaceholders = (text: string | null | undefined): string => {
+  // Memoized placeholder replacement helper
+  const replacePlaceholders = useMemo(() => (text: string | null | undefined): string => {
     if (!text) return '';
     return text
       .replace(/\{\{shkia\}\}/gi, jewishTimesQuery.data?.shkia || '')
@@ -307,15 +293,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       .replace(/\{\{mincha\}\}/gi, jewishTimesQuery.data?.minchaGedolah || '')
       .replace(/\{\{candleLighting\}\}/gi, jewishTimesQuery.data?.candleLighting || '')
       .replace(/\{\{havdalah\}\}/gi, jewishTimesQuery.data?.havdalah || '');
-  };
+  }, [jewishTimesQuery.data]);
 
-  const formatMarkdown = (text: string | null | undefined): string => {
-    if (!text) return '';
-    const withPlaceholders = replacePlaceholders(text);
-    const withBold = withPlaceholders.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    const withLineBreaks = withBold.replace(/\n/g, '<br>');
-    return DOMPurify.sanitize(withLineBreaks);
-  };
+  // Format markdown using extracted utility function
+  const formatMarkdown = useMemo(() => (text: string | null | undefined): string => {
+    return formatMarkdownText(text, jewishTimesQuery.data);
+  }, [jewishTimesQuery.data]);
 
 
 
@@ -420,7 +403,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     }
   };
 
-  const currentPrayer = useMemo(() => getCurrentPrayer(), [jewishTimesQuery.data, jewishTimesQuery.isLoading]);
+  const currentPrayer = useMemo(() => getCurrentPrayer(), [jewishTimesQuery.data, jewishTimesQuery.isLoading, currentMinute]);
 
   // Get the proper icon component
   const PrayerIcon = currentPrayer.icon;
@@ -429,7 +412,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
       {/* TEMPORARY: Full page background image - fixed to cover header */}
       <img 
-        src={getSectionBackground()} 
+        src={sectionBackground} 
         alt="" 
         aria-hidden="true"
         className="fixed inset-0 w-full h-full object-cover pointer-events-none"
@@ -446,7 +429,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       >
         {/* Greeting with Feed button */}
         <div className="flex items-center justify-between mb-3">
-          <h1 className="platypi-bold text-xl text-black tracking-wide">{getGreeting()}</h1>
+          <h1 className="platypi-bold text-xl text-black tracking-wide">{greeting}</h1>
           <div className="relative shrink-0">
             <button
               onClick={() => window.location.href = '/feed'}
@@ -798,7 +781,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         >
           {/* Time-based background - Layer 0 */}
           <img 
-            src={getGardenBackground()} 
+            src={gardenBackground} 
             alt="" 
             className="absolute inset-0 w-full h-full z-0"
             style={{ objectFit: 'cover', opacity: 0.3 }}
