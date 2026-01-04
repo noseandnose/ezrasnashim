@@ -43,15 +43,11 @@
     --browser-ui-bottom: 0px;
   }
   
-  /* Navigation offset - default to 0 for PWA/mobile apps */
-  /* Only add browser UI offset in Safari browser mode (set via JS) */
-  --nav-offset: 0px;
-  
   /* Computed layout dimensions (pure CSS calc, includes ALL spacing) */
   /* Header total = safe-area + top-padding + row-height + bottom-padding */
   --header-total-height: calc(var(--safe-area-top) + var(--header-padding-vertical) + var(--header-row-height) + var(--header-padding-vertical));
-  /* Footer total = navigation offset + content height + safe-area */
-  --footer-total-height: calc(var(--nav-offset) + var(--footer-content-height) + var(--safe-area-bottom));
+  /* Footer total = content height + safe-area */
+  --footer-total-height: calc(var(--footer-content-height) + var(--safe-area-bottom));
   
   /* Backward compatibility aliases */
   --sat: var(--safe-area-top);
@@ -63,21 +59,6 @@
   font-family: Platypi, serif;
 }
 
-/* PWA/Standalone mode: Remove browser UI offset */
-@media (display-mode: standalone) {
-  :root {
-    --nav-offset: 0px;
-  }
-}
-
-/* Legacy iOS PWA detection */
-@supports (-webkit-touch-callout: none) {
-  @media (display-mode: standalone) {
-    :root {
-      --nav-offset: 0px;
-    }
-  }
-}
 
 /* Safari mobile viewport fix */
 @supports (-webkit-touch-callout: none) {

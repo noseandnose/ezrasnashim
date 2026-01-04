@@ -19,9 +19,6 @@ export function ensureSafeAreaVariables() {
   root.style.setProperty('--safe-area-bottom', safeAreaBottom);
   root.style.setProperty('--safe-area-left', safeAreaLeft);
   root.style.setProperty('--safe-area-right', safeAreaRight);
-  
-  // CRITICAL FIX: Always reset --nav-offset to 0px to clear any cached stale values
-  root.style.setProperty('--nav-offset', '0px');
 }
 
 /**

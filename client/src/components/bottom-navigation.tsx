@@ -55,7 +55,7 @@ export default function BottomNavigation({
       data-bridge-container
       className="nav-extended fixed left-4 right-4 mx-auto max-w-md z-50"
       style={{
-        bottom: "calc(var(--nav-offset, 0px) + var(--safe-area-bottom, 0px) + 12px)",
+        bottom: "calc(var(--safe-area-bottom, 0px) + 12px)",
         touchAction: "none"
       }}
     >
