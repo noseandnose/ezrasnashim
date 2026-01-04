@@ -245,12 +245,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   style={{ unicodeBidi: 'plaintext' }}
                 >
                   {!pirkeiAvot?.text ? 'Loading...' : 
-                    pirkeiAvot.text.length > 250 && !pirkeiAvotExpanded 
-                      ? pirkeiAvot.text.slice(0, 250) + '...' 
+                    pirkeiAvot.text.length > 150 && !pirkeiAvotExpanded 
+                      ? pirkeiAvot.text.slice(0, 150) + '...' 
                       : pirkeiAvot.text
                   }
                 </p>
-                {pirkeiAvot?.text && pirkeiAvot.text.length > 250 && (
+                {pirkeiAvot?.text && pirkeiAvot.text.length > 150 && (
                   <button
                     ref={pirkeiExpandButtonRef}
                     onClick={handlePirkeiAvotToggle}
