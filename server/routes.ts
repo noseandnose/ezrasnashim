@@ -31,6 +31,26 @@ interface CacheEntry {
 
 const apiCache = new Map<string, CacheEntry>();
 
+// Periodic cleanup of expired cache entries to prevent memory growth
+// Runs every 5 minutes and removes entries that have expired
+setInterval(() => {
+  const now = Date.now();
+  let cleaned = 0;
+  const keysToDelete: string[] = [];
+  apiCache.forEach((entry, key) => {
+    if (entry.expires < now && !entry.pendingPromise) {
+      keysToDelete.push(key);
+    }
+  });
+  keysToDelete.forEach(key => {
+    apiCache.delete(key);
+    cleaned++;
+  });
+  if (cleaned > 0) {
+    console.log(`[Cache] Cleaned up ${cleaned} expired entries, ${apiCache.size} remaining`);
+  }
+}, 5 * 60 * 1000); // Run every 5 minutes
+
 // Cache TTL configurations (in milliseconds)
 const CACHE_TTLS = {
   hebcalZmanim: 15 * 60 * 1000,      // 15 minutes - times change throughout day
