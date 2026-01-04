@@ -231,6 +231,9 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Lines starting with * or - followed by space become styled bullet items
   formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
   
+  // Collapse blank lines between consecutive bullet divs to prevent extra spacing
+  formatted = formatted.replace(/(<\/div>)\s*\n+\s*(<div style="display: flex; align-items: flex-start)/g, '$1$2');
+  
   // Convert newlines to HTML breaks AFTER bullet processing
   formatted = formatted.replace(/\n/g, '<br />');
   
