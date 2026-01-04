@@ -651,7 +651,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {gemsOfGratitude && (
           <button
             onClick={() => openModal('gems-of-gratitude', 'torah')}
-            className="w-full rounded-xl overflow-hidden border transition-colors text-left mb-3 bg-white/80 border-blush/20"
+            className="w-full bg-white rounded-2xl overflow-hidden border border-blush/10 shadow-lg transition-colors text-left"
             data-testid="button-gems-of-gratitude"
           >
             <div className="flex items-center gap-3 p-3">
