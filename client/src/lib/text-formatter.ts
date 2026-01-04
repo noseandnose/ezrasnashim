@@ -288,8 +288,8 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Process ~~ (grey) markers
   formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8; font-family: inherit;">$1</span>');
   
-  // Process ++ (larger text) markers - 1.2em size
-  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<span style="font-size: 1.2em; font-family: inherit;">$1</span>');
+  // Process ++ (larger and bold text) markers - 1.2em size with bold
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong style="font-size: 1.2em; font-family: inherit;">$1</strong>');
   
   // Process -- (smaller text) markers - but avoid conflicts with line breaks
   // Use negative lookahead to avoid matching --- (line breaks)
