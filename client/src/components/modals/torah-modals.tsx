@@ -42,8 +42,8 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
   // Auto-redirect Torah modals to fullscreen - RE-ENABLED for halacha and featured
   // These now open modal briefly and auto-redirect to fullscreen immediately
   useEffect(() => {
-    // Re-enable halacha, featured, and gems-of-gratitude to auto-redirect to fullscreen
-    const fullscreenTorahModals = ['halacha', 'featured', 'gems-of-gratitude'];
+    // Re-enable halacha, featured, gems-of-gratitude, and torah-challenge to auto-redirect to fullscreen
+    const fullscreenTorahModals = ['halacha', 'featured', 'gems-of-gratitude', 'torah-challenge'];
     
     if (activeModal && fullscreenTorahModals.includes(activeModal)) {
       let title = '';
@@ -61,6 +61,10 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
         case 'gems-of-gratitude':
           title = 'Gems of Gratitude';
           contentType = 'gems-of-gratitude';
+          break;
+        case 'torah-challenge':
+          title = 'Torah Challenge';
+          contentType = 'torah-challenge';
           break;
       }
       
@@ -151,6 +155,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
   const { data: torahSummaryData, isLoading: isTorahSummaryLoading } = useTorahSummary();
   const gemsOfGratitudeContent = torahSummaryData?.gemsOfGratitude;
+  const torahChallengeContent = torahSummaryData?.torahChallenge;
   const isGemsLoading = isTorahSummaryLoading;
 
   const { data: pirkeiAvotContent } = useQuery<Record<string, any>>({
@@ -1227,6 +1232,94 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 >
                   ✨ Tehillim 100 ✨
                 </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-black/60 platypi-regular">
+              No content available for today
+            </div>
+          )
+        ) : fullscreenContent.contentType === 'torah-challenge' ? (
+          torahChallengeContent ? (
+            <div className="space-y-4">
+              <div className="bg-white rounded-2xl p-6 border border-blush/10">
+                {/* Title */}
+                {torahChallengeContent.title && (
+                  <h2 className="platypi-bold text-lg text-black mb-4">{torahChallengeContent.title}</h2>
+                )}
+                
+                {/* Image if provided */}
+                {torahChallengeContent.imageUrl && (
+                  <div className="mb-4 rounded-xl overflow-hidden">
+                    <img 
+                      src={torahChallengeContent.imageUrl} 
+                      alt={torahChallengeContent.title || 'Torah Challenge'}
+                      className="w-full h-auto object-cover"
+                    />
+                  </div>
+                )}
+                
+                {/* Main content */}
+                {torahChallengeContent.contentEnglish && (
+                  <div 
+                    className="platypi-regular leading-relaxed text-black whitespace-pre-line"
+                    style={{ fontSize: `${fontSize}px` }}
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(torahChallengeContent.contentEnglish) }}
+                  />
+                )}
+                
+                {/* Hebrew content if provided */}
+                {torahChallengeContent.contentHebrew && (
+                  <div 
+                    className="mt-4 pt-4 border-t border-blush/10 leading-relaxed text-black whitespace-pre-line text-right"
+                    dir="rtl"
+                    style={{ fontSize: `${fontSize}px`, fontFamily: 'David Libre, serif' }}
+                    dangerouslySetInnerHTML={{ __html: formatTextContent(torahChallengeContent.contentHebrew) }}
+                  />
+                )}
+              </div>
+              
+              {/* Attribution Section - outside content box */}
+              {(torahChallengeContent.attributionLogoUrl || torahChallengeContent.attributionAboutText) && (
+                <AttributionSection 
+                  logoUrl={torahChallengeContent.attributionLogoUrl || undefined}
+                  aboutText={torahChallengeContent.attributionAboutText || undefined}
+                  label="About"
+                />
+              )}
+              
+              {/* Complete button */}
+              <div className="heart-explosion-container">
+                <Button 
+                  onClick={isModalComplete('torah-challenge') ? undefined : () => {
+                    trackModalComplete('torah-challenge');
+                    markModalComplete('torah-challenge');
+                    setShowExplosion(true);
+                    setTimeout(() => {
+                      setShowExplosion(false);
+                      completeTask('torah');
+                      
+                      if (checkAndShowCongratulations()) {
+                        openModal('congratulations', 'torah');
+                      }
+                      
+                      const event = new CustomEvent('closeFullscreen');
+                      window.dispatchEvent(event);
+                      setTimeout(() => {
+                        window.location.hash = '#/?section=home&scrollToProgress=true';
+                      }, 100);
+                    }, 1500);
+                  }}
+                  disabled={isModalComplete('torah-challenge')}
+                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
+                    isModalComplete('torah-challenge') 
+                      ? 'bg-sage text-white' 
+                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
+                  }`}
+                >
+                  {isModalComplete('torah-challenge') ? 'Completed' : 'Complete Challenge'}
+                </Button>
+                <HeartExplosion trigger={showExplosion} />
               </div>
             </div>
           ) : (

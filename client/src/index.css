@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force solid white background - use for sections that must not show page background */
+.bg-solid-white {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
 /* Safe Area CSS Variables - CSS-first approach for instant load without layout shift */
 :root {
   /* Header/Footer padding values */
