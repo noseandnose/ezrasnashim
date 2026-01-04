@@ -222,6 +222,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "parsha-vort": "Parsha Shiur",
     "pirkei-avot": "Pirkei Avot",
     "gems-of-gratitude": "Gems of Gratitude",
+    "torah-challenge": "Bitachon Challenge",
     
     // Life section
     recipe: "Daily Recipe",
@@ -275,6 +276,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "featured-content": Star,
     featured: Star,
     "pirkei-avot": ScrollText,
+    "torah-challenge": Trophy,
     
     // Life section
     recipe: Sparkles,
