@@ -615,7 +615,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 data-modal-section="torah"
                 data-testid="button-shmirat-halashon-bar"
               >
-                <div className="bg-gradient-feminine p-2 rounded-full">
+                <div className={`p-2 rounded-full ${isModalComplete('featured') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
                   <Star className="text-white" size={16} strokeWidth={1.5} />
                 </div>
                 <div className="text-left flex-grow">
@@ -624,16 +624,20 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     {featuredContent?.title ? toCamelCase(featuredContent.title) : 'Special Topics'}
                   </p>
                 </div>
-                {/* Dynamic content type icon */}
-                <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
-                  {hasVideo ? (
-                    <Video className="w-2.5 h-2.5" />
-                  ) : hasAudio ? (
-                    <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                  ) : hasText ? (
-                    <span className="platypi-bold text-xs">T</span>
-                  ) : null}
-                </div>
+                {/* Completion indicator or content type icon */}
+                {isModalComplete('featured') ? (
+                  <Check className="text-sage" size={18} />
+                ) : (
+                  <div className="bg-white text-black text-xs rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
+                    {hasVideo ? (
+                      <Video className="w-2.5 h-2.5" />
+                    ) : hasAudio ? (
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    ) : hasText ? (
+                      <span className="platypi-bold text-xs">T</span>
+                    ) : null}
+                  </div>
+                )}
               </div>
             </div>
           ) : null;
