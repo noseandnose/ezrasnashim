@@ -19,6 +19,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -103,13 +104,49 @@ function Router() {
     const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;
     
     // WebView resume handler for FlutterFlow apps
-    // Fixes untappable buttons by reloading after returning from background
+    // Fixes untappable buttons by resetting scroll locks after returning from background
     // visibilitychange is UNRELIABLE in Flutter WebViews - use multiple detection methods
     let lastBackgroundTime: number | null = null;
-    let isReloading = false; // Prevent double-reload
+    let isRecovering = false; // Prevent double-recovery
     let resumeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
-    const BACKGROUND_THRESHOLD = 3000; // 3 seconds - reliable for WebView recovery
+    const BACKGROUND_THRESHOLD = 3000; // 3 seconds - trigger soft recovery
     const RESUME_DEBOUNCE = 200; // Debounce resume detection
+    
+    // Soft recovery function - tries to restore UI without full reload
+    const softRecovery = () => {
+      console.log('[WebView] Performing soft recovery...');
+      
+      // 1. Force reset all scroll locks (the main culprit)
+      forceResetScrollLock();
+      
+      // 2. Reset body/html overflow explicitly
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      
+      // 3. Blur any focused element that might be blocking touch
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      
+      // 4. Resume AudioContext if suspended (can block UI in some WebViews)
+      try {
+        const audioContext = (window as any).__audioContext;
+        if (audioContext && audioContext.state === 'suspended') {
+          audioContext.resume();
+          console.log('[WebView] Resumed AudioContext');
+        }
+      } catch (e) {
+        // AudioContext resume failed, not critical
+      }
+      
+      // 5. Force a micro-layout recalculation to wake up the renderer
+      document.body.style.transform = 'translateZ(0)';
+      requestAnimationFrame(() => {
+        document.body.style.transform = '';
+      });
+      
+      console.log('[WebView] Soft recovery complete');
+    };
     
     const markBackground = () => {
       if (isInWebview) {
@@ -120,8 +157,8 @@ function Router() {
     };
     
     const handleResume = () => {
-      // Prevent double-reload and ensure we're in webview
-      if (!isInWebview || isReloading) return;
+      // Prevent double-recovery and ensure we're in webview
+      if (!isInWebview || isRecovering) return;
       
       // Clear any pending debounce
       if (resumeDebounceTimer) {
@@ -130,19 +167,19 @@ function Router() {
       
       // Debounce to let all resume events settle
       resumeDebounceTimer = setTimeout(() => {
-        if (lastBackgroundTime !== null && !isReloading) {
+        if (lastBackgroundTime !== null && !isRecovering) {
           const timeInBackground = Date.now() - lastBackgroundTime;
           
           if (timeInBackground > BACKGROUND_THRESHOLD) {
-            isReloading = true;
-            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, refreshing...');
-            // Reset scroll lock that might have been left on
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
-            window.location.reload();
+            isRecovering = true;
+            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, performing soft recovery...');
+            softRecovery();
+            // Allow recovery again after a short delay
+            setTimeout(() => { isRecovering = false; }, 500);
           } else {
-            // Just reset scroll lock without reloading for short background times
-            console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting UI');
+            // Just reset scroll lock for short background times
+            console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting scroll locks');
+            forceResetScrollLock();
             document.body.style.overflow = '';
             document.documentElement.style.overflow = '';
           }
@@ -191,13 +228,12 @@ function Router() {
       const elapsed = now - lastRafTime;
       
       // If more than BACKGROUND_THRESHOLD has passed since last rAF, we were in background
-      if (elapsed > BACKGROUND_THRESHOLD && isInWebview && !isReloading) {
-        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, refreshing...');
-        isReloading = true;
-        document.body.style.overflow = '';
-        document.documentElement.style.overflow = '';
-        window.location.reload();
-        return;
+      if (elapsed > BACKGROUND_THRESHOLD && isInWebview && !isRecovering) {
+        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, performing soft recovery...');
+        isRecovering = true;
+        softRecovery();
+        // Allow recovery again after a short delay
+        setTimeout(() => { isRecovering = false; }, 500);
       }
       
       lastRafTime = now;
