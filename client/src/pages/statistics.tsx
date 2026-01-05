@@ -352,15 +352,26 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   // Simplified view for office display - just 4 big stats
   if (simplified) {
     return (
-      <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        <img src={torahFlower} alt="" className="absolute top-8 left-4 w-14 h-14 opacity-50 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-16 right-6 w-16 h-16 opacity-45 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-1/3 left-2 w-12 h-12 opacity-40 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-1/4 right-3 w-13 h-13 opacity-45 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
+        <img src={torahFlower} alt="" className="absolute bottom-32 left-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-48 right-4 w-12 h-12 opacity-45 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute bottom-16 left-3 w-11 h-11 opacity-50 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-24 right-8 w-13 h-13 opacity-40 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-1/2 left-1 w-10 h-10 opacity-35 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-2/3 right-2 w-12 h-12 opacity-40 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="w-full max-w-2xl h-auto mb-6"
+          className="w-full max-w-2xl h-auto mb-6 relative z-10"
         />
-        <h1 className="platypi-bold text-3xl text-black mb-8 text-center">All Time Statistics</h1>
+        <h1 className="platypi-bold text-3xl text-black mb-8 text-center relative z-10">All Time Statistics</h1>
         
-        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl relative z-10">
           {/* Mitzvas Completed */}
           <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10"
                style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
@@ -415,7 +426,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           </div>
         </div>
         
-        <div className="mt-8 text-sm text-warm-gray platypi-medium">
+        <div className="mt-8 text-sm text-warm-gray platypi-medium relative z-10">
           Auto-refreshes every 2 minutes
         </div>
       </div>
@@ -423,25 +434,10 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   }
 
   return (
-    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col overflow-hidden">
+    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
       <AppHeader />
       
-      {selectedPeriod === 'alltime' && (
-        <>
-          <img src={torahFlower} alt="" className="absolute top-20 left-2 w-10 h-10 opacity-60 pointer-events-none z-0" style={{ transform: 'rotate(-15deg)' }} />
-          <img src={tefillaFlower} alt="" className="absolute top-32 right-3 w-12 h-12 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(20deg)' }} />
-          <img src={tzedakaFlower} alt="" className="absolute top-56 left-4 w-8 h-8 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(-25deg)' }} />
-          <img src={lifeFlower} alt="" className="absolute top-72 right-2 w-9 h-9 opacity-55 pointer-events-none z-0" style={{ transform: 'rotate(10deg)' }} />
-          <img src={torahFlower} alt="" className="absolute bottom-48 left-1 w-11 h-11 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(30deg)' }} />
-          <img src={tefillaFlower} alt="" className="absolute bottom-64 right-4 w-10 h-10 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(-10deg)' }} />
-          <img src={tzedakaFlower} alt="" className="absolute bottom-32 left-5 w-9 h-9 opacity-55 pointer-events-none z-0" style={{ transform: 'rotate(15deg)' }} />
-          <img src={lifeFlower} alt="" className="absolute bottom-24 right-1 w-10 h-10 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(-20deg)' }} />
-          <img src={torahFlower} alt="" className="absolute top-96 left-0 w-8 h-8 opacity-40 pointer-events-none z-0" style={{ transform: 'rotate(5deg)' }} />
-          <img src={tefillaFlower} alt="" className="absolute top-[28rem] right-0 w-10 h-10 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(-8deg)' }} />
-        </>
-      )}
-      
-      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)] relative z-10" data-scroll-lock-target>
+      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)]" data-scroll-lock-target>
         {/* Back button and title in content area */}
         <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
           <div className="flex items-center justify-between mb-4">
