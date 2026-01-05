@@ -112,34 +112,6 @@ function Router() {
     const BACKGROUND_THRESHOLD = 3000; // 3 seconds - trigger soft recovery
     const RESUME_DEBOUNCE = 200; // Debounce resume detection
     
-    // Soft recovery function - tries to restore UI without full reload
-    const softRecovery = () => {
-      console.log('[WebView] Performing soft recovery...');
-      
-      // 1. Nuclear option: force close ALL fullscreen modals and remove stale overlays
-      // This resets scroll locks, removes ghost DOM elements, and dispatches synthetic events
-      forceCloseAllFullscreenModals();
-      
-      // 2. Resume AudioContext if suspended (can block UI in some WebViews)
-      try {
-        const audioContext = (window as any).__audioContext;
-        if (audioContext && audioContext.state === 'suspended') {
-          audioContext.resume();
-          console.log('[WebView] Resumed AudioContext');
-        }
-      } catch (e) {
-        // AudioContext resume failed, not critical
-      }
-      
-      // 3. Force a micro-layout recalculation to wake up the renderer
-      document.body.style.transform = 'translateZ(0)';
-      requestAnimationFrame(() => {
-        document.body.style.transform = '';
-      });
-      
-      console.log('[WebView] Soft recovery complete');
-    };
-    
     const markBackground = () => {
       if (isInWebview) {
         // ALWAYS update the time - multiple events may fire, use the latest
@@ -164,12 +136,11 @@ function Router() {
           
           if (timeInBackground > BACKGROUND_THRESHOLD) {
             isRecovering = true;
-            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, performing soft recovery...');
-            softRecovery();
-            // Allow recovery again after a short delay
-            setTimeout(() => { isRecovering = false; }, 500);
+            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, reloading for clean state...');
+            // Skip soft recovery - go straight to reload since it's the only reliable fix
+            window.location.reload();
           } else {
-            // Just reset scroll lock for short background times
+            // Just reset scroll lock for short background times (no reload needed)
             console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting scroll locks');
             forceCloseAllFullscreenModals();
           }
@@ -219,11 +190,9 @@ function Router() {
       
       // If more than BACKGROUND_THRESHOLD has passed since last rAF, we were in background
       if (elapsed > BACKGROUND_THRESHOLD && isInWebview && !isRecovering) {
-        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, performing soft recovery...');
+        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, reloading...');
         isRecovering = true;
-        softRecovery();
-        // Allow recovery again after a short delay
-        setTimeout(() => { isRecovering = false; }, 500);
+        window.location.reload();
       }
       
       lastRafTime = now;

@@ -69,16 +69,25 @@ function forceCloseAllFullscreenModals() {
   const staleModals = document.querySelectorAll('[data-fullscreen-modal]');
   staleModals.forEach(modal => {
     console.log('[FullscreenModal] Removing stale modal element');
-    // Set pointer-events to none immediately before removal
     (modal as HTMLElement).style.pointerEvents = 'none';
     (modal as HTMLElement).style.visibility = 'hidden';
   });
   
-  // 3. Remove any stale overlays/backdrops
-  const staleBackdrops = document.querySelectorAll('[data-radix-dialog-overlay], [data-state="open"]');
-  staleBackdrops.forEach(backdrop => {
-    (backdrop as HTMLElement).style.pointerEvents = 'none';
-    (backdrop as HTMLElement).style.visibility = 'hidden';
+  // 3. Remove any stale Radix overlays/backdrops/poppers
+  const radixSelectors = [
+    '[data-radix-dialog-overlay]',
+    '[data-radix-popper-content-wrapper]',
+    '[data-radix-dismissable-layer]',
+    '[data-radix-focus-guard]',
+    '[data-state="open"]',
+    '[role="dialog"]',
+    '[role="menu"]'
+  ];
+  const staleRadixElements = document.querySelectorAll(radixSelectors.join(', '));
+  staleRadixElements.forEach(el => {
+    console.log('[FullscreenModal] Hiding stale Radix element:', el.getAttribute('role') || el.getAttribute('data-state'));
+    (el as HTMLElement).style.pointerEvents = 'none';
+    (el as HTMLElement).style.visibility = 'hidden';
   });
   
   // 4. Force reset pointer-events on all major containers
@@ -89,7 +98,12 @@ function forceCloseAllFullscreenModals() {
     (mainContent as HTMLElement).style.pointerEvents = '';
   }
   
-  // 5. Release any stuck touch/pointer states by dispatching synthetic events
+  // 5. Reset ALL elements with inline pointer-events
+  document.querySelectorAll('[style*="pointer-events"]').forEach(el => {
+    (el as HTMLElement).style.pointerEvents = '';
+  });
+  
+  // 6. Release any stuck touch/pointer states by dispatching synthetic events
   try {
     const touchEnd = new TouchEvent('touchend', { bubbles: true, cancelable: true });
     document.body.dispatchEvent(touchEnd);
@@ -103,10 +117,13 @@ function forceCloseAllFullscreenModals() {
     // Synthetic events not supported, skip
   }
   
-  // 6. Force blur any focused element
+  // 7. Force blur any focused element
   if (document.activeElement instanceof HTMLElement) {
     document.activeElement.blur();
   }
+  
+  // 8. Dispatch a custom event that components can listen to for forced remount
+  window.dispatchEvent(new CustomEvent('webview-resume-recovery'));
   
   console.log('[FullscreenModal] Force close complete');
 }
