@@ -19,7 +19,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
-import { forceResetScrollLock } from "@/components/ui/fullscreen-modal";
+import { forceCloseAllFullscreenModals } from "@/components/ui/fullscreen-modal";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -116,19 +116,11 @@ function Router() {
     const softRecovery = () => {
       console.log('[WebView] Performing soft recovery...');
       
-      // 1. Force reset all scroll locks (the main culprit)
-      forceResetScrollLock();
+      // 1. Nuclear option: force close ALL fullscreen modals and remove stale overlays
+      // This resets scroll locks, removes ghost DOM elements, and dispatches synthetic events
+      forceCloseAllFullscreenModals();
       
-      // 2. Reset body/html overflow explicitly
-      document.body.style.overflow = '';
-      document.documentElement.style.overflow = '';
-      
-      // 3. Blur any focused element that might be blocking touch
-      if (document.activeElement instanceof HTMLElement) {
-        document.activeElement.blur();
-      }
-      
-      // 4. Resume AudioContext if suspended (can block UI in some WebViews)
+      // 2. Resume AudioContext if suspended (can block UI in some WebViews)
       try {
         const audioContext = (window as any).__audioContext;
         if (audioContext && audioContext.state === 'suspended') {
@@ -139,7 +131,7 @@ function Router() {
         // AudioContext resume failed, not critical
       }
       
-      // 5. Force a micro-layout recalculation to wake up the renderer
+      // 3. Force a micro-layout recalculation to wake up the renderer
       document.body.style.transform = 'translateZ(0)';
       requestAnimationFrame(() => {
         document.body.style.transform = '';
@@ -179,9 +171,7 @@ function Router() {
           } else {
             // Just reset scroll lock for short background times
             console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting scroll locks');
-            forceResetScrollLock();
-            document.body.style.overflow = '';
-            document.documentElement.style.overflow = '';
+            forceCloseAllFullscreenModals();
           }
           
           // Reset background time after handling

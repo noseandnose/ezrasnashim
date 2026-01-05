@@ -57,6 +57,60 @@ function forceResetScrollLock() {
   activeFullscreenModals = 0;
 }
 
+// Nuclear option: completely reset all modal state AND remove stale DOM
+// Use when WebView resume leaves ghost overlays blocking touches
+function forceCloseAllFullscreenModals() {
+  console.log('[FullscreenModal] Force closing all modals...');
+  
+  // 1. Reset scroll locks and counter
+  forceResetScrollLock();
+  
+  // 2. Remove any stale modal DOM elements that might have invisible overlays
+  const staleModals = document.querySelectorAll('[data-fullscreen-modal]');
+  staleModals.forEach(modal => {
+    console.log('[FullscreenModal] Removing stale modal element');
+    // Set pointer-events to none immediately before removal
+    (modal as HTMLElement).style.pointerEvents = 'none';
+    (modal as HTMLElement).style.visibility = 'hidden';
+  });
+  
+  // 3. Remove any stale overlays/backdrops
+  const staleBackdrops = document.querySelectorAll('[data-radix-dialog-overlay], [data-state="open"]');
+  staleBackdrops.forEach(backdrop => {
+    (backdrop as HTMLElement).style.pointerEvents = 'none';
+    (backdrop as HTMLElement).style.visibility = 'hidden';
+  });
+  
+  // 4. Force reset pointer-events on all major containers
+  document.body.style.pointerEvents = '';
+  document.documentElement.style.pointerEvents = '';
+  const mainContent = document.querySelector('main');
+  if (mainContent) {
+    (mainContent as HTMLElement).style.pointerEvents = '';
+  }
+  
+  // 5. Release any stuck touch/pointer states by dispatching synthetic events
+  try {
+    const touchEnd = new TouchEvent('touchend', { bubbles: true, cancelable: true });
+    document.body.dispatchEvent(touchEnd);
+    
+    const pointerUp = new PointerEvent('pointerup', { bubbles: true, cancelable: true });
+    document.body.dispatchEvent(pointerUp);
+    
+    const mouseUp = new MouseEvent('mouseup', { bubbles: true, cancelable: true });
+    document.body.dispatchEvent(mouseUp);
+  } catch (e) {
+    // Synthetic events not supported, skip
+  }
+  
+  // 6. Force blur any focused element
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+  
+  console.log('[FullscreenModal] Force close complete');
+}
+
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
@@ -85,7 +139,7 @@ export function isFullscreenModalActive(): boolean {
   return activeFullscreenModals > 0;
 }
 
-export { forceResetScrollLock };
+export { forceResetScrollLock, forceCloseAllFullscreenModals };
 
 interface FullscreenModalProps {
   isOpen: boolean;
