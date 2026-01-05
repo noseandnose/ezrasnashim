@@ -131,9 +131,11 @@ export default function Profile() {
     let todayTorah = 0;
     let todayTefilla = 0;
     let todayTzedaka = 0;
+    let todayLife = 0;
     let totalTorah = 0;
     let totalTefilla = 0;
     let totalTzedaka = 0;
+    let totalLife = 0;
     const totalDays = allDates.length;
     
     // Get tzedaka button completions from separate storage
@@ -143,14 +145,16 @@ export default function Profile() {
       let torah = 0;
       let tefilla = 0;
       let tzedaka = 0;
+      let life = 0;
       
       if (dayData?.repeatables) {
         Object.entries(dayData.repeatables).forEach(([key, value]) => {
           const count = value as number;
-          // Torah content
+          // Torah content (including torah-challenge for Bitachon/Gratitude Challenge)
           if (key === 'halacha' || key === 'chizuk' || key === 'emuna' || 
               key === 'featured' || key === 'pirkei-avot' || key === 'gems-of-gratitude' ||
-              key.includes('story') || key.includes('daily-wisdom') || key.includes('torah-class')) {
+              key === 'torah-challenge' || key.includes('story') || 
+              key.includes('daily-wisdom') || key.includes('torah-class')) {
             torah += count;
           }
           // Tefilla content
@@ -169,6 +173,10 @@ export default function Profile() {
           // Tzedaka content
           else if (key.startsWith('tzedaka-')) {
             tzedaka += count;
+          }
+          // Life content (Marriage Insights)
+          else if (key === 'marriage-insights') {
+            life += count;
           }
         });
       }
@@ -191,7 +199,7 @@ export default function Profile() {
         if (dayTzedakaData.active_campaign) tzedaka++;
       }
       
-      return { torah, tefilla, tzedaka };
+      return { torah, tefilla, tzedaka, life };
     };
     
     // Combine dates from both storages
@@ -204,11 +212,13 @@ export default function Profile() {
       totalTorah += counts.torah;
       totalTefilla += counts.tefilla;
       totalTzedaka += counts.tzedaka;
+      totalLife += counts.life;
       
       if (date === today) {
         todayTorah = counts.torah;
         todayTefilla = counts.tefilla;
         todayTzedaka = counts.tzedaka;
+        todayLife = counts.life;
       }
     });
     
@@ -225,11 +235,11 @@ export default function Profile() {
       }
     }
     
-    const totalMitzvos = totalTorah + totalTefilla + totalTzedaka;
+    const totalMitzvos = totalTorah + totalTefilla + totalTzedaka + totalLife;
     
     return { 
-      todayTorah, todayTefilla, todayTzedaka,
-      totalTorah, totalTefilla, totalTzedaka,
+      todayTorah, todayTefilla, todayTzedaka, todayLife,
+      totalTorah, totalTefilla, totalTzedaka, totalLife,
       totalDays, currentStreak, totalMitzvos
     };
   }, [completedModals]);
@@ -463,29 +473,37 @@ export default function Profile() {
             Today's Progress
           </h3>
           
-          <div className="grid grid-cols-3 gap-1.5">
-            <div className="bg-blush/10 rounded-lg p-2 text-center">
-              <div className="w-6 h-6 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-0.5">
-                <BookOpen className="w-3 h-3 text-blush" />
+          <div className="grid grid-cols-4 gap-1">
+            <div className="bg-blush/10 rounded-lg p-1.5 text-center">
+              <div className="w-5 h-5 rounded-full bg-blush/20 flex items-center justify-center mx-auto mb-0.5">
+                <BookOpen className="w-2.5 h-2.5 text-blush" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
+              <div className="platypi-bold text-base text-black">{stats.todayTorah}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Torah</div>
             </div>
             
-            <div className="bg-lavender/10 rounded-lg p-2 text-center">
-              <div className="w-6 h-6 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-0.5">
-                <Heart className="w-3 h-3 text-lavender" />
+            <div className="bg-lavender/10 rounded-lg p-1.5 text-center">
+              <div className="w-5 h-5 rounded-full bg-lavender/20 flex items-center justify-center mx-auto mb-0.5">
+                <Heart className="w-2.5 h-2.5 text-lavender" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
+              <div className="platypi-bold text-base text-black">{stats.todayTefilla}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Tefilla</div>
             </div>
             
-            <div className="bg-sage/10 rounded-lg p-2 text-center">
-              <div className="w-6 h-6 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-0.5">
-                <HandCoins className="w-3 h-3 text-sage" />
+            <div className="bg-sage/10 rounded-lg p-1.5 text-center">
+              <div className="w-5 h-5 rounded-full bg-sage/20 flex items-center justify-center mx-auto mb-0.5">
+                <HandCoins className="w-2.5 h-2.5 text-sage" />
               </div>
-              <div className="platypi-bold text-lg text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
+              <div className="platypi-bold text-base text-black">{stats.todayTzedaka}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
+            </div>
+            
+            <div className="bg-amber-100/50 rounded-lg p-1.5 text-center">
+              <div className="w-5 h-5 rounded-full bg-amber-200/50 flex items-center justify-center mx-auto mb-0.5">
+                <Star className="w-2.5 h-2.5 text-amber-600" />
+              </div>
+              <div className="platypi-bold text-base text-black">{stats.todayLife}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Life</div>
             </div>
           </div>
         </div>
@@ -506,18 +524,22 @@ export default function Profile() {
             All-Time Stats
           </h3>
           
-          <div className="grid grid-cols-3 gap-1.5 mb-2">
-            <div className="bg-blush/10 rounded-lg p-2 text-center">
-              <div className="platypi-bold text-lg text-blush">{stats.totalTorah}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Torah</div>
+          <div className="grid grid-cols-4 gap-1 mb-2">
+            <div className="bg-blush/10 rounded-lg p-1.5 text-center">
+              <div className="platypi-bold text-base text-blush">{stats.totalTorah}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Torah</div>
             </div>
-            <div className="bg-lavender/10 rounded-lg p-2 text-center">
-              <div className="platypi-bold text-lg text-lavender">{stats.totalTefilla}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tefilla</div>
+            <div className="bg-lavender/10 rounded-lg p-1.5 text-center">
+              <div className="platypi-bold text-base text-lavender">{stats.totalTefilla}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Tefilla</div>
             </div>
-            <div className="bg-sage/10 rounded-lg p-2 text-center">
-              <div className="platypi-bold text-lg text-sage">{stats.totalTzedaka}</div>
-              <div className="platypi-regular text-[9px] text-black/60">Tzedaka</div>
+            <div className="bg-sage/10 rounded-lg p-1.5 text-center">
+              <div className="platypi-bold text-base text-sage">{stats.totalTzedaka}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
+            </div>
+            <div className="bg-amber-100/50 rounded-lg p-1.5 text-center">
+              <div className="platypi-bold text-base text-amber-600">{stats.totalLife}</div>
+              <div className="platypi-regular text-[8px] text-black/60">Life</div>
             </div>
           </div>
           
