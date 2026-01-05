@@ -498,9 +498,9 @@ export default function Profile() {
               <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
             </div>
             
-            <div className="bg-amber-100/50 rounded-lg p-1.5 text-center">
-              <div className="w-5 h-5 rounded-full bg-amber-200/50 flex items-center justify-center mx-auto mb-0.5">
-                <Star className="w-2.5 h-2.5 text-amber-600" />
+            <div className="bg-black/5 rounded-lg p-1.5 text-center">
+              <div className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-0.5">
+                <Star className="w-2.5 h-2.5 text-black/60" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayLife}</div>
               <div className="platypi-regular text-[8px] text-black/60">Life</div>
@@ -537,8 +537,8 @@ export default function Profile() {
               <div className="platypi-bold text-base text-sage">{stats.totalTzedaka}</div>
               <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
             </div>
-            <div className="bg-amber-100/50 rounded-lg p-1.5 text-center">
-              <div className="platypi-bold text-base text-amber-600">{stats.totalLife}</div>
+            <div className="bg-black/5 rounded-lg p-1.5 text-center">
+              <div className="platypi-bold text-base text-black">{stats.totalLife}</div>
               <div className="platypi-regular text-[8px] text-black/60">Life</div>
             </div>
           </div>
