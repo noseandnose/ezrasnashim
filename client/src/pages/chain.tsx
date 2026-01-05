@@ -438,7 +438,7 @@ export default function ChainPage() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => setShowReminderDialog(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-feminine hover:scale-105 transition-all shadow-sm"
+            className="w-8 h-8 aspect-square flex items-center justify-center rounded-full bg-gradient-feminine hover:scale-105 transition-all shadow-sm flex-shrink-0"
             data-testid="button-reminder"
             title="Set daily reminder"
           >

@@ -291,15 +291,12 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         ) : campaign ? (
           <>
             <div className="flex items-center space-x-3 mb-2 relative">
-              <div className="bg-gradient-feminine p-3 rounded-full">
-                <Target className="text-white" size={20} />
+              <div className="w-12 h-12 aspect-square flex items-center justify-center bg-gradient-feminine rounded-full flex-shrink-0">
+                <Target className="text-white" size={24} />
               </div>
               <div className="flex-grow">
                 <h3 className="platypi-bold text-lg text-black platypi-bold">{campaign.title}</h3>
                 <p className="platypi-regular text-sm text-black/70">Campaign</p>
-              </div>
-              <div className="bg-gradient-feminine p-2 rounded-full shadow-lg">
-                <HandCoins className="text-white" size={16} />
               </div>
             </div>
             

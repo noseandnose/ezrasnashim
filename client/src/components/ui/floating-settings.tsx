@@ -35,7 +35,7 @@ export function FloatingSettings({
       {/* Floating Settings Button */}
       <button
         onClick={() => setIsDrawerOpen(!isDrawerOpen)}
-        className="fixed left-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
+        className="fixed left-6 w-12 h-12 bg-gradient-feminine text-white rounded-full shadow-lg hover:scale-110 transition-all duration-200 flex items-center justify-center"
         style={{ 
           zIndex: 2147483646,
           bottom: `calc(${bottomOffset} + var(--viewport-bottom-offset, 0px))`
