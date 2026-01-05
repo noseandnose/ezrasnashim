@@ -8,6 +8,10 @@ import BottomNavigation from "@/components/bottom-navigation";
 import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
+import torahFlower from "@assets/Torah_1767035380484.png";
+import tefillaFlower from "@assets/Tefilla_1767035380485.png";
+import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
+import lifeFlower from "@assets/Life_1767176917530.png";
 
 type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
 
@@ -419,10 +423,25 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   }
 
   return (
-    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
+    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col overflow-hidden">
       <AppHeader />
       
-      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)]" data-scroll-lock-target>
+      {selectedPeriod === 'alltime' && (
+        <>
+          <img src={torahFlower} alt="" className="absolute top-20 left-2 w-10 h-10 opacity-60 pointer-events-none z-0" style={{ transform: 'rotate(-15deg)' }} />
+          <img src={tefillaFlower} alt="" className="absolute top-32 right-3 w-12 h-12 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(20deg)' }} />
+          <img src={tzedakaFlower} alt="" className="absolute top-56 left-4 w-8 h-8 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(-25deg)' }} />
+          <img src={lifeFlower} alt="" className="absolute top-72 right-2 w-9 h-9 opacity-55 pointer-events-none z-0" style={{ transform: 'rotate(10deg)' }} />
+          <img src={torahFlower} alt="" className="absolute bottom-48 left-1 w-11 h-11 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(30deg)' }} />
+          <img src={tefillaFlower} alt="" className="absolute bottom-64 right-4 w-10 h-10 opacity-50 pointer-events-none z-0" style={{ transform: 'rotate(-10deg)' }} />
+          <img src={tzedakaFlower} alt="" className="absolute bottom-32 left-5 w-9 h-9 opacity-55 pointer-events-none z-0" style={{ transform: 'rotate(15deg)' }} />
+          <img src={lifeFlower} alt="" className="absolute bottom-24 right-1 w-10 h-10 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(-20deg)' }} />
+          <img src={torahFlower} alt="" className="absolute top-96 left-0 w-8 h-8 opacity-40 pointer-events-none z-0" style={{ transform: 'rotate(5deg)' }} />
+          <img src={tefillaFlower} alt="" className="absolute top-[28rem] right-0 w-10 h-10 opacity-45 pointer-events-none z-0" style={{ transform: 'rotate(-8deg)' }} />
+        </>
+      )}
+      
+      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)] relative z-10" data-scroll-lock-target>
         {/* Back button and title in content area */}
         <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
           <div className="flex items-center justify-between mb-4">
