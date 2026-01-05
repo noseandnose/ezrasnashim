@@ -11,7 +11,7 @@ import { initializeCache } from "@/lib/cache";
 import { lazy, Suspense } from "react";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import UpdateNotification from "@/components/UpdateNotification";
-import { AutoNotificationPrompt } from "@/components/auto-notification-prompt";
+const AutoNotificationPrompt = lazy(() => import("@/components/auto-notification-prompt").then(m => ({ default: m.AutoNotificationPrompt })));
 import { OfflineIndicator } from "@/components/offline-indicator";
 import { SearchProvider } from "@/contexts/SearchContext";
 import "@/utils/clear-modal-completions";
@@ -349,7 +349,7 @@ export default function App() {
         <SearchProvider>
           <TooltipProvider>
             <UpdateNotification />
-            <AutoNotificationPrompt />
+            <Suspense fallback={null}><AutoNotificationPrompt /></Suspense>
             <OfflineIndicator />
             <Router />
             <Toaster />

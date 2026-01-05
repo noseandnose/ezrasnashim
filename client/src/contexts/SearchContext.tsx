@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SearchRecord, createSearchIndex } from '@/lib/searchUtils';
 import { useModalStore } from '@/lib/types';
@@ -487,33 +487,38 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, refuahPrayers, familyPrayers, lifePrayers, openModal]);
   
   // Build MiniSearch index for fuzzy matching with enhanced error handling
-  const miniSearchIndex = useMemo(() => {
-    try {
-      if (searchIndex.length === 0) {
-        if (process.env.NODE_ENV === 'development') {
-          console.log('[SearchContext] Search index is empty, skipping MiniSearch creation');
-        }
-        return null;
-      }
-      
-      const index = createSearchIndex(searchIndex);
-      
+  const [miniSearchIndex, setMiniSearchIndex] = useState<MiniSearch<any> | null>(null);
+  
+  useEffect(() => {
+    if (searchIndex.length === 0) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('[SearchContext] MiniSearch index created successfully with', searchIndex.length, 'records');
+        console.log('[SearchContext] Search index is empty, skipping MiniSearch creation');
       }
-      
-      return index;
-    } catch (error) {
-      console.error('[SearchContext] Failed to create MiniSearch index:', error);
-      // Log the error details for debugging
-      if (error instanceof Error) {
-        console.error('[SearchContext] Error details:', {
-          message: error.message,
-          stack: error.stack
-        });
-      }
-      return null; // Gracefully degrade - search will use simple fallback
+      return;
     }
+    
+    let cancelled = false;
+    
+    createSearchIndex(searchIndex)
+      .then(index => {
+        if (!cancelled) {
+          setMiniSearchIndex(index);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[SearchContext] MiniSearch index created successfully with', searchIndex.length, 'records');
+          }
+        }
+      })
+      .catch(error => {
+        console.error('[SearchContext] Failed to create MiniSearch index:', error);
+        if (error instanceof Error) {
+          console.error('[SearchContext] Error details:', {
+            message: error.message,
+            stack: error.stack
+          });
+        }
+      });
+    
+    return () => { cancelled = true; };
   }, [searchIndex]);
   
   const isLoading = false; // Using cached TanStack Query data, no explicit loading state needed

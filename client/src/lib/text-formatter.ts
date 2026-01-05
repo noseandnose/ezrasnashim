@@ -5,7 +5,7 @@ import DOMPurify from 'dompurify';
  */
 export function sanitizeHTML(htmlContent: string): string {
   return DOMPurify.sanitize(htmlContent, {
-    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3', 'a'],
+    ALLOWED_TAGS: ['strong', 'b', 'em', 'i', 'br', 'div', 'span', 'sup', 'h2', 'h3', 'a', 'ul', 'li'],
     ALLOWED_ATTR: ['style', 'class', 'href', 'target', 'rel'],
     ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
     RETURN_DOM_FRAGMENT: false,
@@ -227,7 +227,14 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
     formatted = applyFootnoteSuperscripts(formatted, footnoteNumbers);
   }
   
-  // Convert newlines to HTML breaks FIRST before any other processing
+  // Process bullet points BEFORE converting newlines to <br />
+  // Lines starting with * or - followed by space become styled bullet items
+  formatted = formatted.replace(/^[*\-]\s+(.+)$/gm, '<div style="display: flex; align-items: flex-start; margin: 0; padding-left: 8px;"><span style="margin-right: 8px; color: #666;">•</span><span style="flex: 1;">$1</span></div>');
+  
+  // Collapse blank lines between consecutive bullet divs to prevent extra spacing
+  formatted = formatted.replace(/(<\/div>)\s*\n+\s*(<div style="display: flex; align-items: flex-start)/g, '$1$2');
+  
+  // Convert newlines to HTML breaks AFTER bullet processing
   formatted = formatted.replace(/\n/g, '<br />');
   
   // Replace --- with line breaks (double breaks for spacing)
@@ -288,8 +295,8 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Process ~~ (grey) markers
   formatted = formatted.replace(/~~([\s\S]*?)~~/g, '<span style="color: #9CA3AF; opacity: 0.8; font-family: inherit;">$1</span>');
   
-  // Process ++ (bold text) markers 
-  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong style="font-family: inherit;">$1</strong>');
+  // Process ++ (larger and bold text) markers - 1.2em size with bold
+  formatted = formatted.replace(/\+\+([\s\S]*?)\+\+/g, '<strong style="font-size: 1.2em; font-family: inherit;">$1</strong>');
   
   // Process -- (smaller text) markers - but avoid conflicts with line breaks
   // Use negative lookahead to avoid matching --- (line breaks)

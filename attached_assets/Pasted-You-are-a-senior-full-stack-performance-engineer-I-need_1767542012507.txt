@@ -1,0 +1,63 @@
+You are a senior full-stack performance engineer. I need you to speed up my production web app.
+
+Context:
+- App name: Ezras Nashim
+- Hosting/runtime: Replit
+- Client: FlutterFlow Web (opens my app in a webview / browser)
+- Problem: the app feels slow (initial load + navigation + data fetching). I want measurable improvements.
+
+Your job:
+1) Establish a baseline
+- Add lightweight performance instrumentation and logging (without breaking prod):
+  - measure TTFB, First Contentful Paint, Largest Contentful Paint, Total Blocking Time, and client-side route transition times
+  - measure API response times per endpoint + DB query durations
+- Provide a short baseline report with actual numbers and where the time is spent.
+
+2) Find the bottlenecks (ranked)
+Investigate and list the top 5–10 bottlenecks with evidence, for example:
+- slow SSR / server startup / cold starts on Replit
+- too-large JS bundles / uncompressed assets / missing caching headers
+- chatty API calls (too many requests, waterfalls)
+- inefficient DB queries / missing indexes / N+1 queries
+- slow auth/session checks
+- large images/audio files not optimized
+- FlutterFlow webview overhead / caching issues
+- unnecessary rerenders / heavy JSON parsing / blocking work on main thread
+
+3) Apply fixes (small PRs, safe changes)
+Make changes in the codebase, in this order of priority:
+A. “No-risk” wins:
+- enable compression (gzip/br), correct cache-control for static assets, ETags
+- add CDN-like caching strategy where possible
+- optimize images (lazy load, responsive sizes), defer non-critical assets
+- reduce bundle size (tree-shaking, remove unused deps, code-splitting / dynamic import)
+- minimize logging and expensive middleware in hot paths
+
+B. Backend/API wins:
+- batch requests; reduce waterfalls
+- add pagination + limits by default
+- add proper DB indexes; fix slow queries; eliminate N+1 patterns
+- add server-side caching for common reads (in-memory cache with TTL) + cache invalidation rules
+
+C. FlutterFlow compatibility:
+- ensure CORS, caching, and headers are correct for FlutterFlow web
+- confirm that the web build is not downloading huge payloads per view
+- propose any changes that help FlutterFlow load faster (preconnect, preload critical assets, etc.)
+
+4) Deliverables
+- A step-by-step “What I changed” list (with file paths)
+- Before/after metrics (same measurements as baseline)
+- A short “next 3 improvements” plan if further work remains
+
+Rules:
+- Do NOT do a large refactor.
+- Keep changes incremental and reversible.
+- If you need environment details, infer them from the repo + Replit config files (.replit, replit.nix, package.json, etc.).
+- If you suspect Replit resource limits/cold start issues, propose concrete mitigations (keep-warm pings, lightweight entrypoint, reduce startup work, caching, etc.).
+
+Start now by:
+- scanning the repo structure
+- identifying the server entrypoint
+- listing the largest client assets/bundles
+- locating DB/query layer
+- then show me your baseline measurements plan and the first 3 fixes you will implement today.

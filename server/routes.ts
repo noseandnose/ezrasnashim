@@ -3324,7 +3324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Set caching: 2 minutes for messages (check frequently)
       res.set({
-        'Cache-Control': 'public, max-age=120', // 2 minutes
+        'Cache-Control': 'public, max-age=120' // 2 minutes
       });
 
       return res.json(summary);

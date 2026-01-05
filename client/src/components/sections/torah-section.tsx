@@ -14,6 +14,7 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { AttributionSection } from "@/components/ui/attribution-section";
+import { formatTextContent } from "@/lib/text-formatter";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -534,13 +535,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 />
               )}
               
-              {/* Content - using Platypi font for English, whitespace-pre-line preserves line breaks */}
+              {/* Content - using Platypi font for English, formatted with text-formatter */}
               <div 
-                className="platypi-regular text-black leading-relaxed text-left mb-4 whitespace-pre-line"
+                className="platypi-regular text-black leading-relaxed text-left mb-4"
                 style={{ fontSize: '16px' }}
-              >
-                {torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available'}
-              </div>
+                dangerouslySetInnerHTML={{ 
+                  __html: formatTextContent(torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available') 
+                }}
+              />
               
               {/* Complete Buttons - Thin with magical styling */}
               {!isModalComplete('torah-challenge') && (
@@ -573,7 +575,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                       const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
                       window.open(whatsappUrl, '_blank');
                     }}
-                    className="flex-1 py-1.5 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                    className="flex-1 py-1.5 px-2 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-xs shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                     data-testid="button-torah-challenge-raffle"
                   >
                     Complete + Enter Raffle

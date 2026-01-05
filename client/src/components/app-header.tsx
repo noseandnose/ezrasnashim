@@ -7,14 +7,14 @@ import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
-import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
-import { SearchModal } from "./SearchModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
+import { SearchModal } from "./SearchModal";
 
 
 export default function AppHeader() {
@@ -257,7 +257,6 @@ export default function AppHeader() {
         isOpen={showAddToHomeScreen}
         onClose={() => setShowAddToHomeScreen(false)}
       />
-      
       
       <SearchModal
         isOpen={showSearchModal}
