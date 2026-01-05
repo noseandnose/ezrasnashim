@@ -344,11 +344,12 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       ...initial,
       completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => {
         const state = get();
+        // Only increment flower count for tzedaka and life (Torah/Tefilla flowers are tracked via modal completions)
+        const shouldIncrementFlower = task === 'tzedaka' || task === 'life';
         const newState = {
           ...state,
           [`${task}Completed`]: true,
-          ...(task === 'tzedaka' ? { tzedakaFlowerCount: (state.tzedakaFlowerCount || 0) + 1 } : {}),
-          ...(task === 'life' ? { lifeFlowerCount: (state.lifeFlowerCount || 0) + 1 } : {}),
+          ...(shouldIncrementFlower && { [`${task}FlowerCount`]: ((state as any)[`${task}FlowerCount`] || 0) + 1 }),
         };
         set(newState);
       },
@@ -440,13 +441,12 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     ...initial,
     completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => {
       const state = get();
+      // Only increment flower count for tzedaka and life (Torah/Tefilla flowers are tracked via modal completions)
+      const shouldIncrementFlower = task === 'tzedaka' || task === 'life';
       const newState = {
         ...state,
         [`${task}Completed`]: true,
-        // For tzedaka, also increment flower count (allows multiple flowers per day)
-        ...(task === 'tzedaka' ? { tzedakaFlowerCount: (state.tzedakaFlowerCount || 0) + 1 } : {}),
-        // For life, also increment flower count (allows multiple flowers per day)
-        ...(task === 'life' ? { lifeFlowerCount: (state.lifeFlowerCount || 0) + 1 } : {}),
+        ...(shouldIncrementFlower && { [`${task}FlowerCount`]: ((state as any)[`${task}FlowerCount`] || 0) + 1 }),
       };
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));

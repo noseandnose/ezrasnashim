@@ -8,6 +8,10 @@ import BottomNavigation from "@/components/bottom-navigation";
 import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
+import torahFlower from "@assets/Torah_1767035380484.png";
+import tefillaFlower from "@assets/Tefilla_1767035380485.png";
+import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
+import lifeFlower from "@assets/Life_1767176917530.png";
 
 type TimePeriod = 'today' | 'week' | 'month' | 'alltime';
 
@@ -348,15 +352,53 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   // Simplified view for office display - just 4 big stats
   if (simplified) {
     return (
-      <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8">
+      <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8 relative overflow-hidden">
+        {/* Large prominent purple flowers */}
+        <img src={tefillaFlower} alt="" className="absolute top-4 left-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-8 right-4 w-28 h-28 opacity-50 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-20 left-4 w-26 h-26 opacity-50 pointer-events-none" style={{ transform: 'rotate(25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-16 right-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        
+        {/* Medium flowers scattered around */}
+        <img src={torahFlower} alt="" className="absolute top-20 left-8 w-16 h-16 opacity-45 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-28 right-10 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-1/4 left-1 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/4 right-1 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-22deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-1/3 left-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(18deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-1/3 right-8 w-16 h-16 opacity-42 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-2/5 left-2 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-2/5 right-4 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        
+        {/* Middle section flowers */}
+        <img src={torahFlower} alt="" className="absolute top-1/2 left-0 w-14 h-14 opacity-35 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/2 right-0 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[55%] left-4 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[55%] right-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
+        
+        {/* Lower section flowers */}
+        <img src={tefillaFlower} alt="" className="absolute top-2/3 left-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(-14deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-2/3 right-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(28deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[70%] left-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[70%] right-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-3/4 left-0 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-3/4 right-0 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        
+        {/* Bottom flowers */}
+        <img src={tzedakaFlower} alt="" className="absolute bottom-40 left-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-44 right-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        <img src={torahFlower} alt="" className="absolute bottom-32 left-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-36 right-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute bottom-8 left-10 w-14 h-14 opacity-45 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-4 right-10 w-12 h-12 opacity-40 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="w-full max-w-2xl h-auto mb-6"
+          className="w-full max-w-2xl h-auto mb-6 relative z-10"
         />
-        <h1 className="platypi-bold text-3xl text-black mb-8 text-center">All Time Statistics</h1>
+        <h1 className="platypi-bold text-3xl text-black mb-8 text-center relative z-10">All Time Statistics</h1>
         
-        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl">
+        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl relative z-10">
           {/* Mitzvas Completed */}
           <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10"
                style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
@@ -411,7 +453,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           </div>
         </div>
         
-        <div className="mt-8 text-sm text-warm-gray platypi-medium">
+        <div className="mt-8 text-sm text-warm-gray platypi-medium relative z-10">
           Auto-refreshes every 2 minutes
         </div>
       </div>

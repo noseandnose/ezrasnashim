@@ -153,7 +153,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     if (!todaysData) return 0;
     
     let count = 0;
-    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort, gems-of-gratitude
+    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort, gems-of-gratitude, torah-challenge, torah-class
     // All Torah items are repeatables (not in SINGLE_COMPLETION_PRAYERS set)
     if (todaysData.repeatables) {
       count += todaysData.repeatables['halacha'] || 0;
@@ -163,6 +163,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['pirkei-avot'] || 0;
       count += todaysData.repeatables['parsha-vort'] || 0;
       count += todaysData.repeatables['gems-of-gratitude'] || 0;
+      count += todaysData.repeatables['torah-challenge'] || 0;
+      count += todaysData.repeatables['torah-class'] || 0;
     }
     return count;
   }, [completedModals]);
