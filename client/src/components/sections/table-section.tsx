@@ -376,7 +376,7 @@ export default function TableSection() {
               )}
               <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
             </div>
-            <p className={`platypi-bold text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
+            <p className={`platypi-regular text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
               {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
             </p>
           </button>
@@ -412,7 +412,7 @@ export default function TableSection() {
               )}
               <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
+            <p className="platypi-regular text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
               {isModalComplete('marriage-insights') ? 'Completed' : 'by Devora Levy'}
             </p>
           </button>
@@ -466,7 +466,7 @@ export default function TableSection() {
               )}
               <p className={`platypi-bold text-xs ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
             </div>
-            <p className={`platypi-bold text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
+            <p className={`platypi-regular text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
               {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
             </p>
           </button>
@@ -496,7 +496,7 @@ export default function TableSection() {
               <Brain className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Meditation</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               Calm your mind
             </p>
           </button>

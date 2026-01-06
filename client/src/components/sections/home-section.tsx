@@ -525,7 +525,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 {currentPrayer.title}
               </p>
             </div>
-            <p className={`platypi-bold text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
+            <p className={`platypi-regular text-xs leading-tight ${currentPrayer.disabled ? 'text-gray-400' : 'text-black'}`}>
               {currentPrayer.subtitle}
             </p>
           </button>
@@ -555,7 +555,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               <MapPin className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            <p className="platypi-regular text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
           </button>
         </div>
 

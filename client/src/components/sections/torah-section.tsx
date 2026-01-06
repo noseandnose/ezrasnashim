@@ -468,7 +468,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 </div>
                 
                 {/* Subtitle */}
-                <p className={`platypi-bold text-xs leading-tight ${!hasContent ? 'text-gray-400' : 'text-black'}`}>
+                <p className={`platypi-regular text-xs leading-tight ${!hasContent ? 'text-gray-400' : 'text-black'}`}>
                   {isCompleted ? 'Completed' : displaySubtitle}
                 </p>
               </button>
