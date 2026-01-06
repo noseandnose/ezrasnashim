@@ -33,6 +33,7 @@ const Profile = lazy(() => import("@/pages/profile"));
 const Login = lazy(() => import("@/pages/login"));
 const AuthCallback = lazy(() => import("@/pages/auth-callback"));
 const Feed = lazy(() => import("@/pages/feed"));
+const Partners = lazy(() => import("@/pages/partners"));
 
 // Unified loading screen with app icon - serves as both splash and loading indicator
 // Using PWA icon instead of attached_assets for faster load (14KB vs 30KB)
@@ -294,6 +295,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/auth/callback" component={AuthCallback} />
         <Route path="/feed" component={Feed} />
+        <Route path="/partners" component={Partners} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
