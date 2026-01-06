@@ -174,8 +174,8 @@ export default function Profile() {
           else if (key.startsWith('tzedaka-')) {
             tzedaka += count;
           }
-          // Life content (Marriage Insights)
-          else if (key === 'marriage-insights') {
+          // Life content (Marriage Insights, Gift of Chatzos)
+          else if (key === 'marriage-insights' || key === 'gift-of-chatzos') {
             life += count;
           }
         });
