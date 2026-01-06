@@ -2791,7 +2791,7 @@ export class DatabaseStorage implements IStorage {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-class', 'torah-challenge'];
     const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim'];
     const tzedakaActs = ['tzedaka', 'donate'];
-    const lifeActs = ['life-class', 'marriage-insights', 'recipe'];
+    const lifeActs = ['life-class', 'marriage-insights', 'recipe', 'gift-of-chatzos'];
     
     let totalActs = 0;
     

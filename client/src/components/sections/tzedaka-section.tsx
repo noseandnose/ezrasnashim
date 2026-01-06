@@ -384,7 +384,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
               )}
               <p className="platypi-bold text-xs text-black">Sponsor a Day</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               {isTzedakaButtonCompleted('sponsor_a_day') ? 'Completed' : 'Dedicate mitzvas'}
             </p>
           </button>
@@ -418,7 +418,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
                 )}
                 <p className="platypi-bold text-xs text-black">Gave Elsewhere</p>
               </div>
-              <p className="platypi-bold text-xs text-black leading-tight">
+              <p className="platypi-regular text-xs text-black leading-tight">
                 {getGaveElsewhereCount() > 0 ? `${getGaveElsewhereCount()}X today` : 'Mark as complete'}
               </p>
               <HeartExplosion trigger={showExplosion} />

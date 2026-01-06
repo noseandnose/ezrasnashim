@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home } from "lucide-react";
+import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
+import { useTrackModalComplete, useTrackFeatureUsage } from "@/hooks/use-analytics";
 
 // TEMPORARY: Section background images
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
@@ -16,7 +17,9 @@ import DOMPurify from "dompurify";
 
 export default function TableSection() {
   const { openModal } = useModalStore();
-  const { isModalComplete } = useModalCompletionStore();
+  const { isModalComplete, markModalComplete } = useModalCompletionStore();
+  const { trackModalComplete } = useTrackModalComplete();
+  const { trackFeatureUsage } = useTrackFeatureUsage();
   const { data: shabbosData, isLoading: shabbosLoading } = useShabbosTime();
 
   // Get shared location state and trigger geolocation if needed
@@ -314,6 +317,35 @@ export default function TableSection() {
                     {giftOfChatzos.linkTitle}
                   </a>
                 )}
+                
+                {/* Complete Button */}
+                <div className="mt-4 pt-3 border-t border-blush/20">
+                  <button
+                    onClick={() => {
+                      if (!isModalComplete('gift-of-chatzos')) {
+                        markModalComplete('gift-of-chatzos');
+                        trackModalComplete('gift-of-chatzos');
+                        trackFeatureUsage('gift-of-chatzos');
+                      }
+                    }}
+                    disabled={isModalComplete('gift-of-chatzos')}
+                    className={`w-full py-2.5 rounded-full platypi-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 ${
+                      isModalComplete('gift-of-chatzos')
+                        ? 'bg-sage text-white cursor-default'
+                        : 'bg-gradient-feminine text-white hover:scale-[1.02] active:scale-[0.98]'
+                    }`}
+                    data-testid="button-gift-of-chatzos-complete"
+                  >
+                    {isModalComplete('gift-of-chatzos') ? (
+                      <>
+                        <Check size={16} />
+                        Completed Today
+                      </>
+                    ) : (
+                      'Complete'
+                    )}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -376,7 +408,7 @@ export default function TableSection() {
               )}
               <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
             </div>
-            <p className={`platypi-bold text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
+            <p className={`platypi-regular text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
               {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
             </p>
           </button>
@@ -412,7 +444,7 @@ export default function TableSection() {
               )}
               <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
+            <p className="platypi-regular text-xs text-black leading-tight" data-testid="text-marriage-insights-subtitle">
               {isModalComplete('marriage-insights') ? 'Completed' : 'by Devora Levy'}
             </p>
           </button>
@@ -466,7 +498,7 @@ export default function TableSection() {
               )}
               <p className={`platypi-bold text-xs ${!currentLifeClass ? 'text-gray-500' : 'text-black'}`}>Practical Parenting</p>
             </div>
-            <p className={`platypi-bold text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
+            <p className={`platypi-regular text-xs leading-tight ${!currentLifeClass ? 'text-gray-400' : 'text-black'}`}>
               {!currentLifeClass ? 'Coming Soon' : isModalComplete('life-class') ? 'Completed' : currentLifeClass.title}
             </p>
           </button>
@@ -496,7 +528,7 @@ export default function TableSection() {
               <Brain className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Meditation</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               Calm your mind
             </p>
           </button>

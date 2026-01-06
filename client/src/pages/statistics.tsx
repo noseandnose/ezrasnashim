@@ -242,6 +242,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": "Marriage Insights",
+    "feature:gift-of-chatzos": "Gift of Chatzos",
+    "gift-of-chatzos": "Gift of Chatzos",
   };
 
   const modalTypeIcons: Record<string, any> = {
@@ -295,6 +297,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": Heart,
+    "feature:gift-of-chatzos": Star,
+    "gift-of-chatzos": Star,
   };
 
   // Financial Stats Component
@@ -396,38 +400,38 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           alt="Ezras Nashim" 
           className="w-full max-w-2xl h-auto mb-6 relative z-10"
         />
-        <h1 className="platypi-bold text-3xl text-black mb-8 text-center relative z-10">All Time Statistics</h1>
+        <h1 className="platypi-bold text-2xl md:text-3xl text-black mb-6 md:mb-8 text-center relative z-10">All Time Statistics</h1>
         
-        <div className="grid grid-cols-2 gap-6 w-full max-w-2xl relative z-10">
+        <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl px-3 md:px-0 relative z-10">
           {/* Mitzvas Completed */}
-          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10"
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10"
                style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
-            <div className="flex items-center justify-center mb-4">
-              <TrendingUp className="h-10 w-10 text-blush" />
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <TrendingUp className="h-7 w-7 md:h-10 md:w-10 text-blush" />
             </div>
-            <div className="text-5xl platypi-bold text-black text-center mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
               {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
             </div>
-            <div className="text-lg platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
           </div>
           
           {/* Women Visited */}
-          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-4">
-              <Users className="h-10 w-10 text-peach" />
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <Users className="h-7 w-7 md:h-10 md:w-10 text-peach" />
             </div>
-            <div className="text-5xl platypi-bold text-black text-center mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
               {currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
             </div>
-            <div className="text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
           </div>
           
           {/* Tehillim Said */}
-          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-4">
-              <ScrollText className="h-10 w-10 text-lavender" />
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <ScrollText className="h-7 w-7 md:h-10 md:w-10 text-lavender" />
             </div>
-            <div className="text-5xl platypi-bold text-black text-center mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
               {currentLoading ? "..." : (() => {
                 const modalCompletions = (currentData as any)?.totalModalCompletions || {};
                 const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
@@ -438,18 +442,18 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                 return (globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim).toLocaleString();
               })()}
             </div>
-            <div className="text-lg platypi-medium text-warm-gray text-center">Tehillim Said</div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Said</div>
           </div>
           
           {/* Tehillim Chains */}
-          <div className="bg-white rounded-3xl p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-4">
-              <Heart className="h-10 w-10 text-sage" />
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <Heart className="h-7 w-7 md:h-10 md:w-10 text-sage" />
             </div>
-            <div className="text-5xl platypi-bold text-black text-center mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
               {activeCampaigns.toLocaleString()}
             </div>
-            <div className="text-lg platypi-medium text-warm-gray text-center">Tehillim Chains</div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Chains</div>
           </div>
         </div>
         

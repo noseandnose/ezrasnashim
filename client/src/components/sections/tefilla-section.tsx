@@ -628,7 +628,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               )}
               <p className="platypi-bold text-xs text-black">Siddur</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas & Brochas'}
             </p>
           </button>
@@ -664,7 +664,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               )}
               <p className="platypi-bold text-xs text-black">Tehillim</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               {hasAnyTehillimCompleted() ? 'Completed' : 'All & Special'}
             </p>
           </button>
@@ -694,7 +694,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               <HandHeart className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Women's Tefillas</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">Special Prayers</p>
+            <p className="platypi-regular text-xs text-black leading-tight">Special Prayers</p>
           </button>
 
           {/* Nishmas Kol Chai */}
@@ -728,7 +728,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               )}
               <p className="platypi-bold text-xs text-black">Nishmas Kol Chai</p>
             </div>
-            <p className="platypi-bold text-xs text-black leading-tight">
+            <p className="platypi-regular text-xs text-black leading-tight">
               {isModalComplete('nishmas-campaign') ? 'Completed' : 'Prayer of Gratitude'}
             </p>
           </button>
