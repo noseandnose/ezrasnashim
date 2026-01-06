@@ -70,14 +70,12 @@ export const discountPromotions = pgTable("discount_promotions", {
   subtitle: text("subtitle").notNull(),
   logoUrl: text("logo_url").notNull(),
   linkUrl: text("link_url").notNull(),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   targetLocation: text("target_location").notNull().default("worldwide"), // "israel" or "worldwide"
+  type: text("type").default("deal").notNull(), // 'deal' or 'resource'
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   activeIdx: index("discount_promotions_active_idx").on(table.isActive),
-  dateRangeIdx: index("discount_promotions_date_range_idx").on(table.startDate, table.endDate),
   locationIdx: index("discount_promotions_location_idx").on(table.targetLocation),
 }));
 

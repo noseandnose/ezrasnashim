@@ -13,8 +13,6 @@ interface Partner {
   linkUrl: string;
   type: string;
   targetLocation: string;
-  startDate: string;
-  endDate: string;
   isActive: boolean;
   createdAt: string;
 }

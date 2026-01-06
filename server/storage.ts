@@ -2242,7 +2242,6 @@ export class DatabaseStorage implements IStorage {
   async getActiveDiscountPromotion(userLocation?: string): Promise<DiscountPromotion | undefined> {
     try {
       const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
-      const now = new Date();
       
       // First try location-specific promotion
       let result = await db.select()
@@ -2250,8 +2249,6 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            lte(discountPromotions.startDate, now),
-            gte(discountPromotions.endDate, now),
             eq(discountPromotions.targetLocation, targetLocation)
           )
         )
@@ -2264,8 +2261,6 @@ export class DatabaseStorage implements IStorage {
           .where(
             and(
               eq(discountPromotions.isActive, true),
-              lte(discountPromotions.startDate, now),
-              gte(discountPromotions.endDate, now),
               eq(discountPromotions.targetLocation, "worldwide")
             )
           )
@@ -2282,7 +2277,6 @@ export class DatabaseStorage implements IStorage {
   async getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]> {
     try {
       const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
-      const now = new Date();
       
       // Get only promotions that match the exact user location
       const promotions = await db.select()
@@ -2290,8 +2284,6 @@ export class DatabaseStorage implements IStorage {
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            lte(discountPromotions.startDate, now),
-            gte(discountPromotions.endDate, now),
             eq(discountPromotions.targetLocation, targetLocation)
           )
         )
