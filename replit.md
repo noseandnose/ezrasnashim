@@ -64,6 +64,7 @@ Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed
 - **Sponsorship System**: Daily content sponsorship.
 - **Analytics**: Tracking daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard, offline queue support with idempotency, and Google Analytics.
 - **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback.
+- **Partners Page**: Full-screen page (/partners) with "Deals" and "Resources" tabs showing curated partner promotions. Uses `discount_promotions` table with `type` field to categorize content.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Unified Admin Interface**: Comprehensive dashboard for content management (Messages, Recipes, Table Inspirations, Notifications) with CRUD and secure image upload.
