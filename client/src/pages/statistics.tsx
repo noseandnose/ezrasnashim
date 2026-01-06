@@ -242,6 +242,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": "Marriage Insights",
+    "feature:gift-of-chatzos": "Gift of Chatzos",
+    "gift-of-chatzos": "Gift of Chatzos",
   };
 
   const modalTypeIcons: Record<string, any> = {
@@ -295,6 +297,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": Heart,
+    "feature:gift-of-chatzos": Star,
+    "gift-of-chatzos": Star,
   };
 
   // Financial Stats Component
