@@ -57,28 +57,28 @@ export default function Partners() {
           <h1 className="flex-1 text-center platypi-bold text-xl text-black pr-8">Partners</h1>
         </div>
         
-        <div className="flex px-4 pb-3 gap-2">
+        <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mx-4 mb-3">
           <button
             onClick={() => setActiveTab("deals")}
-            className={`flex-1 py-2.5 rounded-full platypi-semibold text-sm transition-all ${
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "deals"
-                ? "bg-blush text-white shadow-md"
-                : "bg-white/80 text-black/60 border border-blush/20"
+                ? "bg-gradient-feminine text-white shadow-lg"
+                : "text-black/70 hover:bg-blush/10"
             }`}
             data-testid="tab-deals"
           >
-            Deals
+            <span className="platypi-semibold text-xs leading-tight block">Deals</span>
           </button>
           <button
             onClick={() => setActiveTab("resources")}
-            className={`flex-1 py-2.5 rounded-full platypi-semibold text-sm transition-all ${
+            className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "resources"
-                ? "bg-blush text-white shadow-md"
-                : "bg-white/80 text-black/60 border border-blush/20"
+                ? "bg-gradient-feminine text-white shadow-lg"
+                : "text-black/70 hover:bg-blush/10"
             }`}
             data-testid="tab-resources"
           >
-            Resources
+            <span className="platypi-semibold text-xs leading-tight block">Resources</span>
           </button>
         </div>
       </div>
