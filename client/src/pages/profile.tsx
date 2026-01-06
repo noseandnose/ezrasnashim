@@ -150,20 +150,21 @@ export default function Profile() {
       if (dayData?.repeatables) {
         Object.entries(dayData.repeatables).forEach(([key, value]) => {
           const count = value as number;
-          // Torah content (including torah-challenge for Bitachon/Gratitude Challenge)
+          // Torah content (matching analytics: torah, chizuk, emuna, halacha, featured, parsha-vort, pirkei-avot, gems-of-gratitude, torah-class, torah-challenge)
           if (key === 'halacha' || key === 'chizuk' || key === 'emuna' || 
               key === 'featured' || key === 'pirkei-avot' || key === 'gems-of-gratitude' ||
-              key === 'torah-challenge' || key.includes('story') || 
+              key === 'torah-challenge' || key === 'parsha-vort' || key.includes('story') || 
               key.includes('daily-wisdom') || key.includes('torah-class')) {
             torah += count;
           }
-          // Tefilla content
+          // Tefilla content (matching analytics: individual-tehillim-*, chain-tehillim-*, brocha-*, womens-prayer-*, global-tehillim-chain, tehillim-text, meditation-*, al-hamichiya, birkat-hamazon, nishmas-campaign, special-tehillim)
           else if (key.startsWith('individual-tehillim-') || 
               key.startsWith('chain-tehillim-') ||
               key.startsWith('brocha-') ||
               key.startsWith('womens-prayer-') ||
               key === 'global-tehillim-chain' ||
               key === 'tehillim-text' ||
+              key === 'special-tehillim' ||
               key.startsWith('meditation-') ||
               key === 'al-hamichiya' ||
               key === 'birkat-hamazon' ||
@@ -171,11 +172,11 @@ export default function Profile() {
             tefilla += count;
           } 
           // Tzedaka content
-          else if (key.startsWith('tzedaka-')) {
+          else if (key.startsWith('tzedaka-') || key === 'tzedaka' || key === 'donate') {
             tzedaka += count;
           }
-          // Life content (Marriage Insights, Gift of Chatzos)
-          else if (key === 'marriage-insights' || key === 'gift-of-chatzos') {
+          // Life content (matching analytics: life-class, marriage-insights, recipe, gift-of-chatzos)
+          else if (key === 'marriage-insights' || key === 'gift-of-chatzos' || key === 'life-class' || key === 'recipe') {
             life += count;
           }
         });
