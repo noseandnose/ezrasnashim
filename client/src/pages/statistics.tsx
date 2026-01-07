@@ -448,7 +448,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                 className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
                 style={{ 
                   width: `${Math.max(progressPercent, 15)}%`,
-                  background: 'linear-gradient(90deg, #4ade80, #22c55e)'
+                  background: 'linear-gradient(90deg, hsl(120, 25%, 65%), hsl(120, 25%, 70%))'
                 }}
               >
                 <span className="text-sm md:text-base platypi-bold text-white drop-shadow-sm">
@@ -610,7 +610,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                   className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
                   style={{ 
                     width: `${Math.max(progressPercent, 15)}%`,
-                    background: 'linear-gradient(90deg, #4ade80, #22c55e)'
+                    background: 'linear-gradient(90deg, hsl(120, 25%, 65%), hsl(120, 25%, 70%))'
                   }}
                 >
                   <span className="text-xs platypi-bold text-white drop-shadow-sm">
