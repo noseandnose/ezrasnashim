@@ -186,11 +186,11 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
 
   const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-center mb-2">
         <Icon className={`h-5 w-5 ${color}`} />
-        <span className="text-xs platypi-medium text-warm-gray text-right">{title}</span>
       </div>
       <div className="text-2xl platypi-bold text-black text-center">{value}</div>
+      <div className="text-xs platypi-medium text-warm-gray text-center">{title}</div>
     </div>
   );
 
@@ -631,13 +631,13 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                 {/* Day/Week/Month View: Mitzvas, Torah, Tefilla, Tzedaka */}
                 <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
                      style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-center mb-2">
                     <TrendingUp className="h-5 w-5 text-blush" />
-                    <span className="text-xs platypi-medium text-warm-gray text-right">Mitzvas Completed</span>
                   </div>
                   <div className="text-2xl platypi-bold text-black text-center">
                     {currentLoading ? "..." : ((currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0).toLocaleString()}
                   </div>
+                  <div className="text-xs platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
                 </div>
                 <StatCard
                   title="Torah"
