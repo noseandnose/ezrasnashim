@@ -265,15 +265,20 @@ export default function TableSection() {
             {/* Expanded Content */}
             {giftExpanded && (
               <div className="px-3 pb-3">
-                {/* Image above content - cropped top/bottom */}
+                {/* Image above content - cropped 20px top/bottom, optimized loading */}
                 {giftOfChatzos.imageUrl && (
                   <div className="w-full rounded-xl overflow-hidden mb-3">
                     <img 
-                      src={giftOfChatzos.imageUrl} 
+                      src={giftOfChatzos.imageUrl.includes('cloudinary.com') 
+                        ? giftOfChatzos.imageUrl.replace('/upload/', '/upload/w_800,q_auto,f_auto/')
+                        : giftOfChatzos.imageUrl
+                      }
                       alt={giftOfChatzos.title || "The Gift of Chatzos"} 
                       className="w-full object-cover"
-                      style={{ marginTop: '-10px', marginBottom: '-10px' }}
-                      loading="lazy"
+                      style={{ marginTop: '-20px', marginBottom: '-20px' }}
+                      loading="eager"
+                      decoding="async"
+                      fetchPriority="high"
                     />
                   </div>
                 )}
