@@ -265,14 +265,17 @@ export default function TableSection() {
             {/* Expanded Content */}
             {giftExpanded && (
               <div className="px-3 pb-3">
-                {/* Image above content */}
+                {/* Image above content - cropped top/bottom */}
                 {giftOfChatzos.imageUrl && (
-                  <img 
-                    src={giftOfChatzos.imageUrl} 
-                    alt={giftOfChatzos.title || "The Gift of Chatzos"} 
-                    className="w-full rounded-xl object-cover mb-3"
-                    loading="lazy"
-                  />
+                  <div className="w-full rounded-xl overflow-hidden mb-3">
+                    <img 
+                      src={giftOfChatzos.imageUrl} 
+                      alt={giftOfChatzos.title || "The Gift of Chatzos"} 
+                      className="w-full object-cover"
+                      style={{ marginTop: '-10px', marginBottom: '-10px' }}
+                      loading="lazy"
+                    />
+                  </div>
                 )}
                 
                 {/* Content */}
