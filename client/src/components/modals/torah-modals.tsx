@@ -1347,9 +1347,9 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           }, 100);
                         }, 1500);
                       }}
-                      className="flex-1 py-3 px-2 rounded-xl platypi-medium border-0 bg-gradient-to-r from-sage via-sage/90 to-lavender text-white text-sm shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                      className="flex-1 py-3 px-2 rounded-xl platypi-medium border-0 bg-gradient-to-r from-sage via-sage/90 to-lavender text-white text-xs shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
                     >
-                      Complete + Enter Raffle
+                      Complete + Raffle
                     </Button>
                   </div>
                 )}
