@@ -121,14 +121,14 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     enabled: selectedPeriod === 'month', // Only fetch when selected
   });
 
-  // Fetch total stats - only fetch when 'alltime' is selected
+  // Fetch total stats - always fetch for progress bar
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 60000,
     gcTime: 300000,
-    refetchInterval: isPageVisible && selectedPeriod === 'alltime' ? 120000 : false,
+    refetchInterval: isPageVisible ? 120000 : false,
     refetchOnWindowFocus: false,
-    enabled: selectedPeriod === 'alltime', // Only fetch when selected
+    enabled: true, // Always fetch for progress bar
   });
 
   // Fetch active campaigns (chains) count
@@ -193,6 +193,38 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
       <div className="text-2xl platypi-bold text-black text-center">{value}</div>
     </div>
   );
+
+  // Helper function to calculate Torah completions
+  const getTorahTotal = (modalCompletions: Record<string, number>) => {
+    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge'];
+    return torahKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+  };
+
+  // Helper function to calculate Tefilla completions
+  const getTefillaTotal = (modalCompletions: Record<string, number>) => {
+    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer'];
+    let total = tefillaKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add individual tehillim
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add tehillim chains
+    total += (modalCompletions['global-tehillim-chain'] || 0) + (modalCompletions['tehillim-text'] || 0) + (modalCompletions['chain-tehillim'] || 0);
+    // Add brochas
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('brocha-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add women's prayers
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('womens-prayer')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    return total;
+  };
+
+  // Helper function to calculate Tzedaka completions  
+  const getTzedakaTotal = (data: any, isToday: boolean) => {
+    const tzedakaActs = isToday ? (data?.tzedakaActs || 0) : (data?.totalTzedakaActs || 0);
+    return tzedakaActs;
+  };
+
+  // Calculate total mitzvas for progress bar (always from alltime)
+  const totalMitzvas = (totalStats as any)?.totalActs || 0;
+  const goalMitzvas = 1000000;
+  const progressPercent = Math.min((totalMitzvas / goalMitzvas) * 100, 100);
 
   const modalTypeNames: Record<string, string> = {
     // Main categories
@@ -396,62 +428,80 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="w-full max-w-2xl h-auto mb-6 relative z-10"
+          className="w-full max-w-2xl h-auto mb-4 relative z-10"
         />
-        <h1 className="platypi-bold text-2xl md:text-3xl text-black mb-6 md:mb-8 text-center relative z-10">All Time Statistics</h1>
+        
+        {/* Progress Bar - Total Mitzvas out of 1,000,000 */}
+        <div className="w-full max-w-2xl px-3 md:px-0 mb-6 relative z-10">
+          <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm md:text-lg platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+              <span className="text-xs md:text-base platypi-medium text-warm-gray">
+                {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-blush/20 rounded-full h-6 overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${progressPercent}%`,
+                  background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
+                }}
+              />
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-sm md:text-base platypi-medium text-warm-gray">
+                {progressPercent.toFixed(1)}% complete
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <h1 className="platypi-bold text-2xl md:text-3xl text-black mb-4 md:mb-6 text-center relative z-10">All Time Statistics</h1>
         
         <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl px-3 md:px-0 relative z-10">
-          {/* Mitzvas Completed */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10"
-               style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
+          {/* Torah */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
             <div className="flex items-center justify-center mb-2 md:mb-4">
-              <TrendingUp className="h-7 w-7 md:h-10 md:w-10 text-blush" />
+              <BookOpen className="h-7 w-7 md:h-10 md:w-10 text-sage" />
             </div>
             <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
+              {currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Torah</div>
+          </div>
+          
+          {/* Tefilla */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <Heart className="h-7 w-7 md:h-10 md:w-10 text-lavender" />
+            </div>
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+              {currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+            </div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tefilla</div>
+          </div>
+          
+          {/* Tzedaka */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <HandCoins className="h-7 w-7 md:h-10 md:w-10 text-peach" />
+            </div>
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+              {currentLoading ? "..." : getTzedakaTotal(currentData, false).toLocaleString()}
+            </div>
+            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tzedaka</div>
           </div>
           
           {/* Women Visited */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
             <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Users className="h-7 w-7 md:h-10 md:w-10 text-peach" />
+              <Users className="h-7 w-7 md:h-10 md:w-10 text-blush" />
             </div>
             <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
               {currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
             </div>
             <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
-          </div>
-          
-          {/* Tehillim Said */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <ScrollText className="h-7 w-7 md:h-10 md:w-10 text-lavender" />
-            </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {currentLoading ? "..." : (() => {
-                const modalCompletions = (currentData as any)?.totalModalCompletions || {};
-                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
-                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
-                const chainTehillim = modalCompletions['chain-tehillim'] || 0;
-                const specialTehillim = modalCompletions['special-tehillim'] || 0;
-                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                return (globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim).toLocaleString();
-              })()}
-            </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Said</div>
-          </div>
-          
-          {/* Tehillim Chains */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Heart className="h-7 w-7 md:h-10 md:w-10 text-sage" />
-            </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {activeCampaigns.toLocaleString()}
-            </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Chains</div>
           </div>
         </div>
         
@@ -493,6 +543,30 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
             </button>
           </div>
           
+          {/* Progress Bar - Total Mitzvas out of 1,000,000 */}
+          <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+              <span className="text-xs platypi-medium text-warm-gray">
+                {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
+              </span>
+            </div>
+            <div className="w-full bg-blush/20 rounded-full h-4 overflow-hidden">
+              <div 
+                className="h-full rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${progressPercent}%`,
+                  background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
+                }}
+              />
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-xs platypi-medium text-warm-gray">
+                {progressPercent.toFixed(1)}% complete
+              </span>
+            </div>
+          </div>
+
           {/* Time Period Selector */}
           <div className="flex bg-white/20 rounded-xl p-1 mb-4">
             <Button
@@ -550,50 +624,67 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           </h2>
           
           <div className="grid grid-cols-2 gap-3">
-            {/* Mitzvas Completed - with drop shadow animation */}
-            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
-                 style={{
-                   animation: 'gentle-glow-pink 3s ease-in-out infinite'
-                 }}>
-              <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="h-5 w-5 text-blush" />
-                <span className="text-xs platypi-medium text-warm-gray text-right">Mitzvas Completed</span>
-              </div>
-              <div className="text-2xl platypi-bold text-black text-center">
-                {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
-              </div>
-            </div>
-            <StatCard
-              title="Women Visited"
-              value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
-              icon={Users}
-              color="text-peach"
-            />
-            <StatCard
-              title="Tehillim Said"
-              value={currentLoading ? "..." : (() => {
-                // Server-side analytics: no dedup needed because analytics only tracks once per completion
-                // (global-tehillim-chain for new, tehillim-text for historical)
-                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
-                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
-                const chainTehillim = modalCompletions['chain-tehillim'] || 0;
-                const specialTehillim = modalCompletions['special-tehillim'] || 0;
-                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                
-                // Include all tehillim types (global, chain campaigns, special, individual)
-                const totalTehillim = globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim;
-                return totalTehillim.toLocaleString();
-              })()}
-              icon={ScrollText}
-              color="text-lavender"
-            />
-            <StatCard
-              title="Tehillim Chains"
-              value={activeCampaigns.toLocaleString()}
-              icon={Heart}
-              color="text-sage"
-            />
+            {selectedPeriod !== 'alltime' ? (
+              <>
+                {/* Day/Week/Month View: Mitzvas, Torah, Tefilla, Tzedaka */}
+                <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
+                     style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
+                  <div className="flex items-center justify-between mb-2">
+                    <TrendingUp className="h-5 w-5 text-blush" />
+                    <span className="text-xs platypi-medium text-warm-gray text-right">Mitzvas Completed</span>
+                  </div>
+                  <div className="text-2xl platypi-bold text-black text-center">
+                    {currentLoading ? "..." : ((currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0).toLocaleString()}
+                  </div>
+                </div>
+                <StatCard
+                  title="Torah"
+                  value={currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {}).toLocaleString()}
+                  icon={BookOpen}
+                  color="text-sage"
+                />
+                <StatCard
+                  title="Tefilla"
+                  value={currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {}).toLocaleString()}
+                  icon={Heart}
+                  color="text-lavender"
+                />
+                <StatCard
+                  title="Tzedaka"
+                  value={currentLoading ? "..." : getTzedakaTotal(currentData, selectedPeriod === 'today').toLocaleString()}
+                  icon={HandCoins}
+                  color="text-peach"
+                />
+              </>
+            ) : (
+              <>
+                {/* All Time View: Torah, Tefilla, Tzedaka, Women Visited */}
+                <StatCard
+                  title="Torah"
+                  value={currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+                  icon={BookOpen}
+                  color="text-sage"
+                />
+                <StatCard
+                  title="Tefilla"
+                  value={currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+                  icon={Heart}
+                  color="text-lavender"
+                />
+                <StatCard
+                  title="Tzedaka"
+                  value={currentLoading ? "..." : getTzedakaTotal(currentData, false).toLocaleString()}
+                  icon={HandCoins}
+                  color="text-peach"
+                />
+                <StatCard
+                  title="Women Visited"
+                  value={currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
+                  icon={Users}
+                  color="text-blush"
+                />
+              </>
+            )}
           </div>
         </div>
 
