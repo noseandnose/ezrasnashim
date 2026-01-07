@@ -440,19 +440,21 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                 {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
               </span>
             </div>
-            <div className="w-full bg-blush/20 rounded-full h-6 overflow-hidden">
+            <div 
+              className="w-full rounded-full h-8 overflow-hidden relative"
+              style={{ background: 'linear-gradient(90deg, #E8B4BC, #C4A5D4)' }}
+            >
               <div 
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
                 style={{ 
-                  width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
+                  width: `${Math.max(progressPercent, 15)}%`,
+                  background: 'linear-gradient(90deg, #4ade80, #22c55e)'
                 }}
-              />
-            </div>
-            <div className="text-center mt-2">
-              <span className="text-sm md:text-base platypi-medium text-warm-gray">
-                {progressPercent.toFixed(1)}% complete
-              </span>
+              >
+                <span className="text-sm md:text-base platypi-bold text-white drop-shadow-sm">
+                  {progressPercent.toFixed(1)}%
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -600,19 +602,21 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                   {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
                 </span>
               </div>
-              <div className="w-full bg-blush/20 rounded-full h-4 overflow-hidden">
+              <div 
+                className="w-full rounded-full h-6 overflow-hidden relative"
+                style={{ background: 'linear-gradient(90deg, #E8B4BC, #C4A5D4)' }}
+              >
                 <div 
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
                   style={{ 
-                    width: `${progressPercent}%`,
-                    background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
+                    width: `${Math.max(progressPercent, 15)}%`,
+                    background: 'linear-gradient(90deg, #4ade80, #22c55e)'
                   }}
-                />
-              </div>
-              <div className="text-center mt-2">
-                <span className="text-xs platypi-medium text-warm-gray">
-                  {progressPercent.toFixed(1)}% complete
-                </span>
+                >
+                  <span className="text-xs platypi-bold text-white drop-shadow-sm">
+                    {progressPercent.toFixed(1)}%
+                  </span>
+                </div>
               </div>
             </div>
           )}
