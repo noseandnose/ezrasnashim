@@ -121,14 +121,14 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     enabled: selectedPeriod === 'month', // Only fetch when selected
   });
 
-  // Fetch total stats - always fetch for progress bar
+  // Fetch total stats - only fetch when 'alltime' is selected
   const { data: totalStats, isLoading: totalLoading } = useQuery<PeriodStats>({
     queryKey: ["/api/analytics/stats/total"],
     staleTime: 60000,
     gcTime: 300000,
-    refetchInterval: isPageVisible ? 120000 : false,
+    refetchInterval: isPageVisible && selectedPeriod === 'alltime' ? 120000 : false,
     refetchOnWindowFocus: false,
-    enabled: true, // Always fetch for progress bar
+    enabled: selectedPeriod === 'alltime', // Only fetch when selected
   });
 
   // Fetch active campaigns (chains) count
@@ -543,30 +543,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
             </button>
           </div>
           
-          {/* Progress Bar - Total Mitzvas out of 1,000,000 */}
-          <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
-              <span className="text-xs platypi-medium text-warm-gray">
-                {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
-              </span>
-            </div>
-            <div className="w-full bg-blush/20 rounded-full h-4 overflow-hidden">
-              <div 
-                className="h-full rounded-full transition-all duration-500"
-                style={{ 
-                  width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
-                }}
-              />
-            </div>
-            <div className="text-center mt-2">
-              <span className="text-xs platypi-medium text-warm-gray">
-                {progressPercent.toFixed(1)}% complete
-              </span>
-            </div>
-          </div>
-
           {/* Time Period Selector */}
           <div className="flex bg-white/20 rounded-xl p-1 mb-4">
             <Button
@@ -614,6 +590,32 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
               All Time
             </Button>
           </div>
+
+          {/* Progress Bar - Only show on All Time */}
+          {selectedPeriod === 'alltime' && (
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+                <span className="text-xs platypi-medium text-warm-gray">
+                  {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
+                </span>
+              </div>
+              <div className="w-full bg-blush/20 rounded-full h-4 overflow-hidden">
+                <div 
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${progressPercent}%`,
+                    background: 'linear-gradient(90deg, #E8B4BC, #D4A5AF)'
+                  }}
+                />
+              </div>
+              <div className="text-center mt-2">
+                <span className="text-xs platypi-medium text-warm-gray">
+                  {progressPercent.toFixed(1)}% complete
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Period-Specific Stats */}
           <h2 className="text-base platypi-bold text-black mb-3">
