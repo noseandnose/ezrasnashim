@@ -1280,11 +1280,11 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               </div>
               
               {/* Attribution Section - outside content box */}
-              {(torahChallengeContent.attributionLogoUrl || torahChallengeContent.attributionAboutText) && (
+              {(torahChallengeContent.thankYouMessage || torahChallengeContent.attributionLogoUrl || torahChallengeContent.attributionAboutText) && (
                 <AttributionSection 
                   logoUrl={torahChallengeContent.attributionLogoUrl || undefined}
                   aboutText={torahChallengeContent.attributionAboutText || undefined}
-                  label="About"
+                  label={torahChallengeContent.thankYouMessage || 'About'}
                 />
               )}
               
