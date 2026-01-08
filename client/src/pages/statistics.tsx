@@ -184,13 +184,15 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     });
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
+  const StatCard = ({ title, value, icon: Icon }: { title: string; value: number | string; icon: any; color?: string }) => (
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
-      <div className="flex items-center justify-center mb-2">
-        <Icon className={`h-5 w-5 ${color}`} />
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <div className="bg-gradient-feminine p-1.5 rounded-full">
+          <Icon className="h-4 w-4 text-white" />
+        </div>
+        <span className="text-xs platypi-medium text-warm-gray">{title}</span>
       </div>
       <div className="text-2xl platypi-bold text-black text-center">{value}</div>
-      <div className="text-xs platypi-medium text-warm-gray text-center">{title}</div>
     </div>
   );
 
@@ -464,46 +466,54 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
         <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl px-3 md:px-0 relative z-10">
           {/* Torah */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <BookOpen className="h-7 w-7 md:h-10 md:w-10 text-sage" />
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 md:mb-4">
+              <div className="bg-gradient-feminine p-2 md:p-3 rounded-full">
+                <BookOpen className="h-5 w-5 md:h-7 md:w-7 text-white" />
+              </div>
+              <span className="text-sm md:text-lg platypi-medium text-warm-gray">Torah</span>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
               {currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Torah</div>
           </div>
           
           {/* Tefilla */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Heart className="h-7 w-7 md:h-10 md:w-10 text-lavender" />
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 md:mb-4">
+              <div className="bg-gradient-feminine p-2 md:p-3 rounded-full">
+                <Heart className="h-5 w-5 md:h-7 md:w-7 text-white" />
+              </div>
+              <span className="text-sm md:text-lg platypi-medium text-warm-gray">Tefilla</span>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
               {currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tefilla</div>
           </div>
           
           {/* Tzedaka */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <HandCoins className="h-7 w-7 md:h-10 md:w-10 text-peach" />
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 md:mb-4">
+              <div className="bg-gradient-feminine p-2 md:p-3 rounded-full">
+                <HandCoins className="h-5 w-5 md:h-7 md:w-7 text-white" />
+              </div>
+              <span className="text-sm md:text-lg platypi-medium text-warm-gray">Tzedaka</span>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
               {currentLoading ? "..." : getTzedakaTotal(currentData, false).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tzedaka</div>
           </div>
           
           {/* Women Visited */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Users className="h-7 w-7 md:h-10 md:w-10 text-blush" />
+            <div className="flex items-center justify-center gap-2 md:gap-3 mb-2 md:mb-4">
+              <div className="bg-gradient-feminine p-2 md:p-3 rounded-full">
+                <Users className="h-5 w-5 md:h-7 md:w-7 text-white" />
+              </div>
+              <span className="text-sm md:text-lg platypi-medium text-warm-gray">Women Visited</span>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
               {currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
           </div>
         </div>
         
@@ -635,13 +645,15 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                 {/* Day/Week/Month View: Mitzvas, Torah, Tefilla, Tzedaka */}
                 <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
                      style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
-                  <div className="flex items-center justify-center mb-2">
-                    <TrendingUp className="h-5 w-5 text-blush" />
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className="bg-gradient-feminine p-1.5 rounded-full">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                    </div>
+                    <span className="text-xs platypi-medium text-warm-gray">Mitzvas Completed</span>
                   </div>
                   <div className="text-2xl platypi-bold text-black text-center">
                     {currentLoading ? "..." : ((currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0).toLocaleString()}
                   </div>
-                  <div className="text-xs platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
                 </div>
                 <StatCard
                   title="Torah"
