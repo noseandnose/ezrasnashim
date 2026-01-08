@@ -435,7 +435,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
         
         {/* Progress Bar - Total Mitzvas out of 1,000,000 */}
         <div className="w-full max-w-2xl px-3 md:px-0 mb-6 relative z-10">
-          <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-blush/10">
+          <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-blush/10 complete-button-pulse">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm md:text-lg platypi-bold text-black">Journey to 1 Million Mitzvas</span>
               <span className="text-xs md:text-base platypi-medium text-warm-gray">
@@ -605,7 +605,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
 
           {/* Progress Bar - Only show on All Time */}
           {selectedPeriod === 'alltime' && (
-            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4">
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4 complete-button-pulse">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
                 <span className="text-xs platypi-medium text-warm-gray">
