@@ -4,11 +4,6 @@ import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useTrackModalComplete, useTrackFeatureUsage } from "@/hooks/use-analytics";
-
-// TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
 import { useGeolocation, useJewishTimes } from "@/hooks/use-jewish-times";
 import { useTableSummary } from "@/hooks/use-table-summary";
@@ -25,34 +20,8 @@ export default function TableSection() {
   // Get shared location state and trigger geolocation if needed
   const { coordinates, permissionDenied } = useGeolocation();
   
-  // Get Jewish times (includes shkia)
+  // Get Jewish times for Shabbat countdown calculation
   const { data: jewishTimes } = useJewishTimes();
-  
-  // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
-  const isAfterTzais = () => {
-    const tzaisStr = jewishTimes?.tzaitHakochavim;
-    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM
-    const now = new Date();
-    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-    if (!match) return now.getHours() >= 18;
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const period = match[3]?.toUpperCase();
-    if (period === 'PM' && hours !== 12) hours += 12;
-    else if (period === 'AM' && hours === 12) hours = 0;
-    else if (!period && hours < 12) hours += 12; // 24-hour format fallback
-    const tzaisTime = new Date(now);
-    tzaisTime.setHours(hours, minutes, 0, 0);
-    return now >= tzaisTime;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section
-  const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
-    if (isAfterTzais()) return sectionNightBg;
-    return sectionAfternoonBg;
-  };
   
   // Show location prompt if permission denied and no coordinates
   const showLocationPrompt = permissionDenied && !coordinates;
@@ -129,16 +98,7 @@ export default function TableSection() {
 
 
   return (
-    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
-      {/* TEMPORARY: Full page background image */}
-      <img 
-        src={getSectionBackground()} 
-        alt="" 
-        aria-hidden="true"
-        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
-      />
-      
+    <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
       {/* Main Table Section */}
       <div 
         className="rounded-b-3xl p-3 relative"
