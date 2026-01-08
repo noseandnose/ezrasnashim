@@ -376,43 +376,43 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   if (simplified) {
     return (
       <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8 relative overflow-hidden">
-        {/* Large prominent purple flowers */}
-        <img src={tefillaFlower} alt="" className="absolute top-4 left-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-8 right-4 w-28 h-28 opacity-50 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-20 left-4 w-26 h-26 opacity-50 pointer-events-none" style={{ transform: 'rotate(25deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-16 right-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        {/* Large prominent purple flowers - reduced opacity */}
+        <img src={tefillaFlower} alt="" className="absolute top-4 left-2 w-24 h-24 opacity-20 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-8 right-4 w-28 h-28 opacity-15 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-20 left-4 w-26 h-26 opacity-15 pointer-events-none" style={{ transform: 'rotate(25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-16 right-2 w-24 h-24 opacity-20 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
         
-        {/* Medium flowers scattered around */}
-        <img src={torahFlower} alt="" className="absolute top-20 left-8 w-16 h-16 opacity-45 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-28 right-10 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-1/4 left-1 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(8deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-1/4 right-1 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-22deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-1/3 left-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(18deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-1/3 right-8 w-16 h-16 opacity-42 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-2/5 left-2 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(12deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-2/5 right-4 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        {/* Medium flowers scattered around - reduced opacity */}
+        <img src={torahFlower} alt="" className="absolute top-20 left-8 w-16 h-16 opacity-15 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-28 right-10 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-1/4 left-1 w-18 h-18 opacity-15 pointer-events-none" style={{ transform: 'rotate(8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/4 right-1 w-20 h-20 opacity-15 pointer-events-none" style={{ transform: 'rotate(-22deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-1/3 left-6 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(18deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-1/3 right-8 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-2/5 left-2 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-2/5 right-4 w-18 h-18 opacity-15 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
         
-        {/* Middle section flowers */}
-        <img src={torahFlower} alt="" className="absolute top-1/2 left-0 w-14 h-14 opacity-35 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-1/2 right-0 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-[55%] left-4 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-[55%] right-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
+        {/* Middle section flowers - reduced opacity */}
+        <img src={torahFlower} alt="" className="absolute top-1/2 left-0 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/2 right-0 w-20 h-20 opacity-15 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[55%] left-4 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[55%] right-6 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
         
-        {/* Lower section flowers */}
-        <img src={tefillaFlower} alt="" className="absolute top-2/3 left-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(-14deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-2/3 right-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(28deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-[70%] left-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-[70%] right-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-3/4 left-0 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-3/4 right-0 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        {/* Lower section flowers - reduced opacity */}
+        <img src={tefillaFlower} alt="" className="absolute top-2/3 left-2 w-18 h-18 opacity-12 pointer-events-none" style={{ transform: 'rotate(-14deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-2/3 right-2 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(28deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[70%] left-6 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[70%] right-8 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-3/4 left-0 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-3/4 right-0 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
         
-        {/* Bottom flowers */}
-        <img src={tzedakaFlower} alt="" className="absolute bottom-40 left-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute bottom-44 right-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
-        <img src={torahFlower} alt="" className="absolute bottom-32 left-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-36 right-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute bottom-8 left-10 w-14 h-14 opacity-45 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute bottom-4 right-10 w-12 h-12 opacity-40 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        {/* Bottom flowers - reduced opacity */}
+        <img src={tzedakaFlower} alt="" className="absolute bottom-40 left-8 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-44 right-6 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        <img src={torahFlower} alt="" className="absolute bottom-32 left-2 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-36 right-2 w-18 h-18 opacity-12 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute bottom-8 left-10 w-14 h-14 opacity-15 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-4 right-10 w-12 h-12 opacity-12 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
         
         <img 
           src={logoImage} 
