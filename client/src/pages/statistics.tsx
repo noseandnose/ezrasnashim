@@ -1,11 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import type { Section } from "@/pages/home";
-import BottomNavigation from "@/components/bottom-navigation";
-import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
@@ -165,15 +161,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     // TOTAL CACHE CLEAR: Force page reload to guarantee fresh data
     window.location.reload();
-  };
-
-
-
-
-  // Handler for bottom navigation - navigate back to home page with section
-  const handleSectionChange = (section: Section) => {
-    // For all sections, go back to home page and let the home page handle section navigation
-    setLocation(`/?section=${section}`);
   };
 
   // Scroll to top function
@@ -525,83 +512,85 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   }
 
   return (
-    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
-      <AppHeader />
+    <div className="min-h-screen bg-gradient-soft">
+      {/* Sticky Header */}
+      <div 
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-blush/10"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => setLocation("/")}
+            className="p-2 -ml-2 touch-manipulation"
+            aria-label="Back to Home"
+            data-testid="button-statistics-back"
+          >
+            <ArrowLeft className="h-6 w-6 text-black" />
+          </button>
+          <h1 
+            className="platypi-bold text-xl text-black cursor-pointer"
+            onClick={scrollToTop}
+          >
+            Analytics
+          </h1>
+          <button
+            onClick={handleRefresh}
+            className="p-2 -mr-2 touch-manipulation"
+            aria-label="Refresh Analytics"
+            disabled={isRefreshing}
+            data-testid="button-refresh-analytics"
+          >
+            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
       
-      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)]" data-scroll-lock-target>
-        {/* Back button and title in content area */}
-        <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
-          <div className="flex items-center justify-between mb-4">
+      <main className="px-4 pb-20">
+        {/* Time Period Selector */}
+        <div className="py-4">
+          <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
             <button
-              onClick={() => setLocation("/")}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Back to Home"
-            >
-              <ArrowLeft className="h-5 w-5 text-black/70" />
-            </button>
-            <h1 
-              className="platypi-semibold text-xl text-black tracking-wide cursor-pointer hover:text-black/80 transition-colors"
-              onClick={scrollToTop}
-            >
-              Analytics Dashboard
-            </h1>
-            <button
-              onClick={handleRefresh}
-              className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
-              aria-label="Refresh Analytics"
-              disabled={isRefreshing}
-            >
-              <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-          
-          {/* Time Period Selector */}
-          <div className="flex bg-white/20 rounded-xl p-1 mb-4">
-            <Button
               onClick={() => setSelectedPeriod('today')}
-              variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'today' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'today'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              Today
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Today</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('week')}
-              variant={selectedPeriod === 'week' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'week' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'week'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              This Week
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Week</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('month')}
-              variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'month' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'month'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              This Month
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Month</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('alltime')}
-              variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'alltime' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'alltime'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              All Time
-            </Button>
+              <span className="platypi-semibold text-xs">All Time</span>
+            </button>
           </div>
+        </div>
 
           {/* Progress Bar - Only show on All Time */}
           {selectedPeriod === 'alltime' && (
@@ -704,9 +693,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
               </>
             )}
           </div>
-        </div>
 
-        <div className="p-4 space-y-6">
+        <div className="space-y-6 mt-4">
           {/* Feature Usage */}
           <div key={`feature-usage-${selectedPeriod}`}>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
@@ -820,11 +808,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           <FinancialStatsSection period={selectedPeriod} isVisible={isPageVisible} />
         </div>
       </main>
-
-      <BottomNavigation 
-        activeSection={null} 
-        onSectionChange={handleSectionChange} 
-      />
     </div>
   );
 }
