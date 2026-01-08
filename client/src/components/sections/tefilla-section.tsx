@@ -3,6 +3,7 @@ import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRig
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
 import { useLocation } from "wouter";
+import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useTefillaStats } from "@/hooks/use-tefilla-stats";
 import { useState, useEffect, useCallback, memo } from "react";
 
@@ -38,6 +39,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
   const { openModal } = useModalStore();
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
+  const { data: times, isLoading } = useJewishTimes();
 
   // Lazy prefetch prayer data when browser is idle (not on mount)
   const queryClient = useQueryClient();
