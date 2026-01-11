@@ -191,7 +191,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
 
   // Helper function to calculate Tefilla completions
   const getTefillaTotal = (modalCompletions: Record<string, number>) => {
-    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer'];
+    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer', 'gift-of-chatzos'];
     let total = tefillaKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     // Add individual tehillim
     total += Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);

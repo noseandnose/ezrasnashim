@@ -3002,7 +3002,6 @@ export class DatabaseStorage implements IStorage {
       .select({
         totalUsers: sql<number>`COALESCE(SUM(${dailyStats.uniqueUsers}), 0)`,
         totalPageViews: sql<number>`COALESCE(SUM(${dailyStats.pageViews}), 0)`,
-        totalTehillimCompleted: sql<number>`COALESCE(SUM(${dailyStats.tehillimCompleted}), 0)`,
         totalNamesProcessed: sql<number>`COALESCE(SUM(${dailyStats.namesProcessed}), 0)`,
         totalBooksCompleted: sql<number>`COALESCE(SUM(${dailyStats.booksCompleted}), 0)`,
         totalTzedakaActs: sql<number>`COALESCE(SUM(${dailyStats.tzedakaActs}), 0)`,
@@ -3011,23 +3010,35 @@ export class DatabaseStorage implements IStorage {
       })
       .from(dailyStats);
     
-    // For modal completions, we still need to aggregate JSON - fetch only that column
+    // For modal completions and tehillim, we need to aggregate JSON - fetch only that column
     const modalRows = await db
       .select({ modalCompletions: dailyStats.modalCompletions })
       .from(dailyStats);
     
     const totalModalCompletions: Record<string, number> = {};
+    let totalTehillimCompleted = 0;
     for (const row of modalRows) {
       const completions = row.modalCompletions as Record<string, number> || {};
       for (const [modalType, count] of Object.entries(completions)) {
         totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+        // Count tehillim from modal completions (individual chapters, chains, etc.)
+        if (
+          modalType.startsWith('individual-tehillim-') ||
+          modalType === 'individual-tehillim' ||
+          modalType === 'chain-tehillim' ||
+          modalType === 'global-tehillim-chain' ||
+          modalType === 'tehillim-text' ||
+          modalType === 'special-tehillim'
+        ) {
+          totalTehillimCompleted += count;
+        }
       }
     }
     
     return {
       totalUsers: Number(aggregated?.totalUsers) || 0,
       totalPageViews: Number(aggregated?.totalPageViews) || 0,
-      totalTehillimCompleted: Number(aggregated?.totalTehillimCompleted) || 0,
+      totalTehillimCompleted,
       totalNamesProcessed: Number(aggregated?.totalNamesProcessed) || 0,
       totalBooksCompleted: Number(aggregated?.totalBooksCompleted) || 0,
       totalTzedakaActs: Number(aggregated?.totalTzedakaActs) || 0,
@@ -3083,7 +3094,6 @@ export class DatabaseStorage implements IStorage {
       for (const stats of rangeStats) {
         totalUsers += stats.uniqueUsers || 0;
         totalPageViews += stats.pageViews || 0;
-        totalTehillimCompleted += stats.tehillimCompleted || 0;
         totalNamesProcessed += stats.namesProcessed || 0;
         totalBooksCompleted += stats.booksCompleted || 0;
         totalTzedakaActs += stats.tzedakaActs || 0;
@@ -3095,10 +3105,21 @@ export class DatabaseStorage implements IStorage {
         sponsorADayTotal += stats.sponsorADayTotal || 0;
         gaveElsewhereCount += stats.gaveElsewhereCount || 0;
         
-        // Merge modal completions
+        // Merge modal completions and count tehillim from modalCompletions (not the column)
         const completions = stats.modalCompletions as Record<string, number> || {};
         for (const [modalType, count] of Object.entries(completions)) {
           totalModalCompletions[modalType] = (totalModalCompletions[modalType] || 0) + count;
+          // Count tehillim from modal completions (individual chapters, chains, etc.)
+          if (
+            modalType.startsWith('individual-tehillim-') ||
+            modalType === 'individual-tehillim' ||
+            modalType === 'chain-tehillim' ||
+            modalType === 'global-tehillim-chain' ||
+            modalType === 'tehillim-text' ||
+            modalType === 'special-tehillim'
+          ) {
+            totalTehillimCompleted += count;
+          }
         }
       }
       
