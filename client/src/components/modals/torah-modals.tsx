@@ -63,7 +63,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           contentType = 'gems-of-gratitude';
           break;
         case 'torah-challenge':
-          title = 'Torah Challenge';
+          title = 'Bitachon Challenge';
           contentType = 'torah-challenge';
           break;
       }
@@ -1280,45 +1280,79 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               </div>
               
               {/* Attribution Section - outside content box */}
-              {(torahChallengeContent.attributionLogoUrl || torahChallengeContent.attributionAboutText) && (
+              {(torahChallengeContent.thankYouMessage || torahChallengeContent.attributionLogoUrl || torahChallengeContent.attributionAboutText) && (
                 <AttributionSection 
                   logoUrl={torahChallengeContent.attributionLogoUrl || undefined}
                   aboutText={torahChallengeContent.attributionAboutText || undefined}
-                  label="About"
+                  label={torahChallengeContent.thankYouMessage || 'About'}
                 />
               )}
               
-              {/* Complete button */}
+              {/* Complete buttons */}
               <div className="heart-explosion-container">
-                <Button 
-                  onClick={isModalComplete('torah-challenge') ? undefined : () => {
-                    trackModalComplete('torah-challenge');
-                    markModalComplete('torah-challenge');
-                    setShowExplosion(true);
-                    setTimeout(() => {
-                      setShowExplosion(false);
-                      completeTask('torah');
-                      
-                      if (checkAndShowCongratulations()) {
-                        openModal('congratulations', 'torah');
-                      }
-                      
-                      const event = new CustomEvent('closeFullscreen');
-                      window.dispatchEvent(event);
-                      setTimeout(() => {
-                        window.location.hash = '#/?section=home&scrollToProgress=true';
-                      }, 100);
-                    }, 1500);
-                  }}
-                  disabled={isModalComplete('torah-challenge')}
-                  className={`w-full py-3 rounded-xl platypi-medium border-0 ${
-                    isModalComplete('torah-challenge') 
-                      ? 'bg-sage text-white' 
-                      : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
-                  }`}
-                >
-                  {isModalComplete('torah-challenge') ? 'Completed' : 'Complete Challenge'}
-                </Button>
+                {isModalComplete('torah-challenge') ? (
+                  <Button 
+                    disabled
+                    className="w-full py-3 rounded-xl platypi-medium border-0 bg-sage text-white"
+                  >
+                    Completed
+                  </Button>
+                ) : (
+                  <div className="flex gap-3">
+                    <Button 
+                      onClick={() => {
+                        trackModalComplete('torah-challenge');
+                        markModalComplete('torah-challenge');
+                        setShowExplosion(true);
+                        setTimeout(() => {
+                          setShowExplosion(false);
+                          completeTask('torah');
+                          
+                          if (checkAndShowCongratulations()) {
+                            openModal('congratulations', 'torah');
+                          }
+                          
+                          const event = new CustomEvent('closeFullscreen');
+                          window.dispatchEvent(event);
+                          setTimeout(() => {
+                            window.location.hash = '#/?section=home&scrollToProgress=true';
+                          }, 100);
+                        }, 1500);
+                      }}
+                      className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
+                    >
+                      Complete
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        trackModalComplete('torah-challenge');
+                        markModalComplete('torah-challenge');
+                        setShowExplosion(true);
+                        setTimeout(() => {
+                          setShowExplosion(false);
+                          completeTask('torah');
+                          
+                          if (checkAndShowCongratulations()) {
+                            openModal('congratulations', 'torah');
+                          }
+                          
+                          // Open WhatsApp link
+                          const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
+                          window.open(whatsappUrl, '_blank');
+                          
+                          const event = new CustomEvent('closeFullscreen');
+                          window.dispatchEvent(event);
+                          setTimeout(() => {
+                            window.location.hash = '#/?section=home&scrollToProgress=true';
+                          }, 100);
+                        }, 1500);
+                      }}
+                      className="flex-1 py-3 px-2 rounded-xl platypi-medium border-0 bg-gradient-to-r from-sage via-sage/90 to-lavender text-white text-xs shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
+                    >
+                      Complete + Raffle
+                    </Button>
+                  </div>
+                )}
                 <HeartExplosion trigger={showExplosion} />
               </div>
             </div>

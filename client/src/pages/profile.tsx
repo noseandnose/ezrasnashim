@@ -182,10 +182,10 @@ export default function Profile() {
         });
       }
       
-      // Singles are only for morning-brochas, mincha, maariv
+      // Singles are only for morning-brochas, mincha, maariv, shacharis
       if (dayData?.singles) {
         dayData.singles.forEach((id: string) => {
-          if (id === 'mincha' || id === 'morning-brochas' || id === 'maariv') {
+          if (id === 'mincha' || id === 'morning-brochas' || id === 'maariv' || id === 'shacharis') {
             tefilla++;
           }
         });

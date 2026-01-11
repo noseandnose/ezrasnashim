@@ -1,11 +1,6 @@
 import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-
-// TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 import type { Section } from "@/pages/home";
 import { useLocation } from "wouter";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
@@ -45,32 +40,6 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
   const { tefillaCompleted: _tefillaCompleted } = useDailyCompletionStore();
   const { isModalComplete, completedModals } = useModalCompletionStore();
   const { data: times, isLoading } = useJewishTimes();
-  
-  // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
-  const isAfterTzais = () => {
-    const tzaisStr = times?.tzaitHakochavim;
-    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM
-    const now = new Date();
-    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-    if (!match) return now.getHours() >= 18;
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const period = match[3]?.toUpperCase();
-    if (period === 'PM' && hours !== 12) hours += 12;
-    else if (period === 'AM' && hours === 12) hours = 0;
-    else if (!period && hours < 12) hours += 12; // 24-hour format fallback
-    const tzaisTime = new Date(now);
-    tzaisTime.setHours(hours, minutes, 0, 0);
-    return now >= tzaisTime;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section
-  const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
-    if (isAfterTzais()) return sectionNightBg;
-    return sectionAfternoonBg;
-  };
 
   // Lazy prefetch prayer data when browser is idle (not on mount)
   const queryClient = useQueryClient();
@@ -333,16 +302,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
 
   return (
-    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
-      {/* TEMPORARY: Full page background image */}
-      <img 
-        src={getSectionBackground()} 
-        alt="" 
-        aria-hidden="true"
-        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
-      />
-
+    <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
       {/* Main Tefilla Section */}
       <div 
         className="rounded-b-3xl p-3 space-y-3 relative"

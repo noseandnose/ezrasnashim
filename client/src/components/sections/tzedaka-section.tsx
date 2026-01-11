@@ -1,11 +1,5 @@
 import { BookOpen, Target, Users, HandCoins } from "lucide-react";
 import { useModalStore, useDailyCompletionStore, useDonationCompletionStore } from "@/lib/types";
-import { useJewishTimes } from "@/hooks/use-jewish-times";
-
-// TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 import { useState, useEffect, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { playCoinSound } from "@/utils/sounds";
@@ -94,35 +88,6 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const { resetDaily } = useDonationCompletionStore();
   const [showExplosion, setShowExplosion] = useState(false);
   const { trackEvent } = useAnalytics();
-  
-  // Get Jewish times for isAfterTzais check
-  const { data: jewishTimes } = useJewishTimes();
-  
-  // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
-  const isAfterTzais = () => {
-    const tzaisStr = jewishTimes?.tzaitHakochavim;
-    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM
-    const now = new Date();
-    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-    if (!match) return now.getHours() >= 18;
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const period = match[3]?.toUpperCase();
-    if (period === 'PM' && hours !== 12) hours += 12;
-    else if (period === 'AM' && hours === 12) hours = 0;
-    else if (!period && hours < 12) hours += 12; // 24-hour format fallback
-    const tzaisTime = new Date(now);
-    tzaisTime.setHours(hours, minutes, 0, 0);
-    return now >= tzaisTime;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section
-  const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
-    if (isAfterTzais()) return sectionNightBg;
-    return sectionAfternoonBg;
-  };
 
   // Individual button completion tracking using localStorage with daily reset
   const getLocalDateString = () => {
@@ -246,16 +211,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
 
   return (
-    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
-      {/* TEMPORARY: Full page background image */}
-      <img 
-        src={getSectionBackground()} 
-        alt="" 
-        aria-hidden="true"
-        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
-      />
-      
+    <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
       {/* Main Tzedaka Section */}
       <div 
         className="rounded-b-3xl px-3 pt-3 pb-2 relative"

@@ -1,20 +1,12 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, ChevronUp, ChevronDown } from "lucide-react";
+import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
-import { useJewishTimes } from "@/hooks/use-jewish-times";
-
-// TEMPORARY: Section background images
-import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 import type { Section } from "@/pages/home";
 import { useState, useRef, useCallback, memo } from "react";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { useTorahSummary } from "@/hooks/use-torah-summary";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { AttributionSection } from "@/components/ui/attribution-section";
-import { formatTextContent } from "@/lib/text-formatter";
 
 // Convert string to camel case
 const toCamelCase = (str: string): string => {
@@ -36,37 +28,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [pirkeiAvotExpanded, setPirkeiAvotExpanded] = useState(false);
-  const [torahChallengeExpanded, setTorahChallengeExpanded] = useState(false);
   const pirkeiExpandButtonRef = useRef<HTMLButtonElement>(null);
-  
-  // Get Jewish times for isAfterTzais check
-  const { data: jewishTimes } = useJewishTimes();
-  
-  // TEMPORARY: Check if current time is after tzais hakochavim (nightfall)
-  const isAfterTzais = () => {
-    const tzaisStr = jewishTimes?.tzaitHakochavim;
-    if (!tzaisStr) return new Date().getHours() >= 18; // Fallback to 6 PM
-    const now = new Date();
-    const match = tzaisStr.match(/(\d+):(\d+)\s*(AM|PM)?/i);
-    if (!match) return now.getHours() >= 18;
-    let hours = parseInt(match[1]);
-    const minutes = parseInt(match[2]);
-    const period = match[3]?.toUpperCase();
-    if (period === 'PM' && hours !== 12) hours += 12;
-    else if (period === 'AM' && hours === 12) hours = 0;
-    else if (!period && hours < 12) hours += 12; // 24-hour format fallback
-    const tzaisTime = new Date(now);
-    tzaisTime.setHours(hours, minutes, 0, 0);
-    return now >= tzaisTime;
-  };
-
-  // TEMPORARY: Get time-appropriate background for main section
-  const getSectionBackground = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return sectionMorningBg;
-    if (isAfterTzais()) return sectionNightBg;
-    return sectionAfternoonBg;
-  };
     
   // Toggle handler for Pirkei Avot expand button
   const handlePirkeiAvotToggle = useCallback((event?: React.MouseEvent | { stopPropagation?: () => void }) => {
@@ -180,16 +142,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
   ];
 
   return (
-    <div className="pb-20 relative overflow-hidden min-h-screen" data-bridge-container>
-      {/* TEMPORARY: Full page background image */}
-      <img 
-        src={getSectionBackground()} 
-        alt="" 
-        aria-hidden="true"
-        className="fixed inset-0 w-full h-full object-cover pointer-events-none"
-        style={{ zIndex: 0, opacity: 0.3 }}
-      />
-      
+    <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
       {/* Main Torah Section */}
       <div 
         className="rounded-b-3xl p-3 relative"
@@ -476,125 +429,42 @@ function TorahSectionComponent({}: TorahSectionProps) {
           })}
       </div>
 
-      {/* Bitachon Challenge - Below 4 buttons */}
+      {/* Bitachon Challenge - Below 4 buttons - Now opens fullscreen page */}
       {torahChallenge && (
-        <div 
-          className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative"
+        <button
+          onClick={() => openModal('torah-challenge', 'torah')}
+          className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
           style={{ 
             backgroundColor: '#ffffff', 
             isolation: 'isolate',
             zIndex: 10
           }}
+          data-testid="button-torah-challenge-open"
         >
-          {/* Collapsed/Header Bar */}
-          <button
-            onClick={() => setTorahChallengeExpanded(!torahChallengeExpanded)}
-            className="w-full p-3 text-left transition-colors relative"
-            style={{ backgroundColor: '#ffffff', zIndex: 11 }}
-            data-testid="button-torah-challenge-toggle"
-          >
-            <div className="flex items-center gap-3">
-              {/* Icon */}
-              <div className={`p-2 rounded-full ${
-                isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
-              }`}>
-                <Trophy className="text-white" size={16} />
-              </div>
-              
-              {/* Title and Subtitle */}
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-sm text-black">Bitachon Challenge</h3>
-                <p className="platypi-regular text-xs text-black/70">{torahChallenge.title || 'Daily Challenge'}</p>
-              </div>
-              
-              {/* Expand/Collapse Icon or Checkmark */}
-              {isModalComplete('torah-challenge') ? (
-                <Check className="text-sage" size={18} />
-              ) : (
-                <div className="p-1 rounded-full bg-blush/20">
-                  {torahChallengeExpanded ? (
-                    <ChevronUp className="text-lavender" size={16} />
-                  ) : (
-                    <ChevronDown className="text-lavender" size={16} />
-                  )}
-                </div>
-              )}
+          <div className="flex items-center gap-3">
+            {/* Icon */}
+            <div className={`p-2 rounded-full ${
+              isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
+            }`}>
+              <Trophy className="text-white" size={16} />
             </div>
-          </button>
-          
-          {/* Expanded Content - Force white background */}
-          {torahChallengeExpanded && (
-            <div className="px-3 pb-3 relative" style={{ backgroundColor: '#ffffff', zIndex: 11 }}>
-              {/* Image */}
-              {torahChallenge.imageUrl && (
-                <img 
-                  src={torahChallenge.imageUrl} 
-                  alt={torahChallenge.title || "Bitachon Challenge"} 
-                  className="w-full rounded-xl object-cover mb-3"
-                  loading="lazy"
-                />
-              )}
-              
-              {/* Content - using Platypi font for English, formatted with text-formatter */}
-              <div 
-                className="platypi-regular text-black leading-relaxed text-left mb-4"
-                style={{ fontSize: '16px' }}
-                dangerouslySetInnerHTML={{ 
-                  __html: formatTextContent(torahChallenge.contentEnglish || torahChallenge.contentHebrew || 'No content available') 
-                }}
-              />
-              
-              {/* Complete Buttons - Thin with magical styling */}
-              {!isModalComplete('torah-challenge') && (
-                <div className="flex gap-2 mb-3">
-                  <button
-                    onClick={() => {
-                      markModalComplete('torah-challenge');
-                      completeTask('torah');
-                      trackModalComplete('torah-challenge');
-                      setShowHeartExplosion(true);
-                      setTimeout(() => {
-                        checkAndShowCongratulations();
-                      }, 100);
-                    }}
-                    className="flex-1 py-1.5 rounded-2xl bg-gradient-feminine text-white platypi-medium text-sm hover:scale-105 transition-transform"
-                    data-testid="button-torah-challenge-complete"
-                  >
-                    Complete
-                  </button>
-                  <button
-                    onClick={() => {
-                      markModalComplete('torah-challenge');
-                      completeTask('torah');
-                      trackModalComplete('torah-challenge');
-                      setShowHeartExplosion(true);
-                      setTimeout(() => {
-                        checkAndShowCongratulations();
-                      }, 100);
-                      // Open WhatsApp link
-                      const whatsappUrl = 'https://api.whatsapp.com/send?phone=12018700229&text=Done!%20%E2%9C%94%EF%B8%8F';
-                      window.open(whatsappUrl, '_blank');
-                    }}
-                    className="flex-1 py-1.5 px-2 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium text-xs shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
-                    data-testid="button-torah-challenge-raffle"
-                  >
-                    Complete + Enter Raffle
-                  </button>
-                </div>
-              )}
-              
-              {/* Attribution Section - With expandable dropdown, white variant */}
-              {torahChallenge.thankYouMessage && (
-                <AttributionSection
-                  label={torahChallenge.thankYouMessage}
-                  logoUrl={torahChallenge.attributionLogoUrl}
-                  aboutText={torahChallenge.attributionAboutText}
-                  variant="white"
-                />
-              )}
+            
+            {/* Title and Subtitle */}
+            <div className="flex-grow">
+              <h3 className="platypi-bold text-sm text-black">Bitachon Challenge</h3>
+              <p className="platypi-regular text-xs text-black/70">
+                {isModalComplete('torah-challenge') ? 'Completed' : (torahChallenge.title || 'Daily Challenge')}
+              </p>
             </div>
-          )}
-        </div>
+            
+            {/* Chevron or Checkmark */}
+            {isModalComplete('torah-challenge') ? (
+              <Check className="text-sage" size={18} />
+            ) : (
+              <ChevronRight className="text-lavender" size={18} />
+            )}
+          </div>
+        </button>
       )}
 
       {/* Full-width bars section */}

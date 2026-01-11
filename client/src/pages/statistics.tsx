@@ -1,11 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Users, BookOpen, Heart, ScrollText, TrendingUp, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import type { Section } from "@/pages/home";
-import BottomNavigation from "@/components/bottom-navigation";
-import AppHeader from "@/components/app-header";
 import { getLocalDateString } from "@/lib/dateUtils";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
@@ -167,15 +163,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     window.location.reload();
   };
 
-
-
-
-  // Handler for bottom navigation - navigate back to home page with section
-  const handleSectionChange = (section: Section) => {
-    // For all sections, go back to home page and let the home page handle section navigation
-    setLocation(`/?section=${section}`);
-  };
-
   // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({
@@ -184,15 +171,49 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     });
   };
 
-  const StatCard = ({ title, value, icon: Icon, color }: { title: string; value: number | string; icon: any; color: string }) => (
+  const StatCard = ({ title, value, icon: Icon }: { title: string; value: number | string; icon: any; color?: string }) => (
     <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
-      <div className="flex items-center justify-between mb-2">
-        <Icon className={`h-5 w-5 ${color}`} />
-        <span className="text-xs platypi-medium text-warm-gray text-right">{title}</span>
+      <div className="flex items-center justify-center mb-2">
+        <div className="bg-gradient-feminine px-3 py-1.5 rounded-full flex items-center gap-1.5">
+          <Icon className="h-4 w-4 text-white" />
+          <span className="text-xs platypi-bold text-white">{title}</span>
+        </div>
       </div>
       <div className="text-2xl platypi-bold text-black text-center">{value}</div>
     </div>
   );
+
+  // Helper function to calculate Torah completions
+  const getTorahTotal = (modalCompletions: Record<string, number>) => {
+    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge'];
+    return torahKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+  };
+
+  // Helper function to calculate Tefilla completions
+  const getTefillaTotal = (modalCompletions: Record<string, number>) => {
+    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer', 'gift-of-chatzos'];
+    let total = tefillaKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add individual tehillim
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add tehillim chains
+    total += (modalCompletions['global-tehillim-chain'] || 0) + (modalCompletions['tehillim-text'] || 0) + (modalCompletions['chain-tehillim'] || 0);
+    // Add brochas
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('brocha-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Add women's prayers
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('womens-prayer')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    return total;
+  };
+
+  // Helper function to calculate Tzedaka completions  
+  const getTzedakaTotal = (data: any, isToday: boolean) => {
+    const tzedakaActs = isToday ? (data?.tzedakaActs || 0) : (data?.totalTzedakaActs || 0);
+    return tzedakaActs;
+  };
+
+  // Calculate total mitzvas for progress bar (always from alltime)
+  const totalMitzvas = (totalStats as any)?.totalActs || 0;
+  const goalMitzvas = 1000000;
+  const progressPercent = Math.min((totalMitzvas / goalMitzvas) * 100, 100);
 
   const modalTypeNames: Record<string, string> = {
     // Main categories
@@ -243,7 +264,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": "Marriage Insights",
     "feature:gift-of-chatzos": "Gift of Chatzos",
-    "gift-of-chatzos": "Gift of Chatzos",
   };
 
   const modalTypeIcons: Record<string, any> = {
@@ -298,7 +318,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     // Feature usage (with feature: prefix)
     "feature:marriage-insights": Heart,
     "feature:gift-of-chatzos": Star,
-    "gift-of-chatzos": Star,
   };
 
   // Financial Stats Component
@@ -357,103 +376,131 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   if (simplified) {
     return (
       <div className="min-h-screen w-full bg-gradient-soft flex flex-col items-center justify-center p-8 relative overflow-hidden">
-        {/* Large prominent purple flowers */}
-        <img src={tefillaFlower} alt="" className="absolute top-4 left-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-8 right-4 w-28 h-28 opacity-50 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-20 left-4 w-26 h-26 opacity-50 pointer-events-none" style={{ transform: 'rotate(25deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-16 right-2 w-24 h-24 opacity-55 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        {/* Large prominent purple flowers - reduced opacity */}
+        <img src={tefillaFlower} alt="" className="absolute top-4 left-2 w-24 h-24 opacity-20 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-8 right-4 w-28 h-28 opacity-15 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-20 left-4 w-26 h-26 opacity-15 pointer-events-none" style={{ transform: 'rotate(25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-16 right-2 w-24 h-24 opacity-20 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
         
-        {/* Medium flowers scattered around */}
-        <img src={torahFlower} alt="" className="absolute top-20 left-8 w-16 h-16 opacity-45 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-28 right-10 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-1/4 left-1 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(8deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-1/4 right-1 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-22deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-1/3 left-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(18deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-1/3 right-8 w-16 h-16 opacity-42 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-2/5 left-2 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(12deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-2/5 right-4 w-18 h-18 opacity-45 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        {/* Medium flowers scattered around - reduced opacity */}
+        <img src={torahFlower} alt="" className="absolute top-20 left-8 w-16 h-16 opacity-15 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-28 right-10 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-1/4 left-1 w-18 h-18 opacity-15 pointer-events-none" style={{ transform: 'rotate(8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/4 right-1 w-20 h-20 opacity-15 pointer-events-none" style={{ transform: 'rotate(-22deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-1/3 left-6 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(18deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-1/3 right-8 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-2/5 left-2 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(12deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-2/5 right-4 w-18 h-18 opacity-15 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
         
-        {/* Middle section flowers */}
-        <img src={torahFlower} alt="" className="absolute top-1/2 left-0 w-14 h-14 opacity-35 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-1/2 right-0 w-20 h-20 opacity-45 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-[55%] left-4 w-12 h-12 opacity-38 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-[55%] right-6 w-14 h-14 opacity-40 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
+        {/* Middle section flowers - reduced opacity */}
+        <img src={torahFlower} alt="" className="absolute top-1/2 left-0 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(5deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-1/2 right-0 w-20 h-20 opacity-15 pointer-events-none" style={{ transform: 'rotate(-10deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[55%] left-4 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[55%] right-6 w-14 h-14 opacity-12 pointer-events-none" style={{ transform: 'rotate(-20deg)' }} />
         
-        {/* Lower section flowers */}
-        <img src={tefillaFlower} alt="" className="absolute top-2/3 left-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(-14deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-2/3 right-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(28deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute top-[70%] left-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute top-[70%] right-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute top-3/4 left-0 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
-        <img src={torahFlower} alt="" className="absolute top-3/4 right-0 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
+        {/* Lower section flowers - reduced opacity */}
+        <img src={tefillaFlower} alt="" className="absolute top-2/3 left-2 w-18 h-18 opacity-12 pointer-events-none" style={{ transform: 'rotate(-14deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-2/3 right-2 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(28deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute top-[70%] left-6 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(10deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute top-[70%] right-8 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(-25deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute top-3/4 left-0 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(20deg)' }} />
+        <img src={torahFlower} alt="" className="absolute top-3/4 right-0 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(-12deg)' }} />
         
-        {/* Bottom flowers */}
-        <img src={tzedakaFlower} alt="" className="absolute bottom-40 left-8 w-12 h-12 opacity-35 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute bottom-44 right-6 w-14 h-14 opacity-38 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
-        <img src={torahFlower} alt="" className="absolute bottom-32 left-2 w-16 h-16 opacity-40 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
-        <img src={tefillaFlower} alt="" className="absolute bottom-36 right-2 w-18 h-18 opacity-42 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
-        <img src={tzedakaFlower} alt="" className="absolute bottom-8 left-10 w-14 h-14 opacity-45 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
-        <img src={lifeFlower} alt="" className="absolute bottom-4 right-10 w-12 h-12 opacity-40 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
+        {/* Bottom flowers - reduced opacity */}
+        <img src={tzedakaFlower} alt="" className="absolute bottom-40 left-8 w-12 h-12 opacity-10 pointer-events-none" style={{ transform: 'rotate(15deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-44 right-6 w-14 h-14 opacity-10 pointer-events-none" style={{ transform: 'rotate(-18deg)' }} />
+        <img src={torahFlower} alt="" className="absolute bottom-32 left-2 w-16 h-16 opacity-12 pointer-events-none" style={{ transform: 'rotate(-8deg)' }} />
+        <img src={tefillaFlower} alt="" className="absolute bottom-36 right-2 w-18 h-18 opacity-12 pointer-events-none" style={{ transform: 'rotate(22deg)' }} />
+        <img src={tzedakaFlower} alt="" className="absolute bottom-8 left-10 w-14 h-14 opacity-15 pointer-events-none" style={{ transform: 'rotate(30deg)' }} />
+        <img src={lifeFlower} alt="" className="absolute bottom-4 right-10 w-12 h-12 opacity-12 pointer-events-none" style={{ transform: 'rotate(-15deg)' }} />
         
         <img 
           src={logoImage} 
           alt="Ezras Nashim" 
-          className="w-full max-w-2xl h-auto mb-6 relative z-10"
+          className="w-full max-w-2xl h-auto mb-4 relative z-10"
         />
-        <h1 className="platypi-bold text-2xl md:text-3xl text-black mb-6 md:mb-8 text-center relative z-10">All Time Statistics</h1>
+        
+        {/* Progress Bar - Total Mitzvas out of 1,000,000 */}
+        <div className="w-full max-w-2xl px-3 md:px-0 mb-6 relative z-10">
+          <div className="bg-white rounded-2xl p-4 md:p-6 shadow-lg border border-blush/10 complete-button-pulse">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm md:text-lg platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+              <span className="text-xs md:text-base platypi-medium text-warm-gray">
+                {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
+              </span>
+            </div>
+            <div 
+              className="w-full rounded-full h-8 overflow-hidden relative"
+              style={{ background: 'linear-gradient(90deg, #E8B4BC, #C4A5D4)' }}
+            >
+              <div 
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
+                style={{ 
+                  width: `${Math.max(progressPercent, 15)}%`,
+                  background: 'linear-gradient(90deg, hsl(120, 25%, 65%), hsl(120, 25%, 70%))'
+                }}
+              >
+                <span className="text-sm md:text-base platypi-bold text-white drop-shadow-sm">
+                  {progressPercent.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h1 className="platypi-bold text-2xl md:text-3xl text-black mb-4 md:mb-6 text-center relative z-10">All Time Statistics</h1>
         
         <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl px-3 md:px-0 relative z-10">
-          {/* Mitzvas Completed */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10"
-               style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
+          {/* Torah */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
             <div className="flex items-center justify-center mb-2 md:mb-4">
-              <TrendingUp className="h-7 w-7 md:h-10 md:w-10 text-blush" />
+              <div className="bg-gradient-feminine px-3 md:px-5 py-1.5 md:py-2.5 rounded-full flex items-center gap-1.5 md:gap-2">
+                <BookOpen className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                <span className="text-xs md:text-base platypi-bold text-white">Torah</span>
+              </div>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
+              {currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Mitzvas Completed</div>
+          </div>
+          
+          {/* Tefilla */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <div className="bg-gradient-feminine px-3 md:px-5 py-1.5 md:py-2.5 rounded-full flex items-center gap-1.5 md:gap-2">
+                <Heart className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                <span className="text-xs md:text-base platypi-bold text-white">Tefilla</span>
+              </div>
+            </div>
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
+              {currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+            </div>
+          </div>
+          
+          {/* Tzedaka */}
+          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
+            <div className="flex items-center justify-center mb-2 md:mb-4">
+              <div className="bg-gradient-feminine px-3 md:px-5 py-1.5 md:py-2.5 rounded-full flex items-center gap-1.5 md:gap-2">
+                <HandCoins className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                <span className="text-xs md:text-base platypi-bold text-white">Tzedaka</span>
+              </div>
+            </div>
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
+              {currentLoading ? "..." : getTzedakaTotal(currentData, false).toLocaleString()}
+            </div>
           </div>
           
           {/* Women Visited */}
           <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
             <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Users className="h-7 w-7 md:h-10 md:w-10 text-peach" />
+              <div className="bg-gradient-feminine px-3 md:px-5 py-1.5 md:py-2.5 rounded-full flex items-center gap-1.5 md:gap-2">
+                <Users className="h-4 w-4 md:h-6 md:w-6 text-white" />
+                <span className="text-xs md:text-base platypi-bold text-white">Women</span>
+              </div>
             </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
+            <div className="text-2xl md:text-5xl platypi-bold text-black text-center">
               {currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
             </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Women Visited</div>
-          </div>
-          
-          {/* Tehillim Said */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <ScrollText className="h-7 w-7 md:h-10 md:w-10 text-lavender" />
-            </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {currentLoading ? "..." : (() => {
-                const modalCompletions = (currentData as any)?.totalModalCompletions || {};
-                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
-                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
-                const chainTehillim = modalCompletions['chain-tehillim'] || 0;
-                const specialTehillim = modalCompletions['special-tehillim'] || 0;
-                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                return (globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim).toLocaleString();
-              })()}
-            </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Said</div>
-          </div>
-          
-          {/* Tehillim Chains */}
-          <div className="bg-white rounded-2xl md:rounded-3xl p-4 md:p-8 shadow-lg border border-blush/10">
-            <div className="flex items-center justify-center mb-2 md:mb-4">
-              <Heart className="h-7 w-7 md:h-10 md:w-10 text-sage" />
-            </div>
-            <div className="text-2xl md:text-5xl platypi-bold text-black text-center mb-1 md:mb-2">
-              {activeCampaigns.toLocaleString()}
-            </div>
-            <div className="text-xs md:text-lg platypi-medium text-warm-gray text-center">Tehillim Chains</div>
           </div>
         </div>
         
@@ -465,83 +512,113 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   }
 
   return (
-    <div className="mobile-app min-h-screen w-full bg-white relative flex flex-col">
-      <AppHeader />
+    <div className="min-h-screen bg-gradient-soft">
+      {/* Sticky Header */}
+      <div 
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-blush/10"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="flex items-center justify-between px-4 py-3">
+          <button
+            onClick={() => setLocation("/")}
+            className="p-2 -ml-2 touch-manipulation"
+            aria-label="Back to Home"
+            data-testid="button-statistics-back"
+          >
+            <ArrowLeft className="h-6 w-6 text-black" />
+          </button>
+          <h1 
+            className="platypi-bold text-xl text-black cursor-pointer"
+            onClick={scrollToTop}
+          >
+            Analytics
+          </h1>
+          <button
+            onClick={handleRefresh}
+            className="p-2 -mr-2 touch-manipulation"
+            aria-label="Refresh Analytics"
+            disabled={isRefreshing}
+            data-testid="button-refresh-analytics"
+          >
+            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
       
-      <main className="content-area pb-[calc(var(--footer-total-height)+1rem)]" data-scroll-lock-target>
-        {/* Back button and title in content area */}
-        <div className="bg-gradient-soft rounded-b-3xl px-4 pt-4 pb-4 mb-4 border-0 shadow-none -mt-2">
-          <div className="flex items-center justify-between mb-4">
+      <main className="px-4 pb-20">
+        {/* Time Period Selector */}
+        <div className="py-4">
+          <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
             <button
-              onClick={() => setLocation("/")}
-              className="p-2 rounded-full hover:bg-white/50 transition-colors"
-              aria-label="Back to Home"
-            >
-              <ArrowLeft className="h-5 w-5 text-black/70" />
-            </button>
-            <h1 
-              className="platypi-semibold text-xl text-black tracking-wide cursor-pointer hover:text-black/80 transition-colors"
-              onClick={scrollToTop}
-            >
-              Analytics Dashboard
-            </h1>
-            <button
-              onClick={handleRefresh}
-              className="p-2 rounded-full hover:bg-white/50 transition-all duration-200"
-              aria-label="Refresh Analytics"
-              disabled={isRefreshing}
-            >
-              <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
-            </button>
-          </div>
-          
-          {/* Time Period Selector */}
-          <div className="flex bg-white/20 rounded-xl p-1 mb-4">
-            <Button
               onClick={() => setSelectedPeriod('today')}
-              variant={selectedPeriod === 'today' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'today' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'today'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              Today
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Today</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('week')}
-              variant={selectedPeriod === 'week' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'week' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'week'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              This Week
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Week</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('month')}
-              variant={selectedPeriod === 'month' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'month' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'month'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              This Month
-            </Button>
-            <Button
+              <span className="platypi-semibold text-xs">Month</span>
+            </button>
+            <button
               onClick={() => setSelectedPeriod('alltime')}
-              variant={selectedPeriod === 'alltime' ? 'default' : 'ghost'}
-              className={`flex-1 rounded-lg text-xs h-10 ${
-                selectedPeriod === 'alltime' 
-                  ? 'bg-white text-black shadow-sm' 
-                  : 'text-black/70 hover:text-black hover:bg-white/10'
+              className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+                selectedPeriod === 'alltime'
+                  ? "bg-gradient-feminine text-white shadow-lg"
+                  : "text-black/70 hover:bg-blush/10"
               }`}
             >
-              All Time
-            </Button>
+              <span className="platypi-semibold text-xs">All Time</span>
+            </button>
           </div>
+        </div>
+
+          {/* Progress Bar - Only show on All Time */}
+          {selectedPeriod === 'alltime' && (
+            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-4 complete-button-pulse">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+                <span className="text-xs platypi-medium text-warm-gray">
+                  {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
+                </span>
+              </div>
+              <div 
+                className="w-full rounded-full h-6 overflow-hidden relative"
+                style={{ background: 'linear-gradient(90deg, #E8B4BC, #C4A5D4)' }}
+              >
+                <div 
+                  className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
+                  style={{ 
+                    width: `${Math.max(progressPercent, 15)}%`,
+                    background: 'linear-gradient(90deg, hsl(120, 25%, 65%), hsl(120, 25%, 70%))'
+                  }}
+                >
+                  <span className="text-xs platypi-bold text-white drop-shadow-sm">
+                    {progressPercent.toFixed(1)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Period-Specific Stats */}
           <h2 className="text-base platypi-bold text-black mb-3">
@@ -552,54 +629,72 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           </h2>
           
           <div className="grid grid-cols-2 gap-3">
-            {/* Mitzvas Completed - with drop shadow animation */}
-            <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
-                 style={{
-                   animation: 'gentle-glow-pink 3s ease-in-out infinite'
-                 }}>
-              <div className="flex items-center justify-between mb-2">
-                <TrendingUp className="h-5 w-5 text-blush" />
-                <span className="text-xs platypi-medium text-warm-gray text-right">Mitzvas Completed</span>
-              </div>
-              <div className="text-2xl platypi-bold text-black text-center">
-                {currentLoading ? "..." : ((currentData as any)?.totalActs || 0).toLocaleString()}
-              </div>
-            </div>
-            <StatCard
-              title="Women Visited"
-              value={currentLoading ? "..." : (currentData as any)?.totalUsers?.toLocaleString() || (currentData as any)?.uniqueUsers || 0}
-              icon={Users}
-              color="text-peach"
-            />
-            <StatCard
-              title="Tehillim Said"
-              value={currentLoading ? "..." : (() => {
-                // Server-side analytics: no dedup needed because analytics only tracks once per completion
-                // (global-tehillim-chain for new, tehillim-text for historical)
-                const modalCompletions = (currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {};
-                const globalTehillimChain = modalCompletions['global-tehillim-chain'] || 0;
-                const globalTehillimText = modalCompletions['tehillim-text'] || 0;
-                const chainTehillim = modalCompletions['chain-tehillim'] || 0;
-                const specialTehillim = modalCompletions['special-tehillim'] || 0;
-                const individualTehillim = Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
-                
-                // Include all tehillim types (global, chain campaigns, special, individual)
-                const totalTehillim = globalTehillimChain + globalTehillimText + chainTehillim + specialTehillim + individualTehillim;
-                return totalTehillim.toLocaleString();
-              })()}
-              icon={ScrollText}
-              color="text-lavender"
-            />
-            <StatCard
-              title="Tehillim Chains"
-              value={activeCampaigns.toLocaleString()}
-              icon={Heart}
-              color="text-sage"
-            />
+            {selectedPeriod !== 'alltime' ? (
+              <>
+                {/* Day/Week/Month View: Mitzvas, Torah, Tefilla, Tzedaka */}
+                <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10"
+                     style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}>
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="bg-gradient-feminine px-3 py-1.5 rounded-full flex items-center gap-1.5">
+                      <TrendingUp className="h-4 w-4 text-white" />
+                      <span className="text-xs platypi-bold text-white">Mitzvas</span>
+                    </div>
+                  </div>
+                  <div className="text-2xl platypi-bold text-black text-center">
+                    {currentLoading ? "..." : ((currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0).toLocaleString()}
+                  </div>
+                </div>
+                <StatCard
+                  title="Torah"
+                  value={currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {}).toLocaleString()}
+                  icon={BookOpen}
+                  color="text-sage"
+                />
+                <StatCard
+                  title="Tefilla"
+                  value={currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || (currentData as any)?.modalCompletions || {}).toLocaleString()}
+                  icon={Heart}
+                  color="text-lavender"
+                />
+                <StatCard
+                  title="Tzedaka"
+                  value={currentLoading ? "..." : getTzedakaTotal(currentData, selectedPeriod === 'today').toLocaleString()}
+                  icon={HandCoins}
+                  color="text-peach"
+                />
+              </>
+            ) : (
+              <>
+                {/* All Time View: Torah, Tefilla, Tzedaka, Women Visited */}
+                <StatCard
+                  title="Torah"
+                  value={currentLoading ? "..." : getTorahTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+                  icon={BookOpen}
+                  color="text-sage"
+                />
+                <StatCard
+                  title="Tefilla"
+                  value={currentLoading ? "..." : getTefillaTotal((currentData as any)?.totalModalCompletions || {}).toLocaleString()}
+                  icon={Heart}
+                  color="text-lavender"
+                />
+                <StatCard
+                  title="Tzedaka"
+                  value={currentLoading ? "..." : getTzedakaTotal(currentData, false).toLocaleString()}
+                  icon={HandCoins}
+                  color="text-peach"
+                />
+                <StatCard
+                  title="Women Visited"
+                  value={currentLoading ? "..." : ((currentData as any)?.totalUsers || 0).toLocaleString()}
+                  icon={Users}
+                  color="text-blush"
+                />
+              </>
+            )}
           </div>
-        </div>
 
-        <div className="p-4 space-y-6">
+        <div className="space-y-6 mt-4">
           {/* Feature Usage */}
           <div key={`feature-usage-${selectedPeriod}`}>
             <h2 className="text-base platypi-bold text-black mb-3">Feature Usage</h2>
@@ -713,11 +808,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           <FinancialStatsSection period={selectedPeriod} isVisible={isPageVisible} />
         </div>
       </main>
-
-      <BottomNavigation 
-        activeSection={null} 
-        onSectionChange={handleSectionChange} 
-      />
     </div>
   );
 }
