@@ -224,11 +224,16 @@ export default function Profile() {
     });
     
     let currentStreak = 0;
-    const todayDate = new Date(today);
+    // Use local date calculation to match how completedModals stores dates
+    const todayDate = new Date();
     for (let i = 0; i <= 365; i++) {
       const checkDate = new Date(todayDate);
       checkDate.setDate(checkDate.getDate() - i);
-      const dateStr = checkDate.toISOString().split('T')[0];
+      // Use local date format (YYYY-MM-DD) to match getLocalDateString storage
+      const year = checkDate.getFullYear();
+      const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+      const day = String(checkDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       if (completedModals[dateStr] || tzedakaButtonCompletions[dateStr]) {
         currentStreak++;
       } else if (i > 0) {
