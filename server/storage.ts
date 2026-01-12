@@ -2276,20 +2276,36 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]> {
     try {
-      const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
-      
-      // Get only promotions that match the exact user location
-      const promotions = await db.select()
-        .from(discountPromotions)
-        .where(
-          and(
-            eq(discountPromotions.isActive, true),
-            eq(discountPromotions.targetLocation, targetLocation)
+      // Worldwide promotions should always show everywhere
+      // Israel-specific promotions should only show in Israel
+      if (userLocation === "israel") {
+        // In Israel: show both "worldwide" and "israel" promotions
+        const promotions = await db.select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              or(
+                eq(discountPromotions.targetLocation, "worldwide"),
+                eq(discountPromotions.targetLocation, "israel")
+              )
+            )
           )
-        )
-        .orderBy(discountPromotions.id);
-      
-      return promotions;
+          .orderBy(discountPromotions.id);
+        return promotions;
+      } else {
+        // Outside Israel: show only "worldwide" promotions
+        const promotions = await db.select()
+          .from(discountPromotions)
+          .where(
+            and(
+              eq(discountPromotions.isActive, true),
+              eq(discountPromotions.targetLocation, "worldwide")
+            )
+          )
+          .orderBy(discountPromotions.id);
+        return promotions;
+      }
     } catch (error) {
       console.error('Database error in getActiveDiscountPromotions:', error);
       return [];
