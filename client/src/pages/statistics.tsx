@@ -87,18 +87,18 @@ function SegmentedControl({ value, onChange }: SegmentedControlProps) {
   ];
 
   return (
-    <div className="bg-[#F5E6E8]/60 rounded-[22px] p-1 flex">
+    <div className="bg-blush/10 rounded-2xl p-1 flex border border-blush/20">
       {options.map((option) => (
         <button
           key={option.value}
           onClick={() => onChange(option.value)}
-          className={`flex-1 py-2.5 px-3 rounded-[18px] text-center transition-all duration-200 ${
+          className={`flex-1 py-2.5 px-3 rounded-xl text-center transition-all duration-200 ${
             value === option.value
-              ? "bg-[#E8C4C8] text-[#5A4A4F] shadow-sm"
-              : "text-[#8B7B80]"
+              ? "bg-gradient-feminine text-white shadow-lg"
+              : "text-black/70 hover:bg-blush/10"
           }`}
         >
-          <span className={`text-sm ${value === option.value ? 'font-semibold' : 'font-medium'}`}>
+          <span className={`text-sm platypi-semibold`}>
             {option.label}
           </span>
         </button>
@@ -116,12 +116,12 @@ interface CategoryCardProps {
 
 function CategoryCard({ icon: Icon, label, value, isLoading }: CategoryCardProps) {
   return (
-    <div className="bg-white rounded-[18px] p-4 border border-[#F0E0E3]/50">
+    <div className="bg-white rounded-2xl p-4 border border-blush/10 shadow-soft">
       <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="h-4 w-4 text-[#C4A5B0]" />
-        <span className="text-xs font-medium text-[#8B7B80]">{label}</span>
+        <Icon className="h-4 w-4 text-blush" />
+        <span className="text-xs platypi-medium text-warm-gray">{label}</span>
       </div>
-      <div className="text-2xl font-semibold text-[#3D3539]">
+      <div className="text-2xl platypi-bold text-black">
         {isLoading ? "..." : value}
       </div>
     </div>
@@ -143,15 +143,15 @@ function FeatureUsageRow({ icon: Icon, name, count, maxCount, isTop }: FeatureUs
     <div className="py-3">
       <div className="flex justify-between items-center mb-1.5">
         <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-[#C4A5B0]" />
-          <span className="text-sm font-medium text-[#5A4A4F]">{name}</span>
+          <Icon className="h-4 w-4 text-blush" />
+          <span className="text-sm platypi-medium text-black/80">{name}</span>
         </div>
-        <span className="text-sm font-semibold text-[#3D3539]">{count.toLocaleString()}</span>
+        <span className="text-sm platypi-bold text-black">{count.toLocaleString()}</span>
       </div>
       {!isTop && (
-        <div className="h-1.5 bg-[#F5E6E8]/60 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-blush/10 rounded-full overflow-hidden">
           <div 
-            className="h-full bg-gradient-to-r from-[#E8C4C8] to-[#D4B0C0] rounded-full transition-all duration-300"
+            className="h-full bg-gradient-feminine rounded-full transition-all duration-300"
             style={{ width: `${Math.max(percentage, 2)}%` }}
           />
         </div>
@@ -424,35 +424,35 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     });
 
     return (
-      <div className="bg-white rounded-[20px] p-5 border border-[#F0E0E3]/50">
-        <h3 className="text-base font-semibold text-[#3D3539] mb-4">Financial Impact</h3>
+      <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10">
+        <h3 className="text-base platypi-bold text-black mb-3">Financial Impact</h3>
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
-              <Trophy className="h-5 w-5 text-[#C4A5B0]" />
+              <Trophy className="h-5 w-5 text-blush" />
             </div>
-            <div className="text-lg font-semibold text-[#3D3539]">
+            <div className="text-lg platypi-bold text-black">
               {financialLoading ? "..." : financialStats?.totalCampaigns?.toLocaleString() || 0}
             </div>
-            <div className="text-xs font-medium text-[#8B7B80]">Donations</div>
+            <div className="text-xs platypi-medium text-warm-gray">Donations</div>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
-              <Calendar className="h-5 w-5 text-[#A5C4B0]" />
+              <Calendar className="h-5 w-5 text-sage" />
             </div>
-            <div className="text-lg font-semibold text-[#3D3539]">
+            <div className="text-lg platypi-bold text-black">
               {financialLoading ? "..." : financialStats?.totalDaysSponsored?.toLocaleString() || 0}
             </div>
-            <div className="text-xs font-medium text-[#8B7B80]">Days Sponsored</div>
+            <div className="text-xs platypi-medium text-warm-gray">Days Sponsored</div>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center mb-2">
-              <DollarSign className="h-5 w-5 text-[#D4B0A0]" />
+              <DollarSign className="h-5 w-5 text-peach" />
             </div>
-            <div className="text-lg font-semibold text-[#3D3539]">
+            <div className="text-lg platypi-bold text-black">
               ${financialLoading ? "..." : financialStats?.totalRaised?.toLocaleString() || 0}
             </div>
-            <div className="text-xs font-medium text-[#8B7B80]">Money Raised</div>
+            <div className="text-xs platypi-medium text-warm-gray">Money Raised</div>
           </div>
         </div>
       </div>
@@ -598,9 +598,9 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   const maxFeatureCount = featureUsageData.length > 0 ? featureUsageData[0][1] : 0;
 
   return (
-    <div className="min-h-screen bg-[#FDF8F8]">
+    <div className="min-h-screen bg-gradient-soft">
       <div 
-        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-[#F0E0E3]/30"
+        className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-blush/10"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="flex items-center justify-between px-4 py-3">
@@ -609,10 +609,10 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
             className="p-2 -ml-2 touch-manipulation"
             aria-label="Back to Home"
           >
-            <ArrowLeft className="h-6 w-6 text-[#3D3539]" />
+            <ArrowLeft className="h-6 w-6 text-black" />
           </button>
           <h1 
-            className="text-lg font-semibold text-[#3D3539] cursor-pointer"
+            className="platypi-bold text-xl text-black cursor-pointer"
             onClick={scrollToTop}
           >
             Analytics
@@ -623,7 +623,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
             aria-label="Refresh Analytics"
             disabled={isRefreshing}
           >
-            <RefreshCw className={`h-5 w-5 text-[#8B7B80] transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-5 w-5 text-black/70 transition-transform duration-500 ${isRefreshing ? 'animate-spin' : ''}`} />
           </button>
         </div>
       </div>
@@ -634,36 +634,43 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
         </div>
 
         <div className="text-center py-6">
-          <p className="text-sm font-medium text-[#8B7B80] mb-1">{periodLabel}</p>
-          <p className="text-5xl font-bold text-[#3D3539] mb-3">
+          <p className="text-sm platypi-medium text-warm-gray mb-1">{periodLabel}</p>
+          <p className="text-5xl platypi-bold text-black mb-1">
             {currentLoading ? "..." : totalActs.toLocaleString()}
           </p>
+          <p className="text-sm platypi-medium text-warm-gray mb-3">Mitzvas</p>
           {mostUsed && (
-            <div className="inline-flex items-center gap-1.5 bg-[#F5E6E8]/60 px-3 py-1.5 rounded-full">
-              <Sparkles className="h-3.5 w-3.5 text-[#C4A5B0]" />
-              <span className="text-xs font-medium text-[#5A4A4F]">Most used: {mostUsed}</span>
+            <div className="inline-flex items-center gap-1.5 bg-blush/10 px-3 py-1.5 rounded-full border border-blush/20">
+              <Sparkles className="h-3.5 w-3.5 text-blush" />
+              <span className="text-xs platypi-medium text-black/70">Most used: {mostUsed}</span>
             </div>
           )}
         </div>
 
         {selectedPeriod === 'alltime' && (
-          <div className="bg-white rounded-[20px] p-4 border border-[#F0E0E3]/50 mb-5">
+          <div className="bg-white rounded-2xl p-4 shadow-soft border border-blush/10 mb-5 complete-button-pulse">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-[#3D3539]">Journey to 1 Million</span>
-              <span className="text-xs font-medium text-[#8B7B80]">
+              <span className="text-sm platypi-bold text-black">Journey to 1 Million Mitzvas</span>
+              <span className="text-xs platypi-medium text-warm-gray">
                 {totalLoading ? "..." : totalMitzvas.toLocaleString()} / {goalMitzvas.toLocaleString()}
               </span>
             </div>
-            <div className="w-full rounded-full h-3 overflow-hidden bg-[#F5E6E8]">
+            <div 
+              className="w-full rounded-full h-6 overflow-hidden relative"
+              style={{ background: 'linear-gradient(90deg, #E8B4BC, #C4A5D4)' }}
+            >
               <div 
-                className="h-full rounded-full transition-all duration-500"
+                className="h-full rounded-full transition-all duration-500 flex items-center justify-center"
                 style={{ 
-                  width: `${Math.max(progressPercent, 3)}%`,
-                  background: 'linear-gradient(90deg, #A5C4B0, #8DB89E)'
+                  width: `${Math.max(progressPercent, 15)}%`,
+                  background: 'linear-gradient(90deg, hsl(120, 25%, 65%), hsl(120, 25%, 70%))'
                 }}
-              />
+              >
+                <span className="text-xs platypi-bold text-white drop-shadow-sm">
+                  {progressPercent.toFixed(1)}%
+                </span>
+              </div>
             </div>
-            <p className="text-xs text-[#8B7B80] text-right mt-1">{progressPercent.toFixed(1)}%</p>
           </div>
         )}
 
@@ -688,14 +695,14 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           />
         </div>
 
-        <div className="bg-white rounded-[20px] p-5 border border-[#F0E0E3]/50 mb-5">
-          <h3 className="text-base font-semibold text-[#3D3539] mb-2">Feature Usage</h3>
+        <div className="bg-white rounded-2xl p-5 shadow-soft border border-blush/10 mb-5">
+          <h3 className="text-base platypi-bold text-black mb-2">Feature Usage</h3>
           {currentLoading ? (
-            <div className="text-center text-[#8B7B80] py-4">Loading...</div>
+            <div className="text-center text-warm-gray py-4">Loading...</div>
           ) : featureUsageData.length === 0 ? (
-            <div className="text-center text-[#8B7B80] py-4">No data available</div>
+            <div className="text-center text-warm-gray py-4">No data available</div>
           ) : (
-            <div className="divide-y divide-[#F5E6E8]/60">
+            <div className="divide-y divide-blush/10">
               {featureUsageData.map(([modalType, count], index) => {
                 const Icon = modalTypeIcons[modalType] || BookOpen;
                 return (
