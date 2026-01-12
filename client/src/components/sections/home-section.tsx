@@ -546,7 +546,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
           {/* Shkia - Location badge opens location modal, Shkia time opens events - Apple Glass Style */}
           <div 
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 flex flex-col items-center justify-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -558,7 +558,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             {/* Location badge - display only */}
             <div 
-              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              className="flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
@@ -570,7 +570,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             {/* Shkia time - opens events modal */}
             <button
               onClick={() => openModal('events', 'home')}
-              className="hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity mt-1.5"
               data-modal-type="events"
               data-modal-section="home"
             >
