@@ -544,9 +544,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             </p>
           </button>
 
-          {/* Shkia - Location badge opens location modal, Shkia time opens events - Apple Glass Style */}
-          <div 
-            className="w-full h-full rounded-xl p-4 flex items-center justify-center hover:scale-105 transition-all duration-300"
+          {/* Shkia - Location badge and time - Apple Glass Style */}
+          <button 
+            onClick={() => openModal('events', 'home')}
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -554,31 +555,22 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
+            data-modal-type="events"
+            data-modal-section="home"
             data-testid="button-home-events"
           >
-            <div className="flex flex-col items-center">
-              {/* Location badge - display only */}
-              <div 
-                className="flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
-                  border: '1px solid rgba(255, 255, 255, 0.4)',
-                }}
-              >
-                <MapPin className="text-black" size={12} />
-                <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
-              </div>
-              {/* Shkia time - opens events modal */}
-              <button
-                onClick={() => openModal('events', 'home')}
-                className="hover:opacity-80 transition-opacity"
-                data-modal-type="events"
-                data-modal-section="home"
-              >
-                <p className="platypi-regular text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
-              </button>
+            <div 
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+              style={{
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
+              }}
+            >
+              <MapPin className="text-black" size={12} />
+              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
             </div>
-          </div>
+            <p className="platypi-regular text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
+          </button>
         </div>
 
         {/* Today's Special Expandable Bar - Only shown when content exists */}
