@@ -8,7 +8,6 @@ import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
-import LocationModal from "@/components/modals/location-modal";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { sanitizeHTML } from "@/lib/text-formatter";
@@ -297,9 +296,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
   
-  // Location modal state
-  const [showLocationModal, setShowLocationModal] = useState(false);
-
   // Check if Today's Special has content
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
@@ -560,22 +556,17 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             }}
             data-testid="button-home-events"
           >
-            {/* Location badge - opens location modal */}
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowLocationModal(true);
-              }}
-              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5 hover:opacity-80 transition-opacity"
+            {/* Location badge - display only */}
+            <div 
+              className="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-full mb-1"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
-              data-testid="button-change-location"
             >
-              <MapPin className="text-black" size={12} />
-              <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
-            </button>
+              <MapPin className="text-black" size={10} />
+              <p className="platypi-bold text-[10px] text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
+            </div>
             {/* Shkia time - opens events modal */}
             <button
               onClick={() => openModal('events', 'home')}
@@ -937,12 +928,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           
         </div>
       </div>
-      
-      {/* Location Modal */}
-      <LocationModal 
-        isOpen={showLocationModal} 
-        onClose={() => setShowLocationModal(false)} 
-      />
     </div>
   );
 }
