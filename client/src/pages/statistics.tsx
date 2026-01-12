@@ -598,7 +598,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   const maxFeatureCount = featureUsageData.length > 0 ? featureUsageData[0][1] : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-soft">
+    <div className="min-h-screen bg-[#FDF8F8]">
       <div 
         className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-blush/10"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
