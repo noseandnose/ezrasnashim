@@ -570,7 +570,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             {/* Shkia time - opens events modal */}
             <button
               onClick={() => openModal('events', 'home')}
-              className="hover:opacity-80 transition-opacity mt-1.5"
+              className="hover:opacity-80 transition-opacity"
               data-modal-type="events"
               data-modal-section="home"
             >
