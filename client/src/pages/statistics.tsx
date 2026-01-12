@@ -632,14 +632,13 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
         </div>
 
         <div className="text-center py-6">
-          <p className="text-sm platypi-medium text-warm-gray mb-1">{periodLabel}</p>
           <p className="text-5xl platypi-bold text-black mb-1">
             {currentLoading ? "..." : totalActs.toLocaleString()}
           </p>
           <p className="text-sm platypi-medium text-warm-gray mb-3">Mitzvas</p>
           <div className="inline-flex items-center gap-1.5 bg-blush/10 px-3 py-1.5 rounded-full border border-blush/20">
               <Sparkles className="h-3.5 w-3.5 text-blush" />
-              <span className="text-xs platypi-medium text-black/70">Women Visited: {((currentData as any)?.totalUsers || 0).toLocaleString()}</span>
+              <span className="text-xs platypi-medium text-black/70">Women Visited: {((currentData as any)?.totalUsers || (currentData as any)?.uniqueUsers || 0).toLocaleString()}</span>
             </div>
         </div>
 
