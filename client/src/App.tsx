@@ -30,6 +30,7 @@ const Admin = lazy(() => import("@/pages/admin"));
 const Privacy = lazy(() => import("@/pages/privacy"));
 const ChainPage = lazy(() => import("@/pages/chain"));
 const Profile = lazy(() => import("@/pages/profile"));
+const Settings = lazy(() => import("@/pages/settings"));
 const Login = lazy(() => import("@/pages/login"));
 const AuthCallback = lazy(() => import("@/pages/auth-callback"));
 const Feed = lazy(() => import("@/pages/feed"));
@@ -292,6 +293,7 @@ function Router() {
         <Route path="/privacy" component={Privacy} />
         <Route path="/c/:slug" component={ChainPage} />
         <Route path="/profile" component={Profile} />
+        <Route path="/settings" component={Settings} />
         <Route path="/login" component={Login} />
         <Route path="/auth/callback" component={AuthCallback} />
         <Route path="/feed" component={Feed} />

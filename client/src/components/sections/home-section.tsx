@@ -8,6 +8,7 @@ import { useHebrewDateWithShkia } from "@/hooks/use-hebrew-date";
 import { useHomeSummary } from "@/hooks/use-home-summary";
 import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
+import LocationModal from "@/components/modals/location-modal";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { sanitizeHTML } from "@/lib/text-formatter";
@@ -295,6 +296,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
+  
+  // Location modal state
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   // Check if Today's Special has content
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
@@ -544,10 +548,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             </p>
           </button>
 
-          {/* Shkia - Clickable to open Events - Apple Glass Style */}
-          <button 
-            onClick={() => openModal('events', 'home')}
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative"
+          {/* Shkia - Location badge opens location modal, Shkia time opens events - Apple Glass Style */}
+          <div 
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative flex flex-col items-center justify-center"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -555,22 +558,34 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            data-modal-type="events"
-            data-modal-section="home"
             data-testid="button-home-events"
           >
-            <div 
-              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
+            {/* Location badge - opens location modal */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowLocationModal(true);
+              }}
+              className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5 hover:opacity-80 transition-opacity"
               style={{
                 background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
+              data-testid="button-change-location"
             >
               <MapPin className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">{jewishTimesQuery.data?.location ? jewishTimesQuery.data.location.split(',')[0].trim() : "Set Location"}</p>
-            </div>
-            <p className="platypi-regular text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
-          </button>
+            </button>
+            {/* Shkia time - opens events modal */}
+            <button
+              onClick={() => openModal('events', 'home')}
+              className="hover:opacity-80 transition-opacity"
+              data-modal-type="events"
+              data-modal-section="home"
+            >
+              <p className="platypi-regular text-xs text-black leading-tight">Shkia - {jewishTimesQuery.data?.shkia || "Loading..."}</p>
+            </button>
+          </div>
         </div>
 
         {/* Today's Special Expandable Bar - Only shown when content exists */}
@@ -922,6 +937,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           
         </div>
       </div>
+      
+      {/* Location Modal */}
+      <LocationModal 
+        isOpen={showLocationModal} 
+        onClose={() => setShowLocationModal(false)} 
+      />
     </div>
   );
 }
