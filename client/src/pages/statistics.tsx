@@ -127,14 +127,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     enabled: selectedPeriod === 'alltime', // Only fetch when selected
   });
 
-  // Fetch active campaigns (chains) count
-  const { data: activeCampaignsData } = useQuery<{ count: number }>({
-    queryKey: ["/api/tehillim-chains/stats/active-count"],
-    staleTime: 60000,
-    gcTime: 300000,
-  });
-  const activeCampaigns = activeCampaignsData?.count || 0;
-
   // Get current data based on selected period
   const getCurrentData = () => {
     switch (selectedPeriod) {

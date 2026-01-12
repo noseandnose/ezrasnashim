@@ -92,7 +92,7 @@ export default function Router() {
           }}
         </Route>
         <Route path="/donate" component={Donate} />
-        <Route path="/statistics" component={Statistics} />
+        <Route path="/statistics">{() => <Statistics />}</Route>
         <Route path="/admin/notifications" component={AdminNotifications} />
         <Route path="/admin/recipes" component={AdminRecipes} />
         <Route path="/privacy" component={Privacy} />
