@@ -18,11 +18,7 @@ import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
 import lifeFlower from "@assets/Life_1767176917530.png";
 import chatzosFlower from "@assets/white_1767699733757.png";
 import morningBackground from "@assets/Morning_1767097697251.png";
-import afternoonBackground from "@assets/Afternoon_1767097697250.png";
-import nightBackground from "@assets/Night_1767097697247.png";
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 
 // ============ PURE UTILITY FUNCTIONS (extracted for performance) ============
 
@@ -72,16 +68,14 @@ function getGreetingText(timePeriod: 'night' | 'morning' | 'afternoon', firstNam
   return greeting;
 }
 
-// Get garden background based on time period
-function getGardenBg(timePeriod: 'night' | 'morning' | 'afternoon') {
-  const backgrounds = { night: nightBackground, morning: morningBackground, afternoon: afternoonBackground };
-  return backgrounds[timePeriod];
+// Get garden background - always use morning (default)
+function getGardenBg(_timePeriod: 'night' | 'morning' | 'afternoon') {
+  return morningBackground;
 }
 
-// Get section background based on time period
-function getSectionBg(timePeriod: 'night' | 'morning' | 'afternoon') {
-  const backgrounds = { night: sectionNightBg, morning: sectionMorningBg, afternoon: sectionAfternoonBg };
-  return backgrounds[timePeriod];
+// Get section background - always use morning (default)
+function getSectionBg(_timePeriod: 'night' | 'morning' | 'afternoon') {
+  return sectionMorningBg;
 }
 
 // Format markdown with placeholder replacement
