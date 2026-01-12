@@ -546,7 +546,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
           {/* Shkia - Location badge opens location modal, Shkia time opens events - Apple Glass Style */}
           <div 
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative flex flex-col items-center justify-center"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
