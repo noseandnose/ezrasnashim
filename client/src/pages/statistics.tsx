@@ -139,6 +139,20 @@ interface FeatureUsageRowProps {
 function FeatureUsageRow({ icon: Icon, name, count, maxCount, isTop }: FeatureUsageRowProps) {
   const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
   
+  if (isTop) {
+    return (
+      <div className="py-4 bg-gradient-feminine rounded-xl px-4 -mx-1 mb-2">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Icon className="h-5 w-5 text-white" />
+            <span className="text-sm platypi-bold text-white">{name}</span>
+          </div>
+          <span className="text-lg platypi-bold text-white">{count.toLocaleString()}</span>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="py-3">
       <div className="flex justify-between items-center mb-1.5">
@@ -148,14 +162,12 @@ function FeatureUsageRow({ icon: Icon, name, count, maxCount, isTop }: FeatureUs
         </div>
         <span className="text-sm platypi-bold text-black">{count.toLocaleString()}</span>
       </div>
-      {!isTop && (
-        <div className="h-1.5 bg-blush/10 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-feminine rounded-full transition-all duration-300"
-            style={{ width: `${Math.max(percentage, 2)}%` }}
-          />
-        </div>
-      )}
+      <div className="h-1.5 bg-blush/10 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-feminine rounded-full transition-all duration-300"
+          style={{ width: `${Math.max(percentage, 2)}%` }}
+        />
+      </div>
     </div>
   );
 }
