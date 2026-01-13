@@ -132,28 +132,17 @@ interface FeatureUsageRowProps {
   icon: any;
   name: string;
   count: number;
-  maxCount: number;
   isTop: boolean;
 }
 
-function FeatureUsageRow({ icon: Icon, name, count, maxCount, isTop }: FeatureUsageRowProps) {
-  const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
-  
+function FeatureUsageRow({ icon: Icon, name, count, isTop }: FeatureUsageRowProps) {
   return (
-    <div className="py-3">
-      <div className="flex justify-between items-center mb-1.5">
-        <div className="flex items-center gap-2">
-          <Icon className="h-4 w-4 text-blush" />
-          <span className={`text-sm ${isTop ? 'platypi-bold' : 'platypi-medium'} text-black/80`}>{name}</span>
-        </div>
-        <span className={`text-sm platypi-bold text-black`}>{count.toLocaleString()}</span>
+    <div className="flex justify-between items-center py-2">
+      <div className="flex items-center gap-2">
+        <Icon className="h-4 w-4 text-blush" />
+        <span className={`text-sm ${isTop ? 'platypi-bold' : 'platypi-medium'} text-black/80`}>{name}</span>
       </div>
-      <div className="h-1.5 bg-blush/10 rounded-full overflow-hidden">
-        <div 
-          className="h-full bg-gradient-feminine rounded-full transition-all duration-300"
-          style={{ width: `${Math.max(percentage, 2)}%` }}
-        />
-      </div>
+      <span className={`text-sm platypi-bold text-black`}>{count.toLocaleString()}</span>
     </div>
   );
 }
@@ -593,7 +582,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   const totalActs = (currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0;
   const mostUsed = getMostUsedFeature();
   const featureUsageData = getProcessedFeatureUsage();
-  const maxFeatureCount = featureUsageData.length > 0 ? featureUsageData[0][1] : 0;
 
   return (
     <div className="min-h-screen bg-[#FDF8F8]">
@@ -697,7 +685,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           ) : featureUsageData.length === 0 ? (
             <div className="text-center text-warm-gray py-4">No data available</div>
           ) : (
-            <div className="divide-y divide-blush/10">
+            <div>
               {featureUsageData.map(([modalType, count], index) => {
                 const Icon = modalTypeIcons[modalType] || BookOpen;
                 return (
@@ -706,7 +694,6 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
                     icon={Icon}
                     name={modalTypeNames[modalType] || modalType}
                     count={count}
-                    maxCount={maxFeatureCount}
                     isTop={index === 0}
                   />
                 );
