@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2 } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2, Music, Dumbbell, Gem, Moon, Megaphone, Palette, Gift, Scale, Quote, Utensils } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
@@ -295,8 +295,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "morning-brochas": Sun,
     "brochas": Heart,
     mincha: Clock,
-    maariv: Star,
-    nishmas: Heart,
+    maariv: Moon,
+    nishmas: Music,
     "parsha-vort": BookOpen,
     "birkat-hamazon": Clock3,
     "global-tehillim-chain": ScrollText,
@@ -308,23 +308,23 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "al-hamichiya": Clock3,
     "individual-prayer": Heart,
     "womens-prayer": HandHeart,
-    chizuk: Heart,
+    chizuk: Dumbbell,
     emuna: Shield,
     "gems-of-gratitude": Sparkles,
-    halacha: BookOpen,
-    "featured-content": Star,
-    featured: Star,
-    "pirkei-avot": ScrollText,
+    halacha: Scale,
+    "featured-content": Megaphone,
+    featured: Megaphone,
+    "pirkei-avot": Quote,
     "torah-challenge": Trophy,
-    recipe: Sparkles,
-    inspiration: Star,
+    recipe: Utensils,
+    inspiration: Palette,
     "sponsor-day": Trophy,
     refuah: Heart,
     "life-class": BookOpen,
     donate: HandCoins,
     meditation: Brain,
-    "feature:marriage-insights": Heart,
-    "feature:gift-of-chatzos": Star,
+    "feature:marriage-insights": Gem,
+    "feature:gift-of-chatzos": Gift,
   };
 
   const getProcessedFeatureUsage = () => {
