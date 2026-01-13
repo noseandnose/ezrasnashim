@@ -685,7 +685,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           ) : featureUsageData.length === 0 ? (
             <div className="text-center text-warm-gray py-4">No data available</div>
           ) : (
-            <div>
+            <div className="divide-y divide-blush/10">
               {featureUsageData.map(([modalType, count], index) => {
                 const Icon = modalTypeIcons[modalType] || BookOpen;
                 return (
