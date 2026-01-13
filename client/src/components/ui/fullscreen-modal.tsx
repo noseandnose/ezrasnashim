@@ -128,9 +128,52 @@ function forceCloseAllFullscreenModals() {
   console.log('[FullscreenModal] Force close complete');
 }
 
+// Defensive helper: ensures pointer-events are never stuck
+// Called by App.tsx on various events to catch any stuck state
+export function ensurePointerEventsUnlocked() {
+  // Skip if there are active open dialogs (they legitimately block interactions)
+  const activeDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
+  if (activeDialogs.length > 0) {
+    return; // Don't interfere with active dialogs
+  }
+  
+  // Also check for active fullscreen modals
+  if (activeFullscreenModals > 0) {
+    return; // Don't interfere with fullscreen modals
+  }
+  
+  // No active modals - ensure pointer-events are unlocked on main containers
+  if (document.body.style.pointerEvents === 'none') {
+    console.log('[PointerEvents] Unlocking stuck body pointer-events');
+    document.body.style.pointerEvents = '';
+  }
+  
+  if (document.documentElement.style.pointerEvents === 'none') {
+    console.log('[PointerEvents] Unlocking stuck html pointer-events');
+    document.documentElement.style.pointerEvents = '';
+  }
+  
+  const mainContent = document.querySelector('main');
+  if (mainContent && (mainContent as HTMLElement).style.pointerEvents === 'none') {
+    console.log('[PointerEvents] Unlocking stuck main pointer-events');
+    (mainContent as HTMLElement).style.pointerEvents = '';
+  }
+  
+  // Check for closed Radix overlays that still have pointer-events blocking
+  const closedOverlays = document.querySelectorAll('[data-radix-dialog-overlay][data-state="closed"]');
+  closedOverlays.forEach(overlay => {
+    const htmlOverlay = overlay as HTMLElement;
+    if (htmlOverlay.style.pointerEvents !== 'none') {
+      console.log('[PointerEvents] Disabling pointer-events on closed overlay');
+      htmlOverlay.style.pointerEvents = 'none';
+    }
+  });
+}
+
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
+  (window as any).__ensurePointerEventsUnlocked = ensurePointerEventsUnlocked;
   
   // Safety net: Reset scroll lock when page becomes visible if no modals are actually mounted
   // This catches cases where modals got stuck during background/foreground transitions
