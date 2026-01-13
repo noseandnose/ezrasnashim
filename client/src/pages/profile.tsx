@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles } from "lucide-react";
+import { BookOpen, Heart, HandCoins, LogOut, Calendar, Trophy, ArrowLeft, Star, Pencil, Check, X, Flame, Sparkles, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
 import { useModalCompletionStore } from "@/lib/types";
@@ -224,11 +224,16 @@ export default function Profile() {
     });
     
     let currentStreak = 0;
-    const todayDate = new Date(today);
+    // Use local date calculation to match how completedModals stores dates
+    const todayDate = new Date();
     for (let i = 0; i <= 365; i++) {
       const checkDate = new Date(todayDate);
       checkDate.setDate(checkDate.getDate() - i);
-      const dateStr = checkDate.toISOString().split('T')[0];
+      // Use local date format (YYYY-MM-DD) to match getLocalDateString storage
+      const year = checkDate.getFullYear();
+      const month = String(checkDate.getMonth() + 1).padStart(2, '0');
+      const day = String(checkDate.getDate()).padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
       if (completedModals[dateStr] || tzedakaButtonCompletions[dateStr]) {
         currentStreak++;
       } else if (i > 0) {
@@ -576,6 +581,20 @@ export default function Profile() {
             </div>
           </div>
         </div>
+        
+        <button 
+          onClick={() => setLocation('/settings')}
+          className="w-full rounded-lg p-2.5 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
+          style={{ 
+            background: 'rgba(255,255,255,0.85)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)'
+          }}
+          data-testid="button-settings"
+        >
+          <Settings className="w-4 h-4 text-black/50" />
+          <span className="platypi-regular text-sm text-black/60">Settings</span>
+        </button>
         
         <button 
           onClick={() => logout()}

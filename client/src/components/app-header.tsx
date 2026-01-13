@@ -2,7 +2,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useAuth } from "@/hooks/use-auth";
-import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
+import LocationModal from "./modals/location-modal";
 
 
 export default function AppHeader() {
@@ -25,6 +26,7 @@ export default function AppHeader() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [showAddToHomeScreen, setShowAddToHomeScreen] = useState(false);
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
@@ -208,6 +210,15 @@ export default function AppHeader() {
                   Community Feedback
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  onClick={() => setShowLocationModal(true)}
+                  className="cursor-pointer"
+                  data-testid="menu-item-location"
+                  data-action="menu-location"
+                >
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Change Location
+                </DropdownMenuItem>
+                <DropdownMenuItem
                   onClick={() => openModal('about', 'about')}
                   className="cursor-pointer"
                   data-testid="menu-item-info"
@@ -261,6 +272,11 @@ export default function AppHeader() {
       <SearchModal
         isOpen={showSearchModal}
         onClose={() => setShowSearchModal(false)}
+      />
+      
+      <LocationModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
       />
       
       {/* Easter Egg Modal */}

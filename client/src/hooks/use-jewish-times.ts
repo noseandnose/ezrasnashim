@@ -55,6 +55,24 @@ export const useLocationStore = create<LocationState>((set) => ({
   
   // Initialize location from cache synchronously for instant startup
   initializeFromCache: () => {
+    // FIRST: Check for user's preferred location (saved in profile settings)
+    // This takes priority over device location
+    const preferredLocation = localStorage.getItem('user-preferred-location');
+    const preferredLocationName = localStorage.getItem('user-preferred-location-name');
+    
+    if (preferredLocation) {
+      try {
+        const parsed = JSON.parse(preferredLocation);
+        // Using user's preferred location from settings
+        set({ coordinates: parsed, location: preferredLocationName || '', permissionDenied: false });
+        return true;
+      } catch (e) {
+        localStorage.removeItem('user-preferred-location');
+        localStorage.removeItem('user-preferred-location-name');
+      }
+    }
+    
+    // SECOND: Check cached device location
     const cachedLocation = localStorage.getItem('user-location');
     const cacheTimestamp = localStorage.getItem('user-location-time');
     
@@ -74,13 +92,12 @@ export const useLocationStore = create<LocationState>((set) => ({
         }
       } else {
         // Cache is stale, clear it
-        // Cache is stale, clearing
         localStorage.removeItem('user-location');
         localStorage.removeItem('user-location-time');
       }
     }
     
-    // Try fallback cache (IP location)
+    // THIRD: Try fallback cache (IP location)
     const fallbackLocation = localStorage.getItem('user-location-fallback');
     const fallbackTimestamp = localStorage.getItem('user-location-fallback-time');
     

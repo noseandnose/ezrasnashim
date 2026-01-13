@@ -1,0 +1,70 @@
+You are working on the Ezras Nashim app. Redesign the existing Analytics screen to match the provided mockup (warm feminine pastel, clean + modern). Keep all existing data + logic; change UI only.
+
+GOALS
+- Use the app’s existing color palette (pink / lavender / cream). Reuse existing theme tokens if they exist. Do not introduce a new palette file unless none exists.
+- Make the page feel “premium iOS”: minimal shadows, soft rounded cards, lots of whitespace, clear typography hierarchy.
+- Preserve current functionality: Today/Week/Month/All Time switching, totals, feature usage list.
+
+LAYOUT (match mockup)
+1) Header
+- Title: “Analytics” centered in the top app bar.
+- Keep back button on left and refresh icon on right if they exist.
+
+2) Segmented control (Today / Week / Month / All Time)
+- iOS-style segmented control:
+  - Outer pill container (light pastel background).
+  - Selected tab: slightly darker pastel fill + bold text.
+  - Unselected tabs: transparent background.
+  - Height ~44, rounded corners ~22, subtle border or none.
+- The selected tab changes the data range (existing logic).
+
+3) “Today” KPI Section (top summary)
+- Centered:
+  - Small label: “Today”
+  - Large number: total mitzvos/actions (e.g., 309)
+- Under the number, a small pill “Most used: <feature name>” (computed from the feature usage list for that range).
+  - If you already have “most used” logic, reuse it; otherwise compute by max usage count.
+
+4) Category breakdown row (3 cards)
+- One row of 3 equal cards: Torah / Tefilla / Tzedaka
+- Each card:
+  - Left: small icon + label
+  - Center/bottom: big number
+  - Background: white/cream, very subtle shadow OR a faint border (prefer border).
+  - Rounded corners ~18–20
+  - Spacing between cards consistent
+
+5) Feature Usage section
+- Section title: “Feature Usage”
+- A large rounded container card holding the list
+- Each row:
+  - Left icon + feature name
+  - Right aligned count
+  - For all rows EXCEPT the top one (highest count), show a subtle horizontal progress bar (pastel fill on a pale track) proportional to top count.
+  - Add thin dividers between rows (very light).
+- Keep it scrollable if needed.
+
+STYLING RULES
+- Reduce heavy shadows/glows from the current design.
+- Use consistent spacing:
+  - Page padding: 16–20
+  - Section spacing: 20–24
+  - Card padding: 14–16
+- Typography:
+  - Numbers: semibold, large (KPI biggest)
+  - Labels: medium weight, smaller
+  - Avoid mixing too many font styles; use the app’s default font system.
+
+IMPLEMENTATION NOTES
+- Find the current Analytics screen component (likely something like Analytics.tsx / analytics_screen.dart / AnalyticsScreen).
+- Do not change API calls, data models, or analytics calculations other than adding “Most used” + progress bar percentages.
+- Build a reusable component:
+  - <SegmentedControl />
+  - <StatCard />
+  - <FeatureUsageRow />
+- Ensure dark mode doesn’t break (if app supports it): use theme tokens and adjust borders/backgrounds accordingly.
+
+DELIVERABLE
+- Update the Analytics screen UI to match the mockup.
+- Make sure it compiles and looks correct on iPhone sizes.
+- Provide the code changes (files modified) and a short summary of what you changed.

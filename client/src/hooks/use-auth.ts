@@ -12,6 +12,8 @@ export interface User {
   birthday: string | null;
   birthdayAfterSunset: boolean | null;
   profileImageUrl: string | null;
+  preferredLocation: string | null;
+  preferredLocationCoords: { lat: number; lng: number } | null;
 }
 
 function mapSupabaseUser(user: SupabaseUser | null): User | null {
@@ -28,6 +30,8 @@ function mapSupabaseUser(user: SupabaseUser | null): User | null {
     birthday: metadata.birthday || null,
     birthdayAfterSunset: metadata.birthday_after_sunset || null,
     profileImageUrl: metadata.avatar_url || metadata.picture || null,
+    preferredLocation: metadata.preferred_location || null,
+    preferredLocationCoords: metadata.preferred_location_coords || null,
   };
 }
 
@@ -129,6 +133,8 @@ export function useAuth() {
     hebrewName?: string; 
     birthday?: string;
     birthdayAfterSunset?: boolean;
+    preferredLocation?: string | null;
+    preferredLocationCoords?: { lat: number; lng: number } | null;
   }) => {
     if (!supabase) throw new Error('Authentication not configured');
     const { error } = await supabase.auth.updateUser({
@@ -138,6 +144,8 @@ export function useAuth() {
         hebrew_name: updates.hebrewName,
         birthday: updates.birthday,
         birthday_after_sunset: updates.birthdayAfterSunset,
+        preferred_location: updates.preferredLocation,
+        preferred_location_coords: updates.preferredLocationCoords,
       },
     });
     if (error) throw error;

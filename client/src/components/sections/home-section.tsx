@@ -21,8 +21,6 @@ import morningBackground from "@assets/Morning_1767097697251.png";
 import afternoonBackground from "@assets/Afternoon_1767097697250.png";
 import nightBackground from "@assets/Night_1767097697247.png";
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
-import sectionAfternoonBg from "@assets/Afternoon_Background_1767032607493.png";
-import sectionNightBg from "@assets/background_night_1767034895431.png";
 
 // ============ PURE UTILITY FUNCTIONS (extracted for performance) ============
 
@@ -78,10 +76,9 @@ function getGardenBg(timePeriod: 'night' | 'morning' | 'afternoon') {
   return backgrounds[timePeriod];
 }
 
-// Get section background based on time period
-function getSectionBg(timePeriod: 'night' | 'morning' | 'afternoon') {
-  const backgrounds = { night: sectionNightBg, morning: sectionMorningBg, afternoon: sectionAfternoonBg };
-  return backgrounds[timePeriod];
+// Get section background - always use morning (default)
+function getSectionBg(_timePeriod: 'night' | 'morning' | 'afternoon') {
+  return sectionMorningBg;
 }
 
 // Format markdown with placeholder replacement
@@ -295,7 +292,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
-
+  
   // Check if Today's Special has content
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
@@ -544,10 +541,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             </p>
           </button>
 
-          {/* Shkia - Clickable to open Events - Apple Glass Style */}
+          {/* Shkia - Location badge and time - Apple Glass Style */}
           <button 
             onClick={() => openModal('events', 'home')}
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
