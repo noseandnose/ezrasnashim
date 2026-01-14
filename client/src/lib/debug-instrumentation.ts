@@ -1,7 +1,10 @@
 /**
  * Debug Instrumentation for Mobile WebView Performance Issues
  * 
- * Enables via URL parameter: ?debug=ui
+ * Enables via:
+ * - URL parameter: ?debug=ui
+ * - localStorage: localStorage.setItem('debug_mode', 'ui')
+ * - Secret gesture: Tap logo 7 times quickly (within 3 seconds)
  * 
  * Features:
  * - UI responsiveness watchdog (detects frozen UI)
@@ -11,11 +14,67 @@
  * - Modal state tracking
  */
 
-// Check if debug mode is enabled
+// Check if debug mode is enabled via URL or localStorage
 const urlParams = new URLSearchParams(window.location.search);
-export const DEBUG_UI = urlParams.get('debug') === 'ui' || urlParams.get('debug') === 'all';
-export const DEBUG_COMPASS = urlParams.get('debug') === 'compass' || urlParams.get('debug') === 'all';
-export const DEBUG_LIFECYCLE = urlParams.get('debug') === 'lifecycle' || urlParams.get('debug') === 'all';
+const storedDebug = typeof localStorage !== 'undefined' ? localStorage.getItem('debug_mode') : null;
+
+export let DEBUG_UI = urlParams.get('debug') === 'ui' || urlParams.get('debug') === 'all' || storedDebug === 'ui' || storedDebug === 'all';
+export let DEBUG_COMPASS = urlParams.get('debug') === 'compass' || urlParams.get('debug') === 'all' || storedDebug === 'compass' || storedDebug === 'all';
+export let DEBUG_LIFECYCLE = urlParams.get('debug') === 'lifecycle' || urlParams.get('debug') === 'all' || storedDebug === 'lifecycle' || storedDebug === 'all';
+
+// Secret gesture state for enabling debug mode
+let logoTapCount = 0;
+let logoTapTimer: ReturnType<typeof setTimeout> | null = null;
+const LOGO_TAP_THRESHOLD = 7;
+const LOGO_TAP_TIMEOUT = 3000; // 3 seconds to complete the taps
+
+// Call this when logo is tapped to potentially enable debug mode
+export function handleLogoTapForDebug(): boolean {
+  logoTapCount++;
+  
+  // Clear existing timer and start new one
+  if (logoTapTimer) {
+    clearTimeout(logoTapTimer);
+  }
+  
+  logoTapTimer = setTimeout(() => {
+    logoTapCount = 0;
+  }, LOGO_TAP_TIMEOUT);
+  
+  // Check if threshold reached
+  if (logoTapCount >= LOGO_TAP_THRESHOLD) {
+    logoTapCount = 0;
+    if (logoTapTimer) {
+      clearTimeout(logoTapTimer);
+      logoTapTimer = null;
+    }
+    
+    // Toggle debug mode
+    const currentMode = localStorage.getItem('debug_mode');
+    if (currentMode) {
+      // Disable debug mode
+      localStorage.removeItem('debug_mode');
+      DEBUG_UI = false;
+      DEBUG_LIFECYCLE = false;
+      alert('Debug mode DISABLED. Refresh the app to apply.');
+      return false;
+    } else {
+      // Enable debug mode
+      localStorage.setItem('debug_mode', 'ui');
+      DEBUG_UI = true;
+      DEBUG_LIFECYCLE = true;
+      alert('Debug mode ENABLED! Refresh the app to see debug overlay and logs.');
+      return true;
+    }
+  }
+  
+  // Visual feedback when getting close
+  if (logoTapCount >= 5) {
+    console.log(`[Debug] ${LOGO_TAP_THRESHOLD - logoTapCount} more taps to toggle debug mode...`);
+  }
+  
+  return false;
+}
 
 // Prefix for all debug logs
 const LOG_PREFIX = '[UIDebug]';
