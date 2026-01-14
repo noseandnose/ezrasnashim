@@ -1,10 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { X, Heart } from 'lucide-react';
 import type { SimpleCompass as SimpleCompassType, CompassState } from '@/lib/compass';
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
 import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
 import { Button } from '@/components/ui/button';
-import { ensurePointerEventsUnlocked } from '@/components/ui/fullscreen-modal';
 
 interface MiniCompassModalProps {
   isOpen: boolean;
@@ -26,8 +25,6 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
-  const permissionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -90,39 +87,10 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   }, [state.isAligned, isIOS, isStandalone, isOpen]);
 
   const handleEnableCompass = async () => {
-    if (!compass || isRequestingPermission) return;
-    
-    setIsRequestingPermission(true);
-    
-    // Safety timeout: if permission dialog takes too long (e.g., user walked away),
-    // reset state after 30 seconds to prevent permanent lock
-    permissionTimeoutRef.current = setTimeout(() => {
-      setIsRequestingPermission(false);
-      ensurePointerEventsUnlocked();
-    }, 30000);
-    
-    try {
-      await compass.requestPermission();
-    } catch (error) {
-      console.error('[MiniCompass] Permission request error:', error);
-    } finally {
-      // Clear timeout and reset state
-      if (permissionTimeoutRef.current) {
-        clearTimeout(permissionTimeoutRef.current);
-        permissionTimeoutRef.current = null;
-      }
-      setIsRequestingPermission(false);
-      
-      // Ensure pointer-events are unlocked after permission dialog closes
-      setTimeout(() => {
-        ensurePointerEventsUnlocked();
-      }, 100);
-    }
+    if (compass) await compass.requestPermission();
   };
 
   const handleRetry = async () => {
-    if (isRequestingPermission) return;
-    
     if (compass) compass.dispose();
     setState({
       deviceHeading: 0,
@@ -133,88 +101,24 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
       isSupported: false,
       error: null
     });
-    
-    setIsRequestingPermission(true);
-    
-    permissionTimeoutRef.current = setTimeout(() => {
-      setIsRequestingPermission(false);
-      ensurePointerEventsUnlocked();
-    }, 30000);
-    
-    try {
-      const { SimpleCompass } = await import('@/lib/compass');
-      const newCompass = new SimpleCompass();
-      setCompass(newCompass);
-      await newCompass.requestPermission();
-    } catch (error) {
-      console.error('[MiniCompass] Retry permission error:', error);
-    } finally {
-      if (permissionTimeoutRef.current) {
-        clearTimeout(permissionTimeoutRef.current);
-        permissionTimeoutRef.current = null;
-      }
-      setIsRequestingPermission(false);
-      setTimeout(() => {
-        ensurePointerEventsUnlocked();
-      }, 100);
-    }
+    const { SimpleCompass } = await import('@/lib/compass');
+    const newCompass = new SimpleCompass();
+    setCompass(newCompass);
+    await newCompass.requestPermission();
   };
-  
-  // Safe close handler that blocks closing during permission request
-  const handleSafeClose = useCallback(() => {
-    if (isRequestingPermission) {
-      // Don't close while waiting for permission dialog
-      return;
-    }
-    onClose();
-  }, [isRequestingPermission, onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleSafeClose();
+        onClose();
       }
     };
 
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
-  }, [isOpen, handleSafeClose]);
-  
-  // Cleanup effect: dispose compass and clear timeouts when modal closes
-  useEffect(() => {
-    if (!isOpen) {
-      // Modal is closing, clean up
-      if (permissionTimeoutRef.current) {
-        clearTimeout(permissionTimeoutRef.current);
-        permissionTimeoutRef.current = null;
-      }
-      if (compass) {
-        compass.dispose();
-        setCompass(null);
-      }
-      setIsRequestingPermission(false);
-      
-      // Ensure pointer-events are restored after modal closes
-      setTimeout(() => {
-        ensurePointerEventsUnlocked();
-      }, 50);
-    }
-  }, [isOpen]);
-  
-  // Additional cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (permissionTimeoutRef.current) {
-        clearTimeout(permissionTimeoutRef.current);
-      }
-      if (compass) {
-        compass.dispose();
-      }
-      ensurePointerEventsUnlocked();
-    };
-  }, [compass]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -224,14 +128,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
-      onClick={handleSafeClose}
-      onTouchEnd={(e) => {
-        // Prevent touch events from propagating after permission dialogs
-        if (isRequestingPermission) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      }}
+      onClick={onClose}
     >
       <div 
         className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
@@ -241,10 +138,9 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-black platypi-bold">Direct your Heart Home</h3>
           <button
-            onClick={handleSafeClose}
+            onClick={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Close"
-            disabled={isRequestingPermission}
           >
             <X className="h-5 w-5 text-gray-600" />
           </button>
@@ -285,25 +181,15 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
         ) : !state.hasPermission ? (
           <div className="text-center py-6">
             <p className="text-sm text-black mb-3">
-              {isRequestingPermission 
-                ? 'Please respond to the permission prompt...'
-                : /Android/i.test(navigator.userAgent)
-                  ? 'Tap the button below to activate motion sensors'
-                  : 'Please enable compass access'}
+              {/Android/i.test(navigator.userAgent)
+                ? 'Tap the button below to activate motion sensors'
+                : 'Please enable compass access'}
             </p>
             <Button
               onClick={handleEnableCompass}
-              disabled={isRequestingPermission}
-              className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
             >
-              {isRequestingPermission ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="animate-spin w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />
-                  Waiting...
-                </span>
-              ) : (
-                /Android/i.test(navigator.userAgent) ? 'Activate Sensors' : 'Enable Compass'
-              )}
+              {/Android/i.test(navigator.userAgent) ? 'Activate Sensors' : 'Enable Compass'}
             </Button>
           </div>
         ) : (
