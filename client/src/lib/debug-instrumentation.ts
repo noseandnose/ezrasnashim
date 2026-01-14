@@ -79,16 +79,154 @@ export function handleLogoTapForDebug(): boolean {
 // Prefix for all debug logs
 const LOG_PREFIX = '[UIDebug]';
 
-// Log helper that only logs in debug mode
+// Store recent debug logs for on-screen display
+const debugLogHistory: string[] = [];
+const MAX_LOG_HISTORY = 50;
+let debugPanel: HTMLDivElement | null = null;
+let debugLogContainer: HTMLDivElement | null = null;
+
+// Create or get the on-screen debug panel
+function getOrCreateDebugPanel(): HTMLDivElement {
+  if (debugPanel) return debugPanel;
+  
+  // Create panel
+  debugPanel = document.createElement('div');
+  debugPanel.id = '__debug_panel';
+  debugPanel.style.cssText = `
+    position: fixed;
+    bottom: 80px;
+    left: 10px;
+    right: 10px;
+    max-height: 200px;
+    background: rgba(0, 0, 0, 0.85);
+    color: #0f0;
+    font-family: monospace;
+    font-size: 10px;
+    border-radius: 8px;
+    z-index: 2147483647;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  `;
+  
+  // Header with controls
+  const header = document.createElement('div');
+  header.style.cssText = `
+    padding: 6px 10px;
+    background: rgba(255, 100, 100, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  `;
+  header.innerHTML = `
+    <span style="font-weight: bold; color: #ff6666;">DEBUG MODE</span>
+    <div style="display: flex; gap: 8px;">
+      <button id="__debug_copy" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">Copy Log</button>
+      <button id="__debug_clear" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">Clear</button>
+      <button id="__debug_minimize" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">_</button>
+    </div>
+  `;
+  debugPanel.appendChild(header);
+  
+  // Log container
+  debugLogContainer = document.createElement('div');
+  debugLogContainer.id = '__debug_log_container';
+  debugLogContainer.style.cssText = `
+    padding: 8px 10px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 150px;
+  `;
+  debugPanel.appendChild(debugLogContainer);
+  
+  document.body.appendChild(debugPanel);
+  
+  // Add event listeners
+  let isMinimized = false;
+  document.getElementById('__debug_minimize')?.addEventListener('click', () => {
+    isMinimized = !isMinimized;
+    if (debugLogContainer) {
+      debugLogContainer.style.display = isMinimized ? 'none' : 'block';
+    }
+    const btn = document.getElementById('__debug_minimize');
+    if (btn) btn.textContent = isMinimized ? '+' : '_';
+  });
+  
+  document.getElementById('__debug_clear')?.addEventListener('click', () => {
+    debugLogHistory.length = 0;
+    if (debugLogContainer) debugLogContainer.innerHTML = '';
+  });
+  
+  document.getElementById('__debug_copy')?.addEventListener('click', () => {
+    const logText = debugLogHistory.join('\n');
+    navigator.clipboard.writeText(logText).then(() => {
+      alert('Debug log copied to clipboard! You can paste it to share.');
+    }).catch(() => {
+      // Fallback - show the log in an alert
+      alert('Copy failed. Here are the recent logs:\n\n' + debugLogHistory.slice(-10).join('\n'));
+    });
+  });
+  
+  return debugPanel;
+}
+
+// Add a log entry to the on-screen panel
+function addToDebugPanel(logEntry: string) {
+  if (!DEBUG_UI && !DEBUG_LIFECYCLE) return;
+  
+  // Ensure panel exists
+  getOrCreateDebugPanel();
+  
+  // Add to history
+  debugLogHistory.push(logEntry);
+  if (debugLogHistory.length > MAX_LOG_HISTORY) {
+    debugLogHistory.shift();
+  }
+  
+  // Update panel
+  if (debugLogContainer) {
+    const line = document.createElement('div');
+    line.style.cssText = 'margin-bottom: 2px; word-break: break-all;';
+    
+    // Color code by category
+    if (logEntry.includes('[ERROR]') || logEntry.includes('[WATCHDOG]')) {
+      line.style.color = '#ff6666';
+    } else if (logEntry.includes('[LIFECYCLE]')) {
+      line.style.color = '#66ccff';
+    } else if (logEntry.includes('[POINTER]')) {
+      line.style.color = '#ffcc66';
+    }
+    
+    line.textContent = logEntry;
+    debugLogContainer.appendChild(line);
+    
+    // Auto-scroll to bottom
+    debugLogContainer.scrollTop = debugLogContainer.scrollHeight;
+    
+    // Limit displayed entries
+    while (debugLogContainer.children.length > MAX_LOG_HISTORY) {
+      debugLogContainer.removeChild(debugLogContainer.firstChild!);
+    }
+  }
+}
+
+// Log helper that logs to console AND on-screen panel
 export function debugLog(category: string, message: string, data?: any) {
   if (!DEBUG_UI && !DEBUG_LIFECYCLE) return;
   
-  const timestamp = new Date().toISOString().split('T')[1];
+  const timestamp = new Date().toISOString().split('T')[1].slice(0, 8);
+  const logEntry = `[${timestamp}] [${category}] ${message}`;
+  
+  // Console log
   if (data !== undefined) {
-    console.log(`${LOG_PREFIX} [${timestamp}] [${category}] ${message}`, data);
+    console.log(`${LOG_PREFIX} ${logEntry}`, data);
   } else {
-    console.log(`${LOG_PREFIX} [${timestamp}] [${category}] ${message}`);
+    console.log(`${LOG_PREFIX} ${logEntry}`);
   }
+  
+  // On-screen panel
+  addToDebugPanel(logEntry);
 }
 
 // Track active overlays/modals for debugging

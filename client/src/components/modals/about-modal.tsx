@@ -2,9 +2,16 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useModalStore } from "@/lib/types";
 import projectOfImage from "@assets/A project of_1756118917799.png";
+import { handleLogoTapForDebug } from "@/lib/debug-instrumentation";
 
 export default function AboutModal() {
   const { activeModal, closeModal } = useModalStore();
+  
+  const handleChesedLogoTap = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleLogoTapForDebug();
+  };
 
   return (
     <Dialog open={activeModal === 'about'} onOpenChange={() => closeModal(true)}>
@@ -81,16 +88,14 @@ export default function AboutModal() {
           </p>
         </div>
 
-        {/* Project of JustOneChesed Image */}
+        {/* Project of JustOneChesed Image - tap 7 times to enable debug mode */}
         <div className="flex justify-center mb-4">
-          <a 
-            href="https://justonechesed.org/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hover:opacity-60 transition-opacity"
-          >
-            <img src={projectOfImage} alt="Project of JustOneChesed" className="h-8 opacity-80 cursor-pointer" />
-          </a>
+          <img 
+            src={projectOfImage} 
+            alt="Project of JustOneChesed" 
+            className="h-8 opacity-80 cursor-pointer hover:opacity-60 transition-opacity" 
+            onClick={handleChesedLogoTap}
+          />
         </div>
 
         {/* Complete Button */}

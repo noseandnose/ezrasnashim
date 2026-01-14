@@ -7,7 +7,6 @@ import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
-import { handleLogoTapForDebug } from "@/lib/debug-instrumentation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,9 +93,6 @@ export default function AppHeader() {
       setShowEasterEgg(true);
       setClickCount(0); // Reset counter
     }
-    
-    // Also check for debug mode toggle (7 taps within 3 seconds)
-    handleLogoTapForDebug();
   };
 
   return (
