@@ -1,6 +1,5 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "../storage";
-import { z } from "zod";
 import { cacheMiddleware } from "../middleware/cache";
 import { CACHE_TTL } from "../cache/categoryCache";
 

@@ -390,12 +390,14 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     return processedEntries.sort(([, a], [, b]) => (b as number) - (a as number));
   };
 
-  const getMostUsedFeature = () => {
+  // Available for future use
+  const _getMostUsedFeature = () => {
     const entries = getProcessedFeatureUsage();
     if (entries.length === 0) return null;
     const [topType] = entries[0];
     return modalTypeNames[topType] || topType;
   };
+  void _getMostUsedFeature;
 
   function FinancialStatsSection({ period, isVisible }: { period: 'today' | 'week' | 'month' | 'alltime'; isVisible: boolean }) {
     const { data: financialStats, isLoading: financialLoading } = useQuery<{
@@ -574,14 +576,12 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     );
   }
 
-  const periodLabel = selectedPeriod === 'today' ? 'Today' : 
-                      selectedPeriod === 'week' ? 'This Week' :
-                      selectedPeriod === 'month' ? 'This Month' : 
-                      'All Time';
-  
   const totalActs = (currentData as any)?.totalActs || (currentData as any)?.uniqueUsers || 0;
-  const mostUsed = getMostUsedFeature();
   const featureUsageData = getProcessedFeatureUsage();
+  
+  // These are available for future use but currently unused
+  void totalActs;
+  void featureUsageData;
 
   return (
     <div className="min-h-screen bg-[#FDF8F8]">

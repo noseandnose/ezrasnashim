@@ -216,16 +216,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.supabaseUser || null);
   });
 
-  // Schedule periodic cleanup of expired names (every hour)
-  setInterval(async () => {
-    try {
-      await storage.cleanupExpiredNames();
-      // Cleaned up expired Tehillim names
-    } catch (error) {
-      // Error cleaning up expired names
-    }
-  }, 60 * 60 * 1000); // Run every hour
-
   // Register utility routes (healthcheck, version, root handler)
   registerUtilityRoutes(app, { requireAdminAuth });
 
@@ -2005,17 +1995,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.json(times);
     } catch (error) {
       return res.status(500).json({ message: "Failed to fetch zmanim data" });
-    }
-  });
-
-  // Admin: Migrate tehillim_names to tehillim_chains
-  app.post("/api/admin/migrate-tehillim-names", requireAdminAuth, async (_req, res) => {
-    try {
-      const result = await storage.migrateTehillimNamesToChains();
-      return res.json(result);
-    } catch (error) {
-      console.error("Error migrating tehillim names:", error);
-      return res.status(500).json({ error: "Failed to migrate tehillim names" });
     }
   });
 

@@ -8,7 +8,17 @@ import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Bab
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
 
-import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, TehillimName, WomensPrayer } from "@shared/schema";
+import { MinchaPrayer, MorningPrayer, NishmasText, GlobalTehillimProgress, WomensPrayer } from "@shared/schema";
+
+// Local type for tehillim name from chain system
+interface TehillimName {
+  id: number;
+  name: string;
+  hebrewName?: string;
+  reason?: string;
+  reasonEnglish?: string;
+  chainId?: number;
+}
 import { toast } from "@/hooks/use-toast";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import axiosClient from "@/lib/axiosClient";
@@ -2347,7 +2357,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       {currentName && (
         <div className="bg-sage/10 rounded-xl p-3 border border-sage/20">
           <div className="flex items-center justify-center gap-2">
-            {getReasonIcon(currentName.reasonEnglish || currentName.reason)}
+            {getReasonIcon(currentName.reasonEnglish || currentName.reason || '')}
             <p className="text-sm platypi-medium text-black">
               Davening for: {currentName.hebrewName}
             </p>
