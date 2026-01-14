@@ -3,6 +3,41 @@ import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
 
+// Emergency recovery mechanism for frozen WebViews
+// Tap 5 times quickly in the top-right corner (within 50x50px) to force reload
+// This works even when React clicks are broken because it uses raw touchstart events
+if (typeof window !== 'undefined') {
+  let cornerTapCount = 0;
+  let lastCornerTapTime = 0;
+  const CORNER_SIZE = 50; // pixels from top-right corner
+  const TAP_TIMEOUT = 2000; // reset after 2 seconds
+  const TAPS_NEEDED = 5;
+  
+  document.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    
+    const isInCorner = touch.clientX > window.innerWidth - CORNER_SIZE && 
+                       touch.clientY < CORNER_SIZE;
+    
+    if (isInCorner) {
+      const now = Date.now();
+      if (now - lastCornerTapTime > TAP_TIMEOUT) {
+        cornerTapCount = 1;
+      } else {
+        cornerTapCount++;
+      }
+      lastCornerTapTime = now;
+      
+      if (cornerTapCount >= TAPS_NEEDED) {
+        cornerTapCount = 0;
+        // Force reload to recover from frozen state
+        window.location.reload();
+      }
+    }
+  }, { capture: true, passive: true });
+}
+
 
 // Minimal Safari viewport fix - CSS handles most of this now
 function setupSafariViewportFix() {
