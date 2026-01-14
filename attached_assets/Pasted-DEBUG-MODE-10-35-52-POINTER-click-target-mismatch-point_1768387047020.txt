@@ -1,0 +1,50 @@
+DEBUG MODE
+[10:35:52] [POINTER] click target mismatch! pointerdown on div, click on button#__ui_watchdog_test
+[10:35:52] [POINTER] click on button#__ui_watchdog_test
+[10:35:52] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:35:53] [POINTER] Touch detected but no click followed - possible blocking overlay
+[10:35:53] [POINTER] pointerdown on span.text-[10px].transition-all
+[10:35:53] [POINTER] click on span.text-[10px].transition-all
+[10:35:54] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:35:54] [POINTER] Touch detected but no click followed - possible blocking overlay
+[10:35:56] [POINTER] pointerdown on button.inline-flex.items-center[data-testid]
+[10:35:56] [POINTER] click on button.inline-flex.items-center[data-testid]
+[10:35:57] [POINTER] pointerdown on button.inline-flex.items-center[data-testid]
+[10:35:57] [POINTER] click on button.inline-flex.items-center[data-testid]
+[10:35:57] [POINTER] click target mismatch! pointerdown on button.inline-flex.items-center[data-testid], click on button#__ui_watchdog_test
+[10:35:57] [POINTER] click on button#__ui_watchdog_test
+[10:35:57] [OVERLAY] New overlay detected: div.fixed.inset-0[data-fullscreen-modal][data-bridge-container]
+[10:35:59] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:35:59] [POINTER] click on p.platypi-regular.text-xs
+[10:36:00] [POINTER] Touch detected but no click followed - possible blocking overlay
+[10:36:00] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:36:00] [POINTER] click on p.platypi-regular.text-xs
+[10:36:01] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:36:01] [POINTER] click on p.platypi-regular.text-xs
+[10:36:02] [POINTER] pointerdown on p.platypi-regular.text-xs
+[10:36:02] [POINTER] click on p.platypi-regular.text-xs
+[10:36:02] [POINTER] click target mismatch! pointerdown on p.platypi-regular.text-xs, click on button#__ui_watchdog_test
+[10:36:02] [POINTER] click on button#__ui_watchdog_test
+[10:36:04] [POINTER] pointerdown on button#__debug_copy
+[10:36:04] [POINTER] click on button#__debug_copy
+[10:36:05] [POINTER] pointerdown on button#__debug_copy
+[10:36:06] [POINTER] click on button#__debug_copy
+[10:36:06] [POINTER] pointerdown on button#__debug_copy
+[10:36:06] [POINTER] click on button#__debug_copy
+[10:36:07] [POINTER] click target mismatch! pointerdown on button#__debug_copy, click on button#__ui_watchdog_test
+[10:36:07] [POINTER] click on button#__ui_watchdog_test
+[10:36:09] [POINTER] pointerdown on div
+[10:36:10] [POINTER] click target mismatch! pointerdown on div, click on div
+[10:36:10] [POINTER] click on div
+[10:36:10] [OVERLAY] 2 fixed elements with pointer-events:auto at click point
+[10:36:12] [POINTER] pointerdown on div
+[10:36:12] [POINTER] click target mismatch! pointerdown on div, click on button#__ui_watchdog_test
+[10:36:12] [POINTER] click on button#__ui_watchdog_test
+[10:36:13] [POINTER] pointerdown on div
+[10:36:13] [POINTER] click target mismatch! pointerdown on div, click on div
+[10:36:13] [POINTER] click on div
+[10:36:14] [POINTER] pointerdown on div
+[10:36:15] [POINTER] pointerdown on div
+[10:36:17] [POINTER] click target mismatch! pointerdown on div, click on button#__ui_watchdog_test
+[10:36:17] [POINTER] click on button#__ui_watchdog_test
+[10:36:18] [POINTER] pointerdown on div

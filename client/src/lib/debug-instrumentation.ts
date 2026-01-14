@@ -103,13 +103,17 @@ function getOrCreateDebugPanel(): HTMLDivElement {
     font-family: monospace;
     font-size: 10px;
     border-radius: 8px;
-    z-index: 2147483647;
+    z-index: 9998;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    pointer-events: none;
   `;
   
-  // Header with controls
+  // Make header interactive but not the log area
+  // This prevents the debug panel from blocking modal interactions
+  
+  // Header with controls - needs pointer-events for buttons
   const header = document.createElement('div');
   header.style.cssText = `
     padding: 6px 10px;
@@ -118,6 +122,7 @@ function getOrCreateDebugPanel(): HTMLDivElement {
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+    pointer-events: auto;
   `;
   header.innerHTML = `
     <span style="font-weight: bold; color: #ff6666;">DEBUG MODE</span>
