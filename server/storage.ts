@@ -1,14 +1,14 @@
 import serverAxiosClient from "./axiosClient";
 import { 
   shopItems, 
-  tehillimNames, tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
+  tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos, torahChallenges,
   dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
   userMitzvahProgress,
 
-  type ShopItem, type InsertShopItem, type TehillimName, type InsertTehillimName,
+  type ShopItem, type InsertShopItem,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
   type MaarivPrayer, type InsertMaarivPrayer, type MorningPrayer, type InsertMorningPrayer,
   type Brocha, type InsertBrocha,
@@ -148,13 +148,9 @@ export interface IStorage {
   getCommunityImpactByDate(date: string): Promise<CommunityImpact | undefined>;
   createCommunityImpact(impact: InsertCommunityImpact): Promise<CommunityImpact>;
 
-  // Tehillim methods
-  getActiveNames(): Promise<TehillimName[]>;
-  createTehillimName(name: InsertTehillimName): Promise<TehillimName>;
-  cleanupExpiredNames(): Promise<void>;
+  // Tehillim methods (deprecated global chain methods removed - use personal chains instead)
   getGlobalTehillimProgress(): Promise<GlobalTehillimProgress>;
   updateGlobalTehillimProgress(currentPerek: number, language: string, completedBy?: string): Promise<GlobalTehillimProgress>;
-  getRandomNameForPerek(): Promise<TehillimName | undefined>;
   getProgressWithAssignedName(): Promise<any>;
   getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}>;
   getSupabaseTehillim(englishNumber: number, language: string): Promise<{text: string; perek: number; language: string}>;
@@ -177,7 +173,6 @@ export interface IStorage {
   getTotalChainTehillimCompleted(): Promise<number>;
   getTehillimGlobalStats(): Promise<{ totalRead: number; booksCompleted: number; uniqueReaders: number }>;
   getActiveChainReadingForDevice(chainId: number, deviceId: string): Promise<number | null>;
-  migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }>;
 
   // Mincha methods
   getMinchaPrayers(): Promise<MinchaPrayer[]>;
@@ -417,36 +412,13 @@ export class DatabaseStorage implements IStorage {
     return item;
   }
 
-  // Tehillim methods
-  async getActiveNames(): Promise<TehillimName[]> {
-    // Note: Cleanup is handled by scheduled interval in routes.ts, not per-request
-    const now = new Date();
-    return await db.select().from(tehillimNames).where(gt(tehillimNames.expiresAt, now));
-  }
-
-  async createTehillimName(insertName: InsertTehillimName): Promise<TehillimName> {
-    const [name] = await db.insert(tehillimNames).values({
-      ...insertName,
-      dateAdded: new Date(),
-      expiresAt: new Date(Date.now() + 18 * 24 * 60 * 60 * 1000), // 18 days from now
-      userId: null
-    }).returning();
-    return name;
-  }
-
-  async cleanupExpiredNames(): Promise<void> {
-    const now = new Date();
-    await db.delete(tehillimNames).where(lt(tehillimNames.expiresAt, now));
-  }
-
+  // Tehillim methods (deprecated global chain methods removed - use personal chains)
   async getGlobalTehillimProgress(): Promise<GlobalTehillimProgress> {
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     if (!progress) {
-      // Assign a random name for the initial perek
-      const initialName = await this.getNextNameForAssignment();
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
-        currentNameId: initialName?.id || null,
+        currentNameId: null,
         completedBy: null
       }).returning();
       return newProgress;
@@ -468,10 +440,9 @@ export class DatabaseStorage implements IStorage {
       
       if (!progress) {
         // Initialize progress if it doesn't exist
-        const initialName = await this.getNextNameForAssignment();
         const [newProgress] = await tx.insert(globalTehillimProgress).values({
           currentPerek: 1,
-          currentNameId: initialName?.id || null,
+          currentNameId: null, // tehillimNames deprecated
           completedBy: null
         }).returning();
         return newProgress;
@@ -511,23 +482,13 @@ export class DatabaseStorage implements IStorage {
         });
       }
       
-      // Get the current name being prayed for before updating
-      let currentNameDetails = null;
-      if (progress.currentNameId) {
-        const [nameDetails] = await tx.select()
-          .from(tehillimNames)
-          .where(eq(tehillimNames.id, progress.currentNameId));
-        currentNameDetails = nameDetails;
-      }
-      
-      // Assign a new random name for the next perek
-      const nextName = await this.getNextNameForAssignment();
+      // Note: tehillimNames table deprecated - personal chains system now handles name assignments
       
       // Atomically update to the next perek
       const [updated] = await tx.update(globalTehillimProgress)
         .set({
           currentPerek: nextId,
-          currentNameId: nextName?.id || null,
+          currentNameId: null, // tehillimNames deprecated
           lastUpdated: new Date(),
           completedBy: completedBy || null
         })
@@ -550,23 +511,6 @@ export class DatabaseStorage implements IStorage {
             sessionId: 'global-chain'
           });
         
-        // Track the name being prayed for (if there was a name)
-        if (currentNameDetails) {
-          await tx
-            .insert(analyticsEvents)
-            .values({
-              eventType: 'name_prayed',
-              eventData: {
-                nameId: currentNameDetails.id,
-                namePrayed: currentNameDetails.hebrewName,
-                perekNumber: currentPerek,
-                language: language,
-                completedBy: completedBy || 'Anonymous'
-              },
-              sessionId: 'global-chain'
-            });
-        }
-        
         // IMPORTANT: Global Tehillim chain counts as 2 mitzvos
         // Track an additional mitzvah for the global chain completion
         await tx
@@ -583,7 +527,7 @@ export class DatabaseStorage implements IStorage {
             sessionId: 'global-chain'
           });
         
-        console.log(`Tracked Tehillim completion: perek ${currentPerek}, name: ${currentNameDetails?.hebrewName || 'None'}, counted as 2 mitzvos`);
+        console.log(`Tracked Tehillim completion: perek ${currentPerek}, counted as 2 mitzvos`);
       } catch (analyticsError) {
         // Log analytics errors but don't fail the transaction
         console.error('Failed to track Tehillim analytics:', analyticsError);
@@ -604,103 +548,26 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getProgressWithAssignedName(): Promise<any> {
-    // Optimized method to get progress and assigned name in fewer queries
+    // Deprecated: tehillimNames table removed - use personal chains instead
     const [progress] = await db.select().from(globalTehillimProgress).limit(1);
     
     if (!progress) {
-      // Initialize progress if it doesn't exist
-      const initialName = await this.getNextNameForAssignment();
       const [newProgress] = await db.insert(globalTehillimProgress).values({
         currentPerek: 1,
-        currentNameId: initialName?.id || null,
+        currentNameId: null,
         completedBy: null
       }).returning();
       
       return {
         ...newProgress,
-        assignedName: initialName?.hebrewName || null
+        assignedName: null
       };
-    }
-    
-    // If there's an assigned name, fetch it
-    let assignedName = null;
-    if (progress.currentNameId) {
-      const [name] = await db.select().from(tehillimNames).where(eq(tehillimNames.id, progress.currentNameId));
-      if (name) {
-        assignedName = name.hebrewName;
-      }
-    }
-    
-    // If no assigned name, assign one now
-    if (!assignedName) {
-      const newName = await this.getNextNameForAssignment();
-      if (newName && progress.id) {
-        await db.update(globalTehillimProgress)
-          .set({ currentNameId: newName.id })
-          .where(eq(globalTehillimProgress.id, progress.id));
-        assignedName = newName.hebrewName;
-      }
     }
     
     return {
       ...progress,
-      assignedName: assignedName || null
+      assignedName: null // tehillimNames deprecated - use personal chains
     };
-  }
-
-  async getRandomNameForPerek(): Promise<TehillimName | undefined> {
-    // First get the current progress to see if there's already an assigned name
-    const progress = await this.getGlobalTehillimProgress();
-    if (progress.currentNameId) {
-      // Return the assigned name for this perek
-      const [assignedName] = await db.select().from(tehillimNames).where(eq(tehillimNames.id, progress.currentNameId));
-      if (assignedName) {
-        return assignedName;
-      }
-    }
-    
-    // If no assigned name, assign one now
-    const newName = await this.getNextNameForAssignment();
-    if (newName && progress.id) {
-      // Update the progress with this name
-      await db.update(globalTehillimProgress)
-        .set({ currentNameId: newName.id })
-        .where(eq(globalTehillimProgress.id, progress.id));
-      return newName;
-    }
-    
-    return undefined;
-  }
-
-  async getNextNameForAssignment(): Promise<TehillimName | undefined> {
-    // Don't cleanup here - avoid redundant cleanup operations
-    const now = new Date();
-    const activeNames = await db.select()
-      .from(tehillimNames)
-      .where(gt(tehillimNames.expiresAt, now))
-      .orderBy(tehillimNames.id); // Order by ID to ensure consistent ordering
-    
-    if (activeNames.length === 0) return undefined;
-    
-    // Get the current progress to find which name was last used
-    const [progress] = await db.select().from(globalTehillimProgress).limit(1);
-    
-    if (!progress || !progress.currentNameId) {
-      // No previous name, return the first one
-      return activeNames[0];
-    }
-    
-    // Find the index of the current name
-    const currentIndex = activeNames.findIndex(name => name.id === progress.currentNameId);
-    
-    if (currentIndex === -1) {
-      // Current name not found (maybe expired), return the first one
-      return activeNames[0];
-    }
-    
-    // Return the next name in the list, cycling back to the beginning if needed
-    const nextIndex = (currentIndex + 1) % activeNames.length;
-    return activeNames[nextIndex];
   }
 
 
@@ -1276,60 +1143,7 @@ export class DatabaseStorage implements IStorage {
     return readings.length > 0 ? readings[0].psalmNumber : null;
   }
 
-  async migrateTehillimNamesToChains(): Promise<{ migrated: number; skipped: number; errors: string[] }> {
-    let migrated = 0;
-    let skipped = 0;
-    const errors: string[] = [];
-    
-    try {
-      // Get all tehillim names
-      const names = await db.select().from(tehillimNames);
-      
-      for (const name of names) {
-        try {
-          // Generate slug from name - use numeric ID for Hebrew names
-          let slug: string;
-          const isLatin = /^[a-zA-Z0-9\s-]+$/.test(name.hebrewName);
-          if (isLatin) {
-            // Convert to URL-friendly slug
-            slug = name.hebrewName
-              .toLowerCase()
-              .replace(/[^a-z0-9\s-]/g, '')
-              .replace(/\s+/g, '-')
-              .replace(/-+/g, '-')
-              .substring(0, 50);
-          } else {
-            // Use numeric ID for Hebrew/non-Latin names
-            slug = `chain-${name.id}`;
-          }
-          
-          // Check if chain with this slug already exists
-          const existing = await db.select().from(tehillimChains).where(eq(tehillimChains.slug, slug)).limit(1);
-          if (existing.length > 0) {
-            skipped++;
-            continue;
-          }
-          
-          // Create the chain
-          await db.insert(tehillimChains).values({
-            name: name.hebrewName,
-            reason: name.reasonEnglish || name.reason || 'Prayer',
-            slug,
-            creatorDeviceId: 'migrated-from-global',
-            createdAt: name.dateAdded || new Date(),
-          });
-          
-          migrated++;
-        } catch (err) {
-          errors.push(`Error migrating name ID ${name.id}: ${err}`);
-        }
-      }
-    } catch (err) {
-      errors.push(`Error fetching tehillim names: ${err}`);
-    }
-    
-    return { migrated, skipped, errors };
-  }
+  // Deprecated: tehillimNames table removed - migration no longer needed
 
   // DEPRECATED - Use getSupabaseTehillim instead
   async getSefariaTehillim(perek: number, language: string): Promise<{text: string; perek: number; language: string}> {

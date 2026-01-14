@@ -197,24 +197,6 @@ export const shopItems = pgTable("shop_items", {
   isActive: boolean("is_active").default(true),
 });
 
-export const tehillimNames = pgTable("tehillim_names", {
-  id: serial("id").primaryKey(),
-  hebrewName: text("hebrew_name").notNull(),
-  reason: text("reason").notNull(),
-  reasonEnglish: text("reason_english"),
-  dateAdded: timestamp("date_added").defaultNow(),
-  expiresAt: timestamp("expires_at"), // 18 days from dateAdded - indexed via idx_tehillim_names_expires_at
-  userId: integer("user_id"), // Future: link to user accounts
-});
-
-export const tehillimProgress = pgTable("tehillim_progress", {
-  id: serial("id").primaryKey(),
-  currentPerek: integer("current_perek").default(1),
-  currentNameId: integer("current_name_id"),
-  lastUpdated: timestamp("last_updated").defaultNow(),
-  userId: integer("user_id"), // Future: link to user accounts
-});
-
 // Global progress table - single row for all users
 export const globalTehillimProgress = pgTable("global_tehillim_progress", {
   id: serial("id").primaryKey(),
@@ -222,14 +204,6 @@ export const globalTehillimProgress = pgTable("global_tehillim_progress", {
   currentNameId: integer("current_name_id"), // Reference to assigned name for current perek
   lastUpdated: timestamp("last_updated").defaultNow(),
   completedBy: text("completed_by"), // Track who completed it
-});
-
-export const perakimTexts = pgTable("perakim_texts", {
-  id: serial("id").primaryKey(),
-  perekNumber: integer("perek_number").notNull().unique(),
-  hebrewText: text("hebrew_text"),
-  englishTranslation: text("english_translation"),
-  transliteration: text("transliteration"),
 });
 
 export const minchaPrayers = pgTable("mincha_prayers", {
@@ -331,14 +305,6 @@ export const donations = pgTable("donations", {
 }, (table) => ({
   createdAtIdx: index("donations_created_at_idx").on(table.createdAt),
 }));
-
-export const inspirationalQuotes = pgTable("inspirational_quotes", {
-  id: serial("id").primaryKey(),
-  text: text("text").notNull(),
-  source: text("source").notNull(),
-  date: date("date").notNull(), // The date when this quote should appear
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 export const womensPrayers = pgTable("womens_prayers", {
   id: serial("id").primaryKey(),
@@ -581,21 +547,6 @@ export const insertShopItemSchema = createInsertSchema(shopItems).omit({
   id: true,
 });
 
-export const insertTehillimNameSchema = createInsertSchema(tehillimNames).omit({
-  id: true,
-  dateAdded: true,
-  expiresAt: true,
-});
-
-export const insertTehillimProgressSchema = createInsertSchema(tehillimProgress).omit({
-  id: true,
-  lastUpdated: true,
-});
-
-export const insertPerekTextSchema = createInsertSchema(perakimTexts).omit({
-  id: true,
-});
-
 export const insertGlobalTehillimProgressSchema = createInsertSchema(globalTehillimProgress).omit({
   id: true,
   lastUpdated: true,
@@ -756,11 +707,6 @@ export const insertCampaignSchema = createInsertSchema(campaigns).omit({
   updatedAt: true,
 });
 
-export const insertInspirationalQuoteSchema = createInsertSchema(inspirationalQuotes).omit({
-  id: true,
-  createdAt: true,
-});
-
 export const insertWomensPrayerSchema = createInsertSchema(womensPrayers).omit({
   id: true,
   createdAt: true,
@@ -780,12 +726,6 @@ export const insertDiscountPromotionSchema = createInsertSchema(discountPromotio
 
 export type ShopItem = typeof shopItems.$inferSelect;
 export type InsertShopItem = z.infer<typeof insertShopItemSchema>;
-export type TehillimName = typeof tehillimNames.$inferSelect;
-export type InsertTehillimName = z.infer<typeof insertTehillimNameSchema>;
-export type TehillimProgress = typeof tehillimProgress.$inferSelect;
-export type InsertTehillimProgress = z.infer<typeof insertTehillimProgressSchema>;
-export type PerekText = typeof perakimTexts.$inferSelect;
-export type InsertPerekText = z.infer<typeof insertPerekTextSchema>;
 export type GlobalTehillimProgress = typeof globalTehillimProgress.$inferSelect;
 export type InsertGlobalTehillimProgress = z.infer<typeof insertGlobalTehillimProgressSchema>;
 export type MinchaPrayer = typeof minchaPrayers.$inferSelect;
@@ -832,9 +772,6 @@ export type InsertCommunityImpact = z.infer<typeof insertCommunityImpactSchema>;
 
 export type Campaign = typeof campaigns.$inferSelect;
 export type InsertCampaign = z.infer<typeof insertCampaignSchema>;
-
-export type InspirationalQuote = typeof inspirationalQuotes.$inferSelect;
-export type InsertInspirationalQuote = z.infer<typeof insertInspirationalQuoteSchema>;
 
 export type WomensPrayer = typeof womensPrayers.$inferSelect;
 export type InsertWomensPrayer = z.infer<typeof insertWomensPrayerSchema>;
@@ -968,33 +905,6 @@ export type InsertPushSubscription = z.infer<typeof insertPushSubscriptionSchema
 export const insertPushNotificationSchema = createInsertSchema(pushNotifications).omit({ id: true, sentAt: true });
 export type PushNotification = typeof pushNotifications.$inferSelect;
 export type InsertPushNotification = z.infer<typeof insertPushNotificationSchema>;
-
-// App version history table for tracking deployments and updates
-export const appVersions = pgTable("app_versions", {
-  id: serial("id").primaryKey(),
-  version: varchar("version", { length: 50 }).notNull(),
-  buildNumber: integer("build_number").notNull(),
-  timestamp: timestamp("timestamp").notNull(),
-  deployedAt: timestamp("deployed_at").defaultNow().notNull(),
-  releaseNotes: text("release_notes"),
-  environment: varchar("environment", { length: 20 }).notNull().default('production'), // 'production', 'staging', 'development'
-  isActive: boolean("is_active").default(true).notNull(),
-  deployedBy: text("deployed_by"),
-  gitCommit: varchar("git_commit", { length: 40 }),
-  changesSummary: text("changes_summary"),
-  isCritical: boolean("is_critical").default(false), // Force update flag
-  minClientVersion: varchar("min_client_version", { length: 50 }), // Minimum compatible client version
-}, (table) => {
-  return {
-    versionIdx: index("version_idx").on(table.version),
-    timestampIdx: index("timestamp_idx").on(table.timestamp),
-    activeIdx: index("active_idx").on(table.isActive),
-  };
-});
-
-export const insertAppVersionSchema = createInsertSchema(appVersions).omit({ id: true, deployedAt: true });
-export type AppVersion = typeof appVersions.$inferSelect;
-export type InsertAppVersion = z.infer<typeof insertAppVersionSchema>;
 
 // User Mitzvah Progress - stores completion data for authenticated users
 // Syncs with localStorage format for seamless cross-device experience
