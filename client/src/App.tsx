@@ -20,7 +20,8 @@ import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
 import { ensurePointerEventsUnlocked } from "@/components/ui/fullscreen-modal";
-import { initDebugInstrumentation } from "@/lib/debug-instrumentation";
+// Debug instrumentation disabled - kept for future debugging if needed
+// import { initDebugInstrumentation } from "@/lib/debug-instrumentation";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -124,22 +125,29 @@ function Router() {
     };
     
     const handleResume = () => {
-      // Prevent double-recovery and ensure we're in webview
+      // Run recovery in webview regardless of background time tracking
       if (!isInWebview || isRecovering) return;
+      
+      // IMMEDIATE cleanup - don't wait for debounce for critical recovery
+      try {
+        ensurePointerEventsUnlocked();
+      } catch (e) {
+        console.error('[WebView] Immediate cleanup failed:', e);
+      }
       
       // Clear any pending debounce
       if (resumeDebounceTimer) {
         clearTimeout(resumeDebounceTimer);
       }
       
-      // Debounce to let all resume events settle
+      // Debounce additional recovery actions
       resumeDebounceTimer = setTimeout(() => {
-        if (lastBackgroundTime !== null && !isRecovering) {
-          const timeInBackground = Date.now() - lastBackgroundTime;
+        if (!isRecovering) {
+          const timeInBackground = lastBackgroundTime ? Date.now() - lastBackgroundTime : 0;
           
           console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds');
           
-          // Run recovery - ensurePointerEventsUnlocked handles orphaned overlays safely
+          // Run recovery again after debounce to catch any late-rendered elements
           try {
             ensurePointerEventsUnlocked();
             document.body.style.pointerEvents = '';
@@ -229,11 +237,39 @@ function Router() {
       rafId = requestAnimationFrame(rafCheck);
     }
     
+    // TOUCHSTART FALLBACK: Run cleanup on first touch after any background period
+    // This catches cases where visibility/focus events don't fire correctly
+    let needsCleanupOnTouch = false;
+    const handleTouchStart = () => {
+      if (needsCleanupOnTouch && isInWebview) {
+        console.log('[WebView] Running cleanup on first touch');
+        try {
+          ensurePointerEventsUnlocked();
+        } catch (e) {
+          console.error('[WebView] Touch cleanup failed:', e);
+        }
+        needsCleanupOnTouch = false;
+      }
+    };
+    
+    // Mark that we need cleanup on next touch when going to background
+    const handleVisibilityForTouch = () => {
+      if (document.visibilityState === 'hidden' && isInWebview) {
+        needsCleanupOnTouch = true;
+      }
+    };
+    
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('pageshow', handlePageShow);
     window.addEventListener('focus', handleFocus);
     window.addEventListener('blur', handleBlur);
     window.addEventListener('pagehide', handlePageHide);
+    
+    // Add touch fallback in webview
+    if (isInWebview) {
+      document.addEventListener('touchstart', handleTouchStart, { passive: true, capture: true });
+      document.addEventListener('visibilitychange', handleVisibilityForTouch);
+    }
     
     // Defer performance optimizations - not blocking
     setTimeout(() => {
@@ -245,8 +281,8 @@ function Router() {
       initializeCache();
     }, 300);
     
-    // Initialize debug instrumentation (only active when ?debug=ui or ?debug=lifecycle)
-    initDebugInstrumentation();
+    // Debug instrumentation disabled - kept for future debugging if needed
+    // initDebugInstrumentation();
     
     // One-time cleanup of stale modal completion data
     const cleanupModalCompletions = () => {
@@ -285,6 +321,9 @@ function Router() {
       window.removeEventListener('focus', handleFocus);
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('pagehide', handlePageHide);
+      // Clean up touch fallback listeners
+      document.removeEventListener('touchstart', handleTouchStart, { capture: true } as EventListenerOptions);
+      document.removeEventListener('visibilitychange', handleVisibilityForTouch);
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
