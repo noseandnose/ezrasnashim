@@ -71,12 +71,5 @@ export function useTorahSummary() {
     refetchOnWindowFocus: false,
   });
 
-  console.log('[useTorahSummary] Query state:', { 
-    isLoading: query.isLoading, 
-    isError: query.isError,
-    hasData: !!query.data,
-    pirkeiAvot: query.data?.pirkeiAvot?.text?.substring(0, 30)
-  });
-
   return query;
 }
