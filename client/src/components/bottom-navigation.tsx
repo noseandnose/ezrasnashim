@@ -1,5 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -12,6 +12,9 @@ export default function BottomNavigation({
   onSectionChange,
 }: BottomNavigationProps) {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  
+  // Store refs for each navigation button to attach native event listeners
+  const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
   useEffect(() => {
     const handleFocusIn = (e: FocusEvent) => {
@@ -44,6 +47,34 @@ export default function BottomNavigation({
 
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
+  
+  // Use native touchend events instead of React onClick to bypass frozen event system
+  // This is a workaround for WebView issues where React's synthetic events stop working
+  const setButtonRef = useCallback((id: Section) => (el: HTMLButtonElement | null) => {
+    const prevEl = buttonRefs.current[id];
+    
+    // Clean up old listener
+    if (prevEl && prevEl !== el) {
+      const handler = (prevEl as any).__navHandler;
+      if (handler) {
+        prevEl.removeEventListener('touchend', handler);
+        prevEl.removeEventListener('click', handler);
+      }
+    }
+    
+    buttonRefs.current[id] = el;
+    
+    // Add new listener
+    if (el) {
+      const handler = (e: Event) => {
+        e.preventDefault();
+        onSectionChangeRef.current(id);
+      };
+      (el as any).__navHandler = handler;
+      el.addEventListener('touchend', handler, { passive: false });
+      el.addEventListener('click', handler);
+    }
+  }, []);
 
   if (isKeyboardOpen) {
     return null;
@@ -81,7 +112,7 @@ export default function BottomNavigation({
             return (
               <button
                 key={id}
-                onClick={() => onSectionChange(id)}
+                ref={setButtonRef(id)}
                 data-action={`nav-${id}`}
                 data-testid={`nav-${id}`}
                 className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${
