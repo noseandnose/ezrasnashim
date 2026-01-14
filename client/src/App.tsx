@@ -19,7 +19,8 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
-import { forceCloseAllFullscreenModals } from "@/components/ui/fullscreen-modal";
+import { forceCloseAllFullscreenModals, ensurePointerEventsUnlocked } from "@/components/ui/fullscreen-modal";
+import { initDebugInstrumentation } from "@/lib/debug-instrumentation";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -136,15 +137,50 @@ function Router() {
         if (lastBackgroundTime !== null && !isRecovering) {
           const timeInBackground = Date.now() - lastBackgroundTime;
           
-          if (timeInBackground > BACKGROUND_THRESHOLD) {
-            isRecovering = true;
-            console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds, reloading for clean state...');
-            // Skip soft recovery - go straight to reload since it's the only reliable fix
-            window.location.reload();
-          } else {
-            // Just reset scroll lock for short background times (no reload needed)
-            console.log('[WebView] Short background time', Math.round(timeInBackground / 1000), 's, just resetting scroll locks');
+          console.log('[WebView] App resumed after', Math.round(timeInBackground / 1000), 'seconds');
+          
+          // ALWAYS try soft recovery first (even for long background times)
+          // This prevents unnecessary reloads in most cases
+          try {
+            // 1. Force close any stuck modals
             forceCloseAllFullscreenModals();
+            
+            // 2. Ensure pointer events are unlocked
+            ensurePointerEventsUnlocked();
+            
+            // 3. Remove orphaned Radix dialog overlays (ones without visible content)
+            // This is safer than setting permanent inline styles which break future dialogs
+            document.querySelectorAll('[data-radix-dialog-overlay]').forEach(overlay => {
+              // Check if there's associated dialog content visible
+              const parent = overlay.parentElement;
+              const hasVisibleContent = parent?.querySelector('[data-radix-dialog-content]');
+              
+              // Only remove orphaned overlays (no content = stuck from a closed dialog)
+              if (!hasVisibleContent) {
+                console.log('[WebView] Removing orphaned Radix overlay');
+                overlay.remove();
+              }
+            });
+            
+            // 4. Ensure body and html have proper pointer events
+            document.body.style.pointerEvents = '';
+            document.documentElement.style.pointerEvents = '';
+            
+            console.log('[WebView] Soft recovery applied');
+            
+            // Only reload for very long background times (>30 seconds) as last resort
+            if (timeInBackground > 30000) {
+              isRecovering = true;
+              console.log('[WebView] Very long background time, reloading for clean state...');
+              window.location.reload();
+            }
+          } catch (e) {
+            console.error('[WebView] Error during soft recovery:', e);
+            // If soft recovery fails, reload as fallback
+            if (timeInBackground > BACKGROUND_THRESHOLD) {
+              isRecovering = true;
+              window.location.reload();
+            }
           }
           
           // Reset background time after handling
@@ -192,9 +228,26 @@ function Router() {
       
       // If more than BACKGROUND_THRESHOLD has passed since last rAF, we were in background
       if (elapsed > BACKGROUND_THRESHOLD && isInWebview && !isRecovering) {
-        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, reloading...');
-        isRecovering = true;
-        window.location.reload();
+        console.log('[WebView] rAF detected background gap of', Math.round(elapsed / 1000), 's, applying soft recovery...');
+        
+        // Try soft recovery first instead of immediate reload
+        try {
+          forceCloseAllFullscreenModals();
+          ensurePointerEventsUnlocked();
+          document.body.style.pointerEvents = '';
+          document.documentElement.style.pointerEvents = '';
+          
+          // Only reload for very long background times (>30 seconds)
+          if (elapsed > 30000) {
+            isRecovering = true;
+            console.log('[WebView] Very long background, reloading...');
+            window.location.reload();
+          }
+        } catch (e) {
+          console.error('[WebView] rAF soft recovery failed:', e);
+          isRecovering = true;
+          window.location.reload();
+        }
       }
       
       lastRafTime = now;
@@ -221,6 +274,9 @@ function Router() {
     setTimeout(() => {
       initializeCache();
     }, 300);
+    
+    // Initialize debug instrumentation (only active when ?debug=ui or ?debug=lifecycle)
+    initDebugInstrumentation();
     
     // One-time cleanup of stale modal completion data
     const cleanupModalCompletions = () => {

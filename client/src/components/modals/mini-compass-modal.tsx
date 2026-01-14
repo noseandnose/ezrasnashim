@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { X, Heart } from 'lucide-react';
 import type { SimpleCompass as SimpleCompassType, CompassState } from '@/lib/compass';
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
@@ -25,6 +25,11 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  
+  // Track if modal is still mounted during async operations
+  const mountedRef = useRef(true);
+  const permissionPromiseRef = useRef<Promise<boolean> | null>(null);
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -35,6 +40,15 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
     setIsStandalone(standalone);
   }, []);
 
+  // Track mounted state for cleanup
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Load compass module when modal opens
   useEffect(() => {
     if (!isOpen) return;
     let mounted = true;
@@ -42,7 +56,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
     setLoadError(null);
     import('@/lib/compass')
       .then(({ SimpleCompass }) => {
-        if (mounted) {
+        if (mounted && mountedRef.current) {
           const newCompass = new SimpleCompass();
           setCompass(newCompass);
           setIsLoading(false);
@@ -50,12 +64,34 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
       })
       .catch((error) => {
         console.error('[MiniCompass] Failed to load compass module:', error);
-        if (mounted) {
+        if (mounted && mountedRef.current) {
           setLoadError('Failed to load compass. Please try again.');
           setIsLoading(false);
         }
       });
     return () => { mounted = false; };
+  }, [isOpen]);
+  
+  // Handle visibility changes during permission prompts
+  // When the OS permission dialog appears, the page loses focus
+  // When it returns, we need to ensure the modal is still responsive
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && mountedRef.current) {
+        // Reset permission requesting state if we return from a permission prompt
+        setIsRequestingPermission(false);
+        
+        // Force a state update to ensure UI is responsive
+        setState(prev => ({ ...prev }));
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -64,6 +100,8 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
     const unsubscribe = compass.subscribe(setState);
     return () => {
       unsubscribe();
+      // Dispose compass when modal closes to free resources
+      compass.dispose();
     };
   }, [compass, isOpen]);
 
@@ -86,11 +124,46 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
     };
   }, [state.isAligned, isIOS, isStandalone, isOpen]);
 
-  const handleEnableCompass = async () => {
-    if (compass) await compass.requestPermission();
-  };
+  // Handle permission request with proper state management
+  // Ensures modal stays open and responsive during/after OS permission prompts
+  const handleEnableCompass = useCallback(async () => {
+    if (!compass || isRequestingPermission) return;
+    
+    setIsRequestingPermission(true);
+    
+    try {
+      // Store the promise so we can track it
+      permissionPromiseRef.current = compass.requestPermission();
+      const granted = await permissionPromiseRef.current;
+      
+      // Only update state if still mounted and modal is open
+      if (mountedRef.current) {
+        if (!granted) {
+          setState(prev => ({
+            ...prev,
+            error: 'Compass permission was denied. Please enable in your device settings.',
+            hasPermission: false
+          }));
+        }
+      }
+    } catch (error) {
+      console.error('[MiniCompass] Permission request failed:', error);
+      if (mountedRef.current) {
+        setState(prev => ({
+          ...prev,
+          error: 'Failed to request compass permission. Please try again.',
+          hasPermission: false
+        }));
+      }
+    } finally {
+      if (mountedRef.current) {
+        setIsRequestingPermission(false);
+      }
+      permissionPromiseRef.current = null;
+    }
+  }, [compass, isRequestingPermission]);
 
-  const handleRetry = async () => {
+  const handleRetry = useCallback(async () => {
     if (compass) compass.dispose();
     setState({
       deviceHeading: 0,
@@ -101,11 +174,21 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
       isSupported: false,
       error: null
     });
-    const { SimpleCompass } = await import('@/lib/compass');
-    const newCompass = new SimpleCompass();
-    setCompass(newCompass);
-    await newCompass.requestPermission();
-  };
+    
+    try {
+      const { SimpleCompass } = await import('@/lib/compass');
+      if (mountedRef.current) {
+        const newCompass = new SimpleCompass();
+        setCompass(newCompass);
+        // Don't auto-request permission on retry - let user click button
+      }
+    } catch (error) {
+      console.error('[MiniCompass] Retry failed:', error);
+      if (mountedRef.current) {
+        setLoadError('Failed to reinitialize compass. Please try again.');
+      }
+    }
+  }, [compass]);
 
   useEffect(() => {
     if (!isOpen) return;
