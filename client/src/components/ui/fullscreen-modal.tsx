@@ -57,40 +57,15 @@ function forceResetScrollLock() {
   activeFullscreenModals = 0;
 }
 
-// Nuclear option: completely reset all modal state AND remove stale DOM
-// Use when WebView resume leaves ghost overlays blocking touches
+// Conservative cleanup: only reset scroll locks and remove ORPHANED elements
+// Does NOT hide legitimate open dialogs - that breaks the UI completely
 function forceCloseAllFullscreenModals() {
-  console.log('[FullscreenModal] Force closing all modals...');
+  console.log('[FullscreenModal] Running conservative cleanup...');
   
   // 1. Reset scroll locks and counter
   forceResetScrollLock();
   
-  // 2. Remove any stale modal DOM elements that might have invisible overlays
-  const staleModals = document.querySelectorAll('[data-fullscreen-modal]');
-  staleModals.forEach(modal => {
-    console.log('[FullscreenModal] Removing stale modal element');
-    (modal as HTMLElement).style.pointerEvents = 'none';
-    (modal as HTMLElement).style.visibility = 'hidden';
-  });
-  
-  // 3. Remove any stale Radix overlays/backdrops/poppers
-  const radixSelectors = [
-    '[data-radix-dialog-overlay]',
-    '[data-radix-popper-content-wrapper]',
-    '[data-radix-dismissable-layer]',
-    '[data-radix-focus-guard]',
-    '[data-state="open"]',
-    '[role="dialog"]',
-    '[role="menu"]'
-  ];
-  const staleRadixElements = document.querySelectorAll(radixSelectors.join(', '));
-  staleRadixElements.forEach(el => {
-    console.log('[FullscreenModal] Hiding stale Radix element:', el.getAttribute('role') || el.getAttribute('data-state'));
-    (el as HTMLElement).style.pointerEvents = 'none';
-    (el as HTMLElement).style.visibility = 'hidden';
-  });
-  
-  // 4. Force reset pointer-events on all major containers
+  // 2. Reset pointer-events on major containers only
   document.body.style.pointerEvents = '';
   document.documentElement.style.pointerEvents = '';
   const mainContent = document.querySelector('main');
@@ -98,48 +73,35 @@ function forceCloseAllFullscreenModals() {
     (mainContent as HTMLElement).style.pointerEvents = '';
   }
   
-  // 5. Reset ALL elements with inline pointer-events
-  document.querySelectorAll('[style*="pointer-events"]').forEach(el => {
-    (el as HTMLElement).style.pointerEvents = '';
-  });
-  
-  // 6. Release any stuck touch/pointer states by dispatching synthetic events
-  try {
-    const touchEnd = new TouchEvent('touchend', { bubbles: true, cancelable: true });
-    document.body.dispatchEvent(touchEnd);
-    
-    const pointerUp = new PointerEvent('pointerup', { bubbles: true, cancelable: true });
-    document.body.dispatchEvent(pointerUp);
-    
-    const mouseUp = new MouseEvent('mouseup', { bubbles: true, cancelable: true });
-    document.body.dispatchEvent(mouseUp);
-  } catch (e) {
-    // Synthetic events not supported, skip
-  }
-  
-  // 7. Force blur any focused element
-  if (document.activeElement instanceof HTMLElement) {
-    document.activeElement.blur();
-  }
-  
-  // 8. Dispatch a custom event that components can listen to for forced remount
+  // 3. Dispatch a custom event that components can listen to for state reset
   window.dispatchEvent(new CustomEvent('webview-resume-recovery'));
   
-  console.log('[FullscreenModal] Force close complete');
+  console.log('[FullscreenModal] Conservative cleanup complete');
 }
 
 // Defensive helper: ensures pointer-events are never stuck
 // Called by App.tsx on various events to catch any stuck state
 export function ensurePointerEventsUnlocked() {
-  // Skip if there are active open dialogs (they legitimately block interactions)
-  const activeDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
-  if (activeDialogs.length > 0) {
-    return; // Don't interfere with active dialogs
-  }
+  // ALWAYS clean up orphaned overlays first (safe regardless of active dialogs)
+  // Orphaned = overlay exists but has no associated visible content
+  document.querySelectorAll('[data-radix-dialog-overlay]').forEach(overlay => {
+    const parent = overlay.parentElement;
+    const hasVisibleContent = parent?.querySelector('[data-radix-dialog-content]');
+    const isClosed = overlay.getAttribute('data-state') === 'closed';
+    
+    if (!hasVisibleContent || isClosed) {
+      // This overlay is orphaned or closed - safe to remove
+      console.log('[PointerEvents] Removing orphaned/closed overlay');
+      overlay.remove();
+    }
+  });
   
-  // Also check for active fullscreen modals
-  if (activeFullscreenModals > 0) {
-    return; // Don't interfere with fullscreen modals
+  // Check for active open dialogs - if present, don't touch main container pointer events
+  const activeDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
+  const hasActiveDialogs = activeDialogs.length > 0 || activeFullscreenModals > 0;
+  
+  if (hasActiveDialogs) {
+    return; // Don't interfere with legitimate active dialogs' pointer events
   }
   
   // No active modals - ensure pointer-events are unlocked on main containers
@@ -158,16 +120,6 @@ export function ensurePointerEventsUnlocked() {
     console.log('[PointerEvents] Unlocking stuck main pointer-events');
     (mainContent as HTMLElement).style.pointerEvents = '';
   }
-  
-  // Check for closed Radix overlays that still have pointer-events blocking
-  const closedOverlays = document.querySelectorAll('[data-radix-dialog-overlay][data-state="closed"]');
-  closedOverlays.forEach(overlay => {
-    const htmlOverlay = overlay as HTMLElement;
-    if (htmlOverlay.style.pointerEvents !== 'none') {
-      console.log('[PointerEvents] Disabling pointer-events on closed overlay');
-      htmlOverlay.style.pointerEvents = 'none';
-    }
-  });
 }
 
 // Make available globally for debugging
