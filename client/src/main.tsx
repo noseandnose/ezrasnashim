@@ -3,14 +3,49 @@ import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
 
-// Emergency recovery mechanism for frozen WebViews
-// Tap 5 times quickly in the top-right corner (within 50x50px) to force reload
-// This works even when React clicks are broken because it uses raw touchstart events
+// Auto-reload workaround for FlutterFlow WebView freeze bug
+// When WebView resumes from background, React click events stop working
+// This detects the resume and forces a reload to restore functionality
 if (typeof window !== 'undefined') {
+  let lastVisibilityTime = Date.now();
+  let wasHidden = false;
+  const BACKGROUND_THRESHOLD = 3000; // Only reload if background for 3+ seconds
+  
+  // Detect when page becomes hidden (app goes to background)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      wasHidden = true;
+      lastVisibilityTime = Date.now();
+    } else if (wasHidden) {
+      // Page is now visible again after being hidden
+      const timeInBackground = Date.now() - lastVisibilityTime;
+      
+      // Only reload if we were in background long enough for WebView to freeze
+      if (timeInBackground > BACKGROUND_THRESHOLD) {
+        console.log('[WebView Recovery] Reloading after background resume...');
+        // Small delay to let WebView stabilize before reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
+      }
+      wasHidden = false;
+    }
+  }, { capture: true });
+  
+  // Also handle pageshow event for bfcache scenarios
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      // Page was restored from bfcache - always reload
+      console.log('[WebView Recovery] Reloading from bfcache...');
+      window.location.reload();
+    }
+  });
+  
+  // Emergency manual recovery: Tap 5 times quickly in top-right corner
   let cornerTapCount = 0;
   let lastCornerTapTime = 0;
-  const CORNER_SIZE = 50; // pixels from top-right corner
-  const TAP_TIMEOUT = 2000; // reset after 2 seconds
+  const CORNER_SIZE = 50;
+  const TAP_TIMEOUT = 2000;
   const TAPS_NEEDED = 5;
   
   document.addEventListener('touchstart', (e) => {
@@ -31,7 +66,6 @@ if (typeof window !== 'undefined') {
       
       if (cornerTapCount >= TAPS_NEEDED) {
         cornerTapCount = 0;
-        // Force reload to recover from frozen state
         window.location.reload();
       }
     }
