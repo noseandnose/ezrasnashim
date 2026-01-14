@@ -1,7 +1,5 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "../storage";
-import { insertTehillimNameSchema } from "../../shared/schema";
-import { z } from "zod";
 import { cacheMiddleware } from "../middleware/cache";
 import { CACHE_TTL } from "../cache/categoryCache";
 
@@ -57,29 +55,15 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
     }
   });
 
+  // Deprecated: tehillimNames system removed - use personal chains instead
   app.get("/api/tehillim/current-name", async (_req: Request, res: Response) => {
-    try {
-      const progressWithName = await storage.getProgressWithAssignedName();
-      
-      if (progressWithName.currentNameId) {
-        const names = await storage.getActiveNames();
-        const assignedName = names.find(n => n.id === progressWithName.currentNameId);
-        return res.json(assignedName || null);
-      } else {
-        return res.json(null);
-      }
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch current name" });
-    }
+    // Always return null - tehillimNames deprecated, use personal chains
+    return res.json(null);
   });
 
   app.get("/api/tehillim/names", async (_req: Request, res: Response) => {
-    try {
-      const names = await storage.getActiveNames();
-      return res.json(names);
-    } catch (error) {
-      return res.status(500).json({ message: "Failed to fetch Tehillim names" });
-    }
+    // Return empty array - tehillimNames deprecated, use personal chains
+    return res.json([]);
   });
 
   app.get("/api/tehillim/global-progress", async (_req: Request, res: Response) => {
@@ -264,18 +248,12 @@ export function registerTehillimRoutes(app: Express, deps: TehillimRouteDeps) {
     }
   });
 
-  app.post("/api/tehillim/names", async (req: Request, res: Response) => {
-    try {
-      const validatedData = insertTehillimNameSchema.parse(req.body);
-      const name = await storage.createTehillimName(validatedData);
-      return res.json(name);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid name data", errors: error.errors });
-      } else {
-        return res.status(500).json({ message: "Failed to create Tehillim name" });
-      }
-    }
+  // Deprecated: tehillimNames system removed - use personal chains instead
+  app.post("/api/tehillim/names", async (_req: Request, res: Response) => {
+    // Return 410 Gone - use personal chains API instead
+    return res.status(410).json({ 
+      message: "This endpoint is deprecated. Please use /api/tehillim-chains to create personal prayer chains."
+    });
   });
 
   app.get("/api/tehillim/:tehillimId", async (req: Request, res: Response) => {

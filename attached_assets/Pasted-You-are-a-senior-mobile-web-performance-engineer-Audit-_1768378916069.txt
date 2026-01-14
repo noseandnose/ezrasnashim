@@ -1,0 +1,121 @@
+You are a senior mobile + web performance engineer. Audit and fix my “Ezras Nashim” project. Context: users access the app either (A) via a website, or (B) via a FlutterFlow-built mobile app that is essentially a single giant WebView wrapper around the same web app.
+
+CRITICAL REQUIREMENTS
+- Fix the issues listed below WITHOUT breaking existing functionality.
+- If you must refactor, do it incrementally and behind safe guards (feature flags if needed).
+- Add logging/telemetry so we can verify fixes and identify remaining freeze causes.
+- Do not remove features. Only remove code if you can prove it is unused and safe.
+- Run linting + type checks, fix syntax + LSP errors, and keep the codebase clean.
+
+ISSUES TO INVESTIGATE + FIX
+1) When app is backgrounded then foregrounded: the UI becomes mostly unresponsive. Scrolling still works and hamburger menu opens, but most buttons don’t respond.
+2) When user opens Compass feature and the app triggers the OS permission prompt (motion/location/etc): it closes the compass and many buttons become unresponsive, but some (like menu bar) still work.
+3) App sometimes freezes in certain situations; root cause unknown.
+4) Potential redundant / unused code.
+5) Need to check for all LSP + syntax errors.
+6) Fix all of the above without breaking functionality.
+
+WHAT TO DO (FOLLOW THIS EXACT PLAN)
+PHASE 0 — BASELINE & SAFETY
+- Identify the stack: web framework, router, state management, event handlers, compass implementation, and how the FlutterFlow WebView is configured (Android/iOS).
+- Create a “pre-audit snapshot”: list key user flows and critical features.
+- Add a temporary debug mode (env flag) that enables extra logs without impacting production.
+
+PHASE 1 — REPRODUCTION & INSTRUMENTATION
+- Add instrumentation to detect and log:
+  - pointer/touch events received on buttons
+  - whether an invisible overlay/backdrop is present and capturing clicks
+  - focus/visibility lifecycle events (visibilitychange, pagehide/pageshow, freeze/resume)
+  - route transitions and modal states
+  - unhandled promise rejections and global errors
+  - long tasks / UI thread blocking (PerformanceObserver for longtask if supported)
+- Implement a simple “UI responsiveness watchdog”:
+  - every 2s confirm click handler pipeline works (non-invasive) and log if click events stop firing.
+- Add a “tap debug overlay” toggle that visually highlights the topmost element under the pointer and logs z-index + pointer-events, to catch click-blocking layers.
+
+PHASE 2 — FIX THE “UNRESPONSIVE AFTER BACKGROUND/FOREGROUND” BUG
+- Determine if the web app is getting stuck in a state where:
+  - an overlay/backdrop remains mounted with pointer-events:auto
+  - a modal state remains “open” in state but invisible
+  - a global listener is removed or duplicated incorrectly after resume
+  - a CSS class like “overflow:hidden” or “pointer-events:none” is applied to body/root
+  - focus/visibility lifecycle breaks event delegation
+- Implement robust lifecycle handling:
+  - on visibilitychange/pageshow: re-init any event listeners and revalidate modal/overlay state
+  - ensure any “blocking overlay” has a guaranteed cleanup path on route change AND on resume
+- Add regression tests / manual checklist to confirm:
+  - after resume: every primary button works on each main screen
+  - hamburger menu still works
+  - no double listeners
+
+PHASE 3 — FIX COMPASS PERMISSION FLOW
+- Identify which permissions are requested (location, motion/orientation).
+- For iOS Safari / WebView:
+  - DeviceOrientationEvent.requestPermission() requires a user gesture and returns a promise
+  - Ensure permission prompts don’t happen in a non-gesture context
+- Make the compass permission flow deterministic:
+  - show an in-app modal explaining permission + “Enable” button
+  - only on that button tap: request permission
+  - handle all outcomes: granted/denied/dismissed, and keep the compass UI stable
+- Ensure that if permission is denied or dismissed:
+  - compass doesn’t crash/close abruptly
+  - app remains fully responsive
+- Ensure cleanup:
+  - remove any orientation listeners on close/unmount
+  - avoid multiple listener registrations
+- If the WebView wrapper needs specific configuration (e.g., allowing motion sensors, location, media), document and implement it in FlutterFlow side notes.
+
+PHASE 4 — FREEZE HUNT (UNKNOWN ROOT CAUSE)
+- Add performance profiling hooks:
+  - log route + feature when freeze happens
+  - log memory usage if accessible
+  - measure long tasks and render stalls
+- Search for common causes:
+  - infinite loops in state updates
+  - repeated timers/intervals not cleared
+  - heavy synchronous work on UI thread
+  - excessive re-renders (memoization, dependency arrays)
+  - unbounded listeners (scroll, orientation, resize)
+- Fix the top 3 biggest blockers you find:
+  - debouncing/throttling where appropriate
+  - moving heavy work off main thread (Web Worker) if needed
+  - ensuring correct cleanup on unmount
+
+PHASE 5 — CLEANUP (UNUSED/REDUNDANT CODE)
+- Run a dead-code pass:
+  - identify unused components, functions, imports
+  - remove only if 100% safe (no dynamic imports/refs)
+  - ensure build still passes and app flows still work
+- Organize and document any remaining “intentional redundancy.”
+
+PHASE 6 — LSP, SYNTAX, LINT, TYPECHECK
+- Run:
+  - linter
+  - type checks (if TS)
+  - build
+  - tests (if present)
+- Fix all LSP/syntax errors.
+- No new warnings introduced.
+
+PHASE 7 — DELIVERABLES
+Produce:
+1) A concise “Audit Report” listing:
+   - root causes found for each issue
+   - exactly what was changed
+   - risk assessment
+2) A “Repro + Verification Checklist” with steps for iOS + Android and web.
+3) A list of FlutterFlow/WebView configuration changes needed (if any), including permissions.
+4) A PR-style commit with logically separated commits:
+   - instrumentation
+   - lifecycle fix
+   - compass fix
+   - freeze/perf fixes
+   - cleanup + lint
+
+IMPORTANT DIAGNOSTIC HYPOTHESES TO TEST FIRST
+- A transparent overlay/backdrop is left mounted after resume or after permission prompt, intercepting taps (pointer-events).
+- Event listeners for buttons rely on a delegated root that gets replaced/re-mounted improperly on resume.
+- Compass permission request triggers an exception/unhandled promise rejection that leaves the UI state in a “modal open” state.
+- WebView resume causes the JS runtime to “pause” and resume with stale state; need explicit re-init on pageshow/visibilitychange.
+
+Start by locating the compass feature implementation and the global modal/overlay system, then reproduce the bugs using instrumentation. Only then apply minimal fixes.
