@@ -237,25 +237,29 @@ function Router() {
       rafId = requestAnimationFrame(rafCheck);
     }
     
-    // TOUCHSTART FALLBACK: Run cleanup on first touch after any background period
-    // This catches cases where visibility/focus events don't fire correctly
-    let needsCleanupOnTouch = false;
+    // TOUCHSTART FALLBACK: Run cleanup on EVERY touch in WebView mode
+    // This aggressively catches any stuck state that prevents clicks
+    let lastCleanupTime = 0;
+    const CLEANUP_THROTTLE = 500; // Only run cleanup every 500ms max
     const handleTouchStart = () => {
-      if (needsCleanupOnTouch && isInWebview) {
-        console.log('[WebView] Running cleanup on first touch');
-        try {
-          ensurePointerEventsUnlocked();
-        } catch (e) {
-          console.error('[WebView] Touch cleanup failed:', e);
+      if (isInWebview) {
+        const now = Date.now();
+        if (now - lastCleanupTime > CLEANUP_THROTTLE) {
+          lastCleanupTime = now;
+          try {
+            ensurePointerEventsUnlocked();
+          } catch (e) {
+            // Silent fail - this runs on every touch
+          }
         }
-        needsCleanupOnTouch = false;
       }
     };
     
-    // Mark that we need cleanup on next touch when going to background
+    // Visibility change handler for background detection
     const handleVisibilityForTouch = () => {
-      if (document.visibilityState === 'hidden' && isInWebview) {
-        needsCleanupOnTouch = true;
+      // Reset cleanup throttle when coming back from background
+      if (document.visibilityState === 'visible' && isInWebview) {
+        lastCleanupTime = 0; // Allow immediate cleanup on first touch after resume
       }
     };
     

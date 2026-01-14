@@ -140,6 +140,12 @@ export function ensurePointerEventsUnlocked() {
     console.log('[PointerEvents] Unlocking main pointer-events');
     (mainContent as HTMLElement).style.pointerEvents = '';
   }
+  
+  // 6. Reset any stuck focus state that might be blocking events
+  // This can help "wake up" React's event system in WebViews
+  if (document.activeElement && document.activeElement !== document.body) {
+    (document.activeElement as HTMLElement).blur?.();
+  }
 }
 
 // Make available globally for debugging
