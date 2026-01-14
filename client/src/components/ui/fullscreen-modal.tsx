@@ -82,17 +82,38 @@ function forceCloseAllFullscreenModals() {
 // Defensive helper: ensures pointer-events are never stuck
 // Called by App.tsx on various events to catch any stuck state
 export function ensurePointerEventsUnlocked() {
-  // ALWAYS clean up orphaned overlays first (safe regardless of active dialogs)
-  // Orphaned = overlay exists but has no associated visible content
+  // ALWAYS clean up orphaned/closed Radix overlays first
   document.querySelectorAll('[data-radix-dialog-overlay]').forEach(overlay => {
     const parent = overlay.parentElement;
     const hasVisibleContent = parent?.querySelector('[data-radix-dialog-content]');
     const isClosed = overlay.getAttribute('data-state') === 'closed';
     
     if (!hasVisibleContent || isClosed) {
-      // This overlay is orphaned or closed - safe to remove
-      console.log('[PointerEvents] Removing orphaned/closed overlay');
+      console.log('[PointerEvents] Removing orphaned/closed Radix overlay');
       overlay.remove();
+    }
+  });
+  
+  // Clean up closed Radix popper wrappers (dropdowns, tooltips, etc.)
+  document.querySelectorAll('[data-radix-popper-content-wrapper]').forEach(popper => {
+    const content = popper.querySelector('[data-state]');
+    const isClosed = content?.getAttribute('data-state') === 'closed';
+    if (isClosed || !content) {
+      console.log('[PointerEvents] Removing closed Radix popper');
+      popper.remove();
+    }
+  });
+  
+  // Clean up any fixed overlays that are invisible but might be blocking
+  document.querySelectorAll('.fixed.inset-0').forEach(el => {
+    const htmlEl = el as HTMLElement;
+    const style = window.getComputedStyle(htmlEl);
+    const isInvisible = style.opacity === '0' || style.visibility === 'hidden';
+    const isDataClosed = htmlEl.getAttribute('data-state') === 'closed';
+    
+    if ((isInvisible || isDataClosed) && htmlEl.style.pointerEvents !== 'none') {
+      console.log('[PointerEvents] Disabling pointer-events on invisible fixed overlay');
+      htmlEl.style.pointerEvents = 'none';
     }
   });
   
