@@ -127,9 +127,10 @@ function getOrCreateDebugPanel(): HTMLDivElement {
   header.innerHTML = `
     <span style="font-weight: bold; color: #ff6666;">DEBUG MODE</span>
     <div style="display: flex; gap: 8px;">
-      <button id="__debug_copy" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">Copy Log</button>
-      <button id="__debug_clear" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">Clear</button>
+      <button id="__debug_fix" style="background: #0a0; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;">Fix UI</button>
+      <button id="__debug_copy" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">Copy</button>
       <button id="__debug_minimize" style="background: #333; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px;">_</button>
+      <button id="__debug_off" style="background: #c00; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;">OFF</button>
     </div>
   `;
   debugPanel.appendChild(header);
@@ -158,9 +159,42 @@ function getOrCreateDebugPanel(): HTMLDivElement {
     if (btn) btn.textContent = isMinimized ? '+' : '_';
   });
   
-  document.getElementById('__debug_clear')?.addEventListener('click', () => {
-    debugLogHistory.length = 0;
-    if (debugLogContainer) debugLogContainer.innerHTML = '';
+  document.getElementById('__debug_fix')?.addEventListener('click', () => {
+    debugLog('FIX', 'Manual UI fix triggered');
+    
+    // Run aggressive cleanup
+    try {
+      // Call the global unlock function if available
+      if ((window as any).__ensurePointerEventsUnlocked) {
+        (window as any).__ensurePointerEventsUnlocked();
+      }
+      
+      // Force cleanup all fixed overlays with closed state
+      document.querySelectorAll('[data-state="closed"]').forEach(el => {
+        const htmlEl = el as HTMLElement;
+        const isFixed = window.getComputedStyle(htmlEl).position === 'fixed';
+        if (isFixed) {
+          debugLog('FIX', `Removing closed fixed element: ${el.tagName}`);
+          htmlEl.remove();
+        }
+      });
+      
+      // Reset pointer events on body and html
+      document.body.style.pointerEvents = '';
+      document.documentElement.style.pointerEvents = '';
+      
+      // Reset any overflow hidden that might be stuck
+      if (document.body.style.overflow === 'hidden') {
+        document.body.style.overflow = '';
+        debugLog('FIX', 'Reset body overflow');
+      }
+      
+      debugLog('FIX', 'UI fix completed');
+      alert('UI fix applied! Buttons should work now.');
+    } catch (e) {
+      debugLog('FIX', `Error during fix: ${e}`);
+      alert('Fix failed. Try refreshing the app.');
+    }
   });
   
   document.getElementById('__debug_copy')?.addEventListener('click', () => {
@@ -171,6 +205,14 @@ function getOrCreateDebugPanel(): HTMLDivElement {
       // Fallback - show the log in an alert
       alert('Copy failed. Here are the recent logs:\n\n' + debugLogHistory.slice(-10).join('\n'));
     });
+  });
+  
+  document.getElementById('__debug_off')?.addEventListener('click', () => {
+    localStorage.removeItem('debug_mode');
+    DEBUG_UI = false;
+    DEBUG_LIFECYCLE = false;
+    alert('Debug mode disabled. App will refresh.');
+    window.location.reload();
   });
   
   return debugPanel;
