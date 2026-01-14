@@ -11,8 +11,8 @@ import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
 import LocationModal from "./modals/location-modal";
 
-// Simple dropdown that doesn't use Radix portals/focus traps
-// This is a test to see if Radix is causing the WebView freeze issue
+// Ultra-simple dropdown - no event listeners, no effects, just state-based rendering
+// Testing if ANY complexity in dropdown is causing WebView freeze
 function SimpleDropdown({ 
   trigger, 
   children, 
@@ -24,44 +24,29 @@ function SimpleDropdown({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    if (!isOpen) return;
-    
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        onOpenChange(false);
-      }
-    };
-    
-    // Use setTimeout to avoid immediate close from the same click that opened it
-    const timer = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('touchstart', handleClickOutside);
-    }, 10);
-    
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('touchstart', handleClickOutside);
-    };
-  }, [isOpen, onOpenChange]);
-  
   return (
-    <div ref={dropdownRef} className="relative">
-      <div onClick={() => onOpenChange(!isOpen)}>
+    <div className="relative">
+      <div 
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpenChange(!isOpen);
+        }}
+      >
         {trigger}
       </div>
       {isOpen && (
-        <div 
-          className="absolute top-full left-0 mt-1 z-50 min-w-[12rem] overflow-hidden rounded-xl border border-blush/20 bg-white p-1 shadow-lg"
-          style={{ 
-            animation: 'fadeIn 0.15s ease-out',
-          }}
-        >
-          {children}
-        </div>
+        <>
+          {/* Backdrop to close on tap outside */}
+          <div 
+            className="fixed inset-0 z-40"
+            onClick={() => onOpenChange(false)}
+          />
+          <div 
+            className="absolute top-full left-0 mt-1 z-50 min-w-[12rem] overflow-hidden rounded-xl border border-blush/20 bg-white p-1 shadow-lg"
+          >
+            {children}
+          </div>
+        </>
       )}
     </div>
   );
