@@ -1,5 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -44,6 +44,13 @@ export default function BottomNavigation({
 
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
+  
+  // Handle navigation using onPointerDown - same event type that Radix uses
+  // This works in WebViews where onClick stops working after resume
+  const handlePointerDown = useCallback((id: Section) => (e: React.PointerEvent) => {
+    e.preventDefault();
+    onSectionChangeRef.current(id);
+  }, []);
 
   if (isKeyboardOpen) {
     return null;
@@ -81,7 +88,7 @@ export default function BottomNavigation({
             return (
               <button
                 key={id}
-                onClick={() => onSectionChange(id)}
+                onPointerDown={handlePointerDown(id)}
                 data-action={`nav-${id}`}
                 data-testid={`nav-${id}`}
                 className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${

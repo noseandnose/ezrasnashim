@@ -1,127 +1,77 @@
 import { createRoot } from "react-dom/client";
-import { useState, useEffect } from "react";
 import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
 
-// WebView recovery wrapper - forces React remount when app resumes from background
-// This fixes FlutterFlow WebView issue where React's event delegation breaks after backgrounding
-function WebViewRecoveryWrapper() {
-  const [remountKey, setRemountKey] = useState(0);
+// Auto-reload workaround for FlutterFlow WebView freeze bug
+// When WebView resumes from background, React click events stop working
+// This detects the resume and forces a reload to restore functionality
+if (typeof window !== 'undefined') {
+  let lastVisibilityTime = Date.now();
+  let wasHidden = false;
+  const BACKGROUND_THRESHOLD = 3000; // Only reload if background for 3+ seconds
   
-  useEffect(() => {
-    // Detect if running inside a mobile app webview
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isIOS = /iphone|ipod|ipad/.test(userAgent);
-    const isAndroid = /android/.test(userAgent);
-    
-    const hasFlutterMarkers = 
-      userAgent.includes('flutter') || 
-      userAgent.includes('flutterflow') ||
-      userAgent.includes('fxlauncher') ||
-      userAgent.includes('dart');
-    
-    const hasWebkitMessageHandlers = !!(window as any).webkit?.messageHandlers;
-    
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true;
-    
-    const isAndroidWebview = isAndroid && !isStandalone && (
-      document.referrer.includes('android-app://') ||
-      userAgent.includes('; wv)') ||
-      userAgent.includes('wv)') ||
-      userAgent.includes('webview') ||
-      (userAgent.includes('chrome') && /version\/\d/.test(userAgent))
-    );
-    
-    const isIOSWebview = isIOS && !isStandalone && (
-      hasWebkitMessageHandlers ||
-      (!userAgent.includes('safari') && userAgent.includes('applewebkit'))
-    );
-    
-    const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;
-    
-    if (!isInWebview) {
-      return; // Only run recovery logic in WebViews
-    }
-    
-    console.log('[WebView] Recovery wrapper active');
-    
-    let lastBackgroundTime: number | null = null;
-    const BACKGROUND_THRESHOLD = 5000; // 5 seconds before triggering remount
-    
-    const markBackground = () => {
-      lastBackgroundTime = Date.now();
-      console.log('[WebView] App backgrounded');
-    };
-    
-    const handleResume = () => {
-      if (!lastBackgroundTime) return;
+  // Detect when page becomes hidden (app goes to background)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      wasHidden = true;
+      lastVisibilityTime = Date.now();
+    } else if (wasHidden) {
+      // Page is now visible again after being hidden
+      const timeInBackground = Date.now() - lastVisibilityTime;
       
-      const timeInBackground = Date.now() - lastBackgroundTime;
-      lastBackgroundTime = null;
-      
+      // Only reload if we were in background long enough for WebView to freeze
       if (timeInBackground > BACKGROUND_THRESHOLD) {
-        console.log('[WebView] Forcing React remount after', Math.round(timeInBackground / 1000), 's in background');
-        setRemountKey(prev => prev + 1);
+        console.log('[WebView Recovery] Reloading after background resume...');
+        // Small delay to let WebView stabilize before reload
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       }
-    };
-    
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        markBackground();
-      } else if (document.visibilityState === 'visible') {
-        handleResume();
-      }
-    };
-    
-    const handlePageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) {
-        handleResume();
-      }
-    };
-    
-    const handleFocus = () => {
-      handleResume();
-    };
-    
-    const handleBlur = () => {
-      markBackground();
-    };
-    
-    // rAF fallback for WebViews that don't fire visibility events correctly
-    let lastRafTime = Date.now();
-    let rafId: number;
-    const rafCheck = () => {
-      const now = Date.now();
-      const elapsed = now - lastRafTime;
-      
-      if (elapsed > BACKGROUND_THRESHOLD) {
-        console.log('[WebView] rAF detected', Math.round(elapsed / 1000), 's gap, forcing remount');
-        setRemountKey(prev => prev + 1);
-      }
-      
-      lastRafTime = now;
-      rafId = requestAnimationFrame(rafCheck);
-    };
-    rafId = requestAnimationFrame(rafCheck);
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('pageshow', handlePageShow);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('blur', handleBlur);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('pageshow', handlePageShow as EventListener);
-      window.removeEventListener('focus', handleFocus);
-      window.removeEventListener('blur', handleBlur);
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
+      wasHidden = false;
+    }
+  }, { capture: true });
   
-  return <App key={remountKey} />;
+  // Also handle pageshow event for bfcache scenarios
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
+      // Page was restored from bfcache - always reload
+      console.log('[WebView Recovery] Reloading from bfcache...');
+      window.location.reload();
+    }
+  });
+  
+  // Emergency manual recovery: Tap 5 times quickly in top-right corner
+  let cornerTapCount = 0;
+  let lastCornerTapTime = 0;
+  const CORNER_SIZE = 50;
+  const TAP_TIMEOUT = 2000;
+  const TAPS_NEEDED = 5;
+  
+  document.addEventListener('touchstart', (e) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    
+    const isInCorner = touch.clientX > window.innerWidth - CORNER_SIZE && 
+                       touch.clientY < CORNER_SIZE;
+    
+    if (isInCorner) {
+      const now = Date.now();
+      if (now - lastCornerTapTime > TAP_TIMEOUT) {
+        cornerTapCount = 1;
+      } else {
+        cornerTapCount++;
+      }
+      lastCornerTapTime = now;
+      
+      if (cornerTapCount >= TAPS_NEEDED) {
+        cornerTapCount = 0;
+        window.location.reload();
+      }
+    }
+  }, { capture: true, passive: true });
 }
+
 
 // Minimal Safari viewport fix - CSS handles most of this now
 function setupSafariViewportFix() {
@@ -317,5 +267,4 @@ setTimeout(() => {
 }, 100);
 
 // Render app immediately without waiting for service worker or preloads
-// Use WebViewRecoveryWrapper to handle FlutterFlow WebView resume issues
-createRoot(document.getElementById("root")!).render(<WebViewRecoveryWrapper />);
+createRoot(document.getElementById("root")!).render(<App />);
