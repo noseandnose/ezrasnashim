@@ -82,63 +82,62 @@ function forceCloseAllFullscreenModals() {
 // Defensive helper: ensures pointer-events are never stuck
 // Called by App.tsx on various events to catch any stuck state
 export function ensurePointerEventsUnlocked() {
-  // ALWAYS clean up orphaned/closed Radix overlays first
-  document.querySelectorAll('[data-radix-dialog-overlay]').forEach(overlay => {
-    const parent = overlay.parentElement;
-    const hasVisibleContent = parent?.querySelector('[data-radix-dialog-content]');
-    const isClosed = overlay.getAttribute('data-state') === 'closed';
-    
-    if (!hasVisibleContent || isClosed) {
-      console.log('[PointerEvents] Removing orphaned/closed Radix overlay');
-      overlay.remove();
-    }
+  // Check for active open dialogs first
+  const activeDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
+  const activePoppers = document.querySelectorAll('[data-radix-popper-content-wrapper] [data-state="open"]');
+  const hasActiveDialogs = activeDialogs.length > 0 || activePoppers.length > 0 || activeFullscreenModals > 0;
+  
+  // If active dialogs exist, be very conservative
+  if (hasActiveDialogs) {
+    return;
+  }
+  
+  // CONSERVATIVE CLEANUP - only remove elements that are explicitly closed
+  
+  // 1. Remove CLOSED Radix dialog overlays only
+  document.querySelectorAll('[data-radix-dialog-overlay][data-state="closed"]').forEach(overlay => {
+    console.log('[PointerEvents] Removing closed Radix dialog overlay');
+    overlay.remove();
   });
   
-  // Clean up closed Radix popper wrappers (dropdowns, tooltips, etc.)
+  // 2. Remove Radix popper wrappers that contain closed content
   document.querySelectorAll('[data-radix-popper-content-wrapper]').forEach(popper => {
     const content = popper.querySelector('[data-state]');
-    const isClosed = content?.getAttribute('data-state') === 'closed';
-    if (isClosed || !content) {
-      console.log('[PointerEvents] Removing closed Radix popper');
+    if (content?.getAttribute('data-state') === 'closed') {
+      console.log('[PointerEvents] Removing closed Radix popper wrapper');
       popper.remove();
     }
   });
   
-  // Clean up any fixed overlays that are invisible but might be blocking
-  document.querySelectorAll('.fixed.inset-0').forEach(el => {
-    const htmlEl = el as HTMLElement;
-    const style = window.getComputedStyle(htmlEl);
-    const isInvisible = style.opacity === '0' || style.visibility === 'hidden';
-    const isDataClosed = htmlEl.getAttribute('data-state') === 'closed';
-    
-    if ((isInvisible || isDataClosed) && htmlEl.style.pointerEvents !== 'none') {
-      console.log('[PointerEvents] Disabling pointer-events on invisible fixed overlay');
-      htmlEl.style.pointerEvents = 'none';
-    }
-  });
-  
-  // Check for active open dialogs - if present, don't touch main container pointer events
-  const activeDialogs = document.querySelectorAll('[data-state="open"][role="dialog"]');
-  const hasActiveDialogs = activeDialogs.length > 0 || activeFullscreenModals > 0;
-  
-  if (hasActiveDialogs) {
-    return; // Don't interfere with legitimate active dialogs' pointer events
+  // 3. Remove orphaned Radix focus guards (only when NO open radix components exist)
+  const anyRadixOpen = document.querySelector('[data-state="open"]');
+  if (!anyRadixOpen) {
+    document.querySelectorAll('[data-radix-focus-guard]').forEach(el => {
+      console.log('[PointerEvents] Removing orphaned Radix focus guard');
+      el.remove();
+    });
   }
   
-  // No active modals - ensure pointer-events are unlocked on main containers
+  // 4. Clean up body/html pointer events
   if (document.body.style.pointerEvents === 'none') {
-    console.log('[PointerEvents] Unlocking stuck body pointer-events');
+    console.log('[PointerEvents] Unlocking body pointer-events');
     document.body.style.pointerEvents = '';
   }
   
   if (document.documentElement.style.pointerEvents === 'none') {
-    console.log('[PointerEvents] Unlocking stuck html pointer-events');
+    console.log('[PointerEvents] Unlocking html pointer-events');
     document.documentElement.style.pointerEvents = '';
+  }
+  
+  // 5. Reset any stuck overflow:hidden on body (scroll lock) - only if no modals open
+  if (document.body.style.overflow === 'hidden' && !anyRadixOpen) {
+    console.log('[PointerEvents] Resetting body overflow');
+    document.body.style.overflow = '';
   }
   
   const mainContent = document.querySelector('main');
   if (mainContent && (mainContent as HTMLElement).style.pointerEvents === 'none') {
-    console.log('[PointerEvents] Unlocking stuck main pointer-events');
+    console.log('[PointerEvents] Unlocking main pointer-events');
     (mainContent as HTMLElement).style.pointerEvents = '';
   }
 }
