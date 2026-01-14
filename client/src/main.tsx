@@ -1,7 +1,127 @@
 import { createRoot } from "react-dom/client";
+import { useState, useEffect } from "react";
 import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
+
+// WebView recovery wrapper - forces React remount when app resumes from background
+// This fixes FlutterFlow WebView issue where React's event delegation breaks after backgrounding
+function WebViewRecoveryWrapper() {
+  const [remountKey, setRemountKey] = useState(0);
+  
+  useEffect(() => {
+    // Detect if running inside a mobile app webview
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isIOS = /iphone|ipod|ipad/.test(userAgent);
+    const isAndroid = /android/.test(userAgent);
+    
+    const hasFlutterMarkers = 
+      userAgent.includes('flutter') || 
+      userAgent.includes('flutterflow') ||
+      userAgent.includes('fxlauncher') ||
+      userAgent.includes('dart');
+    
+    const hasWebkitMessageHandlers = !!(window as any).webkit?.messageHandlers;
+    
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true;
+    
+    const isAndroidWebview = isAndroid && !isStandalone && (
+      document.referrer.includes('android-app://') ||
+      userAgent.includes('; wv)') ||
+      userAgent.includes('wv)') ||
+      userAgent.includes('webview') ||
+      (userAgent.includes('chrome') && /version\/\d/.test(userAgent))
+    );
+    
+    const isIOSWebview = isIOS && !isStandalone && (
+      hasWebkitMessageHandlers ||
+      (!userAgent.includes('safari') && userAgent.includes('applewebkit'))
+    );
+    
+    const isInWebview = hasFlutterMarkers || isAndroidWebview || isIOSWebview;
+    
+    if (!isInWebview) {
+      return; // Only run recovery logic in WebViews
+    }
+    
+    console.log('[WebView] Recovery wrapper active');
+    
+    let lastBackgroundTime: number | null = null;
+    const BACKGROUND_THRESHOLD = 5000; // 5 seconds before triggering remount
+    
+    const markBackground = () => {
+      lastBackgroundTime = Date.now();
+      console.log('[WebView] App backgrounded');
+    };
+    
+    const handleResume = () => {
+      if (!lastBackgroundTime) return;
+      
+      const timeInBackground = Date.now() - lastBackgroundTime;
+      lastBackgroundTime = null;
+      
+      if (timeInBackground > BACKGROUND_THRESHOLD) {
+        console.log('[WebView] Forcing React remount after', Math.round(timeInBackground / 1000), 's in background');
+        setRemountKey(prev => prev + 1);
+      }
+    };
+    
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        markBackground();
+      } else if (document.visibilityState === 'visible') {
+        handleResume();
+      }
+    };
+    
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        handleResume();
+      }
+    };
+    
+    const handleFocus = () => {
+      handleResume();
+    };
+    
+    const handleBlur = () => {
+      markBackground();
+    };
+    
+    // rAF fallback for WebViews that don't fire visibility events correctly
+    let lastRafTime = Date.now();
+    let rafId: number;
+    const rafCheck = () => {
+      const now = Date.now();
+      const elapsed = now - lastRafTime;
+      
+      if (elapsed > BACKGROUND_THRESHOLD) {
+        console.log('[WebView] rAF detected', Math.round(elapsed / 1000), 's gap, forcing remount');
+        setRemountKey(prev => prev + 1);
+      }
+      
+      lastRafTime = now;
+      rafId = requestAnimationFrame(rafCheck);
+    };
+    rafId = requestAnimationFrame(rafCheck);
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pageshow', handlePageShow);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('blur', handleBlur);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pageshow', handlePageShow as EventListener);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('blur', handleBlur);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+  
+  return <App key={remountKey} />;
+}
 
 // Minimal Safari viewport fix - CSS handles most of this now
 function setupSafariViewportFix() {
@@ -197,4 +317,5 @@ setTimeout(() => {
 }, 100);
 
 // Render app immediately without waiting for service worker or preloads
-createRoot(document.getElementById("root")!).render(<App />);
+// Use WebViewRecoveryWrapper to handle FlutterFlow WebView resume issues
+createRoot(document.getElementById("root")!).render(<WebViewRecoveryWrapper />);
