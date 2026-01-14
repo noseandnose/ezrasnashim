@@ -3,35 +3,6 @@ import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
 
-// Diagnostic: Track touch/click events to understand what's happening
-// This helps debug the WebView freeze issue
-if (typeof window !== 'undefined') {
-  let touchCount = 0;
-  let clickCount = 0;
-  let lastTouchTime = 0;
-  
-  // Log at document level to see if events are even reaching the DOM
-  document.addEventListener('touchstart', (e) => {
-    touchCount++;
-    lastTouchTime = Date.now();
-    console.log('[Diagnostic] touchstart #' + touchCount, 'target:', (e.target as HTMLElement)?.tagName, (e.target as HTMLElement)?.className?.slice(0, 50));
-  }, { capture: true, passive: true });
-  
-  document.addEventListener('touchend', (e) => {
-    const touchDuration = Date.now() - lastTouchTime;
-    console.log('[Diagnostic] touchend after', touchDuration + 'ms', 'target:', (e.target as HTMLElement)?.tagName);
-  }, { capture: true, passive: true });
-  
-  document.addEventListener('click', (e) => {
-    clickCount++;
-    console.log('[Diagnostic] click #' + clickCount, 'target:', (e.target as HTMLElement)?.tagName, (e.target as HTMLElement)?.className?.slice(0, 50));
-  }, { capture: true });
-  
-  // Check if pointer events are being blocked
-  document.addEventListener('pointerdown', (e) => {
-    console.log('[Diagnostic] pointerdown', 'target:', (e.target as HTMLElement)?.tagName, 'pointerType:', e.pointerType);
-  }, { capture: true, passive: true });
-}
 
 // Minimal Safari viewport fix - CSS handles most of this now
 function setupSafariViewportFix() {

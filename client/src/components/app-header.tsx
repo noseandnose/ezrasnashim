@@ -5,17 +5,89 @@ import { useAuth } from "@/hooks/use-auth";
 import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
 import LocationModal from "./modals/location-modal";
+
+// Simple dropdown that doesn't use Radix portals/focus traps
+// This is a test to see if Radix is causing the WebView freeze issue
+function SimpleDropdown({ 
+  trigger, 
+  children, 
+  isOpen, 
+  onOpenChange 
+}: { 
+  trigger: React.ReactNode;
+  children: React.ReactNode;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (!isOpen) return;
+    
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        onOpenChange(false);
+      }
+    };
+    
+    // Use setTimeout to avoid immediate close from the same click that opened it
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+    }, 10);
+    
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [isOpen, onOpenChange]);
+  
+  return (
+    <div ref={dropdownRef} className="relative">
+      <div onClick={() => onOpenChange(!isOpen)}>
+        {trigger}
+      </div>
+      {isOpen && (
+        <div 
+          className="absolute top-full left-0 mt-1 z-50 min-w-[12rem] overflow-hidden rounded-xl border border-blush/20 bg-white p-1 shadow-lg"
+          style={{ 
+            animation: 'fadeIn 0.15s ease-out',
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SimpleMenuItem({ 
+  children, 
+  onClick,
+  className = "",
+  testId
+}: { 
+  children: React.ReactNode;
+  onClick?: () => void;
+  className?: string;
+  testId?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      className={`w-full flex items-center rounded-lg px-2 py-2 text-sm text-left transition-colors hover:bg-blush/10 active:bg-blush/20 ${className}`}
+    >
+      {children}
+    </button>
+  );
+}
 
 
 export default function AppHeader() {
@@ -30,6 +102,7 @@ export default function AppHeader() {
   const [showEasterEgg, setShowEasterEgg] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [lastClickTime, setLastClickTime] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
   
   // Use install highlight hook for PWA installation guidance
   const {
@@ -109,8 +182,10 @@ export default function AppHeader() {
       >
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+            <SimpleDropdown
+              isOpen={menuOpen}
+              onOpenChange={setMenuOpen}
+              trigger={
                 <button
                   className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
                     (shouldHighlight || (!isLoading && !isAuthenticated)) ? 'animate-pulse border-2 border-blush shadow-lg' : ''
@@ -129,106 +204,89 @@ export default function AppHeader() {
                 >
                   <Menu className="h-5 w-5 text-black/70" />
                 </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-48">
-                {!isLoading && !isAuthenticated && (
-                  <DropdownMenuItem
-                    onClick={() => setLocation('/login')}
-                    className="cursor-pointer"
-                    data-testid="menu-item-login"
-                    data-action="menu-login"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Sign Up / Log In
-                  </DropdownMenuItem>
-                )}
-                {isAuthenticated && user && (
-                  <DropdownMenuItem
-                    onClick={() => setLocation("/profile")}
-                    className="cursor-pointer"
-                    data-testid="menu-item-profile"
-                    data-action="menu-profile"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    My Profile
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => setLocation("/statistics")}
-                  className="cursor-pointer"
-                  data-testid="menu-item-analytics"
-                  data-action="menu-analytics"
+              }
+            >
+              {!isLoading && !isAuthenticated && (
+                <SimpleMenuItem
+                  onClick={() => { setMenuOpen(false); setLocation('/login'); }}
+                  testId="menu-item-login"
                 >
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Analytics
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openModal('date-calculator-fullscreen', 'table')}
-                  className="cursor-pointer"
-                  data-testid="menu-item-date-converter"
-                  data-action="menu-date-converter"
+                  <User className="h-5 w-5 mr-2" />
+                  Sign Up / Log In
+                </SimpleMenuItem>
+              )}
+              {isAuthenticated && user && (
+                <SimpleMenuItem
+                  onClick={() => { setMenuOpen(false); setLocation("/profile"); }}
+                  testId="menu-item-profile"
                 >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Hebrew Date Converter
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleShare}
-                  className="cursor-pointer"
-                  data-testid="menu-item-share"
-                  data-action="menu-share"
+                  <User className="h-5 w-5 mr-2" />
+                  My Profile
+                </SimpleMenuItem>
+              )}
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); setLocation("/statistics"); }}
+                testId="menu-item-analytics"
+              >
+                <BarChart3 className="h-5 w-5 mr-2" />
+                Analytics
+              </SimpleMenuItem>
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); openModal('date-calculator-fullscreen', 'table'); }}
+                testId="menu-item-date-converter"
+              >
+                <Calendar className="h-5 w-5 mr-2" />
+                Hebrew Date Converter
+              </SimpleMenuItem>
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); handleShare(); }}
+                testId="menu-item-share"
+              >
+                <Share2 className="h-5 w-5 mr-2" />
+                Share
+              </SimpleMenuItem>
+              {!isStandalone && !isWebview && (
+                <SimpleMenuItem
+                  onClick={() => { setMenuOpen(false); handleInstallClick(); }}
+                  className={
+                    shouldHighlight 
+                      ? 'bg-blush/20 font-bold animate-pulse border-2 border-blush' 
+                      : canInstall 
+                      ? 'bg-blush/10 font-semibold' 
+                      : ''
+                  }
+                  testId="menu-item-install"
                 >
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Share
-                </DropdownMenuItem>
-                {!isStandalone && !isWebview && (
-                  <DropdownMenuItem
-                    onClick={handleInstallClick}
-                    className={`cursor-pointer ${
-                      shouldHighlight 
-                        ? 'bg-blush/20 font-bold animate-pulse border-2 border-blush' 
-                        : canInstall 
-                        ? 'bg-blush/10 font-semibold' 
-                        : ''
-                    }`}
-                    data-testid="menu-item-install"
-                    data-action="menu-install"
-                  >
-                    {isIOS ? (
-                      <Share className="h-5 w-5 mr-2" />
-                    ) : (
-                      <Share2 className="h-5 w-5 mr-2" />
-                    )}
-                    Install App
-                  </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => window.open('https://tally.so/r/3xqAEy', '_blank')}
-                  className="cursor-pointer"
-                  data-testid="menu-item-feedback"
-                >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Community Feedback
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setShowLocationModal(true)}
-                  className="cursor-pointer"
-                  data-testid="menu-item-location"
-                  data-action="menu-location"
-                >
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Change Location
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => openModal('about', 'about')}
-                  className="cursor-pointer"
-                  data-testid="menu-item-info"
-                  data-action="menu-info"
-                >
-                  <Info className="h-5 w-5 mr-2" />
-                  Info
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                  {isIOS ? (
+                    <Share className="h-5 w-5 mr-2" />
+                  ) : (
+                    <Share2 className="h-5 w-5 mr-2" />
+                  )}
+                  Install App
+                </SimpleMenuItem>
+              )}
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); window.open('https://tally.so/r/3xqAEy', '_blank'); }}
+                testId="menu-item-feedback"
+              >
+                <MessageSquare className="h-5 w-5 mr-2" />
+                Community Feedback
+              </SimpleMenuItem>
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); setShowLocationModal(true); }}
+                testId="menu-item-location"
+              >
+                <MapPin className="h-5 w-5 mr-2" />
+                Change Location
+              </SimpleMenuItem>
+              <SimpleMenuItem
+                onClick={() => { setMenuOpen(false); openModal('about', 'about'); }}
+                testId="menu-item-info"
+              >
+                <Info className="h-5 w-5 mr-2" />
+                Info
+              </SimpleMenuItem>
+            </SimpleDropdown>
           </div>
           <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
