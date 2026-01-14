@@ -19,7 +19,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
-import { forceCloseAllFullscreenModals, ensurePointerEventsUnlocked } from "@/components/ui/fullscreen-modal";
+import { forceCloseAllFullscreenModals } from "@/components/ui/fullscreen-modal";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -265,47 +265,6 @@ function Router() {
       if (resumeDebounceTimer) {
         clearTimeout(resumeDebounceTimer);
       }
-    };
-  }, []);
-  
-  // DEFENSIVE: Ensure pointer-events are never stuck after modal interactions
-  // This catches edge cases where Radix dialogs or fullscreen modals leave pointer-events locked
-  useEffect(() => {
-    // Run initial check after mount
-    const initialCheck = setTimeout(() => {
-      ensurePointerEventsUnlocked();
-    }, 100);
-    
-    // Check on visibility change (app resume)
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') {
-        // Delay slightly to let modal state settle
-        setTimeout(ensurePointerEventsUnlocked, 50);
-      }
-    };
-    
-    // Check on touch/pointer end events to catch post-modal-close stuck states
-    const handleInteractionEnd = () => {
-      // Small delay to let any closing animations finish
-      setTimeout(ensurePointerEventsUnlocked, 100);
-    };
-    
-    // Check on focus (tab/app switch)
-    const handleFocus = () => {
-      setTimeout(ensurePointerEventsUnlocked, 50);
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibility);
-    document.addEventListener('touchend', handleInteractionEnd, { capture: true, passive: true });
-    document.addEventListener('pointerup', handleInteractionEnd, { capture: true, passive: true });
-    window.addEventListener('focus', handleFocus);
-    
-    return () => {
-      clearTimeout(initialCheck);
-      document.removeEventListener('visibilitychange', handleVisibility);
-      document.removeEventListener('touchend', handleInteractionEnd, { capture: true } as EventListenerOptions);
-      document.removeEventListener('pointerup', handleInteractionEnd, { capture: true } as EventListenerOptions);
-      window.removeEventListener('focus', handleFocus);
     };
   }, []);
   
