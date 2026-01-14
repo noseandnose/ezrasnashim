@@ -1,4 +1,4 @@
-import { Book, Heart, Shield, BookOpen, Scroll, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy } from "lucide-react";
+import { Shield, BookOpen, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -97,7 +97,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const torahItems = [
     {
       id: 'chizuk',
-      icon: Heart,
+      icon: Dumbbell,
       title: 'Daily Chizuk',
       subtitle: '5 minute inspiration',
       gradient: 'bg-white',
@@ -119,7 +119,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
     },
     {
       id: 'halacha',
-      icon: Book,
+      icon: Scale,
       title: 'Learn Shabbos',
       subtitle: 'Halachic insights',
       gradient: 'bg-white',
@@ -159,7 +159,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                }}>
             <div className="flex items-center gap-2 mb-3">
               <div className="bg-gradient-feminine p-1.5 rounded-full">
-                <Scroll className="text-white" size={16} />
+                <Quote className="text-white" size={16} />
               </div>
               <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
               {pirkeiAvot && (

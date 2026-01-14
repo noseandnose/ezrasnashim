@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen, Music } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -684,7 +684,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               {isModalComplete('nishmas-campaign') ? (
                 <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Heart className="text-black" size={12} />
+                <Music className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black">Nishmas Kol Chai</p>
             </div>

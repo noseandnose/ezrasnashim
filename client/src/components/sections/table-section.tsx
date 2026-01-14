@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, Heart, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check } from "lucide-react";
+import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -408,7 +408,7 @@ export default function TableSection() {
               {isModalComplete('marriage-insights') ? (
                 <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               ) : (
-                <Heart className="text-black" size={12} />
+                <Gem className="text-black" size={12} />
               )}
               <p className="platypi-bold text-xs text-black" data-testid="text-marriage-insights-title">Marriage Insights</p>
             </div>
