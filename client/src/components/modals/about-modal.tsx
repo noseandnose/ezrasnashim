@@ -93,8 +93,14 @@ export default function AboutModal() {
           <img 
             src={projectOfImage} 
             alt="Project of JustOneChesed" 
-            className="h-8 opacity-80 cursor-pointer hover:opacity-60 transition-opacity" 
+            className="h-8 opacity-80 cursor-pointer hover:opacity-60 transition-opacity select-none" 
+            style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
+            draggable={false}
             onClick={handleChesedLogoTap}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleChesedLogoTap(e as any);
+            }}
           />
         </div>
 
