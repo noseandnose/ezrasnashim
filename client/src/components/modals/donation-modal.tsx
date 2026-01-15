@@ -140,7 +140,7 @@ export default function DonationModal() {
               {quickAmounts.map((quickAmount) => (
                 <button
                   key={quickAmount.value}
-                  onClick={() => handleAmountSelect(quickAmount.value)}
+                  onPointerDown={() => handleAmountSelect(quickAmount.value)}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     amount === quickAmount.value
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -175,7 +175,7 @@ export default function DonationModal() {
           {/* Donation Button */}
           <div>
             <Button
-              onClick={handleDonate}
+              onPointerDown={handleDonate}
               disabled={createPaymentMutation.isPending || (isCustom ? !customAmount || parseFloat(customAmount) <= 0 : !amount || parseFloat(amount) <= 0)}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
             >

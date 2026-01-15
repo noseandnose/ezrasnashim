@@ -100,7 +100,7 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
         
         <div className="flex items-center gap-4">
           <button
-            onClick={handleLikeClick}
+            onPointerDown={handleLikeClick}
             disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'like' 
@@ -114,7 +114,7 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
           </button>
           
           <button
-            onClick={handleDislikeClick}
+            onPointerDown={handleDislikeClick}
             disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'dislike' 

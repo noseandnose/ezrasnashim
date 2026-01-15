@@ -211,17 +211,17 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
   return (
     <div 
       className="fixed inset-0 bg-black/50 z-[9999] flex items-center justify-center p-4"
-      onClick={onClose}
+      onPointerDown={onClose}
     >
       <div 
         className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl"
         data-bridge-container
-        onClick={(e) => e.stopPropagation()}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-black platypi-bold">Direct your Heart Home</h3>
           <button
-            onClick={onClose}
+            onPointerDown={onClose}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
             aria-label="Close"
           >
@@ -239,7 +239,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
             <div className="bg-red-50 rounded-2xl p-4 mb-4">
               <p className="text-red-700 text-sm">{loadError}</p>
             </div>
-            <Button onClick={() => window.location.reload()} variant="outline">
+            <Button onPointerDown={() => window.location.reload()} variant="outline">
               Refresh Page
             </Button>
           </div>
@@ -252,7 +252,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
             <div className="bg-red-50 rounded-2xl p-4 mb-4">
               <p className="text-red-700 text-sm">{state.error}</p>
             </div>
-            <Button onClick={handleRetry} variant="outline">
+            <Button onPointerDown={handleRetry} variant="outline">
               Try Again
             </Button>
           </div>
@@ -269,7 +269,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
                 : 'Please enable compass access'}
             </p>
             <Button
-              onClick={handleEnableCompass}
+              onPointerDown={handleEnableCompass}
               className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
             >
               {/Android/i.test(navigator.userAgent) ? 'Activate Sensors' : 'Enable Compass'}

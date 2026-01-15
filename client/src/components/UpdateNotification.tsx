@@ -75,7 +75,7 @@ export default function UpdateNotification() {
               {updateInfo?.releaseNotes && (
                 <div className="mt-2">
                   <button
-                    onClick={() => setIsExpanded(!isExpanded)}
+                    onPointerDown={() => setIsExpanded(!isExpanded)}
                     className="text-xs underline opacity-90 hover:opacity-100"
                   >
                     {isExpanded ? 'Hide' : 'Show'} what's new
@@ -92,7 +92,7 @@ export default function UpdateNotification() {
 
           <div className="flex items-center gap-2 flex-shrink-0">
             <button
-              onClick={refreshApp}
+              onPointerDown={refreshApp}
               className="bg-white text-blush px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-100 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-1"
             >
               <RefreshCw className="h-4 w-4" />
@@ -100,7 +100,7 @@ export default function UpdateNotification() {
             </button>
             {!updateInfo?.isCritical && (
               <button
-                onClick={dismissUpdate}
+                onPointerDown={dismissUpdate}
                 className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 aria-label="Dismiss update notification"
               >

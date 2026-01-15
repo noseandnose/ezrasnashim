@@ -130,7 +130,7 @@ export default function AdminRecipes() {
                   placeholder="Enter admin password"
                 />
               </div>
-              <Button onClick={handleLogin} className="w-full">
+              <Button onPointerDown={handleLogin} className="w-full">
                 Login
               </Button>
               <Link href="/">
@@ -302,7 +302,7 @@ export default function AdminRecipes() {
               </div>
 
               <Button 
-                onClick={handleSubmit} 
+                onPointerDown={handleSubmit} 
                 disabled={isSaving || !formData.title || !formData.date}
                 className="w-full"
               >

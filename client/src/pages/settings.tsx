@@ -228,7 +228,7 @@ export default function SettingsPage() {
       
       <div className="relative z-10 max-w-md mx-auto p-4 pt-6 pb-24">
         <button 
-          onClick={() => setLocation('/profile')}
+          onPointerDown={() => setLocation('/profile')}
           className="flex items-center gap-2 text-black/70 hover:text-black mb-6"
         >
           <ArrowLeft size={20} />
@@ -261,7 +261,7 @@ export default function SettingsPage() {
                     {predictions.map((prediction) => (
                       <button
                         key={prediction.place_id}
-                        onClick={() => handlePlaceSelect(prediction)}
+                        onPointerDown={() => handlePlaceSelect(prediction)}
                         className="w-full px-4 py-3 text-left hover:bg-gray-50 border-b border-gray-100 last:border-0"
                       >
                         <p className="platypi-regular text-sm text-black">{prediction.description}</p>
@@ -285,7 +285,7 @@ export default function SettingsPage() {
               
               <div className="flex gap-2 mt-4">
                 <Button
-                  onClick={handleSave}
+                  onPointerDown={handleSave}
                   disabled={isSaving || !selectedLocation}
                   className="flex-1 bg-gradient-feminine text-white"
                 >
@@ -298,7 +298,7 @@ export default function SettingsPage() {
                 
                 {user?.preferredLocation && (
                   <Button
-                    onClick={handleClearLocation}
+                    onPointerDown={handleClearLocation}
                     disabled={isSaving}
                     variant="outline"
                     className="flex items-center gap-1"

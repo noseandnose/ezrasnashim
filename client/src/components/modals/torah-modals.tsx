@@ -183,7 +183,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           {/* Fullscreen button in top left */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               if (halachaContent) {
                 setFullscreenContent({
                   isOpen: true,
@@ -228,7 +228,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       
                       <div className="heart-explosion-container">
                         <Button 
-                          onClick={isModalComplete('halacha') ? undefined : () => {
+                          onPointerDown={isModalComplete('halacha') ? undefined : () => {
                             trackModalComplete('halacha');
                             markModalComplete('halacha');
                             setShowExplosion(true);
@@ -281,14 +281,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
                     className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                   >
                     <span className="text-xs platypi-medium">-</span>
                   </button>
                   <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
                   <button
-                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
                     className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                   >
                     <span className="text-xs platypi-medium">+</span>
@@ -323,7 +323,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {halachaContent?.footnotes && (
             <div className="mb-1">
               <button
-                onClick={() => setShowFootnotes(!showFootnotes)}
+                onPointerDown={() => setShowFootnotes(!showFootnotes)}
                 className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -363,7 +363,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('halacha') ? undefined : handleTorahComplete}
+              onPointerDown={isModalComplete('halacha') ? undefined : handleTorahComplete}
               disabled={isModalComplete('halacha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('halacha') 
@@ -386,7 +386,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {/* Fullscreen button */}
           {emunaContent && !emunaContent.audioUrl && (
             <button
-              onClick={() => {
+              onPointerDown={() => {
                 setFullscreenContent({
                   isOpen: true,
                   title: 'Daily Emuna',
@@ -408,7 +408,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       
                       <div className="heart-explosion-container">
                         <Button 
-                          onClick={isModalComplete('emuna') ? undefined : () => {
+                          onPointerDown={isModalComplete('emuna') ? undefined : () => {
                             trackModalComplete('emuna');
                             markModalComplete('emuna');
                             setShowExplosion(true);
@@ -523,7 +523,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('emuna') ? undefined : handleTorahComplete}
+              onPointerDown={isModalComplete('emuna') ? undefined : handleTorahComplete}
               disabled={isModalComplete('emuna')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('emuna') 
@@ -591,7 +591,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('chizuk') ? undefined : handleTorahComplete}
+              onPointerDown={isModalComplete('chizuk') ? undefined : handleTorahComplete}
               disabled={isModalComplete('chizuk')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('chizuk') 
@@ -662,7 +662,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('parsha-vort') ? undefined : handleTorahComplete}
+              onPointerDown={isModalComplete('parsha-vort') ? undefined : handleTorahComplete}
               disabled={isModalComplete('parsha-vort')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('parsha-vort') 
@@ -684,7 +684,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           {/* Fullscreen button */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               if (featuredContent) {
                 setFullscreenContent({
                   isOpen: true,
@@ -729,7 +729,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       
                       <div className="heart-explosion-container">
                         <Button 
-                          onClick={isModalComplete('featured') ? undefined : () => {
+                          onPointerDown={isModalComplete('featured') ? undefined : () => {
                             trackModalComplete('featured');
                             markModalComplete('featured');
                             setShowExplosion(true);
@@ -784,14 +784,14 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               <div className="flex items-center justify-center">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                    onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
                     className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                   >
                     <span className="text-xs platypi-medium">-</span>
                   </button>
                   <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
                   <button
-                    onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                    onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
                     className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                   >
                     <span className="text-xs platypi-medium">+</span>
@@ -826,7 +826,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           {featuredContent?.footnotes && (
             <div className="mb-1">
               <button
-                onClick={() => setShowFootnotes(!showFootnotes)}
+                onPointerDown={() => setShowFootnotes(!showFootnotes)}
                 className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
               >
                 <div className="flex items-center justify-between">
@@ -873,7 +873,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('featured') ? undefined : handleTorahComplete}
+              onPointerDown={isModalComplete('featured') ? undefined : handleTorahComplete}
               disabled={isModalComplete('featured')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('featured') 
@@ -915,7 +915,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onClick={handleTorahComplete} 
+              onPointerDown={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
             >
               Completed
@@ -966,7 +966,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 {halachaContent.footnotes && (
                   <div className="mt-4 flex justify-center">
                     <button
-                      onClick={() => setShowFootnotes(!showFootnotes)}
+                      onPointerDown={() => setShowFootnotes(!showFootnotes)}
                       className="text-xs platypi-medium text-black/60 hover:text-black transition-colors underline"
                     >
                       {showFootnotes ? 'Hide Footnotes' : 'Show Footnotes'}
@@ -986,7 +986,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onClick={isModalComplete('halacha') ? undefined : () => {
+                  onPointerDown={isModalComplete('halacha') ? undefined : () => {
                     trackModalComplete('halacha');
                     markModalComplete('halacha');
                     setShowExplosion(true);
@@ -1086,7 +1086,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 {featuredContent.footnotes && (
                   <div className="mt-4 flex justify-center">
                     <button
-                      onClick={() => setShowFootnotes(!showFootnotes)}
+                      onPointerDown={() => setShowFootnotes(!showFootnotes)}
                       className="text-xs platypi-medium text-black/60 hover:text-black transition-colors underline"
                     >
                       {showFootnotes ? 'Hide Footnotes' : 'Show Footnotes'}
@@ -1106,7 +1106,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onClick={isModalComplete('featured') ? undefined : () => {
+                  onPointerDown={isModalComplete('featured') ? undefined : () => {
                     trackModalComplete('featured');
                     markModalComplete('featured');
                     setShowExplosion(true);
@@ -1185,7 +1185,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 {/* Complete button */}
                 <div className="heart-explosion-container flex-1">
                   <Button 
-                    onClick={isModalComplete('gems-of-gratitude') ? undefined : () => {
+                    onPointerDown={isModalComplete('gems-of-gratitude') ? undefined : () => {
                       trackModalComplete('gems-of-gratitude');
                       markModalComplete('gems-of-gratitude');
                       setShowExplosion(true);
@@ -1218,7 +1218,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 
                 {/* Tehillim 100 button - exciting style */}
                 <Button 
-                  onClick={() => {
+                  onPointerDown={() => {
                     trackModalComplete('gems-of-gratitude');
                     markModalComplete('gems-of-gratitude');
                     completeTask('torah');
@@ -1300,7 +1300,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                 ) : (
                   <div className="flex gap-3">
                     <Button 
-                      onClick={() => {
+                      onPointerDown={() => {
                         trackModalComplete('torah-challenge');
                         markModalComplete('torah-challenge');
                         setShowExplosion(true);
@@ -1324,7 +1324,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       Complete
                     </Button>
                     <Button 
-                      onClick={() => {
+                      onPointerDown={() => {
                         trackModalComplete('torah-challenge');
                         markModalComplete('torah-challenge');
                         setShowExplosion(true);

@@ -103,7 +103,7 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
     <div className="fixed inset-0 bg-black/95 p-0 h-screen w-screen border-0" style={{ zIndex: 2147483647 }}>
       {/* Close Button */}
         <button
-          onClick={onClose}
+          onPointerDown={onClose}
           className="absolute top-4 right-4 z-[101] bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
         >
           <X className="w-6 h-6" />
@@ -114,7 +114,7 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
           <>
             {currentIndex > 0 && (
               <button
-                onClick={goToPrevious}
+                onPointerDown={goToPrevious}
                 className="absolute left-4 top-1/2 -translate-y-1/2 z-[101] bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -123,7 +123,7 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
             
             {currentIndex < images.length - 1 && (
               <button
-                onClick={goToNext}
+                onPointerDown={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-[101] bg-black/50 hover:bg-black/70 text-white rounded-full p-2 transition-colors"
               >
                 <ChevronRight className="w-6 h-6" />
@@ -151,7 +151,7 @@ export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: 
             src={images[currentIndex]}
             alt={`Image ${currentIndex + 1}`}
             className="max-w-full max-h-full object-contain cursor-pointer select-none"
-            onClick={handleImageClick}
+            onPointerDown={handleImageClick}
             onDoubleClick={onClose}
             draggable={false}
           />

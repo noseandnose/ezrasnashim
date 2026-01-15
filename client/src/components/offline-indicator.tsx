@@ -50,7 +50,7 @@ export function OfflineIndicator() {
     if (!isOnline && dismissed) {
       return (
         <button
-          onClick={() => setDismissed(false)}
+          onPointerDown={() => setDismissed(false)}
           className="fixed top-16 right-4 z-50 p-2 rounded-full bg-orange-100/90 dark:bg-orange-900/90 shadow-lg border border-orange-200 dark:border-orange-700 transition-all duration-300 hover:scale-105"
           data-testid="status-offline-mini"
           aria-label="You're offline - tap for details"
@@ -87,7 +87,7 @@ export function OfflineIndicator() {
         </div>
         {!isOnline && (
           <button
-            onClick={() => setDismissed(true)}
+            onPointerDown={() => setDismissed(true)}
             className="p-1 rounded-full hover:bg-orange-200/50 dark:hover:bg-orange-700/50 transition-colors"
             aria-label="Dismiss offline notification"
             data-testid="button-dismiss-offline"

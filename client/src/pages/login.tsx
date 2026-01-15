@@ -49,7 +49,7 @@ export default function Login() {
         >
           <div className="flex items-center h-12">
             <button 
-              onClick={() => setLocation("/")} 
+              onPointerDown={() => setLocation("/")} 
               className="p-2 -ml-2 text-black"
               data-testid="button-back"
             >
@@ -73,7 +73,7 @@ export default function Login() {
               User accounts are not yet available. Check back soon!
             </p>
             <Button 
-              onClick={() => setLocation("/")}
+              onPointerDown={() => setLocation("/")}
               className="bg-blush hover:bg-blush/90 text-white"
             >
               Return Home
@@ -148,7 +148,7 @@ export default function Login() {
       >
         <div className="flex items-center h-12">
           <button 
-            onClick={() => setLocation("/")} 
+            onPointerDown={() => setLocation("/")} 
             className="p-2 -ml-2 text-black"
             data-testid="button-back"
           >
@@ -277,7 +277,7 @@ export default function Login() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onPointerDown={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -303,7 +303,7 @@ export default function Login() {
             {mode === 'login' && (
               <>
                 <button 
-                  onClick={() => setMode('forgot')}
+                  onPointerDown={() => setMode('forgot')}
                   className="text-blush hover:underline"
                   data-testid="link-forgot-password"
                 >
@@ -312,7 +312,7 @@ export default function Login() {
                 <p className="mt-2 text-gray-600">
                   Don't have an account?{' '}
                   <button 
-                    onClick={() => setMode('signup')}
+                    onPointerDown={() => setMode('signup')}
                     className="text-blush hover:underline font-medium"
                     data-testid="link-signup"
                   >
@@ -325,7 +325,7 @@ export default function Login() {
               <p className="text-gray-600">
                 Already have an account?{' '}
                 <button 
-                  onClick={() => setMode('login')}
+                  onPointerDown={() => setMode('login')}
                   className="text-blush hover:underline font-medium"
                   data-testid="link-login"
                 >
@@ -335,7 +335,7 @@ export default function Login() {
             )}
             {mode === 'forgot' && (
               <button 
-                onClick={() => setMode('login')}
+                onPointerDown={() => setMode('login')}
                 className="text-blush hover:underline"
                 data-testid="link-back-to-login"
               >

@@ -33,7 +33,7 @@ export default function TimesSection() {
             </div>
             <button 
               className="text-xs text-blush cursor-pointer hover:text-blush/80 hover:bg-blush/10 px-2 py-1 rounded-lg transition-colors border border-blush/30 platypi-medium"
-              onClick={() => {
+              onPointerDown={() => {
 
                 openModal('location', 'times');
               }}
@@ -82,7 +82,7 @@ export default function TimesSection() {
         {/* Hebrew Date Calculator */}
         <div 
           className="content-card rounded-2xl p-4 cursor-pointer"
-          onClick={() => openModal('date-calculator-fullscreen', 'times')}
+          onPointerDown={() => openModal('date-calculator-fullscreen', 'times')}
         >
           <div className="flex items-center space-x-3">
             <Calendar className="text-xl text-blush" size={24} />

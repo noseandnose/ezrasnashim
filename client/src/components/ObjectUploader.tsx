@@ -79,7 +79,7 @@ export function ObjectUploader({
     <div>
       <div 
         role="button"
-        onClick={() => setShowModal(true)} 
+        onPointerDown={() => setShowModal(true)} 
         className={`${buttonClassName} cursor-pointer inline-flex items-center justify-center`}
         tabIndex={-1}
         style={{ userSelect: 'none' }}

@@ -288,7 +288,7 @@ const StandardModalHeader = ({
     {/* First Row: Language Toggle and Title */}
     <div className="flex items-center justify-center gap-4">
       <Button
-        onClick={() => setShowHebrew(!showHebrew)}
+        onPointerDown={() => setShowHebrew(!showHebrew)}
         variant="ghost"
         size="sm"
         className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -307,14 +307,14 @@ const StandardModalHeader = ({
     <div className="flex items-center justify-center">
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+          onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
           <span className="text-xs platypi-medium">-</span>
         </button>
         <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
         <button
-          onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+          onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
           <span className="text-xs platypi-medium">+</span>
@@ -367,7 +367,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
         {/* Fullscreen button */}
         {setFullscreenContent && (
           <button
-            onClick={() => {
+            onPointerDown={() => {
               setFullscreenContent({
                 isOpen: true,
                 title: 'Morning Brochas',
@@ -399,7 +399,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                     
                     <div className="heart-explosion-container">
                       <Button 
-                        onClick={isModalComplete('morning-brochas') ? undefined : () => {
+                        onPointerDown={isModalComplete('morning-brochas') ? undefined : () => {
                           trackModalComplete('morning-brochas');
                           markModalComplete('morning-brochas');
                           completeTask('tefilla');
@@ -436,7 +436,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
           {/* First Row: Language Toggle, Title, and Info Icon */}
           <div className="flex items-center justify-center gap-2">
             <Button
-              onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+              onPointerDown={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
               size="sm"
               className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -469,14 +469,14 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
           <div className="flex items-center justify-center">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
                 className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
               >
                 <span className="text-xs platypi-medium">-</span>
               </button>
               <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
               <button
-                onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
                 className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
               >
                 <span className="text-xs platypi-medium">+</span>
@@ -518,7 +518,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
         <KorenThankYou />
 
         <Button 
-          onClick={isModalComplete('morning-brochas') ? undefined : () => {
+          onPointerDown={isModalComplete('morning-brochas') ? undefined : () => {
             // Track modal completion and mark as completed globally
             trackModalComplete('morning-brochas');
             markModalComplete('morning-brochas');
@@ -648,7 +648,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       <KorenThankYou />
 
       <Button
-        onClick={isModalComplete('maariv') ? undefined : handleComplete}
+        onPointerDown={isModalComplete('maariv') ? undefined : handleComplete}
         disabled={isModalComplete('maariv')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('maariv') 
@@ -710,7 +710,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       <KorenThankYou />
 
       <Button
-        onClick={isModalComplete('mincha') ? undefined : handleComplete}
+        onPointerDown={isModalComplete('mincha') ? undefined : handleComplete}
         disabled={isModalComplete('mincha')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('mincha') 
@@ -788,7 +788,7 @@ export function ShachrisNavigationArrow() {
   
   return (
     <button
-      onClick={shachrisNavState.scrollToBottom}
+      onPointerDown={shachrisNavState.scrollToBottom}
       className="fixed right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
       style={{ 
         zIndex: 2147483646,
@@ -890,7 +890,7 @@ function ShachrisFullscreenContent({
           >
             {/* Section Header - Clickable */}
             <button
-              onClick={() => handleSectionToggle(sectionIndex)}
+              onPointerDown={() => handleSectionToggle(sectionIndex)}
               className="w-full px-4 py-3 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
@@ -923,7 +923,7 @@ function ShachrisFullscreenContent({
                 
                 {/* Done Button for this section */}
                 <Button
-                  onClick={isModalComplete('shacharis') ? undefined : handleComplete}
+                  onPointerDown={isModalComplete('shacharis') ? undefined : handleComplete}
                   disabled={isModalComplete('shacharis')}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('shacharis') 
@@ -1005,7 +1005,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
             <div className="flex items-center gap-6">
               <button
                 type="button"
-                onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+                onPointerDown={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
                 className="flex items-center gap-2"
               >
                 <span 
@@ -1026,7 +1026,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+                onPointerDown={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
                 className="flex items-center gap-2"
               >
                 <span 
@@ -1047,7 +1047,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
               </button>
               <button
                 type="button"
-                onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+                onPointerDown={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
                 className="flex items-center gap-2"
               >
                 <span 
@@ -1092,7 +1092,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       <KorenThankYou />
 
       <Button
-        onClick={handleComplete}
+        onPointerDown={handleComplete}
         className="w-full py-3 rounded-xl platypi-medium border-0 mt-6 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
       >
         Complete Brocha
@@ -1164,7 +1164,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
       {/* Tab Navigation - matching meditation style */}
       <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
         <button
-          onClick={() => setActiveTab('daily')}
+          onPointerDown={() => setActiveTab('daily')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'daily'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -1175,7 +1175,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           <span className="platypi-semibold text-xs leading-tight block">Daily ({hasDaily ? dailyBrochas.length : 0})</span>
         </button>
         <button
-          onClick={() => setActiveTab('special')}
+          onPointerDown={() => setActiveTab('special')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'special'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -1195,7 +1195,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
             return (
               <button
                 key={brocha.id}
-                onClick={() => {
+                onPointerDown={() => {
                   // Store the selected brocha ID globally and open individual brocha fullscreen
                   (window as any).selectedBrochaId = brocha.id;
                   const openEvent = new CustomEvent('openDirectFullscreen', {
@@ -1245,7 +1245,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           
           {/* Shacharis */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Shacharis',
@@ -1278,7 +1278,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           
           {/* Mincha */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Mincha',
@@ -1311,7 +1311,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           
           {/* Maariv */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Maariv',
@@ -1424,7 +1424,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
       {/* Tab Navigation - 3 tabs */}
       <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
         <button
-          onClick={() => setActiveTab('refuah')}
+          onPointerDown={() => setActiveTab('refuah')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'refuah'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -1435,7 +1435,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           <span className="platypi-semibold text-xs leading-tight block">Refuah ({refuahArray.length})</span>
         </button>
         <button
-          onClick={() => setActiveTab('family')}
+          onPointerDown={() => setActiveTab('family')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'family'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -1446,7 +1446,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           <span className="platypi-semibold text-xs leading-tight block">Family ({familyArray.length})</span>
         </button>
         <button
-          onClick={() => setActiveTab('life')}
+          onPointerDown={() => setActiveTab('life')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'life'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -1464,7 +1464,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           currentPrayers.map((prayer: WomensPrayer) => (
             <button
               key={prayer.id}
-              onClick={() => {
+              onPointerDown={() => {
                 // Store the selected prayer ID globally and open individual prayer fullscreen
                 (window as any).selectedPrayerId = prayer.id;
                 const openEvent = new CustomEvent('openDirectFullscreen', {
@@ -1636,7 +1636,7 @@ function MorningBrochasFullscreenContent({
           >
             {/* Section Header - Clickable */}
             <button
-              onClick={() => handleSectionToggle(sectionIndex)}
+              onPointerDown={() => handleSectionToggle(sectionIndex)}
               className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
@@ -1669,7 +1669,7 @@ function MorningBrochasFullscreenContent({
                 
                 {/* Done Button for this section */}
                 <Button
-                  onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
+                  onPointerDown={isModalComplete('morning-brochas') ? undefined : handleComplete}
                   disabled={isModalComplete('morning-brochas')}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('morning-brochas') 
@@ -1707,7 +1707,7 @@ export function MorningBrochasNavigationArrow() {
   
   return (
     <button
-      onClick={morningBrochasNavState.scrollToBottom}
+      onPointerDown={morningBrochasNavState.scrollToBottom}
       className="fixed right-6 bg-gradient-feminine text-white rounded-full p-3 shadow-lg hover:scale-110 transition-all duration-200"
       style={{ 
         zIndex: 2147483646,
@@ -1854,7 +1854,7 @@ function NishmasFullscreenContent({ language, fontSize }: { language: 'hebrew' |
       <KorenThankYou />
 
       <Button
-        onClick={markNishmasCompleted}
+        onPointerDown={markNishmasCompleted}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           todayCompleted 
             ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -2071,7 +2071,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
       {!showCompleteAndNext ? (
         // Single Complete button (Special occasions with no Daily Tehillim)
         <Button
-          onClick={handleComplete}
+          onPointerDown={handleComplete}
           className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
             isCompleted 
               ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -2084,7 +2084,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
         // Show both "Complete" and "Complete & Next" buttons
         <div className="flex gap-2">
           <Button
-            onClick={handleComplete}
+            onPointerDown={handleComplete}
             className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
               isCompleted 
                 ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -2095,7 +2095,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
           </Button>
           
           <Button
-            onClick={handleCompleteAndNext}
+            onPointerDown={handleCompleteAndNext}
             className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
           >
             Complete & Next ({getNextPsalmNumber()})
@@ -2383,7 +2383,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
       <div className="flex gap-2 mt-6">
         {/* Complete button - returns to previous view */}
         <Button
-          onClick={handleComplete}
+          onPointerDown={handleComplete}
           disabled={advanceChainMutation.isPending || completeAndNextMutation.isPending}
           className={`flex-1 py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 
@@ -2396,7 +2396,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
         
         {/* Complete and Next button - goes to next tehillim in chain */}
         <Button
-          onClick={handleCompleteAndNext}
+          onPointerDown={handleCompleteAndNext}
           disabled={advanceChainMutation.isPending || completeAndNextMutation.isPending}
           className="flex-1 py-3 rounded-xl platypi-medium border-0 bg-gradient-sage-to-blush text-white hover:scale-105 transition-transform complete-next-button-pulse"
         >
@@ -2483,7 +2483,7 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
       )}
       
       <Button 
-        onClick={handleComplete}
+        onPointerDown={handleComplete}
         className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
           isModalComplete(modalKey) 
             ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -3012,7 +3012,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           
           {/* Fullscreen button */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               setFullscreenContent({
                 isOpen: true,
                 title: 'Mincha Prayer',
@@ -3045,7 +3045,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                     
                     <div className="heart-explosion-container">
                       <Button 
-                        onClick={isModalComplete('mincha') ? undefined : () => {
+                        onPointerDown={isModalComplete('mincha') ? undefined : () => {
                           trackModalComplete('mincha');
                           markModalComplete('mincha');
                           completeTask('tefilla');
@@ -3119,7 +3119,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('mincha') ? undefined : () => completeWithAnimation()}
+              onPointerDown={isModalComplete('mincha') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('mincha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('mincha') 
@@ -3153,7 +3153,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onClick={() => {
+              onPointerDown={() => {
                 if (!isModalComplete('blessings')) {
                   closeModal();
                   openModal('blessings', 'tefilla');
@@ -3177,7 +3177,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onClick={() => {
+              onPointerDown={() => {
                 if (!isModalComplete('tefillos')) {
                   closeModal();
                   openModal('tefillos', 'tefilla');
@@ -3201,7 +3201,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onClick={() => {
+              onPointerDown={() => {
                 if (!isModalComplete('personal-prayers')) {
                   closeModal();
                   openModal('personal-prayers', 'tefilla');
@@ -3238,7 +3238,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={() => completeWithAnimation('blessings')}
+              onPointerDown={() => completeWithAnimation('blessings')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('blessings') 
                   ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -3268,7 +3268,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={() => completeWithAnimation('tefillos')}
+              onPointerDown={() => completeWithAnimation('tefillos')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('tefillos') 
                   ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -3292,14 +3292,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
               
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <span className="text-xs platypi-medium">-</span>
                 </button>
                 <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
                 <button
-                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <span className="text-xs platypi-medium">+</span>
@@ -3312,7 +3312,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={() => completeWithAnimation('personal-prayers')}
+              onPointerDown={() => completeWithAnimation('personal-prayers')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('personal-prayers') 
                   ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -3330,7 +3330,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
         <DialogContent className={`w-full max-w-md rounded-3xl p-6 max-h-[95vh] overflow-y-auto platypi-regular ${isAnimating ? 'prayer-ascending' : ''}`}>
           {/* Fullscreen button in top left */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               if (nishmasText) {
                 setFullscreenContent({
                   isOpen: true,
@@ -3359,7 +3359,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                       
                       <div className="heart-explosion-container">
                         <Button 
-                          onClick={() => {
+                          onPointerDown={() => {
                             trackModalComplete('nishmas-campaign');
                             markModalComplete('nishmas-campaign');
                             completeTask('tefilla');
@@ -3395,7 +3395,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             {/* First Row: Language Toggle and Title */}
             <div className="flex items-center justify-center gap-4">
               <Button
-                onClick={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
+                onPointerDown={() => setNishmasLanguage(nishmasLanguage === 'hebrew' ? 'english' : 'hebrew')}
                 variant="ghost"
                 size="sm"
                 className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -3414,14 +3414,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
+                  onPointerDown={() => setNishmasFontSize(Math.max(12, nishmasFontSize - 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <Minus className="w-3 h-3" />
                 </button>
                 <span className="text-xs text-black/60 platypi-medium">{nishmasFontSize}px</span>
                 <button
-                  onClick={() => setNishmasFontSize(Math.min(28, nishmasFontSize + 2))}
+                  onPointerDown={() => setNishmasFontSize(Math.min(28, nishmasFontSize + 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <Plus className="w-3 h-3" />
@@ -3462,7 +3462,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Expandable Information Section */}
           <div className="mb-1">
             <button
-              onClick={() => setShowNishmasInfo(!showNishmasInfo)}
+              onPointerDown={() => setShowNishmasInfo(!showNishmasInfo)}
               className="w-full text-left bg-gray-50 hover:bg-gray-100 rounded-2xl p-3 border border-gray-200 transition-colors"
             >
               <div className="flex items-center justify-between">
@@ -3487,7 +3487,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           {/* Complete Button */}
           <div className="heart-explosion-container">
             <Button 
-              onClick={() => completeWithAnimation()} 
+              onPointerDown={() => completeWithAnimation()} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-3 border-0"
             >
               Completed
@@ -3562,7 +3562,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           
           {/* Fullscreen button */}
           <button
-            onClick={() => {
+            onPointerDown={() => {
               setFullscreenContent({
                 isOpen: true,
                 title: 'Maariv Prayer',
@@ -3600,7 +3600,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             {/* First Row: Language Toggle, Title, and Info Icon */}
             <div className="flex items-center justify-center gap-2">
               <Button
-                onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+                onPointerDown={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
                 variant="ghost"
                 size="sm"
                 className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -3637,14 +3637,14 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
             <div className="flex items-center justify-center">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+                  onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <span className="text-xs platypi-medium">-</span>
                 </button>
                 <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
                 <button
-                  onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+                  onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
                   className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
                 >
                   <span className="text-xs platypi-medium">+</span>
@@ -3686,7 +3686,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onClick={isModalComplete('maariv') ? undefined : () => completeWithAnimation()}
+              onPointerDown={isModalComplete('maariv') ? undefined : () => completeWithAnimation()}
               disabled={isModalComplete('maariv')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('maariv') 
@@ -3794,7 +3794,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       <div className="text-center py-8">
         <p className="text-gray-500 platypi-regular">No prayers available</p>
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
         >
           Close
@@ -3809,7 +3809,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         <div 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onClick={() => {
+          onPointerDown={() => {
 
             onPrayerSelect(prayer.id);
           }}
@@ -3828,7 +3828,7 @@ function RefuahPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       
       <div className="mt-6">
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
@@ -3850,7 +3850,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       <div className="text-center py-8">
         <p className="text-gray-500 platypi-regular">No prayers available</p>
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
         >
           Close
@@ -3865,7 +3865,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
         <div 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onClick={() => onPrayerSelect(prayer.id)}
+          onPointerDown={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Users className="text-purple-500" size={20} />
@@ -3881,7 +3881,7 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
       
       <div className="mt-6">
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
@@ -3903,7 +3903,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       <div className="text-center py-8">
         <p className="text-gray-500 platypi-regular">No prayers available</p>
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
         >
           Close
@@ -3918,7 +3918,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
         <div 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onClick={() => onPrayerSelect(prayer.id)}
+          onPointerDown={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Heart className="text-pink-500" size={20} />
@@ -3934,7 +3934,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       
       <div className="mt-6">
         <Button 
-          onClick={() => closeModal()}
+          onPointerDown={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
@@ -3983,7 +3983,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
           {/* Conditional translate button - only show if English text exists */}
           {prayer.englishTranslation && prayer.englishTranslation.trim() !== '' && prayer.englishTranslation !== 'English translation not available' && (
             <Button
-              onClick={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
+              onPointerDown={() => setLanguage(language === 'hebrew' ? 'english' : 'hebrew')}
               variant="ghost"
               size="sm"
               className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -4003,14 +4003,14 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
               <Minus className="w-3 h-3" />
             </button>
             <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
-              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+              onPointerDown={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
               <Plus className="w-3 h-3" />
@@ -4043,7 +4043,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
 
       <div className="heart-explosion-container">
         <Button 
-          onClick={() => {
+          onPointerDown={() => {
             // Track modal completion and mark as completed globally
             trackModalComplete(modalKey);
             markModalComplete(modalKey);
@@ -4200,7 +4200,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
       {/* Tab Navigation */}
       <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mb-4">
         <button
-          onClick={() => setTehillimActiveTab('all')}
+          onPointerDown={() => setTehillimActiveTab('all')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'all'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -4211,7 +4211,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
           <span className="platypi-semibold text-xs leading-tight block">Sefer Tehillim</span>
         </button>
         <button
-          onClick={() => setTehillimActiveTab('special')}
+          onPointerDown={() => setTehillimActiveTab('special')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'special'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -4231,7 +4231,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
               {allPsalms.map((psalm) => (
                 <button
                   key={psalm}
-                  onClick={() => openTehillimText(psalm)}
+                  onPointerDown={() => openTehillimText(psalm)}
                   className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
@@ -4254,7 +4254,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
                   {dailyTehillim.psalms.map((psalm) => (
                     <button
                       key={psalm}
-                      onClick={() => {
+                      onPointerDown={() => {
                         // Set daily tehillim list for Complete & Next functionality
                         setDailyTehillimPsalms(dailyTehillim.psalms);
                         openTehillimText(psalm, true);
@@ -4281,7 +4281,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
                   {category.psalms.map((psalm) => (
                     <button
                       key={psalm}
-                      onClick={() => openTehillimText(psalm)}
+                      onPointerDown={() => openTehillimText(psalm)}
                       className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
                         isModalComplete(`individual-tehillim-${psalm}`)
                           ? 'bg-sage text-white'
@@ -4302,7 +4302,7 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
       <KorenThankYou />
 
       <Button 
-        onClick={() => {
+        onPointerDown={() => {
           window.dispatchEvent(new Event('closeFullscreen'));
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
@@ -4454,7 +4454,7 @@ function SpecialTehillimModal() {
       {/* Tab Navigation */}
       <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mb-4">
         <button
-          onClick={() => setTehillimActiveTab('all')}
+          onPointerDown={() => setTehillimActiveTab('all')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'all'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -4465,7 +4465,7 @@ function SpecialTehillimModal() {
           <span className="platypi-semibold text-xs leading-tight block">Sefer Tehillim</span>
         </button>
         <button
-          onClick={() => setTehillimActiveTab('special')}
+          onPointerDown={() => setTehillimActiveTab('special')}
           className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
             tehillimActiveTab === 'special'
               ? 'bg-gradient-feminine text-white shadow-lg'
@@ -4485,7 +4485,7 @@ function SpecialTehillimModal() {
               {allPsalms.map((psalm) => (
                 <button
                   key={psalm}
-                  onClick={() => openTehillimText(psalm)}
+                  onPointerDown={() => openTehillimText(psalm)}
                   className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
@@ -4509,7 +4509,7 @@ function SpecialTehillimModal() {
                     {dailyTehillim.psalms.map((psalm) => (
                       <button
                         key={psalm}
-                        onClick={() => openTehillimText(psalm)}
+                        onPointerDown={() => openTehillimText(psalm)}
                         className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
                           isModalComplete(`individual-tehillim-${psalm}`)
                             ? 'bg-sage'
@@ -4532,7 +4532,7 @@ function SpecialTehillimModal() {
                   {category.psalms.map((psalm) => (
                     <button
                       key={psalm}
-                      onClick={() => openTehillimText(psalm)}
+                      onPointerDown={() => openTehillimText(psalm)}
                       className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
                         isModalComplete(`individual-tehillim-${psalm}`)
                           ? 'bg-sage'
@@ -4550,7 +4550,7 @@ function SpecialTehillimModal() {
       </div>
 
       <Button 
-        onClick={() => {
+        onPointerDown={() => {
           closeModal();
         }} 
         className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
@@ -4674,7 +4674,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       <div className={showCompleteAndNext ? 'flex gap-2' : ''}>
                         {/* Complete button */}
                         <Button 
-                          onClick={() => {
+                          onPointerDown={() => {
                             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                             markModalComplete(`individual-tehillim-${selectedPsalm}`);
                             completeTask('tefilla');
@@ -4714,7 +4714,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                         {/* Complete and Next button - show for 1-150 tab OR Daily Tehillim with next psalm */}
                         {showCompleteAndNext && (
                           <Button 
-                            onClick={() => {
+                            onPointerDown={() => {
                               trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                               markModalComplete(`individual-tehillim-${selectedPsalm}`);
                               completeTask('tefilla');
@@ -4770,7 +4770,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       {/* Fullscreen button */}
       {setFullscreenContent && tehillimText && (
         <button
-          onClick={() => {
+          onPointerDown={() => {
             // Construct proper title
             let title = `Tehillim ${selectedPsalm}`;
             if (!isFromSelector && tehillimInfo) {
@@ -4804,7 +4804,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                     <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
                       {/* Complete button - returns to Tehillim selector */}
                       <Button 
-                        onClick={() => {
+                        onPointerDown={() => {
                           // Track modal completion immediately
                           trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                           markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4841,7 +4841,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                       {/* Complete and Next button - only show when coming from 1-150 tab */}
                       {tehillimActiveTab === 'all' && (
                         <Button 
-                          onClick={() => {
+                          onPointerDown={() => {
                             // Track modal completion immediately
                             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
                             markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -4900,7 +4900,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         {/* First Row: Language Toggle and Title */}
         <div className="flex items-center justify-center gap-4">
           <Button
-            onClick={() => {
+            onPointerDown={() => {
               const newLanguage = language === 'hebrew' ? 'english' : 'hebrew';
               setLanguage(newLanguage);
               // Save language preference for Tehillim
@@ -4924,14 +4924,14 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         <div className="flex items-center justify-center">
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+              onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
               <Minus className="w-3 h-3" />
             </button>
             <span className="text-xs text-black/60 platypi-medium">{fontSize}px</span>
             <button
-              onClick={() => setFontSize(Math.min(28, fontSize + 2))}
+              onPointerDown={() => setFontSize(Math.min(28, fontSize + 2))}
               className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
             >
               <Plus className="w-3 h-3" />
@@ -4966,7 +4966,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
       <div className={tehillimActiveTab === 'all' ? 'flex gap-2' : ''}>
         {/* Complete button - returns to Tehillim selector */}
         <Button 
-          onClick={() => {
+          onPointerDown={() => {
             // Track modal completion immediately
             trackModalComplete(`individual-tehillim-${selectedPsalm}`);
             markModalComplete(`individual-tehillim-${selectedPsalm}`);
@@ -5009,7 +5009,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
         {/* Complete and Next button - only show when coming from 1-150 tab */}
         {tehillimActiveTab === 'all' && (
           <Button 
-            onClick={() => {
+            onPointerDown={() => {
               // Track modal completion immediately
               trackModalComplete(`individual-tehillim-${selectedPsalm}`);
               markModalComplete(`individual-tehillim-${selectedPsalm}`);

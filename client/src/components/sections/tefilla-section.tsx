@@ -316,7 +316,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10 relative">
           {/* Apple Glass Style Find Button - Top Right Corner */}
           <button
-            onClick={handleFindToggle}
+            onPointerDown={handleFindToggle}
             className={`absolute top-2 right-2 rounded-xl border border-gray-200 shadow-sm transition-all flex items-center space-x-1 px-2 py-1 ${chainView === 'find' ? 'bg-blush/20 border-blush' : 'bg-white/60 hover:bg-white/80'}`}
             style={{ height: 'auto', minHeight: 'auto' }}
             aria-label="Find Chain"
@@ -348,7 +348,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             <div className="flex items-center justify-center space-x-4 mb-2">
             <Button
               type="button"
-              onClick={handleCreateToggle}
+              onPointerDown={handleCreateToggle}
               className={`text-base px-6 py-3 bg-white border border-blush/30 text-black rounded-xl hover:bg-blush/5 inline-flex items-center ${chainView === 'create' ? 'border-blush' : ''}`}
               data-testid="button-chain-create"
             >
@@ -360,7 +360,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             <Button
               type="button"
               disabled={isLoadingRandom}
-              onClick={async () => {
+              onPointerDown={async () => {
                 if (isLoadingRandom) return;
                 setIsLoadingRandom(true);
                 try {
@@ -421,7 +421,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               <div>
                 <button
                   type="button"
-                  onClick={() => setReasonDropdownOpen(!reasonDropdownOpen)}
+                  onPointerDown={() => setReasonDropdownOpen(!reasonDropdownOpen)}
                   className="flex h-10 w-full items-center justify-between rounded-2xl border border-blush/20 bg-white px-3 py-2 text-sm focus:border-blush focus:outline-none focus:ring-2 focus:ring-blush/20"
                   data-testid="select-chain-reason"
                 >
@@ -446,7 +446,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                         <button
                           key={option.value}
                           type="button"
-                          onClick={() => {
+                          onPointerDown={() => {
                             setChainReason(option.value);
                             setReasonDropdownOpen(false);
                           }}
@@ -471,7 +471,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               
               <div className="flex space-x-3">
                 <Button 
-                  onClick={() => setChainView('none')} 
+                  onPointerDown={() => setChainView('none')} 
                   variant="outline"
                   size="sm"
                   className="flex-1 rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
@@ -479,7 +479,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                   Cancel
                 </Button>
                 <Button 
-                  onClick={handleCreateChain}
+                  onPointerDown={handleCreateChain}
                   disabled={createChainMutation.isPending}
                   size="sm"
                   className="flex-1 rounded-2xl bg-gradient-feminine hover:opacity-90 text-white"
@@ -515,7 +515,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                     return (
                       <button
                         key={chain.id}
-                        onClick={() => setLocation(`/c/${chain.slug}`)}
+                        onPointerDown={() => setLocation(`/c/${chain.slug}`)}
                         className="w-full p-3 bg-white rounded-xl border border-blush/20 hover:bg-blush/5 transition-all flex items-center justify-between"
                       >
                         <div className="text-left">
@@ -539,7 +539,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
               )}
               
               <Button 
-                onClick={() => setChainView('none')} 
+                onPointerDown={() => setChainView('none')} 
                 variant="outline"
                 size="sm"
                 className="w-full rounded-2xl border-blush/30 hover:bg-blush/5 bg-white"
@@ -559,7 +559,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         <div className="grid grid-cols-2 gap-2">
           {/* Siddur */}
           <button 
-            onClick={() => openModal('brochas', 'tefilla')}
+            onPointerDown={() => openModal('brochas', 'tefilla')}
             className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -595,7 +595,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           {/* Tehillim */}
           <button 
-            onClick={() => openModal('special-tehillim', 'tefilla')}
+            onPointerDown={() => openModal('special-tehillim', 'tefilla')}
             className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -631,7 +631,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           {/* Women's Tefillas */}
           <button
-            onClick={() => openModal('womens-tefillas', 'tefilla')}
+            onPointerDown={() => openModal('womens-tefillas', 'tefilla')}
             className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -659,7 +659,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
           {/* Nishmas Kol Chai */}
           <button 
-            onClick={() => openModal('nishmas-campaign', 'tefilla')}
+            onPointerDown={() => openModal('nishmas-campaign', 'tefilla')}
             className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -697,7 +697,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         {/* The Kotel Compass Section */}
         <Button
           variant="ghost"
-          onClick={handleOpenCompass}
+          onPointerDown={handleOpenCompass}
           className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 hover:bg-white/90 transition-all duration-300 text-left h-auto mt-2"
           data-testid="button-open-compass"
         >
