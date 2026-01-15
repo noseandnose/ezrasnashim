@@ -12,6 +12,7 @@ import TorahClassModal from "./torah-class-modal";
 import LifeClassModal from "./life-class-modal";
 import DailyChizukModal from "./daily-chizuk-modal";
 import DailyEmunaModal from "./daily-emuna-modal";
+import LibraryModal from "./library-modal";
 
 const CongratulationsModal = lazy(() => import("./congratulations-modal"));
 const AboutModal = lazy(() => import("./about-modal"));
@@ -40,6 +41,7 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       <LifeClassModal />
       <DailyChizukModal />
       <DailyEmunaModal />
+      <LibraryModal />
       
       <Suspense fallback={null}>
         {activeModal === 'congratulations' && <CongratulationsModal />}

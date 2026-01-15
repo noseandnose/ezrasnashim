@@ -1785,6 +1785,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Library routes (Torah content grouped by speaker)
+  app.get("/api/library/speakers",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'library-speakers' }),
+    async (_req, res) => {
+      try {
+        const speakers = await storage.getLibrarySpeakers();
+        return res.json(speakers);
+      } catch (error) {
+        console.error('Error fetching library speakers:', error);
+        return res.status(500).json({ message: "Failed to fetch library speakers" });
+      }
+    }
+  );
+
+  app.get("/api/library/speakers/:speaker",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'library-content' }),
+    async (req, res) => {
+      try {
+        const speaker = decodeURIComponent(req.params.speaker);
+        const content = await storage.getLibraryContentBySpeaker(speaker);
+        return res.json(content);
+      } catch (error) {
+        console.error('Error fetching library content by speaker:', error);
+        return res.status(500).json({ message: "Failed to fetch library content" });
+      }
+    }
+  );
+
+  app.get("/api/library/content/:id",
+    cacheMiddleware({ ttl: CACHE_TTL.STATIC_PRAYERS, category: 'library-item' }),
+    async (req, res) => {
+      try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+          return res.status(400).json({ message: "Invalid ID" });
+        }
+        const content = await storage.getLibraryContentById(id);
+        if (!content) {
+          return res.status(404).json({ message: "Content not found" });
+        }
+        return res.json(content);
+      } catch (error) {
+        console.error('Error fetching library content:', error);
+        return res.status(500).json({ message: "Failed to fetch library content" });
+      }
+    }
+  );
+
   // Life Classes routes
   app.get("/api/life-classes", async (_req, res) => {
     try {

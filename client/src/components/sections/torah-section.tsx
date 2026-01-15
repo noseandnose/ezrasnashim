@@ -273,6 +273,24 @@ function TorahSectionComponent({}: TorahSectionProps) {
           </button>
         )}
 
+        {/* Library Bar - Permanent content grouped by speaker */}
+        <button 
+          onPointerDown={() => openModal('library', 'torah')}
+          className="w-full bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
+          data-testid="button-library"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-full bg-gradient-feminine">
+              <BookOpen className="text-white" size={16} />
+            </div>
+            <div className="flex-grow">
+              <h3 className="platypi-bold text-sm text-black">Library</h3>
+              <p className="platypi-regular text-xs text-black/70">Browse Torah classes by speaker</p>
+            </div>
+            <ChevronRight className="text-black/40" size={18} />
+          </div>
+        </button>
+
       </div>
 
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
