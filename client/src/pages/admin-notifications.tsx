@@ -117,7 +117,7 @@ export default function AdminNotifications() {
                   placeholder="Enter admin password"
                 />
               </div>
-              <Button onClick={handleLogin} className="w-full">
+              <Button onPointerDown={handleLogin} className="w-full">
                 Login
               </Button>
               <Link href="/">
@@ -209,7 +209,7 @@ export default function AdminNotifications() {
               </div>
 
               <Button 
-                onClick={handleSendNotification} 
+                onPointerDown={handleSendNotification} 
                 disabled={isSending || !title || !body}
                 className="w-full"
               >
@@ -271,7 +271,7 @@ export default function AdminNotifications() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Button
               variant="outline"
-              onClick={() => {
+              onPointerDown={() => {
                 setTitle('Shabbat Times Available');
                 setBody('Check this week\'s Shabbat times in the app.');
                 setUrl('/');
@@ -281,7 +281,7 @@ export default function AdminNotifications() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
+              onPointerDown={() => {
                 setTitle('Daily Torah Study');
                 setBody('Today\'s Torah portion is ready for you.');
                 setUrl('/?section=torah');
@@ -291,7 +291,7 @@ export default function AdminNotifications() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
+              onPointerDown={() => {
                 setTitle('Prayer Reminder');
                 setBody('Time for Mincha prayers.');
                 setUrl('/?section=tefilla');
@@ -301,7 +301,7 @@ export default function AdminNotifications() {
             </Button>
             <Button
               variant="outline"
-              onClick={() => {
+              onPointerDown={() => {
                 setTitle('New Campaign');
                 setBody('Support our new tzedaka campaign.');
                 setUrl('/?section=tzedaka');

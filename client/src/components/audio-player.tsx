@@ -231,7 +231,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         <div className="w-16"></div> {/* Left spacer */}
         
         <button
-          onClick={togglePlay}
+          onPointerDown={togglePlay}
           className={`bg-gradient-feminine rounded-full p-4 hover:scale-105 transition-all border-0 text-white audio-play-button inline-flex items-center justify-center ${audioError ? 'opacity-50' : ''}`}
           style={{ WebkitTapHighlightColor: 'transparent', touchAction: 'manipulation' }}
           data-testid="button-audio-play"
@@ -276,7 +276,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         <div className="audio-progress-bar py-2">
           <div 
             className="bg-gray-300 rounded-full audio-progress-track w-full h-2 cursor-pointer relative"
-            onClick={handleProgressClick}
+            onPointerDown={handleProgressClick}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}

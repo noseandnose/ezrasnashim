@@ -165,7 +165,7 @@ export function SimpleCompassUI() {
             <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 text-sm">{loadError}</p>
           </div>
-          <Button onClick={() => window.location.reload()} variant="outline">
+          <Button onPointerDown={() => window.location.reload()} variant="outline">
             Refresh Page
           </Button>
         </div>
@@ -188,7 +188,7 @@ export function SimpleCompassUI() {
             <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 text-sm">{state.error}</p>
           </div>
-          <Button onClick={handleRetry} variant="outline">
+          <Button onPointerDown={handleRetry} variant="outline">
             Try Again
           </Button>
         </div>
@@ -340,7 +340,7 @@ export function SimpleCompassUI() {
               : 'For accurate direction to Jerusalem, please enable compass access'}
           </p>
           <Button
-            onClick={handleEnableCompass}
+            onPointerDown={handleEnableCompass}
             className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
             data-testid="button-enable-compass"
           >

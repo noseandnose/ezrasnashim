@@ -34,7 +34,7 @@ export function FloatingSettings({
     <>
       {/* Floating Settings Button */}
       <button
-        onClick={() => setIsDrawerOpen(!isDrawerOpen)}
+        onPointerDown={() => setIsDrawerOpen(!isDrawerOpen)}
         className="fixed left-6 w-12 h-12 bg-gradient-feminine text-white rounded-full shadow-lg hover:scale-110 transition-all duration-200 flex items-center justify-center"
         style={{ 
           zIndex: 2147483646,
@@ -51,7 +51,7 @@ export function FloatingSettings({
           {/* Backdrop */}
           <div 
             className="fixed inset-0 bg-black/20 z-40"
-            onClick={() => setIsDrawerOpen(false)}
+            onPointerDown={() => setIsDrawerOpen(false)}
           />
           
           {/* Drawer Panel */}
@@ -66,7 +66,7 @@ export function FloatingSettings({
                   <p className="text-sm font-medium text-gray-700 mb-2 text-center">Language</p>
                   <div className="flex bg-gradient-feminine rounded-2xl p-1">
                     <button
-                      onClick={() => {
+                      onPointerDown={() => {
                         onLanguageChange('hebrew');
                         setIsDrawerOpen(false);
                       }}
@@ -79,7 +79,7 @@ export function FloatingSettings({
                       עברית
                     </button>
                     <button
-                      onClick={() => {
+                      onPointerDown={() => {
                         onLanguageChange('english');
                         setIsDrawerOpen(false);
                       }}
@@ -101,7 +101,7 @@ export function FloatingSettings({
                   <p className="text-sm font-medium text-gray-700 mb-2 text-center">Font Size</p>
                   <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-2xl p-2">
                     <button
-                      onClick={() => onFontSizeChange(Math.max(12, (fontSize || 16) - 2))}
+                      onPointerDown={() => onFontSizeChange(Math.max(12, (fontSize || 16) - 2))}
                       className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                       aria-label="Decrease font size"
                     >
@@ -111,7 +111,7 @@ export function FloatingSettings({
                       {fontSize || 16}px
                     </span>
                     <button
-                      onClick={() => onFontSizeChange(Math.min(28, (fontSize || 16) + 2))}
+                      onPointerDown={() => onFontSizeChange(Math.min(28, (fontSize || 16) + 2))}
                       className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                       aria-label="Increase font size"
                     >

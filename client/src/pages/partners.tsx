@@ -57,7 +57,7 @@ export default function Partners() {
         
         <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mx-4 mb-3">
           <button
-            onClick={() => setActiveTab("deals")}
+            onPointerDown={() => setActiveTab("deals")}
             className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "deals"
                 ? "bg-gradient-feminine text-white shadow-lg"
@@ -68,7 +68,7 @@ export default function Partners() {
             <span className="platypi-semibold text-xs leading-tight block">Deals</span>
           </button>
           <button
-            onClick={() => setActiveTab("resources")}
+            onPointerDown={() => setActiveTab("resources")}
             className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "resources"
                 ? "bg-gradient-feminine text-white shadow-lg"
@@ -98,7 +98,7 @@ export default function Partners() {
               key={partner.id}
               className="bg-white rounded-2xl p-4 cursor-pointer shadow-sm border border-blush/10
                          hover:shadow-md transition-shadow duration-200"
-              onClick={() => handleClick(partner.linkUrl)}
+              onPointerDown={() => handleClick(partner.linkUrl)}
               data-testid={`partner-card-${partner.id}`}
             >
               <div className="flex items-center gap-4">

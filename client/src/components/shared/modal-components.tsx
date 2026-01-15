@@ -43,7 +43,7 @@ export const StandardModalHeader = ({
     {/* First Row: Language Toggle and Title */}
     <div className="flex items-center justify-center gap-4">
       <Button
-        onClick={() => setShowHebrew(!showHebrew)}
+        onPointerDown={() => setShowHebrew(!showHebrew)}
         variant="ghost"
         size="sm"
         className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -62,14 +62,14 @@ export const StandardModalHeader = ({
     <div className="flex items-center justify-center">
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setFontSize(Math.max(12, fontSize - 2))}
+          onPointerDown={() => setFontSize(Math.max(12, fontSize - 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
           <Minus className="w-3 h-3" />
         </button>
         <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
         <button
-          onClick={() => setFontSize(Math.min(32, fontSize + 2))}
+          onPointerDown={() => setFontSize(Math.min(32, fontSize + 2))}
           className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
           <Plus className="w-3 h-3" />

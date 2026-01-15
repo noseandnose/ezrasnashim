@@ -170,7 +170,7 @@ export function DonationFormModal({ config, isOpen, onClose, activeCampaign }: D
             {config.gridAmounts.map((amount) => (
               <button
                 key={amount}
-                onClick={() => setDonationAmount(amount)}
+                onPointerDown={() => setDonationAmount(amount)}
                 className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                   donationAmount === amount
                     ? 'bg-gradient-feminine text-white shadow-soft'
@@ -317,7 +317,7 @@ export function DonationFormModal({ config, isOpen, onClose, activeCampaign }: D
           {/* Submit Button */}
           <div>
             <Button 
-              onClick={handleDonation}
+              onPointerDown={handleDonation}
               disabled={!isFormValid()}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >

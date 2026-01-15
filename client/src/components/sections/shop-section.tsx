@@ -91,7 +91,7 @@ export default function ShopSection() {
           <button
             key={id}
             className={`${gradient} rounded-3xl p-3 text-center glow-hover transition-gentle shadow-lg border ${border}`}
-            onClick={() => openModal(id, 'shop')}
+            onPointerDown={() => openModal(id, 'shop')}
           >
             <div className={`${iconBg} p-2 rounded-full mx-auto mb-2 w-fit`}>
               <Icon className={`${iconColor}`} size={18} strokeWidth={1.5} />
@@ -109,7 +109,7 @@ export default function ShopSection() {
           {shopItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => handleItemClick(item)}
+              onPointerDown={() => handleItemClick(item)}
               className="w-full bg-white rounded-3xl p-3 shadow-lg border border-blush/10 glow-hover transition-gentle text-left"
             >
               <div className="flex items-center space-x-3">

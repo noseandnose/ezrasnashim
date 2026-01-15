@@ -118,7 +118,7 @@ export default function TableSection() {
               Please enable location access for accurate davening times, or click below to set your location manually.
             </p>
             <button 
-              onClick={() => openModal('location', 'table')}
+              onPointerDown={() => openModal('location', 'table')}
               className="bg-yellow-600 text-white px-3 py-1.5 rounded-lg text-xs platypi-medium hover:bg-yellow-700 transition-colors"
               data-modal-type="location"
               data-modal-section="table"
@@ -190,7 +190,7 @@ export default function TableSection() {
           >
             {/* Collapsed/Header Bar */}
             <button
-              onClick={() => setGiftExpanded(!giftExpanded)}
+              onPointerDown={() => setGiftExpanded(!giftExpanded)}
               className="w-full p-3 text-left hover:bg-white/90 transition-colors"
               data-testid="button-gift-of-chatzos-toggle"
             >
@@ -289,7 +289,7 @@ export default function TableSection() {
                 {/* Complete Button */}
                 <div className="mt-4 pt-3 border-t border-blush/20">
                   <button
-                    onClick={() => {
+                    onPointerDown={() => {
                       if (!isModalComplete('gift-of-chatzos')) {
                         markModalComplete('gift-of-chatzos');
                         trackModalComplete('gift-of-chatzos');
@@ -337,7 +337,7 @@ export default function TableSection() {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            onClick={() => {
+            onPointerDown={() => {
               if (recipeContent) {
                 const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
                   detail: {
@@ -392,7 +392,7 @@ export default function TableSection() {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            onClick={() => openModal('marriage-insights', 'table')}
+            onPointerDown={() => openModal('marriage-insights', 'table')}
             data-modal-type="marriage-insights"
             data-modal-section="table"
           >
@@ -432,7 +432,7 @@ export default function TableSection() {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            onClick={() => {
+            onPointerDown={() => {
               if (currentLifeClass) {
                 openModal('life-class', 'table');
               }
@@ -481,7 +481,7 @@ export default function TableSection() {
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            onClick={() => openModal('meditation-categories', 'table')}
+            onPointerDown={() => openModal('meditation-categories', 'table')}
             data-testid="button-meditation"
             data-modal-type="meditation-categories"
             data-modal-section="table"
@@ -505,7 +505,7 @@ export default function TableSection() {
         {/* Table Inspiration Bar - Only shown when content exists */}
         {inspirationContent && (
           <button 
-            onClick={() => {
+            onPointerDown={() => {
               const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   modalKey: 'inspiration',

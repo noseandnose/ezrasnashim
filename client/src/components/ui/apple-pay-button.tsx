@@ -110,7 +110,7 @@ export default function ApplePayButton({ amount, onSuccess, onError, disabled }:
 
   return (
     <button
-      onClick={handleApplePay}
+      onPointerDown={handleApplePay}
       disabled={disabled || isProcessing || !stripe}
       className={`
         w-full h-12 bg-black text-white rounded-xl platypi-medium

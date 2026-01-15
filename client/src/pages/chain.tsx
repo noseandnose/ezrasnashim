@@ -407,7 +407,7 @@ export default function ChainPage() {
           This Tehillim chain doesn't exist or may have been removed.
         </p>
         <button
-          onClick={() => setLocation('/')}
+          onPointerDown={() => setLocation('/')}
           className="bg-gradient-feminine text-white rounded-full px-6 py-3 platypi-medium"
           data-testid="button-go-home"
         >
@@ -422,7 +422,7 @@ export default function ChainPage() {
       {/* Header with Tehillim name */}
       <div className="flex items-center p-4 border-b border-blush/10 bg-white safe-area-top">
         <button
-          onClick={() => setLocation('/')}
+          onPointerDown={() => setLocation('/')}
           className="p-2 rounded-full hover:bg-blush/10 transition-colors flex-shrink-0"
           data-testid="button-back"
         >
@@ -437,7 +437,7 @@ export default function ChainPage() {
         
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
-            onClick={() => setShowReminderDialog(true)}
+            onPointerDown={() => setShowReminderDialog(true)}
             className="flex items-center justify-center rounded-full bg-gradient-feminine hover:scale-105 transition-all shadow-sm"
             style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}
             data-testid="button-reminder"
@@ -446,7 +446,7 @@ export default function ChainPage() {
             <Bell size={16} strokeWidth={2.5} className="text-white" />
           </button>
           <button
-            onClick={handleShare}
+            onPointerDown={handleShare}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-feminine text-white hover:scale-105 transition-all shadow-sm"
             data-testid="button-share"
           >
@@ -462,7 +462,7 @@ export default function ChainPage() {
           {/* Tehillim Chain section with border */}
           <div 
             className={`py-3 px-4 border border-blush/20 rounded-xl bg-white relative ${chain.description ? 'cursor-pointer' : ''}`}
-            onClick={() => chain.description && setIsDescriptionExpanded(!isDescriptionExpanded)}
+            onPointerDown={() => chain.description && setIsDescriptionExpanded(!isDescriptionExpanded)}
             data-testid="chain-header"
           >
             <div className="flex items-center justify-between">
@@ -561,7 +561,7 @@ export default function ChainPage() {
           {/* Buttons */}
           <div className="flex space-x-3 pt-2 pb-2">
             <button
-              onClick={handleFindAnother}
+              onPointerDown={handleFindAnother}
               disabled={!currentPsalm || isFindingAnother}
               className="flex-1 py-4 rounded-2xl border border-amber-200/50 bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-900 platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-amber-200 hover:to-yellow-200 hover:scale-105 transition-all"
               data-testid="button-find-another"
@@ -569,7 +569,7 @@ export default function ChainPage() {
               {isFindingAnother ? 'Loading...' : 'Find me another'}
             </button>
             <button
-              onClick={handleComplete}
+              onPointerDown={handleComplete}
               disabled={!currentPsalm || completeReadingMutation.isPending}
               className="flex-1 py-4 rounded-2xl bg-gradient-feminine text-white platypi-medium disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform complete-button-pulse"
               data-testid="button-complete"
@@ -581,7 +581,7 @@ export default function ChainPage() {
           {/* Do Other Mitsvahs Button */}
           <div className="pb-4">
             <button
-              onClick={() => window.location.href = '/'}
+              onPointerDown={() => window.location.href = '/'}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-sage via-sage/90 to-lavender text-white platypi-medium shadow-lg hover:shadow-xl hover:scale-[1.03] transition-all duration-300"
               data-testid="button-do-other-mitsvahs"
             >
@@ -636,13 +636,13 @@ export default function ChainPage() {
             
             <div className="space-y-3">
               <Button
-                onClick={handleGoogleCalendar}
+                onPointerDown={handleGoogleCalendar}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium hover:scale-105 transition-all"
               >
                 Add to Google Calendar
               </Button>
               <Button
-                onClick={handleAppleCalendar}
+                onPointerDown={handleAppleCalendar}
                 variant="outline"
                 className="w-full border-blush/30 text-black py-3 rounded-xl platypi-medium hover:scale-105 hover:bg-blush/5 transition-all"
               >
@@ -673,7 +673,7 @@ function SettingsButton({
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onPointerDown={() => setIsOpen(!isOpen)}
         className="bg-gradient-feminine text-white rounded-full p-2.5 shadow-lg hover:scale-110 transition-all duration-200"
         aria-label="Open settings"
       >
@@ -684,7 +684,7 @@ function SettingsButton({
         <>
           <div 
             className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
+            onPointerDown={() => setIsOpen(false)}
           />
           <div className="absolute bottom-12 left-0 bg-white rounded-2xl shadow-xl border border-gray-200 p-4 z-50 min-w-[200px]">
             <div className="space-y-4">
@@ -693,7 +693,7 @@ function SettingsButton({
                 <p className="text-sm font-medium text-gray-700 mb-2 text-center">Language</p>
                 <div className="flex bg-gradient-feminine rounded-2xl p-1">
                   <button
-                    onClick={() => {
+                    onPointerDown={() => {
                       onLanguageChange('hebrew');
                       setIsOpen(false);
                     }}
@@ -706,7 +706,7 @@ function SettingsButton({
                     עברית
                   </button>
                   <button
-                    onClick={() => {
+                    onPointerDown={() => {
                       onLanguageChange('english');
                       setIsOpen(false);
                     }}
@@ -726,7 +726,7 @@ function SettingsButton({
                 <p className="text-sm font-medium text-gray-700 mb-2 text-center">Font Size</p>
                 <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-2xl p-2">
                   <button
-                    onClick={() => onFontSizeChange(Math.max(12, fontSize - 2))}
+                    onPointerDown={() => onFontSizeChange(Math.max(12, fontSize - 2))}
                     className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                     aria-label="Decrease font size"
                   >
@@ -736,7 +736,7 @@ function SettingsButton({
                     {fontSize}px
                   </span>
                   <button
-                    onClick={() => onFontSizeChange(Math.min(28, fontSize + 2))}
+                    onPointerDown={() => onFontSizeChange(Math.min(28, fontSize + 2))}
                     className="w-8 h-8 flex items-center justify-center rounded-xl bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                     aria-label="Increase font size"
                   >

@@ -59,7 +59,7 @@ export function StandardModal({
           {/* Custom Close Button */}
           {showCloseX && (
             <button
-              onClick={onClose}
+              onPointerDown={onClose}
               className="absolute right-4 top-4 rounded-full w-8 h-8 bg-warm-gray/10 hover:bg-warm-gray/20 flex items-center justify-center transition-all duration-200 z-10"
               aria-label="Close modal"
             >
@@ -122,7 +122,7 @@ export function StandardModalButton({
 
   return (
     <Button
-      onClick={onClick}
+      onPointerDown={onClick}
       disabled={disabled}
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
     >

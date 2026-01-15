@@ -338,7 +338,7 @@ export default function AdminMessages() {
                 />
               </div>
               <Button 
-                onClick={handleLogin} 
+                onPointerDown={handleLogin} 
                 className="w-full"
                 data-testid="button-admin-login"
                 disabled={isLoggingIn}
@@ -452,7 +452,7 @@ export default function AdminMessages() {
 
               <div className="flex gap-2">
                 <Button 
-                  onClick={handleSubmit}
+                  onPointerDown={handleSubmit}
                   disabled={isSaving}
                   className="flex-1"
                   data-testid="button-save-message"
@@ -462,7 +462,7 @@ export default function AdminMessages() {
                 </Button>
                 {editingMessage && (
                   <Button 
-                    onClick={handleCancelEdit}
+                    onPointerDown={handleCancelEdit}
                     variant="outline"
                     data-testid="button-cancel-edit"
                   >
@@ -507,7 +507,7 @@ export default function AdminMessages() {
                         <Button
                           size="sm"
                           variant={message.isPinned ? "default" : "outline"}
-                          onClick={() => handlePinMessage(message)}
+                          onPointerDown={() => handlePinMessage(message)}
                           title={message.isPinned ? "Unpin message" : "Pin message to top"}
                           data-testid={`button-pin-message-${message.id}`}
                         >
@@ -516,7 +516,7 @@ export default function AdminMessages() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleEditMessage(message)}
+                          onPointerDown={() => handleEditMessage(message)}
                           data-testid={`button-edit-message-${message.id}`}
                         >
                           <Edit className="w-3 h-3" />
@@ -524,7 +524,7 @@ export default function AdminMessages() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteMessage(message)}
+                          onPointerDown={() => handleDeleteMessage(message)}
                           data-testid={`button-delete-message-${message.id}`}
                         >
                           <Trash2 className="w-3 h-3" />

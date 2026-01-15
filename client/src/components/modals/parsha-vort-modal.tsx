@@ -156,7 +156,7 @@ export default function ParshaVortModal() {
 
           {/* Complete Button */}
           <Button
-            onClick={isCompleted ? undefined : handleComplete}
+            onPointerDown={isCompleted ? undefined : handleComplete}
             disabled={isCompleted}
             className={`w-full py-3 rounded-xl platypi-medium border-0 ${
               isCompleted 

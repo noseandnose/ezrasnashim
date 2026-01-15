@@ -1153,7 +1153,7 @@ export default function Admin() {
             </div>
             
             <Button 
-              onClick={handleLogin} 
+              onPointerDown={handleLogin} 
               className="w-full admin-btn-primary"
               data-testid="button-admin-login"
               disabled={isLoggingIn}
@@ -1174,7 +1174,7 @@ export default function Admin() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
           <p className="text-gray-600">Manage messages, recipes, and notifications</p>
           <Button 
-            onClick={handleLogout}
+            onPointerDown={handleLogout}
             variant="outline"
             className="absolute top-0 right-0 text-sm"
             data-testid="button-admin-logout"
@@ -1187,7 +1187,7 @@ export default function Admin() {
         <div className="mb-8">
           <div className="flex space-x-1 bg-white p-1 rounded-lg shadow-sm">
             <button
-              onClick={() => setActiveTab('messages')}
+              onPointerDown={() => setActiveTab('messages')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'messages'
                   ? 'admin-tab-active'
@@ -1199,7 +1199,7 @@ export default function Admin() {
               Messages
             </button>
             <button
-              onClick={() => setActiveTab('recipes')}
+              onPointerDown={() => setActiveTab('recipes')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'recipes'
                   ? 'admin-tab-active'
@@ -1211,7 +1211,7 @@ export default function Admin() {
               Recipes
             </button>
             <button
-              onClick={() => setActiveTab('inspirations')}
+              onPointerDown={() => setActiveTab('inspirations')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'inspirations'
                   ? 'admin-tab-active'
@@ -1223,7 +1223,7 @@ export default function Admin() {
               Inspirations
             </button>
             <button
-              onClick={() => setActiveTab('notifications')}
+              onPointerDown={() => setActiveTab('notifications')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'notifications'
                   ? 'admin-tab-active'
@@ -1235,7 +1235,7 @@ export default function Admin() {
               Notifications
             </button>
             <button
-              onClick={() => setActiveTab('parsha-vorts')}
+              onPointerDown={() => setActiveTab('parsha-vorts')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'parsha-vorts'
                   ? 'admin-tab-active'
@@ -1247,7 +1247,7 @@ export default function Admin() {
               Parsha Vorts
             </button>
             <button
-              onClick={() => setActiveTab('gems-of-gratitude')}
+              onPointerDown={() => setActiveTab('gems-of-gratitude')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'gems-of-gratitude'
                   ? 'admin-tab-active'
@@ -1259,7 +1259,7 @@ export default function Admin() {
               Gems
             </button>
             <button
-              onClick={() => setActiveTab('analytics')}
+              onPointerDown={() => setActiveTab('analytics')}
               className={`flex-1 flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 activeTab === 'analytics'
                   ? 'admin-tab-active'
@@ -1344,7 +1344,7 @@ export default function Admin() {
                 </div>
 
                 <Button 
-                  onClick={handleMessageSubmit} 
+                  onPointerDown={handleMessageSubmit} 
                   disabled={isSavingMessage}
                   className="w-full admin-btn-primary"
                   data-testid="button-save-message"
@@ -1355,7 +1355,7 @@ export default function Admin() {
 
                 {editingMessage && (
                   <Button 
-                    onClick={() => {
+                    onPointerDown={() => {
                       setEditingMessage(null);
                       setMessageFormData({ date: '', title: '', message: '', category: 'message' });
                     }}
@@ -1397,7 +1397,7 @@ export default function Admin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
+                          onPointerDown={() => {
                             setEditingMessage(message);
                             setMessageFormData({
                               date: message.date,
@@ -1413,7 +1413,7 @@ export default function Admin() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteMessage(message)}
+                          onPointerDown={() => handleDeleteMessage(message)}
                           data-testid={`button-delete-message-${message.id}`}
                         >
                           <Trash2 className="w-3 h-3 text-red-600" />
@@ -1570,7 +1570,7 @@ export default function Admin() {
                 />
 
                 <Button 
-                  onClick={handleRecipeSubmit} 
+                  onPointerDown={handleRecipeSubmit} 
                   disabled={isSavingRecipe}
                   className="w-full admin-btn-primary"
                   data-testid="button-save-recipe"
@@ -1614,7 +1614,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onPointerDown={() => {
                                   // Handle edit recipe - you can implement this later
                                   toast({
                                     title: "Edit Recipe",
@@ -1628,7 +1628,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onPointerDown={() => {
                                   // Handle delete recipe - you can implement this later
                                   if (confirm('Are you sure you want to delete this recipe?')) {
                                     toast({
@@ -1779,7 +1779,7 @@ export default function Admin() {
 
                 <div className="flex gap-2">
                   <Button 
-                    onClick={handleInspirationSubmit}
+                    onPointerDown={handleInspirationSubmit}
                     disabled={isSavingInspiration}
                     className="flex-1 admin-btn-primary"
                     data-testid="button-save-inspiration"
@@ -1790,7 +1790,7 @@ export default function Admin() {
                   
                   {editingInspiration && (
                     <Button 
-                      onClick={() => {
+                      onPointerDown={() => {
                         setEditingInspiration(null);
                         setInspirationFormData({
                           fromDate: '', untilDate: '', title: '', content: '',
@@ -1840,7 +1840,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onPointerDown={() => {
                                   setEditingInspiration(inspiration);
                                   setInspirationFormData({
                                     fromDate: inspiration.fromDate,
@@ -1866,7 +1866,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleDeleteInspiration(inspiration)}
+                                onPointerDown={() => handleDeleteInspiration(inspiration)}
                                 data-testid={`button-delete-inspiration-${inspiration.id}`}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
@@ -2030,7 +2030,7 @@ export default function Admin() {
 
                 <div className="flex gap-2">
                   <Button 
-                    onClick={handleParshaVortSubmit}
+                    onPointerDown={handleParshaVortSubmit}
                     disabled={isSavingParshaVort}
                     className="flex-1 admin-btn-primary"
                     data-testid="button-save-vort"
@@ -2041,7 +2041,7 @@ export default function Admin() {
                   
                   {editingParshaVort && (
                     <Button 
-                      onClick={() => {
+                      onPointerDown={() => {
                         setEditingParshaVort(null);
                         setParshaVortFormData({
                           fromDate: '', untilDate: '', title: '', content: '',
@@ -2089,7 +2089,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onPointerDown={() => {
                                   setEditingParshaVort(vort);
                                   setParshaVortFormData({
                                     fromDate: vort.fromDate,
@@ -2110,7 +2110,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleDeleteParshaVort(vort)}
+                                onPointerDown={() => handleDeleteParshaVort(vort)}
                                 data-testid={`button-delete-vort-${vort.id}`}
                               >
                                 <Trash2 className="w-4 h-4 text-red-500" />
@@ -2210,7 +2210,7 @@ export default function Admin() {
                   </p>
                 </div>
                 <Button 
-                  onClick={handleValidateSubscriptions} 
+                  onPointerDown={handleValidateSubscriptions} 
                   disabled={isValidatingSubscriptions}
                   className="admin-btn-primary"
                   data-testid="button-validate-subscriptions"
@@ -2310,7 +2310,7 @@ export default function Admin() {
                 </div>
 
                 <Button 
-                  onClick={handleSendNotification} 
+                  onPointerDown={handleSendNotification} 
                   disabled={isSendingNotification}
                   className="w-full admin-btn-primary"
                   data-testid="button-send-notification"
@@ -2324,7 +2324,7 @@ export default function Admin() {
 
                 {editingNotification && (
                   <Button 
-                    onClick={() => {
+                    onPointerDown={() => {
                       setEditingNotification(null);
                       setNotificationData({ title: '', body: '', url: '/', requireInteraction: false, scheduledDate: '', scheduledTime: '' });
                     }}
@@ -2384,7 +2384,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => {
+                                onPointerDown={() => {
                                   setEditingNotification(notification);
                                   setNotificationData({
                                     title: notification.title,
@@ -2402,7 +2402,7 @@ export default function Admin() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleDeleteScheduledNotification(notification)}
+                                onPointerDown={() => handleDeleteScheduledNotification(notification)}
                                 data-testid={`button-delete-scheduled-${notification.id}`}
                               >
                                 <Trash2 className="w-3 h-3 text-red-600" />
@@ -2529,7 +2529,7 @@ export default function Admin() {
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={handleSaveGem}
+                    onPointerDown={handleSaveGem}
                     disabled={isSavingGem}
                     className="flex-1"
                     data-testid="button-save-gem"
@@ -2546,7 +2546,7 @@ export default function Admin() {
                   {editingGem && (
                     <Button
                       variant="outline"
-                      onClick={() => {
+                      onPointerDown={() => {
                         setEditingGem(null);
                         setGemsFormData({ fromDate: '', untilDate: '', title: '', subtitle: '' });
                       }}
@@ -2592,7 +2592,7 @@ export default function Admin() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEditGem(gem)}
+                            onPointerDown={() => handleEditGem(gem)}
                             data-testid={`button-edit-gem-${gem.id}`}
                           >
                             <Edit className="w-4 h-4" />
@@ -2600,7 +2600,7 @@ export default function Admin() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteGem(gem)}
+                            onPointerDown={() => handleDeleteGem(gem)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                             data-testid={`button-delete-gem-${gem.id}`}
                           >
@@ -2656,7 +2656,7 @@ export default function Admin() {
               </div>
 
               <Button 
-                onClick={handleLoadDateRangeStats}
+                onPointerDown={handleLoadDateRangeStats}
                 disabled={isLoadingAnalytics}
                 className="w-full admin-btn-primary" 
                 data-testid="button-load-analytics"
@@ -2701,7 +2701,7 @@ export default function Admin() {
               </h2>
 
               <Button 
-                onClick={handleLoadWeekComparison}
+                onPointerDown={handleLoadWeekComparison}
                 disabled={isLoadingAnalytics}
                 className="w-full admin-btn-primary mb-4" 
                 data-testid="button-load-week-comparison"
@@ -2798,7 +2798,7 @@ export default function Admin() {
               </h2>
 
               <Button 
-                onClick={handleLoadMonthComparison}
+                onPointerDown={handleLoadMonthComparison}
                 disabled={isLoadingAnalytics}
                 className="w-full admin-btn-primary mb-4" 
                 data-testid="button-load-month-comparison"

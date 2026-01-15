@@ -92,7 +92,7 @@ export default function ShopModals() {
                     {shopItem.couponCode}
                   </code>
                   <Button
-                    onClick={handleCopyCoupon}
+                    onPointerDown={handleCopyCoupon}
                     variant="ghost"
                     size="sm"
                     className="text-blush hover:bg-blush/10"
@@ -115,7 +115,7 @@ export default function ShopModals() {
             <div className="flex gap-3 pt-2">
               {shopItem.externalUrl && (
                 <Button
-                  onClick={handleVisitStore}
+                  onPointerDown={handleVisitStore}
                   className="flex-1 bg-blush hover:bg-blush/90 text-white"
                 >
                   <ExternalLink size={16} className="mr-2" />
@@ -123,7 +123,7 @@ export default function ShopModals() {
                 </Button>
               )}
               <Button
-                onClick={() => {
+                onPointerDown={() => {
                   closeModal();
                   // Navigate to home and scroll to progress
                   window.location.hash = '#/?section=home&scrollToProgress=true';

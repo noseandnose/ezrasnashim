@@ -168,7 +168,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
               
               {/* Complete Button */}
               <button
-                onClick={handlePirkeiAvotComplete}
+                onPointerDown={handlePirkeiAvotComplete}
                 disabled={isModalComplete('pirkei-avot') || !pirkeiAvot?.text}
                 className={`ml-auto px-3 py-1 rounded-lg text-xs platypi-medium transition-all ${
                   isModalComplete('pirkei-avot')
@@ -207,7 +207,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 150 && (
                   <button
                     ref={pirkeiExpandButtonRef}
-                    onClick={handlePirkeiAvotToggle}
+                    onPointerDown={handlePirkeiAvotToggle}
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
                     style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"
@@ -235,7 +235,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {/* Torah Classes Bar - Only shown when content exists */}
         {currentTorahClass && (
           <button 
-            onClick={() => openModal('torah-class', 'torah')}
+            onPointerDown={() => openModal('torah-class', 'torah')}
             className="w-full bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
             style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
             data-testid="button-torah-class"
@@ -360,7 +360,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
                   border: '1px solid rgba(255, 255, 255, 0.4)',
                 }}
-                onClick={(event) => {
+                onPointerDown={(event) => {
                   if (!hasContent) return;
                   
                   if (id === 'halacha') {
@@ -432,7 +432,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       {/* Bitachon Challenge - Below 4 buttons - Now opens fullscreen page */}
       {torahChallenge && (
         <button
-          onClick={() => openModal('torah-challenge', 'torah')}
+          onPointerDown={() => openModal('torah-challenge', 'torah')}
           className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
           style={{ 
             backgroundColor: '#ffffff', 
@@ -480,7 +480,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
             <div className="w-full bg-white rounded-2xl p-3 shadow-lg border border-blush/10 relative">
               <div 
                 className="flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
-                onClick={(event) => {
+                onPointerDown={(event) => {
                   handleDirectFullscreen('featured', event);
                 }}
                 data-modal-type="featured"
@@ -518,7 +518,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {/* Gems of Gratitude Button - Only show when database content exists */}
         {gemsOfGratitude && (
           <button
-            onClick={() => openModal('gems-of-gratitude', 'torah')}
+            onPointerDown={() => openModal('gems-of-gratitude', 'torah')}
             className="w-full bg-white rounded-2xl overflow-hidden border border-blush/10 shadow-lg transition-colors text-left"
             data-testid="button-gems-of-gratitude"
           >
