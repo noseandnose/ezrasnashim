@@ -6,6 +6,7 @@ import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, 
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import logoImage from "@assets/A_project_of_(4)_1764762086237.png";
 import AddToHomeScreenModal from "./modals/add-to-home-screen-modal";
 import { SearchModal } from "./SearchModal";
@@ -26,6 +27,8 @@ export default function AppHeader() {
   const [lastClickTime, setLastClickTime] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   
   // Close menu when clicking outside - using pointerdown for WebView compatibility
   useEffect(() => {
@@ -132,6 +135,7 @@ export default function AppHeader() {
         <div className="flex items-center px-2" style={{ minHeight: 'var(--header-row-height)' }}>
           <div className="flex items-center gap-1 flex-1 relative" ref={menuRef}>
             <button
+              ref={buttonRef}
               className={`flex items-center justify-center rounded-full transition-colors focus:outline-none relative ${
                 (shouldHighlight || (!isLoading && !isAuthenticated)) ? 'animate-pulse border-2 border-blush shadow-lg' : ''
               }`}
@@ -139,6 +143,10 @@ export default function AppHeader() {
               data-testid="button-menu"
               onPointerDown={(e) => {
                 e.stopPropagation();
+                if (!menuOpen && buttonRef.current) {
+                  const rect = buttonRef.current.getBoundingClientRect();
+                  setMenuPosition({ top: rect.bottom + 4, left: rect.left });
+                }
                 setMenuOpen(!menuOpen);
               }}
               style={{
@@ -153,142 +161,6 @@ export default function AppHeader() {
             >
               <Menu className="h-5 w-5 text-black/70" />
             </button>
-            
-            {menuOpen && (
-              <div 
-                className="absolute left-0 w-48 rounded-xl border border-blush/20 bg-white p-1 shadow-md"
-                style={{ 
-                  top: '100%', 
-                  marginTop: '4px',
-                  zIndex: 99999
-                }}
-              >
-                {!isLoading && !isAuthenticated && (
-                  <div
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen(false);
-                      setLocation('/login');
-                    }}
-                    className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                    data-testid="menu-item-login"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    Sign Up / Log In
-                  </div>
-                )}
-                {isAuthenticated && user && (
-                  <div
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen(false);
-                      setLocation("/profile");
-                    }}
-                    className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                    data-testid="menu-item-profile"
-                  >
-                    <User className="h-5 w-5 mr-2" />
-                    My Profile
-                  </div>
-                )}
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    setLocation("/statistics");
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-analytics"
-                >
-                  <BarChart3 className="h-5 w-5 mr-2" />
-                  Analytics
-                </div>
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    openModal('date-calculator-fullscreen', 'table');
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-date-converter"
-                >
-                  <Calendar className="h-5 w-5 mr-2" />
-                  Hebrew Date Converter
-                </div>
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    handleShare();
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-share"
-                >
-                  <Share2 className="h-5 w-5 mr-2" />
-                  Share
-                </div>
-                {!isStandalone && !isWebview && (
-                  <div
-                    onPointerDown={(e) => {
-                      e.stopPropagation();
-                      setMenuOpen(false);
-                      handleInstallClick();
-                    }}
-                    className={`relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20 ${
-                      shouldHighlight 
-                        ? 'bg-blush/20 font-bold animate-pulse border-2 border-blush' 
-                        : canInstall 
-                        ? 'bg-blush/10 font-semibold' 
-                        : ''
-                    }`}
-                    data-testid="menu-item-install"
-                  >
-                    {isIOS ? (
-                      <Share className="h-5 w-5 mr-2" />
-                    ) : (
-                      <Share2 className="h-5 w-5 mr-2" />
-                    )}
-                    Install App
-                  </div>
-                )}
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    window.open('https://tally.so/r/3xqAEy', '_blank');
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-feedback"
-                >
-                  <MessageSquare className="h-5 w-5 mr-2" />
-                  Community Feedback
-                </div>
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    setShowLocationModal(true);
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-location"
-                >
-                  <MapPin className="h-5 w-5 mr-2" />
-                  Change Location
-                </div>
-                <div
-                  onPointerDown={(e) => {
-                    e.stopPropagation();
-                    setMenuOpen(false);
-                    openModal('about', 'about');
-                  }}
-                  className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
-                  data-testid="menu-item-info"
-                >
-                  <Info className="h-5 w-5 mr-2" />
-                  Info
-                </div>
-              </div>
-            )}
           </div>
           <div className="flex-shrink-0 flex items-center" style={{ height: 'var(--header-row-height)' }}>
             <img 
@@ -323,6 +195,146 @@ export default function AppHeader() {
           </div>
         </div>
       </header>
+      
+      {/* Portal-rendered menu for proper z-index stacking */}
+      {menuOpen && createPortal(
+        <div 
+          ref={menuRef}
+          className="fixed w-48 rounded-xl border border-blush/20 bg-white p-1 shadow-lg"
+          style={{ 
+            top: menuPosition.top,
+            left: menuPosition.left,
+            zIndex: 99999
+          }}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
+          {!isLoading && !isAuthenticated && (
+            <div
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                setMenuOpen(false);
+                setLocation('/login');
+              }}
+              className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+              data-testid="menu-item-login"
+            >
+              <User className="h-5 w-5 mr-2" />
+              Sign Up / Log In
+            </div>
+          )}
+          {isAuthenticated && user && (
+            <div
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                setMenuOpen(false);
+                setLocation("/profile");
+              }}
+              className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+              data-testid="menu-item-profile"
+            >
+              <User className="h-5 w-5 mr-2" />
+              My Profile
+            </div>
+          )}
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              setLocation("/statistics");
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-analytics"
+          >
+            <BarChart3 className="h-5 w-5 mr-2" />
+            Analytics
+          </div>
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              openModal('date-calculator-fullscreen', 'table');
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-date-converter"
+          >
+            <Calendar className="h-5 w-5 mr-2" />
+            Hebrew Date Converter
+          </div>
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              handleShare();
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-share"
+          >
+            <Share2 className="h-5 w-5 mr-2" />
+            Share
+          </div>
+          {!isStandalone && !isWebview && (
+            <div
+              onPointerDown={(e) => {
+                e.stopPropagation();
+                setMenuOpen(false);
+                handleInstallClick();
+              }}
+              className={`relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20 ${
+                shouldHighlight 
+                  ? 'bg-blush/20 font-bold animate-pulse border-2 border-blush' 
+                  : canInstall 
+                  ? 'bg-blush/10 font-semibold' 
+                  : ''
+              }`}
+              data-testid="menu-item-install"
+            >
+              {isIOS ? (
+                <Share className="h-5 w-5 mr-2" />
+              ) : (
+                <Share2 className="h-5 w-5 mr-2" />
+              )}
+              Install App
+            </div>
+          )}
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              window.open('https://tally.so/r/3xqAEy', '_blank');
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-feedback"
+          >
+            <MessageSquare className="h-5 w-5 mr-2" />
+            Community Feedback
+          </div>
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              setShowLocationModal(true);
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-location"
+          >
+            <MapPin className="h-5 w-5 mr-2" />
+            Change Location
+          </div>
+          <div
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              openModal('about', 'about');
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-info"
+          >
+            <Info className="h-5 w-5 mr-2" />
+            Info
+          </div>
+        </div>,
+        document.body
+      )}
       
       <AddToHomeScreenModal 
         isOpen={showAddToHomeScreen}
