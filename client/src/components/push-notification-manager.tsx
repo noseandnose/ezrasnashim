@@ -184,7 +184,7 @@ export function PushNotificationManager() {
     <div className="flex items-center gap-2">
       {subscription ? (
         <Button
-          onPointerDown={unsubscribeFromPush}
+          onClick={unsubscribeFromPush}
           disabled={isLoading}
           variant="outline"
           size="sm"
@@ -195,7 +195,7 @@ export function PushNotificationManager() {
         </Button>
       ) : (
         <Button
-          onPointerDown={subscribeToPush}
+          onClick={subscribeToPush}
           disabled={isLoading}
           variant="outline"
           size="sm"

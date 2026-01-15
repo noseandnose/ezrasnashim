@@ -269,7 +269,7 @@ export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
                 : 'Please enable compass access'}
             </p>
             <Button
-              onPointerDown={handleEnableCompass}
+              onClick={handleEnableCompass}
               className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
             >
               {/Android/i.test(navigator.userAgent) ? 'Activate Sensors' : 'Enable Compass'}

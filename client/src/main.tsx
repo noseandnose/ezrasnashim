@@ -9,7 +9,7 @@ import { initializeOptimizations } from "./lib/optimization";
 if (typeof window !== 'undefined') {
   let lastVisibilityTime = Date.now();
   let wasHidden = false;
-  const BACKGROUND_THRESHOLD = 3000; // Only reload if background for 3+ seconds
+  const BACKGROUND_THRESHOLD = 30000; // Only reload if background for 30+ seconds
   
   // Detect when page becomes hidden (app goes to background)
   document.addEventListener('visibilitychange', () => {
