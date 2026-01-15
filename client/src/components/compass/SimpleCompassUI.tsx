@@ -340,7 +340,7 @@ export function SimpleCompassUI() {
               : 'For accurate direction to Jerusalem, please enable compass access'}
           </p>
           <Button
-            onPointerDown={handleEnableCompass}
+            onClick={handleEnableCompass}
             className="w-full bg-gradient-to-r from-blush to-peach text-white py-2 rounded-xl font-medium"
             data-testid="button-enable-compass"
           >
