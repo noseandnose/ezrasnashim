@@ -1729,7 +1729,8 @@ export class DatabaseStorage implements IStorage {
         imageUrl: torahClasses.attributionLogoUrl,
       })
       .from(torahClasses)
-      .groupBy(torahClasses.speaker, torahClasses.attributionLogoUrl);
+      .groupBy(torahClasses.speaker, torahClasses.attributionLogoUrl)
+      .orderBy(torahClasses.speaker);
     
     // Get count for each speaker
     const speakersWithCount = await Promise.all(
@@ -1746,7 +1747,8 @@ export class DatabaseStorage implements IStorage {
       })
     );
     
-    return speakersWithCount;
+    // Already sorted by SQL orderBy, but ensure consistent A-Z order
+    return speakersWithCount.sort((a, b) => a.speaker.localeCompare(b.speaker));
   }
 
   async getLibraryContentBySpeaker(speaker: string): Promise<TorahClass[]> {
