@@ -268,6 +268,7 @@ export default function LibraryModal() {
                 audioUrl={contentDetail.audioUrl} 
                 title={contentDetail.title || 'Audio Content'}
                 duration=""
+                onAudioEnded={handleComplete}
               />
             </div>
           )}
