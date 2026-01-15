@@ -1,4 +1,4 @@
-import { Shield, BookOpen, Triangle, Check, Video, Star, ChevronRight, GraduationCap, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
+import { Shield, BookOpen, Triangle, Check, Video, Star, ChevronRight, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -48,15 +48,11 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const chizukContent = torahSummary?.chizuk;
   const emunaContent = torahSummary?.emuna;
   const featuredContent = torahSummary?.featured;
-  const torahClasses = torahSummary?.torahClasses || [];
   const gemsOfGratitude = torahSummary?.gemsOfGratitude;
   const torahChallenge = torahSummary?.torahChallenge;
   
   // Extract per-section errors for UI fallbacks
   const sectionErrors = torahSummary?.errors || {};
-
-  // Get the first available Torah class for display
-  const currentTorahClass = torahClasses?.[0];
 
   // Handle direct fullscreen opening for specific modals (bypassing modal completely)
   const handleDirectFullscreen = (modalType: string, event: React.MouseEvent) => {
@@ -230,47 +226,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
               </div>
             )}
           </div>
-        )}
-
-        {/* Torah Classes Bar - Only shown when content exists */}
-        {currentTorahClass && (
-          <button 
-            onPointerDown={() => openModal('torah-class', 'torah')}
-            className="w-full bg-white/80 rounded-xl mt-3 overflow-hidden border border-blush/20 p-3 text-left hover:bg-white/90 transition-colors"
-            style={{ animation: 'gentle-glow-pink 3s ease-in-out infinite' }}
-            data-testid="button-torah-class"
-          >
-            <div className="flex items-center gap-3">
-              {/* Image or Icon with completion state */}
-              {currentTorahClass.imageUrl ? (
-                <img 
-                  src={currentTorahClass.imageUrl} 
-                  alt={currentTorahClass.title} 
-                  className="w-10 h-10 rounded-xl object-cover"
-                  loading="lazy"
-                />
-              ) : (
-                <div className={`p-2 rounded-full ${isModalComplete('torah-class') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-                  <GraduationCap className="text-white" size={16} />
-                </div>
-              )}
-              
-              {/* Title and Subtitle */}
-              <div className="flex-grow">
-                <h3 className="platypi-bold text-sm text-black">{currentTorahClass.title}</h3>
-                <p className="platypi-regular text-xs text-black/70">
-                  {isModalComplete('torah-class') ? 'Completed' : (currentTorahClass.subtitle || '')}
-                </p>
-              </div>
-              
-              {/* Checkmark when completed, arrow when not */}
-              {isModalComplete('torah-class') ? (
-                <Check className="text-sage" size={18} />
-              ) : (
-                <ChevronRight className="text-black/40" size={18} />
-              )}
-            </div>
-          </button>
         )}
 
       </div>
