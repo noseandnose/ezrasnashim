@@ -12,6 +12,100 @@ import { getHebrewFontClass, getTextDirection } from "@/lib/hebrewUtils";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import type { TorahClass } from "@shared/schema";
 
+function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; onVideoEnded?: () => void }) {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [hasCompleted, setHasCompleted] = useState(false);
+
+  const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+  const isVimeo = videoUrl.includes('vimeo.com');
+
+  const getYouTubeEmbedUrl = (url: string) => {
+    if (url.includes('embed/')) return url;
+    if (url.includes('watch?v=')) return url.replace('watch?v=', 'embed/');
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    return url;
+  };
+
+  const getVimeoEmbedUrl = (url: string) => {
+    const vimeoId = url.match(/vimeo\.com\/(\d+)/)?.[1];
+    return vimeoId ? `https://player.vimeo.com/video/${vimeoId}` : url;
+  };
+
+  const handleVideoEnd = () => {
+    if (!hasCompleted && onVideoEnded) {
+      setHasCompleted(true);
+      onVideoEnded();
+    }
+  };
+
+  if (isYouTube) {
+    return (
+      <iframe
+        src={getYouTubeEmbedUrl(videoUrl)}
+        className="w-full h-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        loading="lazy"
+      />
+    );
+  }
+
+  if (isVimeo) {
+    return (
+      <iframe
+        src={getVimeoEmbedUrl(videoUrl)}
+        className="w-full h-full"
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        loading="lazy"
+      />
+    );
+  }
+
+  return (
+    <>
+      {isLoading && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
+          <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full"></div>
+        </div>
+      )}
+      {hasError ? (
+        <div className="w-full h-full bg-gray-100 flex flex-col items-center justify-center">
+          <p className="text-gray-500 text-center mb-2">Video unavailable</p>
+          <a 
+            href={videoUrl} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blush underline text-sm"
+          >
+            Open in new tab
+          </a>
+        </div>
+      ) : (
+        <video
+          controls
+          className="w-full h-full object-contain bg-gray-50"
+          preload="metadata"
+          playsInline
+          onLoadedData={() => setIsLoading(false)}
+          onError={() => {
+            setIsLoading(false);
+            setHasError(true);
+          }}
+          onEnded={handleVideoEnd}
+        >
+          <source src={videoUrl} type={videoUrl.includes('.webm') ? 'video/webm' : 'video/mp4'} />
+          Your browser does not support the video tag.
+        </video>
+      )}
+    </>
+  );
+}
+
 interface Speaker {
   speaker: string;
   imageUrl: string | null;
@@ -251,12 +345,10 @@ export default function LibraryModal() {
 
           {contentDetail.videoUrl && (
             <div className="bg-white rounded-2xl p-4 border border-blush/10">
-              <div className="aspect-video rounded-lg overflow-hidden">
-                <iframe
-                  src={contentDetail.videoUrl.replace('watch?v=', 'embed/')}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
+              <div className="aspect-video rounded-lg overflow-hidden relative">
+                <OptimizedVideoPlayer 
+                  videoUrl={contentDetail.videoUrl}
+                  onVideoEnded={handleComplete}
                 />
               </div>
             </div>
