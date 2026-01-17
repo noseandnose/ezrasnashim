@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Headphones, FileText, Video, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { TapButton } from "@/components/ui/tap-button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -208,9 +209,9 @@ export default function LibraryModal() {
         </div>
       ) : speakers && speakers.length > 0 ? (
         speakers.map((speaker) => (
-          <button
+          <TapButton
             key={speaker.speaker}
-            onPointerDown={() => handleSelectSpeaker(speaker.speaker)}
+            onTap={() => handleSelectSpeaker(speaker.speaker)}
             className="bg-white/80 rounded-2xl p-4 border border-blush/20 text-center hover:bg-white/90 transition-colors"
             data-testid={`button-speaker-${speaker.speaker.replace(/\s+/g, '-').toLowerCase()}`}
           >
@@ -228,7 +229,7 @@ export default function LibraryModal() {
             )}
             <h3 className="platypi-bold text-sm text-black line-clamp-2">{speaker.speaker}</h3>
             <p className="text-xs text-black/60 mt-1">{speaker.contentCount} {speaker.contentCount === 1 ? 'lesson' : 'lessons'}</p>
-          </button>
+          </TapButton>
         ))
       ) : (
         <div className="col-span-2 text-center py-8">
@@ -256,9 +257,9 @@ export default function LibraryModal() {
         </div>
       ) : speakerContent && speakerContent.length > 0 ? (
         speakerContent.map((item) => (
-          <button
+          <TapButton
             key={item.id}
-            onPointerDown={() => handleSelectContent(item.id)}
+            onTap={() => handleSelectContent(item.id)}
             className="w-full bg-white/80 rounded-xl p-4 border border-blush/20 text-left hover:bg-white/90 transition-colors flex items-center gap-3"
             data-testid={`button-content-${item.id}`}
           >
@@ -274,7 +275,7 @@ export default function LibraryModal() {
               {item.content && <FileText className="w-4 h-4 text-blush" />}
               <ChevronRight className="w-4 h-4 text-black/40" />
             </div>
-          </button>
+          </TapButton>
         ))
       ) : (
         <div className="text-center py-8">

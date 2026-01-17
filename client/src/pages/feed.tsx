@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import type { Message, MessageCategory } from "@shared/schema";
 import { linkifyText } from "@/lib/text-formatter";
 import { apiRequest } from "@/lib/queryClient";
+import { TapButton } from "@/components/ui/tap-button";
 
 const categoryColors: Record<MessageCategory, { bg: string; label: string }> = {
   message: { bg: "bg-yellow-400", label: "Message" },
@@ -99,8 +100,8 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
         </span>
         
         <div className="flex items-center gap-4">
-          <button
-            onPointerDown={handleLikeClick}
+          <TapButton
+            onTap={handleLikeClick}
             disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'like' 
@@ -111,10 +112,10 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
           >
             <ThumbsUp className="w-4 h-4" />
             <span className="text-sm font-medium">{optimisticLikes}</span>
-          </button>
+          </TapButton>
           
-          <button
-            onPointerDown={handleDislikeClick}
+          <TapButton
+            onTap={handleDislikeClick}
             disabled={isVoting}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full transition-all ${
               userVote === 'dislike' 
@@ -125,7 +126,7 @@ function FeedItem({ message, onLike, onDislike, onUnlike, onUndislike, isVoting,
           >
             <ThumbsDown className="w-4 h-4" />
             <span className="text-sm font-medium">{optimisticDislikes}</span>
-          </button>
+          </TapButton>
         </div>
       </div>
     </div>
