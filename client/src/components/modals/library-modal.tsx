@@ -14,9 +14,9 @@ import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import type { TorahClass } from "@shared/schema";
 
 function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; onVideoEnded?: () => void }) {
-  const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
   const isVimeo = videoUrl.includes('vimeo.com');
@@ -69,9 +69,9 @@ function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; on
 
   return (
     <>
-      {isLoading && !hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100 z-10">
-          <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full"></div>
+      {isBuffering && !hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/20 z-10 pointer-events-none">
+          <div className="animate-spin w-8 h-8 border-4 border-white border-t-transparent rounded-full"></div>
         </div>
       )}
       {hasError ? (
@@ -89,14 +89,13 @@ function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; on
       ) : (
         <video
           controls
-          className="w-full h-full object-contain bg-gray-50"
-          preload="metadata"
+          className="w-full h-full object-contain bg-black"
+          preload="none"
           playsInline
-          onLoadedData={() => setIsLoading(false)}
-          onError={() => {
-            setIsLoading(false);
-            setHasError(true);
-          }}
+          onWaiting={() => setIsBuffering(true)}
+          onCanPlay={() => setIsBuffering(false)}
+          onPlaying={() => setIsBuffering(false)}
+          onError={() => setHasError(true)}
           onEnded={handleVideoEnd}
         >
           <source src={videoUrl} type={videoUrl.includes('.webm') ? 'video/webm' : 'video/mp4'} />
