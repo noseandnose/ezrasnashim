@@ -504,18 +504,17 @@ function TorahSectionComponent({}: TorahSectionProps) {
         {/* Library Bar - Permanent content grouped by speaker */}
         <button 
           onPointerDown={() => openModal('library', 'torah')}
-          className="w-full bg-white rounded-2xl overflow-hidden border border-blush/10 shadow-lg transition-colors text-left"
+          className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 hover:bg-white/90 transition-all duration-300"
           data-testid="button-library"
         >
-          <div className="flex items-center gap-3 p-3">
-            <div className="p-2 rounded-full bg-gradient-feminine">
+          <div className="flex items-center justify-center gap-3">
+            <div className="bg-gradient-feminine p-2 rounded-full">
               <BookOpen className="text-white" size={16} />
             </div>
-            <div className="flex-grow">
+            <div className="text-center">
               <h3 className="platypi-bold text-sm text-black">Library</h3>
               <p className="platypi-regular text-xs text-black/70">Browse Torah classes by speaker</p>
             </div>
-            <ChevronRight className="text-black/40" size={18} />
           </div>
         </button>
 
