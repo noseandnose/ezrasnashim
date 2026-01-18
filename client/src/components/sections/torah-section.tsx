@@ -1,4 +1,4 @@
-import { Shield, BookOpen, Triangle, Check, Video, Star, ChevronRight, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
+import { Shield, BookOpen, Headphones, Check, Video, Star, ChevronRight, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -368,7 +368,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                       {hasVideo ? (
                         <Video className="w-2.5 h-2.5" />
                       ) : hasAudio ? (
-                        <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                        <Headphones className="w-2.5 h-2.5" />
                       ) : hasText ? (
                         <span className="platypi-bold text-[10px]">T</span>
                       ) : null}
@@ -494,7 +494,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     {hasVideo ? (
                       <Video className="w-2.5 h-2.5" />
                     ) : hasAudio ? (
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                      <Headphones className="w-2.5 h-2.5" />
                     ) : hasText ? (
                       <span className="platypi-bold text-xs">T</span>
                     ) : null}
