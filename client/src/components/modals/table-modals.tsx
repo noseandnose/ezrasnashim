@@ -316,7 +316,7 @@ export default function TableModals() {
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-80 object-contain cursor-pointer"
-                    onPointerDown={() => handleImageTap(recipeContent.imageUrl!)}
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -896,7 +896,7 @@ export default function TableModals() {
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-80 object-cover cursor-pointer"
-                    onPointerDown={() => handleImageTap(recipeContent.imageUrl!)}
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                   />
                 </div>
               )}
@@ -1118,7 +1118,7 @@ export default function TableModals() {
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
                                 className="w-full h-80 object-contain"
-                                onPointerDown={() => {
+                                onClick={() => {
                                   const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
                                   handleImageTap(mediaItems[currentMediaIndex].url!, allImageUrls);
                                 }}
