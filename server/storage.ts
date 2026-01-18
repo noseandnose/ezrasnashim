@@ -117,7 +117,7 @@ export interface IStorage {
   deleteTorahClass(id: number): Promise<boolean>;
 
   // Library methods (Torah classes grouped by speaker)
-  getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number }[]>;
+  getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number; subtitle: string | null; hasText: boolean; hasAudio: boolean; hasVideo: boolean }[]>;
   getLibraryContentBySpeaker(speaker: string): Promise<TorahClass[]>;
   getLibraryContentById(id: number): Promise<TorahClass | undefined>;
 
@@ -1722,7 +1722,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Library methods - speakers and content grouped by speaker
-  async getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number }[]> {
+  async getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number; subtitle: string | null; hasText: boolean; hasAudio: boolean; hasVideo: boolean }[]> {
     const result = await db
       .select({
         speaker: torahClasses.speaker,
@@ -1732,23 +1732,41 @@ export class DatabaseStorage implements IStorage {
       .groupBy(torahClasses.speaker, torahClasses.attributionLogoUrl)
       .orderBy(torahClasses.speaker);
     
-    // Get count for each speaker
-    const speakersWithCount = await Promise.all(
+    // Get count and content types for each speaker
+    const speakersWithDetails = await Promise.all(
       result.map(async (r) => {
-        const countResult = await db
-          .select({ count: sql<number>`count(*)` })
+        const allContent = await db
+          .select({
+            subtitle: torahClasses.subtitle,
+            content: torahClasses.content,
+            audioUrl: torahClasses.audioUrl,
+            videoUrl: torahClasses.videoUrl,
+          })
           .from(torahClasses)
           .where(eq(torahClasses.speaker, r.speaker));
+        
+        // Get first subtitle found (if any)
+        const subtitle = allContent.find(c => c.subtitle)?.subtitle || null;
+        
+        // Check content types across all items
+        const hasText = allContent.some(c => c.content && !c.audioUrl && !c.videoUrl);
+        const hasAudio = allContent.some(c => c.audioUrl);
+        const hasVideo = allContent.some(c => c.videoUrl);
+        
         return {
           speaker: r.speaker,
           imageUrl: r.imageUrl,
-          contentCount: Number(countResult[0]?.count || 0)
+          contentCount: allContent.length,
+          subtitle,
+          hasText,
+          hasAudio,
+          hasVideo
         };
       })
     );
     
     // Already sorted by SQL orderBy, but ensure consistent A-Z order
-    return speakersWithCount.sort((a, b) => a.speaker.localeCompare(b.speaker));
+    return speakersWithDetails.sort((a, b) => a.speaker.localeCompare(b.speaker));
   }
 
   async getLibraryContentBySpeaker(speaker: string): Promise<TorahClass[]> {

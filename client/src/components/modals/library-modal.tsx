@@ -171,6 +171,10 @@ interface Speaker {
   speaker: string;
   imageUrl: string | null;
   contentCount: number;
+  subtitle: string | null;
+  hasText: boolean;
+  hasAudio: boolean;
+  hasVideo: boolean;
 }
 
 type LibraryView = 'speakers' | 'content-list' | 'content-detail';
@@ -287,9 +291,27 @@ export default function LibraryModal() {
           <TapButton
             key={speaker.speaker}
             onTap={() => handleSelectSpeaker(speaker.speaker)}
-            className="bg-white/80 rounded-2xl p-4 border border-blush/20 text-center hover:bg-white/90 transition-colors"
+            className="bg-white/80 rounded-2xl p-4 border border-blush/20 text-center hover:bg-white/90 transition-colors relative"
             data-testid={`button-speaker-${speaker.speaker.replace(/\s+/g, '-').toLowerCase()}`}
           >
+            {/* Content type icons in top-right corner */}
+            <div className="absolute top-2 right-2 flex gap-1">
+              {speaker.hasText && (
+                <span className="w-5 h-5 rounded-full bg-blush/20 flex items-center justify-center">
+                  <span className="text-[10px] font-bold text-blush">T</span>
+                </span>
+              )}
+              {speaker.hasAudio && (
+                <span className="w-5 h-5 rounded-full bg-blush/20 flex items-center justify-center">
+                  <Headphones className="w-3 h-3 text-blush" />
+                </span>
+              )}
+              {speaker.hasVideo && (
+                <span className="w-5 h-5 rounded-full bg-blush/20 flex items-center justify-center">
+                  <Video className="w-3 h-3 text-blush" />
+                </span>
+              )}
+            </div>
             {speaker.imageUrl ? (
               <img 
                 src={speaker.imageUrl} 
@@ -303,6 +325,9 @@ export default function LibraryModal() {
               </div>
             )}
             <h3 className="platypi-bold text-sm text-black line-clamp-2">{speaker.speaker}</h3>
+            {speaker.subtitle && (
+              <p className="text-xs text-black/50 mt-0.5 line-clamp-1">{speaker.subtitle}</p>
+            )}
             <p className="text-xs text-black/60 mt-1">{speaker.contentCount} {speaker.contentCount === 1 ? 'lesson' : 'lessons'}</p>
           </TapButton>
         ))
