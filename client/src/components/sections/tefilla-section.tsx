@@ -697,14 +697,14 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         {/* The Kotel Compass Section */}
         <button
           onClick={handleOpenCompass}
-          className="w-full bg-white/80 rounded-xl overflow-hidden border border-blush/20 p-3 flex items-center gap-3 transition-all hover:bg-white/90 shadow-sm mt-2"
+          className="w-full bg-white/80 rounded-xl overflow-hidden border border-blush/20 p-3 flex items-center justify-center gap-3 transition-all hover:bg-white/90 shadow-sm mt-2"
           data-testid="button-open-compass"
         >
           <div className="p-2.5 rounded-full bg-gradient-feminine shadow-sm flex-shrink-0">
             <Compass className="text-white" size={18} />
           </div>
           
-          <div className="flex-1 min-w-0">
+          <div>
             <h3 className="platypi-bold text-sm text-black">The Kotel Compass</h3>
             <p className="platypi-regular text-xs text-black/70">Direct your Heart Home</p>
           </div>
