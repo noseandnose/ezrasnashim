@@ -339,6 +339,19 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 data-modal-section="torah"
                 data-testid={`button-torah-${id}`}
               >
+                {/* Content Type Indicator - Top Right */}
+                {hasContent && !isCompleted && (
+                  <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+                    {id === 'halacha' ? (
+                      <span className="platypi-bold text-[10px]">T</span>
+                    ) : id === 'chizuk' || id === 'emuna' ? (
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    ) : id === 'speakers' ? (
+                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                    ) : null}
+                  </div>
+                )}
+                
                 {/* Coming Soon Overlay */}
                 {showComingSoon && (
                   <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center z-10">
