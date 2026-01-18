@@ -364,17 +364,17 @@ export default function LibraryModal() {
             className="w-full bg-white/80 rounded-xl p-4 border border-blush/20 text-left hover:bg-white/90 transition-colors flex items-center gap-3"
             data-testid={`button-content-${item.id}`}
           >
-            <div className="flex-grow">
+            <div className="flex-grow min-w-0">
               <h3 className="platypi-bold text-sm text-black">{item.title}</h3>
               {item.subtitle && (
                 <p className="text-xs text-black/60 mt-0.5">{item.subtitle}</p>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              {item.audioUrl && <Headphones className="w-4 h-4 text-blush" />}
-              {item.videoUrl && <Video className="w-4 h-4 text-blush" />}
-              {item.content && <FileText className="w-4 h-4 text-blush" />}
-              <ChevronRight className="w-4 h-4 text-black/40" />
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {item.audioUrl && <Headphones className="w-4 h-4 text-blush flex-shrink-0" />}
+              {item.videoUrl && <Video className="w-4 h-4 text-blush flex-shrink-0" />}
+              {item.content && <FileText className="w-4 h-4 text-blush flex-shrink-0" />}
+              <ChevronRight className="w-4 h-4 text-black/40 flex-shrink-0" />
             </div>
           </TapButton>
         ))
