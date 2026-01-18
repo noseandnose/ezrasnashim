@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useSafeArea } from "@/hooks/use-safe-area";
-import { useBackButton } from "@/hooks/use-back-button";
+import { useModalHistory, useBaseHistoryEntry } from "@/hooks/use-modal-history";
 import { useMitzvahSync } from "@/hooks/use-mitzvah-sync";
 import { initializeCache } from "@/lib/cache";
 import { lazy, Suspense } from "react";
@@ -56,8 +56,9 @@ function Router() {
   // Initialize safe area CSS variables for proper layout positioning
   useSafeArea();
   
-  // Handle Android back button navigation
-  useBackButton();
+  // Handle Android back button navigation for modals
+  useModalHistory();
+  useBaseHistoryEntry();
   
   // Sync mitzvah progress for authenticated users
   useMitzvahSync();
