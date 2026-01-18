@@ -2,99 +2,155 @@ import { useEffect, useRef } from 'react';
 import { useModalStore } from '@/lib/types';
 
 /**
+ * Unique key to identify modal history entries
+ */
+const MODAL_HISTORY_KEY = '__ezras_modal__';
+
+/**
  * History state structure for modal tracking
  */
 interface ModalHistoryState {
-  type: 'modal';
+  [MODAL_HISTORY_KEY]: true;
   modalId: string;
-  timestamp: number;
+  depth: number; // Track modal stack depth
 }
 
+/**
+ * Check if a history state is our modal state
+ */
+function isOurModalState(state: unknown): state is ModalHistoryState {
+  return (
+    typeof state === 'object' &&
+    state !== null &&
+    MODAL_HISTORY_KEY in state &&
+    (state as ModalHistoryState)[MODAL_HISTORY_KEY] === true
+  );
+}
+
+// Global modal depth counter - persists across hook instances
+let globalModalDepth = 0;
 
 /**
  * Hook that manages browser history for modals
- * - Pushes history entry when modal opens
- * - Closes modal when back button is pressed
- * - Works with Android WebView back button
+ * Provides Android back button support for modal navigation
+ * 
+ * Strategy:
+ * - Track modal depth to match history entries with modal state
+ * - On modal open: push entry with depth marker
+ * - On back: check if we're leaving a modal entry (via state depth matching)
+ * - On close: only navigate back if current state matches our modal entry
  */
 export function useModalHistory() {
   const activeModal = useModalStore(state => state.activeModal);
   const closeModal = useModalStore(state => state.closeModal);
   
-  // Track the previous modal to detect changes
+  // Track the previous modal to detect transitions
   const prevModalRef = useRef<string | null>(null);
   
-  // Track if we're currently handling a popstate (to prevent loops)
-  const handlingPopstateRef = useRef(false);
+  // Track the depth when we pushed the current modal entry
+  const pushedDepthRef = useRef<number | null>(null);
   
-  // Track the history state we pushed
-  const pushedStateRef = useRef<string | null>(null);
+  // Flag to prevent re-entry
+  const isNavigatingRef = useRef(false);
   
+  // Handle popstate (back button pressed)
   useEffect(() => {
-    const handlePopstate = (_event: PopStateEvent) => {
-      // If current modal is open and back was pressed, close it
-      if (activeModal && !handlingPopstateRef.current) {
-        handlingPopstateRef.current = true;
+    const handlePopstate = (event: PopStateEvent) => {
+      // Ignore if we triggered this navigation
+      if (isNavigatingRef.current) {
+        return;
+      }
+      
+      // Check if we're leaving a modal state
+      // event.state is the state we're navigating TO
+      // We need to check if we WERE in a modal state and are now leaving it
+      
+      // If we have an active modal AND we pushed a history entry for it,
+      // AND the state we're navigating to is NOT our modal state (or is a different depth),
+      // then back was pressed and we should close the modal
+      if (activeModal && pushedDepthRef.current !== null) {
+        const targetState = event.state;
         
-        // Close the modal
-        closeModal();
+        // If the target state is not our modal or has a different depth, the modal was "backed out"
+        const isLeavingModal = !isOurModalState(targetState) || 
+          (targetState.depth !== pushedDepthRef.current);
         
-        // Reset flag after a short delay
-        setTimeout(() => {
-          handlingPopstateRef.current = false;
-        }, 100);
+        if (isLeavingModal) {
+          isNavigatingRef.current = true;
+          pushedDepthRef.current = null; // Clear since we're closing via back
+          globalModalDepth = Math.max(0, globalModalDepth - 1);
+          
+          closeModal();
+          
+          requestAnimationFrame(() => {
+            isNavigatingRef.current = false;
+          });
+        }
       }
     };
     
-    // Add the popstate listener
     window.addEventListener('popstate', handlePopstate);
-    
-    return () => {
-      window.removeEventListener('popstate', handlePopstate);
-    };
+    return () => window.removeEventListener('popstate', handlePopstate);
   }, [activeModal, closeModal]);
   
-  // Push history state when modal opens
+  // Manage history entries based on modal state changes
   useEffect(() => {
     const prevModal = prevModalRef.current;
+    const currentModal = activeModal;
     
-    // Modal just opened (null -> something)
-    if (activeModal && !prevModal && !handlingPopstateRef.current) {
-      // Push a new history entry for the modal
-      const modalState: ModalHistoryState = {
-        type: 'modal',
-        modalId: activeModal,
-        timestamp: Date.now()
-      };
-      
-      // Push state with the modal info
-      window.history.pushState(modalState, '', window.location.href);
-      pushedStateRef.current = activeModal;
+    // Modal just opened (null -> modalId)
+    if (currentModal && !prevModal) {
+      if (!isNavigatingRef.current) {
+        globalModalDepth++;
+        const depth = globalModalDepth;
+        
+        const modalState: ModalHistoryState = {
+          [MODAL_HISTORY_KEY]: true,
+          modalId: currentModal,
+          depth
+        };
+        
+        window.history.pushState(modalState, '');
+        pushedDepthRef.current = depth;
+      }
     }
     
-    // Modal just closed (something -> null) and we didn't trigger it via popstate
-    // We need to go back in history to match the UI state
-    if (!activeModal && prevModal && pushedStateRef.current === prevModal && !handlingPopstateRef.current) {
-      // The modal was closed programmatically (not via back button)
-      // We need to remove the history entry we pushed
-      // But we can't remove it, so we'll just leave it - the next back press will be a no-op
-      pushedStateRef.current = null;
+    // Modal just closed (modalId -> null)
+    else if (!currentModal && prevModal) {
+      // Only clean up history if this wasn't triggered by popstate (back button)
+      if (!isNavigatingRef.current && pushedDepthRef.current !== null) {
+        // Verify the current state matches what we pushed
+        const currentState = window.history.state;
+        
+        if (isOurModalState(currentState) && currentState.depth === pushedDepthRef.current) {
+          isNavigatingRef.current = true;
+          globalModalDepth = Math.max(0, globalModalDepth - 1);
+          
+          window.history.back();
+          
+          requestAnimationFrame(() => {
+            isNavigatingRef.current = false;
+          });
+        }
+        
+        pushedDepthRef.current = null;
+      }
     }
     
-    // Modal changed to a different modal (modal A -> modal B)
-    if (activeModal && prevModal && activeModal !== prevModal && !handlingPopstateRef.current) {
-      // Replace the current state with the new modal
-      const modalState: ModalHistoryState = {
-        type: 'modal',
-        modalId: activeModal,
-        timestamp: Date.now()
-      };
-      
-      window.history.replaceState(modalState, '', window.location.href);
-      pushedStateRef.current = activeModal;
+    // Modal changed (modalA -> modalB)
+    else if (currentModal && prevModal && currentModal !== prevModal) {
+      // Replace the history entry with the new modal (keep same depth)
+      if (pushedDepthRef.current !== null) {
+        const modalState: ModalHistoryState = {
+          [MODAL_HISTORY_KEY]: true,
+          modalId: currentModal,
+          depth: pushedDepthRef.current
+        };
+        window.history.replaceState(modalState, '');
+      }
     }
     
-    prevModalRef.current = activeModal;
+    prevModalRef.current = currentModal;
   }, [activeModal]);
   
   return { activeModal };
@@ -106,10 +162,14 @@ export function useModalHistory() {
  */
 export function useBaseHistoryEntry() {
   useEffect(() => {
-    // Push a base entry if we're at the start of history
-    // This is a safety net for the very first page load
+    // Mark initial state as base if not already marked
+    if (!window.history.state) {
+      window.history.replaceState({ type: 'base' }, '');
+    }
+    
+    // Ensure at least some history depth for safety
     if (window.history.length <= 1) {
-      window.history.pushState({ type: 'base', timestamp: Date.now() }, '', window.location.href);
+      window.history.pushState({ type: 'base', safety: true }, '');
     }
   }, []);
 }
