@@ -1,4 +1,4 @@
-import { forwardRef, useRef, useCallback } from 'react';
+import { forwardRef, useRef, useCallback, useEffect } from 'react';
 
 const SCROLL_THRESHOLD = 10; // pixels of movement before we consider it a scroll
 const TAP_DEBOUNCE_MS = 300; // minimum time between taps to prevent double-firing
@@ -14,6 +14,37 @@ export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
     const isScrolling = useRef(false);
     const lastTapTime = useRef(0);
     const isTouchDevice = useRef(false);
+    const lastResumeTime = useRef(0);
+
+    // Reset touch device detection on app resume to fix unresponsive buttons
+    useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          // Reset touch detection so click events work again after resume
+          isTouchDevice.current = false;
+          touchStartPos.current = null;
+          isScrolling.current = false;
+          lastResumeTime.current = Date.now();
+        }
+      };
+
+      const handlePageShow = (e: PageTransitionEvent) => {
+        if (e.persisted) {
+          isTouchDevice.current = false;
+          touchStartPos.current = null;
+          isScrolling.current = false;
+          lastResumeTime.current = Date.now();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pageshow', handlePageShow);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pageshow', handlePageShow);
+      };
+    }, []);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
       isTouchDevice.current = true;
@@ -47,9 +78,10 @@ export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
     }, [onTap]);
 
     const handleClick = useCallback(() => {
-      // Only use click for non-touch devices
-      if (!isTouchDevice.current) {
-        const now = Date.now();
+      const now = Date.now();
+      // Allow click if not a touch device OR if we recently resumed from background
+      const recentlyResumed = now - lastResumeTime.current < 2000;
+      if (!isTouchDevice.current || recentlyResumed) {
         if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
           lastTapTime.current = now;
           onTap();
@@ -85,6 +117,36 @@ export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
     const isScrolling = useRef(false);
     const lastTapTime = useRef(0);
     const isTouchDevice = useRef(false);
+    const lastResumeTime = useRef(0);
+
+    // Reset touch device detection on app resume to fix unresponsive buttons
+    useEffect(() => {
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          isTouchDevice.current = false;
+          touchStartPos.current = null;
+          isScrolling.current = false;
+          lastResumeTime.current = Date.now();
+        }
+      };
+
+      const handlePageShow = (e: PageTransitionEvent) => {
+        if (e.persisted) {
+          isTouchDevice.current = false;
+          touchStartPos.current = null;
+          isScrolling.current = false;
+          lastResumeTime.current = Date.now();
+        }
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('pageshow', handlePageShow);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('pageshow', handlePageShow);
+      };
+    }, []);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
       isTouchDevice.current = true;
@@ -118,9 +180,10 @@ export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
     }, [onTap]);
 
     const handleClick = useCallback(() => {
-      // Only use click for non-touch devices
-      if (!isTouchDevice.current) {
-        const now = Date.now();
+      const now = Date.now();
+      // Allow click if not a touch device OR if we recently resumed from background
+      const recentlyResumed = now - lastResumeTime.current < 2000;
+      if (!isTouchDevice.current || recentlyResumed) {
         if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
           lastTapTime.current = now;
           onTap();
