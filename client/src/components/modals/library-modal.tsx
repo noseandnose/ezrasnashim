@@ -169,7 +169,17 @@ export default function LibraryModal() {
 
   const sortedSpeakerContent = useMemo(() => {
     if (!speakerContent) return [];
-    return [...speakerContent].sort((a, b) => naturalSort(a.title, b.title));
+    return [...speakerContent].sort((a, b) => {
+      // If both have displayOrder, sort by displayOrder
+      if (a.displayOrder != null && b.displayOrder != null) {
+        return a.displayOrder - b.displayOrder;
+      }
+      // If only one has displayOrder, it comes first
+      if (a.displayOrder != null) return -1;
+      if (b.displayOrder != null) return 1;
+      // Otherwise, fall back to natural alphabetical sort
+      return naturalSort(a.title, b.title);
+    });
   }, [speakerContent]);
 
   const handleSelectSpeaker = useCallback((speaker: string) => {
