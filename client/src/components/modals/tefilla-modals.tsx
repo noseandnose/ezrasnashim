@@ -1,7 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
-import { TapButton } from "@/components/ui/tap-button";
+import { TapButton, TapDiv } from "@/components/ui/tap-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, Sunrise, Sun } from "lucide-react";
@@ -890,8 +890,8 @@ function ShachrisFullscreenContent({
             className="bg-white rounded-2xl border border-blush/10 overflow-hidden"
           >
             {/* Section Header - Clickable */}
-            <button
-              onPointerDown={() => handleSectionToggle(sectionIndex)}
+            <TapButton
+              onTap={() => handleSectionToggle(sectionIndex)}
               className="w-full px-4 py-3 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
@@ -902,7 +902,7 @@ function ShachrisFullscreenContent({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-            </button>
+            </TapButton>
 
             {/* Section Content - Collapsible */}
             {isExpanded && (
@@ -1194,9 +1194,9 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           currentBrochas.map((brocha: any) => {
             const IconComponent = getBrochaIcon(brocha.title);
             return (
-              <button
+              <TapButton
                 key={brocha.id}
-                onPointerDown={() => {
+                onTap={() => {
                   // Store the selected brocha ID globally and open individual brocha fullscreen
                   (window as any).selectedBrochaId = brocha.id;
                   const openEvent = new CustomEvent('openDirectFullscreen', {
@@ -1226,7 +1226,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                     </p>
                   )}
                 </div>
-              </button>
+              </TapButton>
             );
           })
         ) : (
@@ -1245,8 +1245,8 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
           <div className="border-t border-blush/20 my-4"></div>
           
           {/* Shacharis */}
-          <button
-            onPointerDown={() => {
+          <TapButton
+            onTap={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Shacharis',
@@ -1275,11 +1275,11 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                 <Check className="text-sage" size={20} />
               </div>
             )}
-          </button>
+          </TapButton>
           
           {/* Mincha */}
-          <button
-            onPointerDown={() => {
+          <TapButton
+            onTap={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Mincha',
@@ -1308,11 +1308,11 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                 <Check className="text-sage" size={20} />
               </div>
             )}
-          </button>
+          </TapButton>
           
           {/* Maariv */}
-          <button
-            onPointerDown={() => {
+          <TapButton
+            onTap={() => {
               const openEvent = new CustomEvent('openDirectFullscreen', {
                 detail: {
                   title: 'Maariv',
@@ -1341,7 +1341,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                 <Check className="text-sage" size={20} />
               </div>
             )}
-          </button>
+          </TapButton>
         </div>
       )}
       
@@ -1463,9 +1463,9 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
       <div className="space-y-4">
         {currentPrayers.length > 0 ? (
           currentPrayers.map((prayer: WomensPrayer) => (
-            <button
+            <TapButton
               key={prayer.id}
-              onPointerDown={() => {
+              onTap={() => {
                 // Store the selected prayer ID globally and open individual prayer fullscreen
                 (window as any).selectedPrayerId = prayer.id;
                 const openEvent = new CustomEvent('openDirectFullscreen', {
@@ -1495,7 +1495,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
                   </p>
                 )}
               </div>
-            </button>
+            </TapButton>
           ))
         ) : (
           <div className="text-center py-8">
@@ -1636,8 +1636,8 @@ function MorningBrochasFullscreenContent({
             className="bg-white rounded-2xl border border-blush/10 overflow-hidden"
           >
             {/* Section Header - Clickable */}
-            <button
-              onPointerDown={() => handleSectionToggle(sectionIndex)}
+            <TapButton
+              onTap={() => handleSectionToggle(sectionIndex)}
               className="w-full px-6 py-4 text-left hover:bg-blush/5 transition-colors flex items-center justify-between"
             >
               <h3 className="platypi-bold text-lg text-black">
@@ -1648,7 +1648,7 @@ function MorningBrochasFullscreenContent({
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
-            </button>
+            </TapButton>
 
             {/* Section Content - Collapsible */}
             {isExpanded && (
@@ -3148,13 +3148,13 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
           />
           
           <div className="space-y-3">
-            <div 
+            <TapDiv 
               className={`content-card rounded-xl p-4 ${
                 isModalComplete('blessings') 
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onPointerDown={() => {
+              onTap={() => {
                 if (!isModalComplete('blessings')) {
                   closeModal();
                   openModal('blessings', 'tefilla');
@@ -3170,15 +3170,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   <Check className="text-sage" size={20} />
                 )}
               </div>
-            </div>
+            </TapDiv>
             
-            <div 
+            <TapDiv 
               className={`content-card rounded-xl p-4 ${
                 isModalComplete('tefillos') 
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onPointerDown={() => {
+              onTap={() => {
                 if (!isModalComplete('tefillos')) {
                   closeModal();
                   openModal('tefillos', 'tefilla');
@@ -3194,15 +3194,15 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   <Check className="text-sage" size={20} />
                 )}
               </div>
-            </div>
+            </TapDiv>
             
-            <div 
+            <TapDiv 
               className={`content-card rounded-xl p-4 ${
                 isModalComplete('personal-prayers') 
                   ? 'bg-sage/20 border-sage cursor-not-allowed' 
                   : 'cursor-pointer hover:bg-gray-50'
               }`}
-              onPointerDown={() => {
+              onTap={() => {
                 if (!isModalComplete('personal-prayers')) {
                   closeModal();
                   openModal('personal-prayers', 'tefilla');
@@ -3218,7 +3218,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                   <Check className="text-sage" size={20} />
                 )}
               </div>
-            </div>
+            </TapDiv>
           </div>
         </DialogContent>
       </Dialog>
@@ -3863,10 +3863,10 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
   return (
     <div className="space-y-3">
       {prayers.map((prayer) => (
-        <div 
+        <TapDiv 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onPointerDown={() => onPrayerSelect(prayer.id)}
+          onTap={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Users className="text-purple-500" size={20} />
@@ -3877,12 +3877,12 @@ function FamilyPrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) =>
               )}
             </div>
           </div>
-        </div>
+        </TapDiv>
       ))}
       
       <div className="mt-6">
         <Button 
-          onPointerDown={() => closeModal()}
+          onClick={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
@@ -3904,7 +3904,7 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
       <div className="text-center py-8">
         <p className="text-gray-500 platypi-regular">No prayers available</p>
         <Button 
-          onPointerDown={() => closeModal()}
+          onClick={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform mt-4"
         >
           Close
@@ -3916,10 +3916,10 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
   return (
     <div className="space-y-3">
       {prayers.map((prayer) => (
-        <div 
+        <TapDiv 
           key={prayer.id}
           className="bg-white rounded-xl p-4 cursor-pointer hover:bg-white/90 transition-all duration-300 shadow-sm border border-blush/20"
-          onPointerDown={() => onPrayerSelect(prayer.id)}
+          onTap={() => onPrayerSelect(prayer.id)}
         >
           <div className="flex items-center space-x-3">
             <Heart className="text-pink-500" size={20} />
@@ -3930,12 +3930,12 @@ function LifePrayersList({ onPrayerSelect }: { onPrayerSelect: (id: number) => v
               )}
             </div>
           </div>
-        </div>
+        </TapDiv>
       ))}
       
       <div className="mt-6">
         <Button 
-          onPointerDown={() => closeModal()}
+          onClick={() => closeModal()}
           className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
         >
           Close
