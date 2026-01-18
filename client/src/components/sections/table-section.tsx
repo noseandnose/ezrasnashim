@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem } from "lucide-react";
+import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem, Triangle, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -350,6 +350,13 @@ export default function TableSection() {
             }}
             disabled={!recipeContent}
           >
+            {/* Content Type Indicator - Top Right */}
+            {recipeContent && !isModalComplete('recipe') && (
+              <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+                <span className="platypi-bold text-[10px]">T</span>
+              </div>
+            )}
+            
             {!recipeContent && (
               <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
@@ -384,7 +391,7 @@ export default function TableSection() {
           {/* Marriage Insights Button */}
           <button
             data-testid="button-marriage-insights"
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -396,6 +403,13 @@ export default function TableSection() {
             data-modal-type="marriage-insights"
             data-modal-section="table"
           >
+            {/* Content Type Indicator - Top Right */}
+            {!isModalComplete('marriage-insights') && (
+              <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+                <span className="platypi-bold text-[10px]">T</span>
+              </div>
+            )}
+            
             <div 
               className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
@@ -440,6 +454,19 @@ export default function TableSection() {
             disabled={!currentLifeClass}
             data-testid="button-life-class"
           >
+            {/* Content Type Indicator - Top Right */}
+            {currentLifeClass && !isModalComplete('life-class') && (
+              <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+                {currentLifeClass.videoUrl ? (
+                  <Video className="w-2.5 h-2.5" />
+                ) : currentLifeClass.audioUrl ? (
+                  <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                ) : (
+                  <span className="platypi-bold text-[10px]">T</span>
+                )}
+              </div>
+            )}
+            
             {!currentLifeClass && (
               <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center z-10">
                 <div className="bg-white/90 px-2 py-1 rounded-lg">
@@ -473,7 +500,7 @@ export default function TableSection() {
 
           {/* Meditation Button */}
           <button
-            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
+            className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300 relative"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
@@ -486,6 +513,11 @@ export default function TableSection() {
             data-modal-type="meditation-categories"
             data-modal-section="table"
           >
+            {/* Content Type Indicator - Top Right (Audio) */}
+            <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+              <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+            </div>
+            
             <div 
               className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
