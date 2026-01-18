@@ -93,9 +93,20 @@ const NishmasThankYou = () => {
 };
 
 // Custom hook to manage Tefilla conditions
+// Refreshes every minute to catch sunset transitions for Rosh Chodesh etc.
 const useTefillaConditions = () => {
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Refresh conditions every minute to catch sunset transitions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 60000); // 1 minute
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const loadConditions = async () => {
@@ -107,7 +118,6 @@ const useTefillaConditions = () => {
         
         setConditions(tefillaConditions);
       } catch (error) {
-        
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
@@ -138,15 +148,26 @@ const useTefillaConditions = () => {
     };
 
     loadConditions();
-  }, [coordinates]);
+  }, [coordinates, refreshTrigger]);
 
   return conditions;
 };
 
 // Custom hook for Maariv - checks tomorrow for Rosh Chodesh since Jewish days start at sunset
+// Refreshes every minute to catch sunset transitions
 const useMaarivTefillaConditions = () => {
   const { coordinates } = useLocationStore();
   const [conditions, setConditions] = useState<TefillaConditions | null>(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Refresh conditions every minute to catch sunset transitions
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRefreshTrigger(prev => prev + 1);
+    }, 60000); // 1 minute
+    
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     const loadConditions = async () => {
@@ -159,7 +180,6 @@ const useMaarivTefillaConditions = () => {
         
         setConditions(tefillaConditions);
       } catch (error) {
-        
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
@@ -190,7 +210,7 @@ const useMaarivTefillaConditions = () => {
     };
 
     loadConditions();
-  }, [coordinates]);
+  }, [coordinates, refreshTrigger]);
 
   return conditions;
 };
