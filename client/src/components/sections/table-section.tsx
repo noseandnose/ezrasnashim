@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem, Triangle, Video } from "lucide-react";
+import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem, Headphones, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
@@ -460,7 +460,7 @@ export default function TableSection() {
                 {currentLifeClass.videoUrl ? (
                   <Video className="w-2.5 h-2.5" />
                 ) : currentLifeClass.audioUrl ? (
-                  <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                  <Headphones className="w-2.5 h-2.5" />
                 ) : (
                   <span className="platypi-bold text-[10px]">T</span>
                 )}
@@ -515,7 +515,7 @@ export default function TableSection() {
           >
             {/* Content Type Indicator - Top Right (Audio) */}
             <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
-              <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+              <Headphones className="w-2.5 h-2.5" />
             </div>
             
             <div 
