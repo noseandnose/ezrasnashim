@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import axiosClient from "@/lib/axiosClient";
+import { TapDiv } from "@/components/ui/tap-button";
 
 interface Partner {
   id: number;
@@ -94,11 +95,11 @@ export default function Partners() {
           </div>
         ) : (
           filteredPartners.map((partner) => (
-            <div
+            <TapDiv
               key={partner.id}
               className="bg-white rounded-2xl p-4 cursor-pointer shadow-sm border border-blush/10
                          hover:shadow-md transition-shadow duration-200"
-              onPointerDown={() => handleClick(partner.linkUrl)}
+              onTap={() => handleClick(partner.linkUrl)}
               data-testid={`partner-card-${partner.id}`}
             >
               <div className="flex items-center gap-4">
@@ -117,7 +118,7 @@ export default function Partners() {
                 </div>
                 <ExternalLink className="w-5 h-5 text-black/40 flex-shrink-0" />
               </div>
-            </div>
+            </TapDiv>
           ))
         )}
       </div>

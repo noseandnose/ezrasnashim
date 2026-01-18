@@ -116,6 +116,11 @@ export interface IStorage {
   updateTorahClass(id: number, torahClass: Partial<InsertTorahClass>): Promise<TorahClass | undefined>;
   deleteTorahClass(id: number): Promise<boolean>;
 
+  // Library methods (Torah classes grouped by speaker)
+  getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number }[]>;
+  getLibraryContentBySpeaker(speaker: string): Promise<TorahClass[]>;
+  getLibraryContentById(id: number): Promise<TorahClass | undefined>;
+
   // Life classes methods
   getLifeClassesByDate(date: string): Promise<LifeClass[]>;
   getAllLifeClasses(): Promise<LifeClass[]>;
@@ -1699,33 +1704,67 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount ? result.rowCount > 0 : false;
   }
 
-  // Torah Classes methods
-  async getTorahClassByDate(date: string): Promise<TorahClass | undefined> {
+  // Torah Classes methods (Library - permanent content, no date filtering)
+  async getTorahClassByDate(_date: string): Promise<TorahClass | undefined> {
     const [torahClass] = await db
       .select()
       .from(torahClasses)
-      .where(and(
-        lte(torahClasses.fromDate, date),
-        gte(torahClasses.untilDate, date)
-      ))
       .limit(1);
     return torahClass;
   }
 
-  async getTorahClassesByDate(date: string): Promise<TorahClass[]> {
-    const classes = await db
-      .select()
-      .from(torahClasses)
-      .where(and(
-        lte(torahClasses.fromDate, date),
-        gte(torahClasses.untilDate, date)
-      ))
-      .orderBy(torahClasses.id);
-    return classes;
+  async getTorahClassesByDate(_date: string): Promise<TorahClass[]> {
+    return await db.select().from(torahClasses).orderBy(torahClasses.speaker, torahClasses.id);
   }
 
   async getAllTorahClasses(): Promise<TorahClass[]> {
-    return await db.select().from(torahClasses).orderBy(desc(torahClasses.fromDate), desc(torahClasses.id));
+    return await db.select().from(torahClasses).orderBy(torahClasses.speaker, desc(torahClasses.id));
+  }
+
+  // Library methods - speakers and content grouped by speaker
+  async getLibrarySpeakers(): Promise<{ speaker: string; imageUrl: string | null; contentCount: number }[]> {
+    const result = await db
+      .select({
+        speaker: torahClasses.speaker,
+        imageUrl: torahClasses.attributionLogoUrl,
+      })
+      .from(torahClasses)
+      .groupBy(torahClasses.speaker, torahClasses.attributionLogoUrl)
+      .orderBy(torahClasses.speaker);
+    
+    // Get count for each speaker
+    const speakersWithCount = await Promise.all(
+      result.map(async (r) => {
+        const countResult = await db
+          .select({ count: sql<number>`count(*)` })
+          .from(torahClasses)
+          .where(eq(torahClasses.speaker, r.speaker));
+        return {
+          speaker: r.speaker,
+          imageUrl: r.imageUrl,
+          contentCount: Number(countResult[0]?.count || 0)
+        };
+      })
+    );
+    
+    // Already sorted by SQL orderBy, but ensure consistent A-Z order
+    return speakersWithCount.sort((a, b) => a.speaker.localeCompare(b.speaker));
+  }
+
+  async getLibraryContentBySpeaker(speaker: string): Promise<TorahClass[]> {
+    return await db
+      .select()
+      .from(torahClasses)
+      .where(eq(torahClasses.speaker, speaker))
+      .orderBy(torahClasses.title);
+  }
+
+  async getLibraryContentById(id: number): Promise<TorahClass | undefined> {
+    const [content] = await db
+      .select()
+      .from(torahClasses)
+      .where(eq(torahClasses.id, id));
+    return content;
   }
 
   async createTorahClass(insertClass: InsertTorahClass): Promise<TorahClass> {

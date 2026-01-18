@@ -34,6 +34,7 @@ export type ModalType =
   | 'community-impact'
   | 'date-calculator-fullscreen'
   | 'events'
+  | 'library'
   | null;
 
 export interface ModalState {

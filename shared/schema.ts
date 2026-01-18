@@ -46,22 +46,20 @@ export const parshaVorts = pgTable("parsha_vorts", {
 
 export const torahClasses = pgTable("torah_classes", {
   id: serial("id").primaryKey(),
-  fromDate: date("from_date").notNull(), // Start date for display
-  untilDate: date("until_date").notNull(), // End date for display
   title: text("title").notNull(),
   subtitle: text("subtitle"), // Subtitle for the bar display
   content: text("content"),
   audioUrl: text("audio_url"),
   videoUrl: text("video_url"),
   imageUrl: text("image_url"), // Graphic for the bar
-  speaker: text("speaker"),
+  speaker: text("speaker").notNull(), // Required for library grouping
   speakerWebsite: text("speaker_website"),
   thankYouMessage: text("thank_you_message"),
   attributionLogoUrl: text("attribution_logo_url"),
   attributionAboutText: text("attribution_about_text"),
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
-  dateRangeIdx: index("torah_classes_date_range_idx").on(table.fromDate, table.untilDate),
+  speakerIdx: index("torah_classes_speaker_idx").on(table.speaker),
 }));
 
 export const lifeClasses = pgTable("life_classes", {

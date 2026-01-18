@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen, Music } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen, Music, ChevronRight } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -695,22 +695,22 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         </div>
 
         {/* The Kotel Compass Section */}
-        <Button
-          variant="ghost"
-          onPointerDown={handleOpenCompass}
-          className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 hover:bg-white/90 transition-all duration-300 text-left h-auto mt-2"
+        <button
+          onClick={handleOpenCompass}
+          className="w-full bg-white rounded-2xl overflow-hidden border border-blush/10 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] mt-2"
           data-testid="button-open-compass"
         >
-          <div className="flex items-center gap-3">
-            <div className="bg-gradient-feminine p-2 rounded-full">
-              <Compass className="text-white" size={16} />
+          <div className="flex flex-col items-center justify-center p-4 text-center">
+            {/* Icon */}
+            <div className="p-2.5 rounded-full bg-gradient-feminine mb-2 shadow-sm">
+              <Compass className="text-white" size={20} />
             </div>
-            <div className="flex-grow">
-              <h3 className="platypi-bold text-sm text-black">The Kotel Compass</h3>
-              <p className="platypi-regular text-xs text-black/70">Direct your Heart Home</p>
-            </div>
+            
+            {/* Title and Subtitle */}
+            <h3 className="platypi-bold text-base text-black">The Kotel Compass</h3>
+            <p className="platypi-regular text-xs text-black/60">Direct your Heart Home</p>
           </div>
-        </Button>
+        </button>
 
         {/* Bottom padding */}
         <div className="h-16"></div>
