@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Headphones, FileText, Video, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,28 @@ import { AttributionSection } from "@/components/ui/attribution-section";
 import { getHebrewFontClass, getTextDirection } from "@/lib/hebrewUtils";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import type { TorahClass } from "@shared/schema";
+
+function naturalSort(a: string, b: string): number {
+  const regex = /(\d+)|(\D+)/g;
+  const aParts = a.match(regex) || [];
+  const bParts = b.match(regex) || [];
+  
+  for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+    const aPart = aParts[i] || '';
+    const bPart = bParts[i] || '';
+    
+    const aNum = parseInt(aPart, 10);
+    const bNum = parseInt(bPart, 10);
+    
+    if (!isNaN(aNum) && !isNaN(bNum)) {
+      if (aNum !== bNum) return aNum - bNum;
+    } else {
+      const cmp = aPart.localeCompare(bPart);
+      if (cmp !== 0) return cmp;
+    }
+  }
+  return 0;
+}
 
 function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; onVideoEnded?: () => void }) {
   const [hasError, setHasError] = useState(false);
@@ -145,6 +167,11 @@ export default function LibraryModal() {
     staleTime: 5 * 60 * 1000,
   });
 
+  const sortedSpeakerContent = useMemo(() => {
+    if (!speakerContent) return [];
+    return [...speakerContent].sort((a, b) => naturalSort(a.title, b.title));
+  }, [speakerContent]);
+
   const handleSelectSpeaker = useCallback((speaker: string) => {
     setSelectedSpeaker(speaker);
     setView('content-list');
@@ -242,7 +269,7 @@ export default function LibraryModal() {
   const renderContentList = () => (
     <div className="space-y-2 pb-20">
       <button
-        onPointerDown={handleBack}
+        onClick={handleBack}
         className="flex items-center gap-2 text-blush mb-3"
         data-testid="button-back-to-speakers"
       >
@@ -254,8 +281,8 @@ export default function LibraryModal() {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blush mx-auto"></div>
           <p className="text-sm text-black/60 mt-2">Loading content...</p>
         </div>
-      ) : speakerContent && speakerContent.length > 0 ? (
-        speakerContent.map((item) => (
+      ) : sortedSpeakerContent && sortedSpeakerContent.length > 0 ? (
+        sortedSpeakerContent.map((item) => (
           <TapButton
             key={item.id}
             onTap={() => handleSelectContent(item.id)}
@@ -288,7 +315,7 @@ export default function LibraryModal() {
   const renderContentDetail = () => (
     <div className="space-y-4 pb-20">
       <button
-        onPointerDown={handleBack}
+        onClick={handleBack}
         className="flex items-center gap-2 text-blush mb-3"
         data-testid="button-back-to-content-list"
       >

@@ -88,7 +88,7 @@ body {
   min-height: 100svh; /* Small viewport */
   min-height: -webkit-fill-available; /* Safari fallback */
   overflow-x: hidden;
-  overscroll-behavior-y: auto; /* Allow pull-to-refresh */
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
   /* Safari specific fixes */
   -webkit-overflow-scrolling: touch;
   position: relative;
@@ -1128,7 +1128,7 @@ html, body, #root {
   
   /* Prevent scroll bounce on iOS */
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: auto; /* Changed from contain to auto to allow native scroll behavior */
+  overscroll-behavior-y: contain; /* Prevent pull-to-refresh */
   /* Ensure content is always accessible on Safari */
   position: relative;
 }
@@ -1424,9 +1424,9 @@ header[class*="fixed"] {
   right: 0 !important;
   z-index: 40 !important;
   
-  /* Allow pull-to-refresh */
+  /* Prevent pull-to-refresh */
   touch-action: pan-y !important;
-  overscroll-behavior-y: auto !important;
+  overscroll-behavior-y: contain !important;
   
   /* Prevent dragging */
   -webkit-user-drag: none !important;
