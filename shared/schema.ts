@@ -57,6 +57,7 @@ export const torahClasses = pgTable("torah_classes", {
   thankYouMessage: text("thank_you_message"),
   attributionLogoUrl: text("attribution_logo_url"),
   attributionAboutText: text("attribution_about_text"),
+  displayOrder: integer("display_order"), // Custom order per speaker (null = alphabetical)
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   speakerIdx: index("torah_classes_speaker_idx").on(table.speaker),

@@ -70,6 +70,7 @@
     "express-session": "^1.18.2",
     "geo-tz": "^8.1.4",
     "helmet": "^8.1.0",
+    "hls.js": "^1.6.15",
     "http-proxy-middleware": "^3.0.5",
     "isomorphic-dompurify": "^2.30.0",
     "jsonwebtoken": "^9.0.3",

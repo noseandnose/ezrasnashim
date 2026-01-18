@@ -13,6 +13,7 @@ import { LazyImage } from "@/components/ui/lazy-image";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { FullscreenImageModal } from "@/components/modals/fullscreen-image-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
+import Hls from "hls.js";
 
 export default function TableModals() {
   const { activeModal, closeModal } = useModalStore();
@@ -315,7 +316,7 @@ export default function TableModals() {
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-80 object-contain cursor-pointer"
-                    onPointerDown={() => handleImageTap(recipeContent.imageUrl!)}
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                     onError={() => {
                       // Image failed to load, could hide the container
                     }}
@@ -599,6 +600,7 @@ export default function TableModals() {
                           if (url.includes('.mp4')) return 'video/mp4';
                           if (url.includes('.mov')) return 'video/quicktime';
                           if (url.includes('.webm')) return 'video/webm';
+                          if (url.includes('.m3u8')) return 'application/vnd.apple.mpegurl';
                           return 'video/mp4'; // default
                         };
                         
@@ -621,6 +623,43 @@ export default function TableModals() {
                         };
 
                         const videoUrl = getOptimizedVideoUrl(currentMedia.url || '');
+                        const isHls = videoUrl.includes('.m3u8');
+                        const videoRef = useRef<HTMLVideoElement>(null);
+                        const hlsRef = useRef<Hls | null>(null);
+
+                        useEffect(() => {
+                          const video = videoRef.current;
+                          if (!video || !isHls) return;
+
+                          if (Hls.isSupported()) {
+                            const hls = new Hls({
+                              enableWorker: true,
+                              lowLatencyMode: false,
+                            });
+                            hlsRef.current = hls;
+                            hls.loadSource(videoUrl);
+                            hls.attachMedia(video);
+                            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                              setIsLoading(false);
+                            });
+                            hls.on(Hls.Events.ERROR, (_, data) => {
+                              if (data.fatal) {
+                                setVideoError(true);
+                              }
+                            });
+                          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                            video.src = videoUrl;
+                          } else {
+                            setVideoError(true);
+                          }
+
+                          return () => {
+                            if (hlsRef.current) {
+                              hlsRef.current.destroy();
+                              hlsRef.current = null;
+                            }
+                          };
+                        }, [videoUrl, isHls]);
                         
                         return (
                           <div className="w-full h-full relative">
@@ -644,18 +683,19 @@ export default function TableModals() {
                               </div>
                             ) : (
                               <video 
-                                src={videoUrl}
+                                ref={videoRef}
+                                {...(!isHls && { src: videoUrl })}
                                 controls
                                 className="w-full h-full object-contain bg-gray-50"
                                 preload="none"
                                 poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3Cpolygon points='40,30 70,50 40,70' fill='%23d1d5db'/%3E%3C/svg%3E"
-                                onError={handleVideoError}
+                                onError={() => !isHls && handleVideoError()}
                                 onLoadedData={handleCanPlay}
                                 onLoadStart={() => setIsLoading(true)}
                                 playsInline
                                 muted
                               >
-                                <source src={videoUrl} type={getVideoType(videoUrl)} />
+                                {!isHls && <source src={videoUrl} type={getVideoType(videoUrl)} />}
                                 Your browser does not support the video tag.
                               </video>
                             )}
@@ -856,7 +896,7 @@ export default function TableModals() {
                     src={recipeContent.imageUrl} 
                     alt={recipeContent.title || "Recipe"} 
                     className="w-full h-80 object-cover cursor-pointer"
-                    onPointerDown={() => handleImageTap(recipeContent.imageUrl!)}
+                    onClick={() => handleImageTap(recipeContent.imageUrl!)}
                   />
                 </div>
               )}
@@ -1078,7 +1118,7 @@ export default function TableModals() {
                                 src={mediaItems[currentMediaIndex].url!}
                                 alt="Inspiration content"
                                 className="w-full h-80 object-contain"
-                                onPointerDown={() => {
+                                onClick={() => {
                                   const allImageUrls = mediaItems.filter(item => item.type === 'image' && item.url).map(item => item.url!);
                                   handleImageTap(mediaItems[currentMediaIndex].url!, allImageUrls);
                                 }}
