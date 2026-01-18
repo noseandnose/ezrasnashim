@@ -339,18 +339,45 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 data-modal-section="torah"
                 data-testid={`button-torah-${id}`}
               >
-                {/* Content Type Indicator - Top Right */}
-                {hasContent && !isCompleted && (
-                  <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
-                    {id === 'halacha' ? (
-                      <span className="platypi-bold text-[10px]">T</span>
-                    ) : id === 'chizuk' || id === 'emuna' ? (
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : id === 'speakers' ? (
-                      <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
-                    ) : null}
-                  </div>
-                )}
+                {/* Content Type Indicator - Top Right - Detects actual content */}
+                {hasContent && !isCompleted && (() => {
+                  let hasVideo = false;
+                  let hasAudio = false;
+                  let hasText = false;
+                  
+                  if (id === 'halacha') {
+                    // Halacha only has text content
+                    hasText = !!halachaContent?.content;
+                  } else if (id === 'chizuk') {
+                    // Chizuk has audioUrl and optional content
+                    hasAudio = !!chizukContent?.audioUrl;
+                    hasText = !!chizukContent?.content && !chizukContent?.audioUrl;
+                  } else if (id === 'emuna') {
+                    // Emuna has audioUrl and optional content
+                    hasAudio = !!emunaContent?.audioUrl;
+                    hasText = !!emunaContent?.content && !emunaContent?.audioUrl;
+                  } else if (id === 'speakers') {
+                    const todayStr = getLocalDateString();
+                    const firstVort = (Array.isArray(parshaVorts) ? parshaVorts.find(p => 
+                      p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
+                    ) : null);
+                    hasVideo = !!firstVort?.videoUrl;
+                    hasAudio = !!firstVort?.audioUrl;
+                    hasText = !!firstVort?.content && !firstVort?.audioUrl && !firstVort?.videoUrl;
+                  }
+                  
+                  return (
+                    <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
+                      {hasVideo ? (
+                        <Video className="w-2.5 h-2.5" />
+                      ) : hasAudio ? (
+                        <Triangle className="w-2.5 h-2.5 fill-current rotate-90" />
+                      ) : hasText ? (
+                        <span className="platypi-bold text-[10px]">T</span>
+                      ) : null}
+                    </div>
+                  );
+                })()}
                 
                 {/* Coming Soon Overlay */}
                 {showComingSoon && (
