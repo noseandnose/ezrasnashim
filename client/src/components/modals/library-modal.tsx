@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, Headphones, FileText, Video, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { AttributionSection } from "@/components/ui/attribution-section";
 import { getHebrewFontClass, getTextDirection } from "@/lib/hebrewUtils";
 import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import type { TorahClass } from "@shared/schema";
+import Hls from "hls.js";
 
 function naturalSort(a: string, b: string): number {
   const regex = /(\d+)|(\D+)/g;
@@ -39,9 +40,43 @@ function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; on
   const [hasError, setHasError] = useState(false);
   const [hasCompleted, setHasCompleted] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
 
   const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
   const isVimeo = videoUrl.includes('vimeo.com');
+  const isHls = videoUrl.includes('.m3u8');
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !isHls) return;
+
+    if (Hls.isSupported()) {
+      const hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: false,
+      });
+      hlsRef.current = hls;
+      hls.loadSource(videoUrl);
+      hls.attachMedia(video);
+      hls.on(Hls.Events.ERROR, (_, data) => {
+        if (data.fatal) {
+          setHasError(true);
+        }
+      });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = videoUrl;
+    } else {
+      setHasError(true);
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [videoUrl, isHls]);
 
   const getYouTubeEmbedUrl = (url: string) => {
     if (url.includes('embed/')) return url;
@@ -110,6 +145,7 @@ function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; on
         </div>
       ) : (
         <video
+          ref={videoRef}
           controls
           className="w-full h-full object-contain bg-black"
           preload="none"
@@ -117,10 +153,13 @@ function OptimizedVideoPlayer({ videoUrl, onVideoEnded }: { videoUrl: string; on
           onWaiting={() => setIsBuffering(true)}
           onCanPlay={() => setIsBuffering(false)}
           onPlaying={() => setIsBuffering(false)}
-          onError={() => setHasError(true)}
+          onError={() => !isHls && setHasError(true)}
           onEnded={handleVideoEnd}
+          {...(!isHls && { src: videoUrl })}
         >
-          <source src={videoUrl} type={videoUrl.includes('.webm') ? 'video/webm' : 'video/mp4'} />
+          {!isHls && (
+            <source src={videoUrl} type={videoUrl.includes('.webm') ? 'video/webm' : 'video/mp4'} />
+          )}
           Your browser does not support the video tag.
         </video>
       )}
