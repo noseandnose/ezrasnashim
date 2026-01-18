@@ -254,8 +254,9 @@ export default function LibraryModal() {
   }, [closeModal]);
 
   const handleComplete = useCallback(() => {
+    const speakerName = contentDetail?.speaker || selectedSpeaker || 'Unknown';
     const modalId = `library-${selectedContentId}`;
-    trackModalComplete(modalId);
+    trackModalComplete(`Library - ${speakerName}`);
     markModalComplete(modalId);
     completeTask('torah');
     setTriggerHeartExplosion(true);

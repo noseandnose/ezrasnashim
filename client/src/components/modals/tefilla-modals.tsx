@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
 import { Button } from "@/components/ui/button";
+import { TapButton } from "@/components/ui/tap-button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { HandHeart, Scroll, Heart, Plus, Minus, Stethoscope, HeartHandshake, Baby, DollarSign, Star, Users, GraduationCap, Smile, Unlock, Check, Utensils, Wine, Car, Wheat, Moon, User, Info, Sunrise, Sun } from "lucide-react";
@@ -4229,18 +4230,17 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
           <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
             <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
               {allPsalms.map((psalm) => (
-                <button
+                <TapButton
                   key={psalm}
-                  onPointerDown={() => openTehillimText(psalm)}
+                  onTap={() => openTehillimText(psalm)}
                   className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
                   } ${psalm === 27 ? 'tehillim-27-pulse' : ''}`}
-                  style={{ touchAction: 'manipulation' }}
                 >
                   {psalm}
-                </button>
+                </TapButton>
               ))}
             </div>
           </div>
@@ -4252,9 +4252,9 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
                 <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
                 <div className="flex flex-wrap gap-2">
                   {dailyTehillim.psalms.map((psalm) => (
-                    <button
+                    <TapButton
                       key={psalm}
-                      onPointerDown={() => {
+                      onTap={() => {
                         // Set daily tehillim list for Complete & Next functionality
                         setDailyTehillimPsalms(dailyTehillim.psalms);
                         openTehillimText(psalm, true);
@@ -4264,10 +4264,9 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
                           ? 'bg-sage text-white'
                           : 'bg-gradient-feminine text-white'
                       }`}
-                      style={{ touchAction: 'manipulation' }}
                     >
                       {psalm}
-                    </button>
+                    </TapButton>
                   ))}
                 </div>
               </div>
@@ -4279,18 +4278,17 @@ function SpecialTehillimFullscreenContent({ language: _language, fontSize: _font
                 <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
                 <div className="flex flex-wrap gap-2">
                   {category.psalms.map((psalm) => (
-                    <button
+                    <TapButton
                       key={psalm}
-                      onPointerDown={() => openTehillimText(psalm)}
+                      onTap={() => openTehillimText(psalm)}
                       className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center ${
                         isModalComplete(`individual-tehillim-${psalm}`)
                           ? 'bg-sage text-white'
                           : 'bg-gradient-feminine text-white'
                       }`}
-                      style={{ touchAction: 'manipulation' }}
                     >
                       {psalm}
-                    </button>
+                    </TapButton>
                   ))}
                 </div>
               </div>
@@ -4483,18 +4481,17 @@ function SpecialTehillimModal() {
           <div className="bg-white/80 rounded-2xl p-3 border border-blush/10">
             <div className="grid grid-cols-6 gap-2 overflow-hidden tehillim-button-grid">
               {allPsalms.map((psalm) => (
-                <button
+                <TapButton
                   key={psalm}
-                  onPointerDown={() => openTehillimText(psalm)}
+                  onTap={() => openTehillimText(psalm)}
                   className={`w-11 h-11 rounded-lg text-sm platypi-medium hover:opacity-90 transition-opacity flex items-center justify-center flex-shrink-0 ${
                     isModalComplete(`individual-tehillim-${psalm}`)
                       ? 'bg-sage text-white'
                       : 'bg-gradient-feminine text-white'
                   }`}
-                  style={{ touchAction: 'manipulation' }}
                 >
                   {psalm}
-                </button>
+                </TapButton>
               ))}
             </div>
           </div>
@@ -4507,9 +4504,9 @@ function SpecialTehillimModal() {
                   <h3 className="platypi-bold text-base text-black mb-3">{dailyTehillim.title}</h3>
                   <div className="flex flex-wrap gap-2">
                     {dailyTehillim.psalms.map((psalm) => (
-                      <button
+                      <TapButton
                         key={psalm}
-                        onPointerDown={() => openTehillimText(psalm)}
+                        onTap={() => openTehillimText(psalm)}
                         className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
                           isModalComplete(`individual-tehillim-${psalm}`)
                             ? 'bg-sage'
@@ -4517,7 +4514,7 @@ function SpecialTehillimModal() {
                         }`}
                       >
                         {psalm}
-                      </button>
+                      </TapButton>
                     ))}
                   </div>
                 </div>
@@ -4530,9 +4527,9 @@ function SpecialTehillimModal() {
                 <h3 className="platypi-bold text-sm text-black mb-2">{category.title}</h3>
                 <div className="flex flex-wrap gap-2">
                   {category.psalms.map((psalm) => (
-                    <button
+                    <TapButton
                       key={psalm}
-                      onPointerDown={() => openTehillimText(psalm)}
+                      onTap={() => openTehillimText(psalm)}
                       className={`px-3 py-1 rounded-xl text-sm platypi-medium hover:opacity-90 transition-opacity text-white ${
                         isModalComplete(`individual-tehillim-${psalm}`)
                           ? 'bg-sage'
@@ -4540,7 +4537,7 @@ function SpecialTehillimModal() {
                       }`}
                     >
                       {psalm}
-                    </button>
+                    </TapButton>
                   ))}
                 </div>
               </div>
