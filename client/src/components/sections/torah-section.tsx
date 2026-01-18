@@ -545,7 +545,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
           <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
             <BookOpen className="text-white" size={18} />
           </div>
-          <div>
+          <div className="text-left">
             <h3 className="platypi-bold text-sm text-black">The Library</h3>
             <p className="platypi-regular text-xs text-black/70">Browse Torah classes by speaker</p>
           </div>

@@ -704,7 +704,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             <Compass className="text-white" size={18} />
           </div>
           
-          <div>
+          <div className="text-left">
             <h3 className="platypi-bold text-sm text-black">The Kotel Compass</h3>
             <p className="platypi-regular text-xs text-black/70">Direct your Heart Home</p>
           </div>

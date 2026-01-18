@@ -16,7 +16,7 @@ export default function DiscountBar({ className = "" }: DiscountBarProps) {
             <Handshake className="text-white" size={18} />
           </div>
           
-          <div>
+          <div className="text-left">
             <h3 className="platypi-bold text-sm text-black">Partners</h3>
             <p className="platypi-regular text-xs text-black/70">
               Exclusive Deals and Resources
