@@ -1,6 +1,7 @@
 import { forwardRef, useRef, useCallback } from 'react';
 
 const SCROLL_THRESHOLD = 10; // pixels of movement before we consider it a scroll
+const TAP_DEBOUNCE_MS = 300; // minimum time between taps to prevent double-firing
 
 interface TapButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   onTap: () => void;
@@ -11,8 +12,11 @@ export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
   ({ onTap, children, ...props }, ref) => {
     const touchStartPos = useRef<{ x: number; y: number } | null>(null);
     const isScrolling = useRef(false);
+    const lastTapTime = useRef(0);
+    const isTouchDevice = useRef(false);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      isTouchDevice.current = true;
       const touch = e.touches[0];
       touchStartPos.current = { x: touch.clientX, y: touch.clientY };
       isScrolling.current = false;
@@ -29,18 +33,27 @@ export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
     }, []);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+      const now = Date.now();
       if (!isScrolling.current && touchStartPos.current) {
-        e.preventDefault();
-        onTap();
+        // Debounce rapid taps
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          e.preventDefault();
+          onTap();
+        }
       }
       touchStartPos.current = null;
       isScrolling.current = false;
     }, [onTap]);
 
     const handleClick = useCallback(() => {
-      // For non-touch devices (desktop), use click directly
-      if (!('ontouchstart' in window)) {
-        onTap();
+      // Only use click for non-touch devices
+      if (!isTouchDevice.current) {
+        const now = Date.now();
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          onTap();
+        }
       }
     }, [onTap]);
 
@@ -70,8 +83,11 @@ export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
   ({ onTap, children, ...props }, ref) => {
     const touchStartPos = useRef<{ x: number; y: number } | null>(null);
     const isScrolling = useRef(false);
+    const lastTapTime = useRef(0);
+    const isTouchDevice = useRef(false);
 
     const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      isTouchDevice.current = true;
       const touch = e.touches[0];
       touchStartPos.current = { x: touch.clientX, y: touch.clientY };
       isScrolling.current = false;
@@ -88,18 +104,27 @@ export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
     }, []);
 
     const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+      const now = Date.now();
       if (!isScrolling.current && touchStartPos.current) {
-        e.preventDefault();
-        onTap();
+        // Debounce rapid taps
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          e.preventDefault();
+          onTap();
+        }
       }
       touchStartPos.current = null;
       isScrolling.current = false;
     }, [onTap]);
 
     const handleClick = useCallback(() => {
-      // For non-touch devices (desktop), use click directly
-      if (!('ontouchstart' in window)) {
-        onTap();
+      // Only use click for non-touch devices
+      if (!isTouchDevice.current) {
+        const now = Date.now();
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          onTap();
+        }
       }
     }, [onTap]);
 
