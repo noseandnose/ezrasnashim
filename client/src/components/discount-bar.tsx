@@ -1,4 +1,4 @@
-import { ChevronRight, Handshake } from "lucide-react";
+import { Handshake } from "lucide-react";
 import { Link } from "wouter";
 
 interface DiscountBarProps {

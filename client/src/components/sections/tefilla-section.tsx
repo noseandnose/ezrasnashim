@@ -1,4 +1,4 @@
-import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronRight, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen, Music } from "lucide-react";
+import { HandHeart, Plus, Heart, Star, Compass, Stars, Search, Link2, ChevronDown, Shuffle, Briefcase, Baby, Home, Shield, Sparkles, HeartPulse, BookOpen, Music } from "lucide-react";
 
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -312,6 +312,24 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
         }}
       >
         
+        {/* The Kotel Compass Bar - Center Lifted */}
+        <button
+          onClick={handleOpenCompass}
+          className="w-full bg-white rounded-2xl overflow-hidden border border-blush/10 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+          data-testid="button-kotel-compass-open"
+        >
+          <div className="flex flex-col items-center justify-center p-4 text-center">
+            {/* Icon */}
+            <div className="p-2.5 rounded-full bg-gradient-feminine mb-2 shadow-sm">
+              <Compass className="text-white" size={20} />
+            </div>
+            
+            {/* Title and Subtitle */}
+            <h3 className="platypi-bold text-base text-black">The Kotel Compass</h3>
+            <p className="platypi-regular text-xs text-black/60">Find the direction of the Holy Kotel</p>
+          </div>
+        </button>
+
         {/* Total Tehillim Said Card */}
         <div className="bg-white/70 rounded-2xl p-3 border border-blush/10 relative">
           {/* Apple Glass Style Find Button - Top Right Corner */}
