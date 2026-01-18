@@ -104,18 +104,19 @@ export function BirkatHamazonModal() {
   }, [isOpen]);
 
   // Load Tefilla conditions for conditional content processing
+  // Reload each time modal opens to get fresh sunset-aware conditions
   useEffect(() => {
     const loadConditions = async () => {
+      if (!isOpen) return;
+      
       try {
         const tefillaConditions = await getCurrentTefillaConditions(
           coordinates?.lat,
           coordinates?.lng
         );
         
-        
         setConditions(tefillaConditions);
       } catch (error) {
-        
         // Could not load Tefilla conditions - Set default conditions
         setConditions({
           isInIsrael: false,
@@ -145,7 +146,7 @@ export function BirkatHamazonModal() {
     };
 
     loadConditions();
-  }, [coordinates]);
+  }, [coordinates, isOpen]);
 
   const { data: birkatHamazon, isLoading } = useQuery<Brocha>({
     queryKey: ["/api/brochas", 2],
