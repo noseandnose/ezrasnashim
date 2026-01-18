@@ -343,7 +343,7 @@ export default function LibraryModal() {
   const renderContentList = () => (
     <div className="space-y-2 pb-20">
       <button
-        onPointerDown={handleBack}
+        onClick={handleBack}
         className="flex items-center gap-2 text-blush mb-3"
         data-testid="button-back-to-speakers"
       >
@@ -389,7 +389,7 @@ export default function LibraryModal() {
   const renderContentDetail = () => (
     <div className="space-y-4 pb-20">
       <button
-        onPointerDown={handleBack}
+        onClick={handleBack}
         className="flex items-center gap-2 text-blush mb-3"
         data-testid="button-back-to-content-list"
       >

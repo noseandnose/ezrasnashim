@@ -161,7 +161,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
               
               {/* Complete Button */}
               <button
-                onPointerDown={handlePirkeiAvotComplete}
+                onClick={handlePirkeiAvotComplete}
                 disabled={isModalComplete('pirkei-avot') || !pirkeiAvot?.text}
                 className={`ml-auto px-3 py-1 rounded-lg text-xs platypi-medium transition-all ${
                   isModalComplete('pirkei-avot')
@@ -200,7 +200,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 {pirkeiAvot?.text && pirkeiAvot.text.length > 150 && (
                   <button
                     ref={pirkeiExpandButtonRef}
-                    onPointerDown={handlePirkeiAvotToggle}
+                    onClick={handlePirkeiAvotToggle}
                     className="absolute -bottom-1 right-0 bg-gradient-feminine rounded-full shadow-sm hover:scale-110 transition-transform p-0 overflow-visible"
                     style={{ width: '16px', height: '16px', minWidth: '16px', minHeight: '16px', padding: 0 }}
                     data-testid="button-toggle-pirkei-avot"

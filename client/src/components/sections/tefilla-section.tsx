@@ -696,7 +696,7 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
 
         {/* The Kotel Compass Section */}
         <button
-          onPointerDown={handleOpenCompass}
+          onClick={handleOpenCompass}
           className="w-full bg-white/80 rounded-xl overflow-hidden border border-blush/20 p-3 flex items-center justify-center gap-3 transition-all hover:bg-white/90 shadow-sm mt-2"
           data-testid="button-open-compass"
         >
