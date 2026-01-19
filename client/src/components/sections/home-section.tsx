@@ -732,7 +732,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       <div className="p-2 space-y-2">
         {/* Daily Torah Bar */}
         <button
-          onPointerDown={() => navigateToSection('torah')}
+          onClick={() => navigateToSection('torah')}
           className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
           <div className={`p-2.5 rounded-full ${torahCompleted ? 'bg-sage' : 'bg-gradient-feminine'}`}>
@@ -751,7 +751,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
         {/* Daily Tefilla Bar */}
         <button
-          onPointerDown={() => navigateToSection('tefilla')}
+          onClick={() => navigateToSection('tefilla')}
           className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
           <div className={`p-2.5 rounded-full ${tefillaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-blush to-lavender'}`}>
@@ -770,7 +770,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
         {/* Daily Tzedaka Bar */}
         <button
-          onPointerDown={() => navigateToSection('tzedaka')}
+          onClick={() => navigateToSection('tzedaka')}
           className="w-full rounded-2xl py-3 px-4 text-left hover:scale-[1.02] transition-all duration-300 shadow-lg border border-blush/10 bg-white flex items-center space-x-4"
         >
           <div className={`p-2.5 rounded-full ${tzedakaCompleted ? 'bg-sage' : 'bg-gradient-to-br from-muted-lavender to-rose-blush'}`}>

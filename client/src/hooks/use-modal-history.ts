@@ -2,90 +2,46 @@ import { useEffect, useRef } from 'react';
 import { useModalStore } from '@/lib/types';
 
 /**
- * Unique key to identify modal history entries
- */
-const MODAL_HISTORY_KEY = '__ezras_modal__';
-
-/**
- * History state structure for modal tracking
- */
-interface ModalHistoryState {
-  [MODAL_HISTORY_KEY]: true;
-  modalId: string;
-  depth: number; // Track modal stack depth
-}
-
-/**
- * Check if a history state is our modal state
- */
-function isOurModalState(state: unknown): state is ModalHistoryState {
-  return (
-    typeof state === 'object' &&
-    state !== null &&
-    MODAL_HISTORY_KEY in state &&
-    (state as ModalHistoryState)[MODAL_HISTORY_KEY] === true
-  );
-}
-
-// Global modal depth counter - persists across hook instances
-let globalModalDepth = 0;
-
-/**
- * Hook that manages browser history for modals
- * Provides Android back button support for modal navigation
+ * Simple, robust modal history management for Android back button support
  * 
  * Strategy:
- * - Track modal depth to match history entries with modal state
- * - On modal open: push entry with depth marker
- * - On back: check if we're leaving a modal entry (via state depth matching)
- * - On close: only navigate back if current state matches our modal entry
+ * - When modal opens: push a history entry
+ * - When back button pressed: popstate fires, we close the modal
+ * - When modal closed via X/Escape: we go back in history
+ * 
+ * Uses a simple tracking approach without complex depth management.
  */
 export function useModalHistory() {
   const activeModal = useModalStore(state => state.activeModal);
   const closeModal = useModalStore(state => state.closeModal);
   
-  // Track the previous modal to detect transitions
+  // Track previous modal state to detect transitions
   const prevModalRef = useRef<string | null>(null);
   
-  // Track the depth when we pushed the current modal entry
-  const pushedDepthRef = useRef<number | null>(null);
+  // Track if we have a modal entry in history
+  const hasModalEntryRef = useRef(false);
   
-  // Flag to prevent re-entry
-  const isNavigatingRef = useRef(false);
+  // Flag to prevent loops when we trigger navigation
+  const isClosingRef = useRef(false);
   
-  // Handle popstate (back button pressed)
+  // Handle back button (popstate event)
   useEffect(() => {
-    const handlePopstate = (event: PopStateEvent) => {
-      // Ignore if we triggered this navigation
-      if (isNavigatingRef.current) {
+    const handlePopstate = () => {
+      // If we're in the middle of programmatic close, ignore
+      if (isClosingRef.current) {
         return;
       }
       
-      // Check if we're leaving a modal state
-      // event.state is the state we're navigating TO
-      // We need to check if we WERE in a modal state and are now leaving it
-      
-      // If we have an active modal AND we pushed a history entry for it,
-      // AND the state we're navigating to is NOT our modal state (or is a different depth),
-      // then back was pressed and we should close the modal
-      if (activeModal && pushedDepthRef.current !== null) {
-        const targetState = event.state;
+      // If modal is open and we got a popstate, user pressed back
+      if (activeModal && hasModalEntryRef.current) {
+        isClosingRef.current = true;
+        hasModalEntryRef.current = false;
+        closeModal();
         
-        // If the target state is not our modal or has a different depth, the modal was "backed out"
-        const isLeavingModal = !isOurModalState(targetState) || 
-          (targetState.depth !== pushedDepthRef.current);
-        
-        if (isLeavingModal) {
-          isNavigatingRef.current = true;
-          pushedDepthRef.current = null; // Clear since we're closing via back
-          globalModalDepth = Math.max(0, globalModalDepth - 1);
-          
-          closeModal();
-          
-          requestAnimationFrame(() => {
-            isNavigatingRef.current = false;
-          });
-        }
+        // Reset flag after close completes
+        setTimeout(() => {
+          isClosingRef.current = false;
+        }, 100);
       }
     };
     
@@ -93,60 +49,41 @@ export function useModalHistory() {
     return () => window.removeEventListener('popstate', handlePopstate);
   }, [activeModal, closeModal]);
   
-  // Manage history entries based on modal state changes
+  // Manage history entries when modal state changes
   useEffect(() => {
     const prevModal = prevModalRef.current;
     const currentModal = activeModal;
     
-    // Modal just opened (null -> modalId)
+    // Modal just opened
     if (currentModal && !prevModal) {
-      if (!isNavigatingRef.current) {
-        globalModalDepth++;
-        const depth = globalModalDepth;
-        
-        const modalState: ModalHistoryState = {
-          [MODAL_HISTORY_KEY]: true,
-          modalId: currentModal,
-          depth
-        };
-        
-        window.history.pushState(modalState, '');
-        pushedDepthRef.current = depth;
+      if (!isClosingRef.current) {
+        // Push a history entry for the modal
+        window.history.pushState({ modal: currentModal }, '');
+        hasModalEntryRef.current = true;
       }
     }
     
-    // Modal just closed (modalId -> null)
+    // Modal just closed
     else if (!currentModal && prevModal) {
-      // Only clean up history if this wasn't triggered by popstate (back button)
-      if (!isNavigatingRef.current && pushedDepthRef.current !== null) {
-        // Verify the current state matches what we pushed
-        const currentState = window.history.state;
+      // If we have a modal entry and this wasn't triggered by back button
+      if (hasModalEntryRef.current && !isClosingRef.current) {
+        isClosingRef.current = true;
+        hasModalEntryRef.current = false;
         
-        if (isOurModalState(currentState) && currentState.depth === pushedDepthRef.current) {
-          isNavigatingRef.current = true;
-          globalModalDepth = Math.max(0, globalModalDepth - 1);
-          
-          window.history.back();
-          
-          requestAnimationFrame(() => {
-            isNavigatingRef.current = false;
-          });
-        }
+        // Go back to remove our entry
+        window.history.back();
         
-        pushedDepthRef.current = null;
+        setTimeout(() => {
+          isClosingRef.current = false;
+        }, 100);
       }
     }
     
-    // Modal changed (modalA -> modalB)
+    // Modal changed (switched from one to another)
     else if (currentModal && prevModal && currentModal !== prevModal) {
-      // Replace the history entry with the new modal (keep same depth)
-      if (pushedDepthRef.current !== null) {
-        const modalState: ModalHistoryState = {
-          [MODAL_HISTORY_KEY]: true,
-          modalId: currentModal,
-          depth: pushedDepthRef.current
-        };
-        window.history.replaceState(modalState, '');
+      // Just replace the current state with new modal info
+      if (hasModalEntryRef.current) {
+        window.history.replaceState({ modal: currentModal }, '');
       }
     }
     
@@ -157,19 +94,13 @@ export function useModalHistory() {
 }
 
 /**
- * Hook to ensure there's always a base history entry
- * This prevents the app from exiting on the first back press
+ * Ensures there's a base history entry so back button doesn't exit app immediately
  */
 export function useBaseHistoryEntry() {
   useEffect(() => {
-    // Mark initial state as base if not already marked
+    // Only set up once on mount
     if (!window.history.state) {
-      window.history.replaceState({ type: 'base' }, '');
-    }
-    
-    // Ensure at least some history depth for safety
-    if (window.history.length <= 1) {
-      window.history.pushState({ type: 'base', safety: true }, '');
+      window.history.replaceState({ base: true }, '');
     }
   }, []);
 }
