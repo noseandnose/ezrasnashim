@@ -669,7 +669,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       <KorenThankYou />
 
       <Button
-        onPointerDown={isModalComplete('maariv') ? undefined : handleComplete}
+        onClick={isModalComplete('maariv') ? undefined : handleComplete}
         disabled={isModalComplete('maariv')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('maariv') 
@@ -731,7 +731,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
       <KorenThankYou />
 
       <Button
-        onPointerDown={isModalComplete('mincha') ? undefined : handleComplete}
+        onClick={isModalComplete('mincha') ? undefined : handleComplete}
         disabled={isModalComplete('mincha')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('mincha') 
@@ -944,7 +944,7 @@ function ShachrisFullscreenContent({
                 
                 {/* Done Button for this section */}
                 <Button
-                  onPointerDown={isModalComplete('shacharis') ? undefined : handleComplete}
+                  onClick={isModalComplete('shacharis') ? undefined : handleComplete}
                   disabled={isModalComplete('shacharis')}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
                     isModalComplete('shacharis') 
@@ -1113,7 +1113,7 @@ function IndividualBrochaFullscreenContent({ language, fontSize }: { language: '
       <KorenThankYou />
 
       <Button
-        onPointerDown={handleComplete}
+        onClick={handleComplete}
         className="w-full py-3 rounded-xl platypi-medium border-0 mt-6 bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse"
       >
         Complete Brocha

@@ -220,7 +220,7 @@ function MeditationAudioPlayer({
         />
 
         <Button
-          onPointerDown={isCompleted ? undefined : handleMeditationComplete}
+          onClick={isCompleted ? undefined : handleMeditationComplete}
           disabled={isCompleted}
           className={`w-full py-3 rounded-xl platypi-medium border-0 ${
             isCompleted 

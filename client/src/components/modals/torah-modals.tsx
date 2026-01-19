@@ -363,7 +363,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('halacha') ? undefined : handleTorahComplete}
+              onClick={isModalComplete('halacha') ? undefined : handleTorahComplete}
               disabled={isModalComplete('halacha')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('halacha') 
@@ -523,7 +523,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('emuna') ? undefined : handleTorahComplete}
+              onClick={isModalComplete('emuna') ? undefined : handleTorahComplete}
               disabled={isModalComplete('emuna')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('emuna') 
@@ -591,7 +591,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('chizuk') ? undefined : handleTorahComplete}
+              onClick={isModalComplete('chizuk') ? undefined : handleTorahComplete}
               disabled={isModalComplete('chizuk')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('chizuk') 
@@ -662,7 +662,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('parsha-vort') ? undefined : handleTorahComplete}
+              onClick={isModalComplete('parsha-vort') ? undefined : handleTorahComplete}
               disabled={isModalComplete('parsha-vort')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('parsha-vort') 
@@ -873,7 +873,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('featured') ? undefined : handleTorahComplete}
+              onClick={isModalComplete('featured') ? undefined : handleTorahComplete}
               disabled={isModalComplete('featured')}
               className={`w-full py-3 rounded-xl platypi-medium mt-6 border-0 ${
                 isModalComplete('featured') 
@@ -915,7 +915,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
           
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={handleTorahComplete} 
+              onClick={handleTorahComplete} 
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-6 border-0"
             >
               Completed

@@ -490,7 +490,7 @@ export function BirkatHamazonModal() {
             
             <div className="heart-explosion-container">
               <Button 
-                onPointerDown={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+                onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
                 disabled={isModalComplete('al-hamichiya')}
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('al-hamichiya') 
@@ -527,7 +527,7 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
+              onClick={isModalComplete('al-hamichiya') ? undefined : () => handleComplete('al-hamichiya')}
               disabled={isModalComplete('al-hamichiya')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('al-hamichiya') 
@@ -577,7 +577,7 @@ export function BirkatHamazonModal() {
             
             <div className="heart-explosion-container">
               <Button 
-                onPointerDown={() => handleComplete('birkat-hamazon')}
+                onClick={() => handleComplete('birkat-hamazon')}
                 className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                   isModalComplete('birkat-hamazon') 
                     ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -1014,7 +1014,7 @@ export function BirkatHamazonFullscreenContent({ language, fontSize }: { languag
       <KorenThankYou />
 
       <Button
-        onPointerDown={handleComplete}
+        onClick={handleComplete}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('birkat-hamazon') 
             ? 'bg-sage text-white hover:scale-105 transition-transform' 
