@@ -287,14 +287,8 @@ export function FullscreenModal({
       onClose();
     };
 
-    // Try to handle native browser back gesture by listening for popstate
-    const handlePopState = (e: PopStateEvent) => {
-      e.preventDefault();
-      onClose();
-    };
-
-    // Add popstate listener to catch browser back gestures
-    window.addEventListener('popstate', handlePopState, true);
+    // Note: popstate handling for Android back button is now centralized in useModalHistory hook
+    // The hook calls closeModal() which will trigger onClose via modal state change
     
     // Find and lock the scroll container (.content-area) instead of body
     const scrollContainer = document.querySelector('[data-scroll-lock-target]') as HTMLElement 
@@ -411,7 +405,6 @@ export function FullscreenModal({
       
       document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('closeFullscreen', handleCloseFullscreen);
-      window.removeEventListener('popstate', handlePopState, true);
     };
   }, [isOpen, onClose]);
 
