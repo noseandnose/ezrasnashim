@@ -404,7 +404,7 @@ export const featuredContent = pgTable("featured_content", {
   dateRangeIdx: index("featured_content_date_range_idx").on(table.fromDate, table.untilDate),
 }));
 
-// Today's Special - expandable content bar for home page
+// Today's Special / Community Challenge - fullscreen content with community counter
 export const todaysSpecial = pgTable("todays_special", {
   id: serial("id").primaryKey(),
   fromDate: date("from_date").notNull(),
@@ -416,6 +416,13 @@ export const todaysSpecial = pgTable("todays_special", {
   contentHebrew: text("content_hebrew"),
   linkTitle: text("link_title"),
   url: text("url"),
+  // Community Challenge fields
+  challengeType: text("challenge_type"), // e.g., 'tehillim', 'nishmas', 'halacha', 'custom' - determines what content to render
+  challengeContentId: integer("challenge_content_id"), // e.g., psalm number for tehillim, or reference ID for other content
+  targetCount: integer("target_count"), // e.g., 100 for "Say Tehillim 100 times together"
+  currentCount: integer("current_count").default(0), // Tracks community completions
+  pillarType: text("pillar_type"), // 'torah' or 'tefilla' - for mitzvah tracking
+  modalName: text("modal_name"), // e.g., 'tehillim', 'nishmas', 'halacha' - for usage tracking
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   dateRangeIdx: index("todays_special_date_range_idx").on(table.fromDate, table.untilDate),
