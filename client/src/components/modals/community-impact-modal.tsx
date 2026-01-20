@@ -83,7 +83,7 @@ export function CommunityImpactModal() {
 
               {/* Close Button */}
               <Button
-                onPointerDown={() => closeModal()}
+                onClick={() => closeModal()}
                 className="w-full bg-gradient-feminine hover:opacity-90 text-white platypi-medium rounded-2xl py-3"
               >
                 Close
@@ -93,7 +93,7 @@ export function CommunityImpactModal() {
             <div className="text-center py-8">
               <p className="platypi-regular text-black/60">No community impact story available today.</p>
               <Button
-                onPointerDown={() => closeModal()}
+                onClick={() => closeModal()}
                 className="w-full mt-4 bg-gradient-feminine hover:opacity-90 text-white platypi-medium rounded-2xl py-3"
               >
                 Close

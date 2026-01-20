@@ -58,7 +58,7 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
         
         <div className="flex-shrink-0 pt-4">
           <Button 
-            onPointerDown={onClose}
+            onClick={onClose}
             className="w-full py-3 rounded-xl platypi-medium border-0 bg-gradient-feminine text-white hover:scale-105 transition-transform"
           >
             Done

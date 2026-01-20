@@ -131,7 +131,7 @@ function LazyImageComponent({
         backgroundColor: !imageSrc ? '#f5f5f5' : undefined
       }}
       loading="lazy"
-      onPointerDown={onClick}
+      onClick={onClick}
     />
   );
 }

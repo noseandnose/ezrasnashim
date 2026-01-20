@@ -479,7 +479,7 @@ export default function LibraryModal() {
           )}
 
           <Button
-            onPointerDown={handleComplete}
+            onClick={handleComplete}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl font-medium"
             data-testid="button-complete-library-content"
           >

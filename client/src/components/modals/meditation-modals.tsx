@@ -79,7 +79,7 @@ export default function MeditationModals() {
               {categories.map((category) => (
                 <button
                   key={category.section}
-                  onPointerDown={() => setActiveTab(category.section)}
+                  onClick={() => setActiveTab(category.section)}
                   className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
                     activeTab === category.section
                       ? 'bg-gradient-feminine text-white shadow-lg'
@@ -98,7 +98,7 @@ export default function MeditationModals() {
               {activeMeditations.map((meditation) => (
                 <button
                   key={meditation.id}
-                  onPointerDown={() => handleMeditationSelect(meditation)}
+                  onClick={() => handleMeditationSelect(meditation)}
                   className="w-full rounded-2xl p-4 text-left hover:scale-[1.02] transition-all duration-200 shadow-lg border border-blush/10 bg-white"
                   data-testid={`button-meditation-${meditation.id}`}
                 >

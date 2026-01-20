@@ -58,7 +58,7 @@ export default function Partners() {
         
         <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20 mx-4 mb-3">
           <button
-            onPointerDown={() => setActiveTab("deals")}
+            onClick={() => setActiveTab("deals")}
             className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "deals"
                 ? "bg-gradient-feminine text-white shadow-lg"
@@ -69,7 +69,7 @@ export default function Partners() {
             <span className="platypi-semibold text-xs leading-tight block">Deals</span>
           </button>
           <button
-            onPointerDown={() => setActiveTab("resources")}
+            onClick={() => setActiveTab("resources")}
             className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
               activeTab === "resources"
                 ? "bg-gradient-feminine text-white shadow-lg"

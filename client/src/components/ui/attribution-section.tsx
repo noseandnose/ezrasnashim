@@ -72,7 +72,7 @@ export function AttributionSection({
     <div className={`mb-1 ${className}`}>
       <div className={`${isWhite ? 'bg-solid-white hover:bg-gray-50' : 'bg-gray-50 hover:bg-gray-100'} rounded-2xl border border-gray-200 transition-colors overflow-hidden`}>
         <button
-          onPointerDown={() => setIsExpanded(prev => !prev)}
+          onClick={() => setIsExpanded(prev => !prev)}
           className="w-full text-left p-3"
           data-testid="button-toggle-attribution"
         >

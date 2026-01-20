@@ -253,7 +253,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 disabled={isProcessing || !donorName.trim() || !dedicationText.trim() || !sponsorMessage.trim() || !isValidEmail(donorEmail)}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -322,7 +322,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={isProcessing || !torahPortion}
               >
@@ -395,7 +395,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
@@ -461,7 +461,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
@@ -528,7 +528,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
@@ -595,7 +595,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={!donationAmount}
               >
@@ -631,7 +631,7 @@ export default function TzedakaModals() {
               <label className="text-sm platypi-medium block mb-2">Select Amount</label>
               <div className="grid grid-cols-5 gap-2">
                 <button
-                  onPointerDown={() => setDonationAmount("1")}
+                  onClick={() => setDonationAmount("1")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -641,7 +641,7 @@ export default function TzedakaModals() {
                   $1
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("18")}
+                  onClick={() => setDonationAmount("18")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "18"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -651,7 +651,7 @@ export default function TzedakaModals() {
                   $18
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("180")}
+                  onClick={() => setDonationAmount("180")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "180"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -661,7 +661,7 @@ export default function TzedakaModals() {
                   $180
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("1800")}
+                  onClick={() => setDonationAmount("1800")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1800"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -671,7 +671,7 @@ export default function TzedakaModals() {
                   $1800
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("custom")}
+                  onClick={() => setDonationAmount("custom")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "custom"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -710,7 +710,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
                 disabled={isProcessing || !donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
@@ -750,7 +750,7 @@ export default function TzedakaModals() {
               <label className="text-sm platypi-medium block mb-2">Select Amount</label>
               <div className="grid grid-cols-5 gap-2">
                 <button
-                  onPointerDown={() => setDonationAmount("1")}
+                  onClick={() => setDonationAmount("1")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "1"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -760,7 +760,7 @@ export default function TzedakaModals() {
                   $1
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("18")}
+                  onClick={() => setDonationAmount("18")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "18"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -770,7 +770,7 @@ export default function TzedakaModals() {
                   $18
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("36")}
+                  onClick={() => setDonationAmount("36")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "36"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -780,7 +780,7 @@ export default function TzedakaModals() {
                   $36
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("72")}
+                  onClick={() => setDonationAmount("72")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "72"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -790,7 +790,7 @@ export default function TzedakaModals() {
                   $72
                 </button>
                 <button
-                  onPointerDown={() => setDonationAmount("custom")}
+                  onClick={() => setDonationAmount("custom")}
                   className={`p-2 rounded-xl text-xs platypi-medium transition-all whitespace-nowrap ${
                     donationAmount === "custom"
                       ? 'bg-gradient-feminine text-white shadow-soft'
@@ -840,7 +840,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => handleDonation()}
+                onClick={() => handleDonation()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isProcessing || !donationAmount || (donationAmount === "custom" && (!customAmount || parseFloat(customAmount) <= 0)) || !isValidEmail(donorEmail)}
               >
@@ -885,7 +885,7 @@ export default function TzedakaModals() {
 
             <div>
               <Button 
-                onPointerDown={() => closeModal()}
+                onClick={() => closeModal()}
                 className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 hover:shadow-lg transition-all duration-300"
               >
                 Mark Complete

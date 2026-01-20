@@ -488,7 +488,7 @@ export default function TimesModals() {
                     type="button"
                     role="checkbox"
                     aria-checked={afterNightfall}
-                    onPointerDown={() => handleNightfallChange(!afterNightfall)}
+                    onClick={() => handleNightfallChange(!afterNightfall)}
                     className="rounded-full transition-all duration-200 flex items-center justify-center flex-shrink-0"
                     style={{ 
                       width: '16px', 
@@ -505,7 +505,7 @@ export default function TimesModals() {
                     )}
                   </button>
                   <Label 
-                    onPointerDown={() => handleNightfallChange(!afterNightfall)}
+                    onClick={() => handleNightfallChange(!afterNightfall)}
                     className="text-xs text-gray-600 cursor-pointer"
                   >
                     After nightfall?
@@ -532,7 +532,7 @@ export default function TimesModals() {
             {convertedHebrewDate && (
               <div 
                 className="bg-gradient-to-r from-blush/5 to-lavender/5 backdrop-blur-sm rounded-lg p-3 shadow-soft border border-blush/20 animate-in slide-in-from-bottom duration-300 cursor-pointer hover:border-blush/30 hover:shadow-md transition-all"
-                onPointerDown={() => setShowEnglishFormat(!showEnglishFormat)}
+                onClick={() => setShowEnglishFormat(!showEnglishFormat)}
                 data-testid="hebrew-date-display"
               >
                 <div className="flex items-center justify-between">
@@ -587,7 +587,7 @@ export default function TimesModals() {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onPointerDown={() => setYearDuration(1)}
+                  onClick={() => setYearDuration(1)}
                   className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 1
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
@@ -600,7 +600,7 @@ export default function TimesModals() {
                 </button>
                 <button
                   type="button"
-                  onPointerDown={() => setYearDuration(10)}
+                  onClick={() => setYearDuration(10)}
                   className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 10
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
@@ -613,7 +613,7 @@ export default function TimesModals() {
                 </button>
                 <button
                   type="button"
-                  onPointerDown={() => setYearDuration(120)}
+                  onClick={() => setYearDuration(120)}
                   className={`py-2 px-2 rounded-md text-xs platypi-semibold transition-all duration-200 ${
                     yearDuration === 120
                       ? 'bg-gradient-feminine text-white shadow-lg transform scale-105'
@@ -636,7 +636,7 @@ export default function TimesModals() {
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     <Button
-                      onPointerDown={handleGoogleCalendar}
+                      onClick={handleGoogleCalendar}
                       disabled={calendarLoading !== null}
                       className="bg-white border-2 border-blush/30 text-gray-700 py-2.5 rounded-lg platypi-semibold text-sm hover:border-blush hover:bg-blush/5 transition-all"
                       data-testid="button-google-calendar"
@@ -648,7 +648,7 @@ export default function TimesModals() {
                       )}
                     </Button>
                     <Button
-                      onPointerDown={handleAppleCalendar}
+                      onClick={handleAppleCalendar}
                       disabled={calendarLoading !== null}
                       className="bg-white border-2 border-blush/30 text-gray-700 py-2.5 rounded-lg platypi-semibold text-sm hover:border-blush hover:bg-blush/5 transition-all"
                       data-testid="button-apple-calendar"
@@ -661,7 +661,7 @@ export default function TimesModals() {
                     </Button>
                   </div>
                   <button
-                    onPointerDown={() => setShowCalendarChoice(false)}
+                    onClick={() => setShowCalendarChoice(false)}
                     className="w-full text-xs text-gray-500 py-1 hover:text-gray-700"
                     data-testid="button-cancel-choice"
                   >
@@ -670,7 +670,7 @@ export default function TimesModals() {
                 </div>
               ) : (
                 <Button 
-                  onPointerDown={handleDownloadCalendar}
+                  onClick={handleDownloadCalendar}
                   disabled={downloadCalendarMutation.isPending || !eventTitle || !englishDate}
                   className="w-full bg-gradient-feminine text-white py-2.5 rounded-lg platypi-semibold text-sm border-0 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none"
                   data-testid="button-download-calendar"

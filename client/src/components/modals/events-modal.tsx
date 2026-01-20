@@ -135,7 +135,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
       <div className="sticky z-10 bg-white pb-4" style={{ top: '-1rem', margin: '0 -1rem', padding: '1rem 1rem 1rem 1rem', boxShadow: '0 2px 4px -2px rgba(0,0,0,0.05)' }}>
         <div className="flex bg-white/80 backdrop-blur-sm rounded-xl p-1 border border-blush/10">
           <button
-            onPointerDown={() => setActiveTab('zmanim')}
+            onClick={() => setActiveTab('zmanim')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
               activeTab === 'zmanim'
                 ? 'bg-gradient-feminine text-white shadow-lg'
@@ -147,7 +147,7 @@ export function EventsModal({ isOpen, onClose }: EventsModalProps) {
             Zmanim
           </button>
           <button
-            onPointerDown={() => setActiveTab('days')}
+            onClick={() => setActiveTab('days')}
             className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm platypi-medium transition-all ${
               activeTab === 'days'
                 ? 'bg-gradient-feminine text-white shadow-lg'

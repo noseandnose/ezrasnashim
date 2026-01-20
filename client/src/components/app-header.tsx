@@ -141,7 +141,7 @@ export default function AppHeader() {
               }`}
               aria-label="Menu"
               data-testid="button-menu"
-              onPointerDown={(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 if (!menuOpen && buttonRef.current) {
                   const rect = buttonRef.current.getBoundingClientRect();
@@ -168,14 +168,14 @@ export default function AppHeader() {
               alt="Ezras Nashim" 
               className="w-auto cursor-pointer select-none"
               style={{ height: 'calc(var(--header-row-height) - 10px)', marginTop: '5px', marginBottom: '5px' }}
-              onPointerDown={handleLogoClick}
+              onClick={handleLogoClick}
               draggable={false}
             />
           </div>
           <div className="flex flex-col items-end flex-1">
             <span className="font-hebrew text-[8px] text-black/50 leading-none" dir="rtl">בס״ד</span>
             <button
-              onPointerDown={() => setShowSearchModal(true)}
+              onClick={() => setShowSearchModal(true)}
               className="flex items-center justify-center rounded-full transition-colors"
               aria-label="Search"
               data-testid="button-search"
@@ -206,11 +206,11 @@ export default function AppHeader() {
             left: menuPosition.left,
             zIndex: 99999
           }}
-          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           {!isLoading && !isAuthenticated && (
             <div
-              onPointerDown={(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setMenuOpen(false);
                 setLocation('/login');
@@ -224,7 +224,7 @@ export default function AppHeader() {
           )}
           {isAuthenticated && user && (
             <div
-              onPointerDown={(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setMenuOpen(false);
                 setLocation("/profile");
@@ -237,7 +237,7 @@ export default function AppHeader() {
             </div>
           )}
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               setLocation("/statistics");
@@ -249,7 +249,7 @@ export default function AppHeader() {
             Analytics
           </div>
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               openModal('date-calculator-fullscreen', 'table');
@@ -261,7 +261,7 @@ export default function AppHeader() {
             Hebrew Date Converter
           </div>
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               handleShare();
@@ -274,7 +274,7 @@ export default function AppHeader() {
           </div>
           {!isStandalone && !isWebview && (
             <div
-              onPointerDown={(e) => {
+              onClick={(e) => {
                 e.stopPropagation();
                 setMenuOpen(false);
                 handleInstallClick();
@@ -297,7 +297,7 @@ export default function AppHeader() {
             </div>
           )}
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               window.open('https://tally.so/r/3xqAEy', '_blank');
@@ -309,7 +309,7 @@ export default function AppHeader() {
             Community Feedback
           </div>
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               setShowLocationModal(true);
@@ -321,7 +321,7 @@ export default function AppHeader() {
             Change Location
           </div>
           <div
-            onPointerDown={(e) => {
+            onClick={(e) => {
               e.stopPropagation();
               setMenuOpen(false);
               openModal('about', 'about');
@@ -356,14 +356,14 @@ export default function AppHeader() {
         <div 
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
           style={{ zIndex: 99999 }}
-          onPointerDown={() => setShowEasterEgg(false)}
+          onClick={() => setShowEasterEgg(false)}
         >
           <div 
             className="bg-white rounded-3xl shadow-2xl max-w-md w-full mx-4 p-8 text-center relative"
-            onPointerDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
           >
             <button
-              onPointerDown={() => setShowEasterEgg(false)}
+              onClick={() => setShowEasterEgg(false)}
               className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 transition-colors"
               aria-label="Close"
             >

@@ -97,7 +97,7 @@ export default function SponsorDetailsModal() {
           
           {/* Close button */}
           <Button
-            onPointerDown={() => {
+            onClick={() => {
               closeModal();
               // Navigate to home with scroll to progress since user viewed sponsor details
               window.location.hash = '/?scrollToProgress=true';

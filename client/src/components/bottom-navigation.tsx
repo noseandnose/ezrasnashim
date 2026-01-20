@@ -45,10 +45,9 @@ export default function BottomNavigation({
   const onSectionChangeRef = useRef(onSectionChange);
   onSectionChangeRef.current = onSectionChange;
   
-  // Handle navigation using onPointerDown - same event type that Radix uses
-  // This works in WebViews where onClick stops working after resume
-  const handlePointerDown = useCallback((id: Section) => (e: React.PointerEvent) => {
-    e.preventDefault();
+  // Handle navigation using onClick - more reliable than pointerDown
+  // Prevents double-firing and touch pass-through issues
+  const handleClick = useCallback((id: Section) => () => {
     onSectionChangeRef.current(id);
   }, []);
 
@@ -88,7 +87,7 @@ export default function BottomNavigation({
             return (
               <button
                 key={id}
-                onPointerDown={handlePointerDown(id)}
+                onClick={handleClick(id)}
                 data-action={`nav-${id}`}
                 data-testid={`nav-${id}`}
                 className={`flex flex-col items-center justify-center transition-all duration-300 rounded-2xl px-3 py-2 min-w-[56px] ${

@@ -193,7 +193,7 @@ export function BirkatHamazonModal() {
       {/* First Row: Fullscreen, Title, and Language Toggle */}
       <div className="flex items-center justify-between">
         <button
-          onPointerDown={() => setIsFullscreen(!isFullscreen)}
+          onClick={() => setIsFullscreen(!isFullscreen)}
           className="w-8 h-8 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
         >
           <Expand className="w-4 h-4" />
@@ -204,7 +204,7 @@ export function BirkatHamazonModal() {
         </DialogTitle>
         
         <Button
-          onPointerDown={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
+          onClick={() => setLanguage(language === "hebrew" ? "english" : "hebrew")}
           variant="ghost"
           size="sm"
           className={`text-xs platypi-medium px-3 py-1 rounded-lg transition-all ${
@@ -221,14 +221,14 @@ export function BirkatHamazonModal() {
       <div className="flex items-center justify-center">
         <div className="flex items-center gap-2">
           <button
-            onPointerDown={decreaseFontSize}
+            onClick={decreaseFontSize}
             className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
           >
             <span className="text-xs platypi-medium">-</span>
           </button>
           <span className="text-xs platypi-medium text-black/70 w-6 text-center">{fontSize}</span>
           <button
-            onPointerDown={increaseFontSize}
+            onClick={increaseFontSize}
             className="w-6 h-6 rounded-full bg-warm-gray/10 flex items-center justify-center text-black/60 hover:text-black transition-colors"
           >
             <span className="text-xs platypi-medium">+</span>
@@ -332,7 +332,7 @@ export function BirkatHamazonModal() {
 
           <div className="space-y-3">
             <button
-              onPointerDown={() => {
+              onClick={() => {
                 // Open Me'ein Shalosh directly in fullscreen
                 setFullscreenContent({
                   isOpen: true,
@@ -350,7 +350,7 @@ export function BirkatHamazonModal() {
             </button>
 
             <button
-              onPointerDown={() => {
+              onClick={() => {
                 // Open Birkat Hamazon directly in fullscreen
                 setFullscreenContent({
                   isOpen: true,
@@ -370,7 +370,7 @@ export function BirkatHamazonModal() {
 
           <div className="flex space-x-3 mt-6">
             <Button 
-              onPointerDown={() => closeModal()} 
+              onClick={() => closeModal()} 
               variant="outline"
               className="flex-1 rounded-2xl border-blush/30 text-blush hover:bg-blush/5"
             >
@@ -409,7 +409,7 @@ export function BirkatHamazonModal() {
                 <div className="flex gap-6">
                   <button
                     type="button"
-                    onPointerDown={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
                     className="flex items-center gap-2"
                   >
                     <span 
@@ -430,7 +430,7 @@ export function BirkatHamazonModal() {
                   </button>
                   <button
                     type="button"
-                    onPointerDown={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
                     className="flex items-center gap-2"
                   >
                     <span 
@@ -451,7 +451,7 @@ export function BirkatHamazonModal() {
                   </button>
                   <button
                     type="button"
-                    onPointerDown={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+                    onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
                     className="flex items-center gap-2"
                   >
                     <span 
@@ -613,7 +613,7 @@ export function BirkatHamazonModal() {
 
           <div className="heart-explosion-container">
             <Button 
-              onPointerDown={() => handleComplete('birkat-hamazon')}
+              onClick={() => handleComplete('birkat-hamazon')}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                 isModalComplete('birkat-hamazon') 
                   ? 'bg-sage text-white hover:scale-105 transition-transform' 
@@ -793,7 +793,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
           <div className="flex gap-6">
             <button
               type="button"
-              onPointerDown={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
+              onClick={() => setSelectedOptions(prev => ({ ...prev, grain: !prev.grain }))}
               className="flex items-center gap-2"
             >
               <span 
@@ -814,7 +814,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
             </button>
             <button
               type="button"
-              onPointerDown={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
+              onClick={() => setSelectedOptions(prev => ({ ...prev, wine: !prev.wine }))}
               className="flex items-center gap-2"
             >
               <span 
@@ -835,7 +835,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
             </button>
             <button
               type="button"
-              onPointerDown={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
+              onClick={() => setSelectedOptions(prev => ({ ...prev, fruit: !prev.fruit }))}
               className="flex items-center gap-2"
             >
               <span 
@@ -871,7 +871,7 @@ export function MeeinShaloshFullscreenContent({ language, fontSize }: { language
       <KorenThankYou />
 
       <Button
-        onPointerDown={isModalComplete('al-hamichiya') ? undefined : handleComplete}
+        onClick={isModalComplete('al-hamichiya') ? undefined : handleComplete}
         disabled={isModalComplete('al-hamichiya')}
         className={`w-full py-3 rounded-xl platypi-medium border-0 mt-6 ${
           isModalComplete('al-hamichiya') 

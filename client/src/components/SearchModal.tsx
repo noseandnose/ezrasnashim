@@ -90,7 +90,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <div className="flex items-center gap-3 mb-3">
             <h2 className="text-lg font-semibold text-gray-900 flex-1">Search</h2>
             <button
-              onPointerDown={onClose}
+              onClick={onClose}
               className="rounded-full w-8 h-8 bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-all duration-200"
               aria-label="Close search"
               data-testid="button-close-search"
@@ -112,7 +112,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             />
             {query && (
               <button
-                onPointerDown={handleClearQuery}
+                onClick={handleClearQuery}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 aria-label="Clear search"
                 data-testid="button-clear-search"
@@ -151,7 +151,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     {groupedResults[category].map(result => (
                       <button
                         key={result.id}
-                        onPointerDown={() => handleResultClick(result)}
+                        onClick={() => handleResultClick(result)}
                         className="w-full text-left p-3 rounded-lg bg-white hover:bg-rose-50 transition-colors border border-gray-200 hover:border-rose-300"
                         data-testid={`result-${result.id}`}
                       >

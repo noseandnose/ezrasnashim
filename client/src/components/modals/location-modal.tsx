@@ -167,7 +167,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
               {predictions.map((prediction) => (
                 <button
                   key={prediction.place_id}
-                  onPointerDown={() => handlePlaceSelect(prediction.place_id, prediction.description)}
+                  onClick={() => handlePlaceSelect(prediction.place_id, prediction.description)}
                   className="w-full text-left px-4 py-3 hover:bg-blush/5 transition-colors border-b border-blush/5 last:border-b-0"
                 >
                   <div className="flex items-center space-x-3">
@@ -185,7 +185,7 @@ export default function LocationModal({ isOpen, onClose }: LocationModalProps) {
 
           <div className="flex space-x-3">
             <Button 
-              onPointerDown={handleClose} 
+              onClick={handleClose} 
               variant="outline"
               className="flex-1 rounded-2xl border-blush/30 text-blush hover:bg-blush/5"
             >

@@ -51,7 +51,7 @@ function CommunityImpactButton({ impactContent, isLoading }: { impactContent: Co
 
   return (
     <button
-      onPointerDown={() => openModal('community-impact', 'tzedaka')}
+      onClick={() => openModal('community-impact', 'tzedaka')}
       className="w-full bg-white rounded-3xl p-3 border border-blush/10 shadow-lg hover:shadow-md transition-all duration-300 text-left"
       data-modal-type="community-impact"
       data-modal-section="tzedaka"
@@ -221,7 +221,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         }}
       >
         <button 
-          onPointerDown={() => handleTzedakaButtonClick('active_campaign')}
+          onClick={() => handleTzedakaButtonClick('active_campaign')}
           className="w-full rounded-2xl px-3 pt-3 pb-2 border border-blush/10 hover:bg-white/90 transition-all duration-300 text-left bg-white/85"
         >
         {isLoading ? (
@@ -287,7 +287,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         
         {/* Put a Coin in Tzedaka - Long Bar style */}
         <button
-          onPointerDown={() => handleTzedakaButtonClick('put_a_coin')}
+          onClick={() => handleTzedakaButtonClick('put_a_coin')}
           className="w-full h-[88px] rounded-xl text-center hover:scale-[1.02] transition-all duration-300 shadow-lg border-2 bg-white border-blush/30"
           style={{
             animation: isTzedakaButtonCompleted('put_a_coin') 
@@ -314,7 +314,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           {/* Left: Sponsor a Day */}
           <button
-            onPointerDown={() => handleTzedakaButtonClick('sponsor_a_day')}
+            onClick={() => handleTzedakaButtonClick('sponsor_a_day')}
             className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -347,7 +347,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
           {/* Right: Gave Tzedaka Elsewhere */}
           <button
-            onPointerDown={() => handleTzedakaButtonClick('gave_elsewhere')}
+            onClick={() => handleTzedakaButtonClick('gave_elsewhere')}
             className="w-full h-[88px] rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',

@@ -52,7 +52,7 @@ export function StandardModalHeader({
       {showLanguageToggle && onLanguageChange && (
         <div className="absolute left-2 top-2 flex gap-1">
           <Button
-            onPointerDown={() => onLanguageChange('english')}
+            onClick={() => onLanguageChange('english')}
             size="sm"
             variant="ghost"
             className={`text-xs px-2 py-1 h-auto rounded-lg transition-all ${
@@ -64,7 +64,7 @@ export function StandardModalHeader({
             EN
           </Button>
           <Button
-            onPointerDown={() => onLanguageChange('hebrew')}
+            onClick={() => onLanguageChange('hebrew')}
             size="sm"
             variant="ghost"
             className={`text-xs px-2 py-1 h-auto rounded-lg transition-all ${
@@ -82,7 +82,7 @@ export function StandardModalHeader({
       {showFontControls && onFontSizeChange && (
         <div className="absolute left-2 top-12 flex flex-col gap-1">
           <Button
-            onPointerDown={increaseFontSize}
+            onClick={increaseFontSize}
             size="sm"
             variant="ghost"
             className="w-8 h-8 p-0 rounded-full bg-white/50 hover:bg-white/80 transition-all"
@@ -91,7 +91,7 @@ export function StandardModalHeader({
             <Plus className="h-3 w-3" />
           </Button>
           <Button
-            onPointerDown={decreaseFontSize}
+            onClick={decreaseFontSize}
             size="sm"
             variant="ghost"
             className="w-8 h-8 p-0 rounded-full bg-white/50 hover:bg-white/80 transition-all"
@@ -130,7 +130,7 @@ export function StandardModalHeader({
         {/* Fullscreen Button */}
         {showFullscreenButton && onFullscreenClick && (
           <Button
-            onPointerDown={onFullscreenClick}
+            onClick={onFullscreenClick}
             size="sm"
             variant="ghost"
             className="w-8 h-8 p-0 rounded-full bg-white/50 hover:bg-white/80 transition-all"

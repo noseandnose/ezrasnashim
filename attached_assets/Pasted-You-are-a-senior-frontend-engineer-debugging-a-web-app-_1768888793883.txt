@@ -1,0 +1,78 @@
+You are a senior frontend engineer debugging a web app wrapped in a FlutterFlow WebView.
+
+Current issue:
+- After the app is backgrounded and then foregrounded, many controls become unresponsive (dead taps).
+- A previous fix swapped handlers (onclick vs pointerdown/up vs buttonpress) which helped the resume issue, but now:
+  - Some buttons freeze intermittently
+  - Some controls double-press / double-fire
+  - I suspect some components are using the wrong handler type for their context
+
+Goal:
+Do a full interaction audit and correct each interactive element to use the RIGHT handler for its specific use-case (not a single universal solution), while ensuring consistent reliability after background→foreground in FlutterFlow WebView.
+
+Hard requirements:
+1) Keep the UX and logic the same (no feature removals).
+2) Fix background→foreground dead taps across the app.
+3) Eliminate double firing and ghost taps.
+4) Eliminate freezes caused by handler conflicts, overlays capturing taps, or stuck pressed states.
+5) Do NOT enforce “one handler for all”; instead apply the correct event model per component type.
+
+Step 1 — Build an Interaction Inventory (no code changes yet):
+Scan the repo and create a markdown report listing EVERY interactive element grouped by screen/component:
+- Buttons (primary/secondary), icon buttons, menu items, cards/list rows, links
+- Modals (close buttons, backdrops), drawers, dropdowns
+- Forms (inputs, selects, toggles, checkboxes), submit buttons
+- Any custom tappable divs
+For each entry include:
+- File path + component name
+- Current handlers used (onClick, onPointerDown, onPointerUp, onTouchStart/End, onMouseDown/Up, key handlers)
+- Whether nested handlers exist (parent + child both clickable)
+- Whether it triggers navigation, submits data, toggles state, opens modal, etc.
+
+Step 2 — Define “Correct Handler Rules” (context-based):
+Create a clear mapping that decides the correct handler per category, for a WebView environment:
+A) Simple “tap to navigate / open modal” items (cards, rows, menu items)
+B) Primary action buttons (submit/save)
+C) Toggle controls (switches/checkboxes)
+D) Elements inside scrollable containers (prevent scroll-jank / accidental taps)
+E) Drag/gesture controls (sliders, carousels)
+F) Backdrops/overlays (must reliably close and never block taps invisibly)
+G) Links that should allow default browser behavior vs app navigation
+H) Accessibility: keyboard activation (Enter/Space) for real buttons
+
+Important: choose per category whether click, pointerup, pointerdown, or another is correct — and justify briefly.
+Also define rules to prevent double fire (e.g., if using pointer events, ensure synthetic click doesn’t also fire; if using click, don’t bind pointer handlers too).
+
+Step 3 — Apply Fixes Systematically:
+For each component in the inventory:
+- Change ONLY what’s needed to match the correct handler for its category.
+- Remove conflicting duplicate handlers (e.g., both pointer and click).
+- Fix nested press issues (explicit stopPropagation / restructure) ONLY where it causes double fire.
+- Ensure async handlers cannot “freeze” the UI (always clear loading state in finally; avoid leaving disabled forever).
+
+Step 4 — Fix Background/Foreground Resume Robustly:
+Implement a reliable resume strategy without hacks:
+- Add global listeners for visibilitychange + focus + pageshow.
+- On resume:
+  - Clear any stuck “pressed” states
+  - Ensure no invisible overlay/backdrop is left capturing pointer events
+  - Re-sync any modal/drawer state if needed
+  - If any event listeners are being lost due to rerendering or cleanup, fix lifecycle wiring
+- Add lightweight debug logging (guarded behind a flag) to detect if taps are being intercepted by an overlay or if the handler is firing twice.
+
+Step 5 — Verification & Deliverables:
+Provide:
+1) The Interaction Inventory report (before vs after where relevant).
+2) The “Correct Handler Rules” mapping you used.
+3) A list of code changes per file.
+4) A test checklist specifically for FlutterFlow WebView:
+   - Open screen A/B/C, tap all controls
+   - Background app for 10 seconds, return, tap all controls again
+   - Verify no double navigation, no double submissions
+   - Verify scroll + tap inside lists
+   - Verify modals open/close and backdrops never block taps after resume
+
+Do the work in this order:
+- Inventory report first
+- Handler rules mapping
+- Then implement fixes incrementally and re-test frequently

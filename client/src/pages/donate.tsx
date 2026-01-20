@@ -831,13 +831,13 @@ export default function Donate() {
           
           <div className="space-y-3">
             <Button
-              onPointerDown={handleBackToApp}
+              onClick={handleBackToApp}
               className="w-full gradient-blush-peach text-white py-3 font-semibold shadow-md hover:shadow-lg transition-shadow"
             >
               Return to Ezras Nashim
             </Button>
             {/* <Button
-              onPointerDown={() => setLocation('/donate')}
+              onClick={() => setLocation('/donate')}
               variant="outline"
               className="w-full py-3"
             >
