@@ -96,7 +96,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
       completeTask('torah');
       
       // Check if all tasks are completed and show congratulations
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         // Only close and navigate if congratulations wasn't shown
@@ -237,7 +237,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                               completeTask('torah');
                               
                               // Check if all tasks are completed and show congratulations
-                              if (checkAndShowCongratulations()) {
+                              if (checkAndShowCongratulations('torah')) {
                                 openModal('congratulations', 'torah');
                               }
                               
@@ -417,7 +417,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                               completeTask('torah');
                               
                               // Check if all tasks are completed and show congratulations
-                              if (checkAndShowCongratulations()) {
+                              if (checkAndShowCongratulations('torah')) {
                                 openModal('congratulations', 'torah');
                               }
                               
@@ -738,7 +738,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                               completeTask('torah');
                               
                               // Check if all tasks are completed and show congratulations
-                              if (checkAndShowCongratulations()) {
+                              if (checkAndShowCongratulations('torah')) {
                                 openModal('congratulations', 'torah');
                               }
                               
@@ -995,7 +995,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       completeTask('torah');
                       
                       // Check if all tasks are completed and show congratulations
-                      if (checkAndShowCongratulations()) {
+                      if (checkAndShowCongratulations('torah')) {
                         openModal('congratulations', 'torah');
                       }
                       
@@ -1046,7 +1046,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           setTimeout(() => {
                             setShowExplosion(false);
                             completeTask('torah');
-                            if (checkAndShowCongratulations()) {
+                            if (checkAndShowCongratulations('torah')) {
                               openModal('congratulations', 'torah');
                             }
                             const event = new CustomEvent('closeFullscreen');
@@ -1115,7 +1115,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                       completeTask('torah');
                       
                       // Check if all tasks are completed and show congratulations
-                      if (checkAndShowCongratulations()) {
+                      if (checkAndShowCongratulations('torah')) {
                         openModal('congratulations', 'torah');
                       }
                       
@@ -1193,7 +1193,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                         setShowExplosion(false);
                         completeTask('torah');
                         
-                        if (checkAndShowCongratulations()) {
+                        if (checkAndShowCongratulations('torah')) {
                           openModal('congratulations', 'torah');
                         }
                         
@@ -1308,7 +1308,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           setShowExplosion(false);
                           completeTask('torah');
                           
-                          if (checkAndShowCongratulations()) {
+                          if (checkAndShowCongratulations('torah')) {
                             openModal('congratulations', 'torah');
                           }
                           
@@ -1332,7 +1332,7 @@ export default function TorahModals({ onSectionChange }: TorahModalsProps) {
                           setShowExplosion(false);
                           completeTask('torah');
                           
-                          if (checkAndShowCongratulations()) {
+                          if (checkAndShowCongratulations('torah')) {
                             openModal('congratulations', 'torah');
                           }
                           

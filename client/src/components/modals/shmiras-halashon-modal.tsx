@@ -48,7 +48,7 @@ export default function ShmirasHalashonModal() {
     setTimeout(() => {
       setShowHeartExplosion(false);
       
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         closeModal();

@@ -171,7 +171,7 @@ export function BirkatHamazonModal() {
     setTimeout(() => {
       setShowHeartExplosion(false);
       // Only close and navigate if congratulations modal wasn't triggered
-      if (!checkAndShowCongratulations()) {
+      if (!checkAndShowCongratulations('tefilla')) {
         closeModal();
         window.location.hash = '#/?section=home&scrollToProgress=true';
       } else {

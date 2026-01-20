@@ -263,7 +263,7 @@ export default function LibraryModal() {
     setTriggerHeartExplosion(true);
     setTimeout(() => {
       setTriggerHeartExplosion(false);
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         setView('content-list');

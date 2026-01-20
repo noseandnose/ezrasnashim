@@ -131,7 +131,7 @@ export interface DailyCompletionState {
   completeTask: (task: 'torah' | 'tefilla' | 'tzedaka' | 'life') => void;
   markTefillaComplete: () => void;
   resetDaily: () => void;
-  checkAndShowCongratulations: () => boolean;
+  checkAndShowCongratulations: (justCompleted?: 'torah' | 'tefilla' | 'tzedaka') => boolean;
 }
 
 // Daily modal completion tracking with support for repeatable prayers
@@ -374,24 +374,21 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
         };
         set(newState);
       },
-      checkAndShowCongratulations: () => {
+      checkAndShowCongratulations: (justCompleted?: 'torah' | 'tefilla' | 'tzedaka') => {
         const state = get();
+        // Account for the task that was just completed (in case state hasn't updated yet)
+        const torahDone = state.torahCompleted || justCompleted === 'torah';
+        const tefillaDone = state.tefillaCompleted || justCompleted === 'tefilla';
+        const tzedakaDone = state.tzedakaCompleted || justCompleted === 'tzedaka';
+        
         // Only check Torah, Tefilla, Tzedaka for congratulations (3 pillars)
-        const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+        const allCompleted = torahDone && tefillaDone && tzedakaDone;
         
         if (allCompleted && !state.congratulationsShown) {
           // Mark congratulations as shown immediately to prevent race conditions
           const newState = { ...state, congratulationsShown: true };
           set(newState);
-          
-          // Double-check after state update to ensure consistency
-          const updatedState = get();
-          if (updatedState.congratulationsShown && 
-              updatedState.torahCompleted && 
-              updatedState.tefillaCompleted && 
-              updatedState.tzedakaCompleted) {
-            return true;
-          }
+          return true;
         }
         return false;
       }
@@ -475,25 +472,22 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
       set(newState);
       localStorage.setItem('dailyCompletion', JSON.stringify(newState));
     },
-    checkAndShowCongratulations: () => {
+    checkAndShowCongratulations: (justCompleted?: 'torah' | 'tefilla' | 'tzedaka') => {
       const state = get();
+      // Account for the task that was just completed (in case state hasn't updated yet)
+      const torahDone = state.torahCompleted || justCompleted === 'torah';
+      const tefillaDone = state.tefillaCompleted || justCompleted === 'tefilla';
+      const tzedakaDone = state.tzedakaCompleted || justCompleted === 'tzedaka';
+      
       // Only check Torah, Tefilla, Tzedaka for congratulations (3 pillars)
-      const allCompleted = state.torahCompleted && state.tefillaCompleted && state.tzedakaCompleted;
+      const allCompleted = torahDone && tefillaDone && tzedakaDone;
       
       if (allCompleted && !state.congratulationsShown) {
         // Mark congratulations as shown immediately to prevent race conditions
         const newState = { ...state, congratulationsShown: true };
         set(newState);
         localStorage.setItem('dailyCompletion', JSON.stringify(newState));
-        
-        // Double-check after state update to ensure consistency
-        const updatedState = get();
-        if (updatedState.congratulationsShown && 
-            updatedState.torahCompleted && 
-            updatedState.tefillaCompleted && 
-            updatedState.tzedakaCompleted) {
-          return true;
-        }
+        return true;
       }
       return false;
     }

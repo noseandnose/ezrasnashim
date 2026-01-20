@@ -192,7 +192,7 @@ const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
         
 //         // Check if all tasks are completed and show congratulations
 //         setTimeout(() => {
-//           if (checkAndShowCongratulations()) {
+//           if (checkAndShowCongratulations('tzedaka')) {
 //             openModal('congratulations');
 //           }
 //         }, 1000);
@@ -544,7 +544,7 @@ export default function Donate() {
         
         // Check if all tasks are completed and show congratulations
         setTimeout(() => {
-          if (checkAndShowCongratulations()) {
+          if (checkAndShowCongratulations('tzedaka')) {
             openModal('congratulations', 'tzedaka');
           }
         }, 200);
@@ -671,7 +671,7 @@ export default function Donate() {
                   });
                   
                   // Check if congratulations should be shown
-                  if (checkAndShowCongratulations()) {
+                  if (checkAndShowCongratulations('tzedaka')) {
                     openModal('congratulations', 'tzedaka');
                   } else {
                     // Only navigate if congratulations wasn't shown
