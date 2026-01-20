@@ -253,11 +253,33 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
       <div className="p-2 grid grid-cols-2 gap-2">
-          {torahItems.map(({ id, icon: Icon, title, subtitle }) => {
+          {torahItems.filter(({ id }) => {
+            // Filter out items without content
+            switch(id) {
+              case 'halacha':
+                return !!halachaContent?.content && !sectionErrors.halacha;
+              case 'chizuk':
+                return !!chizukContent?.audioUrl && !sectionErrors.chizuk;
+              case 'emuna':
+                return !!emunaContent?.audioUrl && !sectionErrors.emuna;
+              case 'speakers':
+                const todayStr = getLocalDateString();
+                const activeVorts = Array.isArray(parshaVorts) ? parshaVorts.filter(p => 
+                  p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
+                ) : [];
+                return activeVorts.length > 0 && !sectionErrors.parshaVorts;
+              case 'shmiras-halashon':
+                return !!(shmirasHalashonContent?.content || shmirasHalashonContent?.audioUrl || shmirasHalashonContent?.videoUrl) && !sectionErrors.shmirasHalashon;
+              case 'shalom':
+                return !!(shalomContent?.content || shalomContent?.audioUrl || shalomContent?.videoUrl) && !sectionErrors.shalomContent;
+              default:
+                return true;
+            }
+          }).map(({ id, icon: Icon, title, subtitle }) => {
             const modalId = id === 'speakers' ? 'parsha-vort' : id;
             const isCompleted = isModalComplete(modalId);
             
-            let hasContent = false;
+            let hasContent = true; // Already filtered, so hasContent is always true
             let displaySubtitle = subtitle;
             let isError = false;
             let isLoading = false;
@@ -345,16 +367,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 break;
             }
             
-            const showComingSoon = !hasContent && !isLoading && !isError;
-            
             return (
               <button
                 key={id}
-                className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
-                  !hasContent ? 'cursor-not-allowed opacity-60' : 'hover:scale-105'
-                }`}
+                className="w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative hover:scale-105"
                 style={{
-                  background: hasContent ? 'rgba(255, 255, 255, 0.85)' : 'rgba(200, 200, 200, 0.5)',
+                  background: 'rgba(255, 255, 255, 0.85)',
                   backdropFilter: 'blur(12px)',
                   WebkitBackdropFilter: 'blur(12px)',
                   boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
@@ -431,15 +449,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     </div>
                   );
                 })()}
-                
-                {/* Coming Soon Overlay */}
-                {showComingSoon && (
-                  <div className="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center z-10">
-                    <div className="bg-white/90 rounded-xl px-3 py-1.5 shadow-lg">
-                      <p className="platypi-bold text-xs text-black">Coming Soon</p>
-                    </div>
-                  </div>
-                )}
                 
                 {/* Icon + Title Badge (like home page prayer buttons) */}
                 <div 
