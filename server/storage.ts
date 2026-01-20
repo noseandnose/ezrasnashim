@@ -1861,7 +1861,7 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(torahClasses)
       .where(eq(torahClasses.speaker, speaker))
-      .orderBy(torahClasses.displayOrder, torahClasses.title);
+      .orderBy(sql`${torahClasses.displayOrder} ASC NULLS LAST`, torahClasses.title);
   }
 
   async getLibraryContentById(id: number): Promise<TorahClass | undefined> {

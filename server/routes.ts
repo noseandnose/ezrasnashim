@@ -1733,6 +1733,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertTorahClassSchema.parse(req.body);
       const torahClass = await storage.createTorahClass(validatedData);
+      cache.clearCategory('torah-classes-today');
+      cache.clearCategory('library-speakers');
+      cache.clearCategory('library-content');
       return res.json(torahClass);
     } catch (error) {
       console.error('Error creating Torah class:', error);
@@ -1758,6 +1761,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Torah class not found" });
       }
       
+      cache.clearCategory('torah-classes-today');
+      cache.clearCategory('library-speakers');
+      cache.clearCategory('library-content');
       return res.json(torahClass);
     } catch (error) {
       console.error('Error updating Torah class:', error);
@@ -1778,6 +1784,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Torah class not found" });
       }
       
+      cache.clearCategory('torah-classes-today');
+      cache.clearCategory('library-speakers');
+      cache.clearCategory('library-content');
       return res.json({ success: true });
     } catch (error) {
       console.error('Error deleting Torah class:', error);
