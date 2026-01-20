@@ -3379,7 +3379,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fetch all Torah data in parallel with individual error tracking
-      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses, gemsOfGratitude, torahChallenge] = await Promise.allSettled([
+      const [halacha, chizuk, emuna, featured, pirkeiAvot, parshaVorts, torahClasses, gemsOfGratitude, torahChallenge, shmirasHalashon, shalomContent] = await Promise.allSettled([
         storage.getDailyHalachaByDate(date),
         storage.getDailyChizukByDate(date),
         storage.getDailyEmunaByDate(date),
@@ -3388,7 +3388,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         storage.getParshaVortsByDate(date),
         storage.getTorahClassesByDate(date),
         storage.getGemsOfGratitudeByDate(date),
-        storage.getTorahChallengeByDate(date)
+        storage.getTorahChallengeByDate(date),
+        storage.getShmirasHalashonByDate(date),
+        storage.getShalomContentByDate(date)
       ]);
 
       // Track per-section errors for UI fallback messages
@@ -3402,6 +3404,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (torahClasses.status === 'rejected') errors.torahClasses = true;
       if (gemsOfGratitude.status === 'rejected') errors.gemsOfGratitude = true;
       if (torahChallenge.status === 'rejected') errors.torahChallenge = true;
+      if (shmirasHalashon.status === 'rejected') errors.shmirasHalashon = true;
+      if (shalomContent.status === 'rejected') errors.shalomContent = true;
 
       // Format Pirkei Avot response to match existing /api/torah/pirkei-avot/:date API
       let formattedPirkeiAvot = null;
@@ -3423,6 +3427,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         torahClasses: torahClasses.status === 'fulfilled' ? torahClasses.value : [],
         gemsOfGratitude: gemsOfGratitude.status === 'fulfilled' ? gemsOfGratitude.value : null,
         torahChallenge: torahChallenge.status === 'fulfilled' ? torahChallenge.value : null,
+        shmirasHalashon: shmirasHalashon.status === 'fulfilled' ? shmirasHalashon.value : null,
+        shalomContent: shalomContent.status === 'fulfilled' ? shalomContent.value : null,
         errors: Object.keys(errors).length > 0 ? errors : undefined,
         fetchedAt: new Date().toISOString()
       };

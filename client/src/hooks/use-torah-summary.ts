@@ -8,7 +8,9 @@ import type {
   FeaturedContent, 
   ParshaVort,
   GemsOfGratitude,
-  TorahChallenge
+  TorahChallenge,
+  ShmirasHalashon,
+  ShalomContent
 } from "@shared/schema";
 
 interface PirkeiAvotFormatted {
@@ -27,6 +29,8 @@ interface TorahSummaryErrors {
   torahClasses?: boolean;
   gemsOfGratitude?: boolean;
   torahChallenge?: boolean;
+  shmirasHalashon?: boolean;
+  shalomContent?: boolean;
 }
 
 interface TorahSummary {
@@ -39,6 +43,8 @@ interface TorahSummary {
   torahClasses: TorahClass[];
   gemsOfGratitude: GemsOfGratitude | null;
   torahChallenge: TorahChallenge | null;
+  shmirasHalashon: ShmirasHalashon | null;
+  shalomContent: ShalomContent | null;
   errors?: TorahSummaryErrors;
   fetchedAt: string;
 }

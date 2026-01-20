@@ -1,4 +1,4 @@
-import { Shield, BookOpen, Headphones, Check, Video, Star, ChevronRight, Trophy, Dumbbell, Scale, Quote } from "lucide-react";
+import { Shield, BookOpen, Headphones, Check, Video, Star, ChevronRight, Trophy, Dumbbell, Scale, Quote, MessageCircle, Heart } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import { useModalStore, useModalCompletionStore, useDailyCompletionStore } from "@/lib/types";
 import type { Section } from "@/pages/home";
@@ -50,6 +50,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
   const featuredContent = torahSummary?.featured;
   const gemsOfGratitude = torahSummary?.gemsOfGratitude;
   const torahChallenge = torahSummary?.torahChallenge;
+  const shmirasHalashonContent = torahSummary?.shmirasHalashon;
+  const shalomContent = torahSummary?.shalomContent;
   
   // Extract per-section errors for UI fallbacks
   const sectionErrors = torahSummary?.errors || {};
@@ -131,6 +133,28 @@ function TorahSectionComponent({}: TorahSectionProps) {
       iconColor: 'text-white',
       border: 'border-blush/10',
       contentType: 'dynamic' // Will be determined based on content
+    },
+    {
+      id: 'shmiras-halashon',
+      icon: MessageCircle,
+      title: 'Shmiras Halashon',
+      subtitle: 'CCHF',
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10',
+      contentType: 'dynamic'
+    },
+    {
+      id: 'shalom',
+      icon: Heart,
+      title: 'Shalom',
+      subtitle: 'CCHF',
+      gradient: 'bg-white',
+      iconBg: 'bg-gradient-feminine',
+      iconColor: 'text-white',
+      border: 'border-blush/10',
+      contentType: 'dynamic'
     }
   ];
 
@@ -295,6 +319,30 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   displaySubtitle = 'Loading...';
                 }
                 break;
+              case 'shmiras-halashon':
+                isError = !!sectionErrors.shmirasHalashon;
+                isLoading = torahLoading;
+                hasContent = !!(shmirasHalashonContent?.content || shmirasHalashonContent?.audioUrl || shmirasHalashonContent?.videoUrl) && !isError;
+                if (hasContent && !isCompleted && shmirasHalashonContent) {
+                  displaySubtitle = toCamelCase(shmirasHalashonContent.title || '') || 'CCHF';
+                } else if (isError) {
+                  displaySubtitle = 'Unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
+                }
+                break;
+              case 'shalom':
+                isError = !!sectionErrors.shalomContent;
+                isLoading = torahLoading;
+                hasContent = !!(shalomContent?.content || shalomContent?.audioUrl || shalomContent?.videoUrl) && !isError;
+                if (hasContent && !isCompleted && shalomContent) {
+                  displaySubtitle = toCamelCase(shalomContent.title || '') || 'CCHF';
+                } else if (isError) {
+                  displaySubtitle = 'Unavailable';
+                } else if (isLoading) {
+                  displaySubtitle = 'Loading...';
+                }
+                break;
             }
             
             const showComingSoon = !hasContent && !isLoading && !isError;
@@ -361,6 +409,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     hasVideo = !!firstVort?.videoUrl;
                     hasAudio = !!firstVort?.audioUrl;
                     hasText = !!firstVort?.content && !firstVort?.audioUrl && !firstVort?.videoUrl;
+                  } else if (id === 'shmiras-halashon') {
+                    hasVideo = !!shmirasHalashonContent?.videoUrl;
+                    hasAudio = !!shmirasHalashonContent?.audioUrl;
+                    hasText = !!shmirasHalashonContent?.content && !shmirasHalashonContent?.audioUrl && !shmirasHalashonContent?.videoUrl;
+                  } else if (id === 'shalom') {
+                    hasVideo = !!shalomContent?.videoUrl;
+                    hasAudio = !!shalomContent?.audioUrl;
+                    hasText = !!shalomContent?.content && !shalomContent?.audioUrl && !shalomContent?.videoUrl;
                   }
                   
                   return (

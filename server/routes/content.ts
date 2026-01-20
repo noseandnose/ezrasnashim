@@ -9,6 +9,8 @@ import {
   insertDailyEmunaSchema,
   insertDailyChizukSchema,
   insertFeaturedContentSchema,
+  insertShmirasHalashonSchema,
+  insertShalomContentSchema,
   insertTodaysSpecialSchema,
   insertGiftOfChatzosSchema,
   insertPirkeiAvotSchema
@@ -263,6 +265,132 @@ export function registerContentRoutes(app: Express, deps: ContentRouteDeps) {
       return res.json(featured);
     } catch (error) {
       return res.status(500).json({ message: "Failed to create featured content" });
+    }
+  });
+
+  // Shmiras Halashon routes
+  app.get("/api/torah/shmiras-halashon/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'shmiras-halashon' }),
+    async (req: Request, res: Response) => {
+      try {
+        const { date } = req.params;
+        const content = await storage.getShmirasHalashonByDate(date);
+        return res.json(content || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Shmiras Halashon content" });
+      }
+    }
+  );
+
+  app.get("/api/torah/shmiras-halashon", requireAdminAuth, async (_req: Request, res: Response) => {
+    try {
+      const content = await storage.getAllShmirasHalashon();
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch Shmiras Halashon content" });
+    }
+  });
+
+  app.post("/api/torah/shmiras-halashon", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertShmirasHalashonSchema.parse(req.body);
+      const content = await storage.createShmirasHalashon(validatedData);
+      cache.clearCategory('shmiras-halashon');
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to create Shmiras Halashon content" });
+    }
+  });
+
+  app.put("/api/torah/shmiras-halashon/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertShmirasHalashonSchema.parse(req.body);
+      const content = await storage.updateShmirasHalashon(id, validatedData);
+      if (!content) {
+        return res.status(404).json({ message: "Shmiras Halashon content not found" });
+      }
+      cache.clearCategory('shmiras-halashon');
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to update Shmiras Halashon content" });
+    }
+  });
+
+  app.delete("/api/torah/shmiras-halashon/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteShmirasHalashon(id);
+      if (!success) {
+        return res.status(404).json({ message: "Shmiras Halashon content not found" });
+      }
+      cache.clearCategory('shmiras-halashon');
+      return res.json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to delete Shmiras Halashon content" });
+    }
+  });
+
+  // Shalom Content routes
+  app.get("/api/torah/shalom/:date",
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'shalom-content' }),
+    async (req: Request, res: Response) => {
+      try {
+        const { date } = req.params;
+        const content = await storage.getShalomContentByDate(date);
+        return res.json(content || null);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch Shalom content" });
+      }
+    }
+  );
+
+  app.get("/api/torah/shalom", requireAdminAuth, async (_req: Request, res: Response) => {
+    try {
+      const content = await storage.getAllShalomContent();
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to fetch Shalom content" });
+    }
+  });
+
+  app.post("/api/torah/shalom", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const validatedData = insertShalomContentSchema.parse(req.body);
+      const content = await storage.createShalomContent(validatedData);
+      cache.clearCategory('shalom-content');
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to create Shalom content" });
+    }
+  });
+
+  app.put("/api/torah/shalom/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const validatedData = insertShalomContentSchema.parse(req.body);
+      const content = await storage.updateShalomContent(id, validatedData);
+      if (!content) {
+        return res.status(404).json({ message: "Shalom content not found" });
+      }
+      cache.clearCategory('shalom-content');
+      return res.json(content);
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to update Shalom content" });
+    }
+  });
+
+  app.delete("/api/torah/shalom/:id", requireAdminAuth, async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await storage.deleteShalomContent(id);
+      if (!success) {
+        return res.status(404).json({ message: "Shalom content not found" });
+      }
+      cache.clearCategory('shalom-content');
+      return res.json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to delete Shalom content" });
     }
   });
 

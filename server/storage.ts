@@ -3,6 +3,7 @@ import {
   shopItems, 
   tehillim, globalTehillimProgress, minchaPrayers, maarivPrayers, morningPrayers, brochas, sponsors, nishmasText,
   dailyHalacha, dailyEmuna, dailyChizuk, featuredContent, todaysSpecial, giftOfChatzos, torahChallenges,
+  shmirasHalashon, shalomContent,
   dailyRecipes, parshaVorts, torahClasses, lifeClasses, gemsOfGratitude, tableInspirations, marriageInsights, communityImpact, campaigns, donations, womensPrayers, meditations, discountPromotions, pirkeiAvot, pirkeiAvotProgress,
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
@@ -17,6 +18,8 @@ import {
   type DailyEmuna, type InsertDailyEmuna,
   type DailyChizuk, type InsertDailyChizuk,
   type FeaturedContent, type InsertFeaturedContent,
+  type ShmirasHalashon, type InsertShmirasHalashon,
+  type ShalomContent, type InsertShalomContent,
   type DailyRecipe, type InsertDailyRecipe,
   type ParshaVort, type InsertParshaVort,
   type TorahClass, type InsertTorahClass,
@@ -72,6 +75,20 @@ export interface IStorage {
   
   getFeaturedContentByDate(date: string): Promise<FeaturedContent | undefined>;
   createFeaturedContent(featured: InsertFeaturedContent): Promise<FeaturedContent>;
+  
+  // Shmiras Halashon methods
+  getShmirasHalashonByDate(date: string): Promise<ShmirasHalashon | undefined>;
+  createShmirasHalashon(data: InsertShmirasHalashon): Promise<ShmirasHalashon>;
+  updateShmirasHalashon(id: number, data: Partial<InsertShmirasHalashon>): Promise<ShmirasHalashon | undefined>;
+  getAllShmirasHalashon(): Promise<ShmirasHalashon[]>;
+  deleteShmirasHalashon(id: number): Promise<boolean>;
+  
+  // Shalom Content methods
+  getShalomContentByDate(date: string): Promise<ShalomContent | undefined>;
+  createShalomContent(data: InsertShalomContent): Promise<ShalomContent>;
+  updateShalomContent(id: number, data: Partial<InsertShalomContent>): Promise<ShalomContent | undefined>;
+  getAllShalomContent(): Promise<ShalomContent[]>;
+  deleteShalomContent(id: number): Promise<boolean>;
   
   // Today's Special methods
   getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined>;
@@ -1496,6 +1513,76 @@ export class DatabaseStorage implements IStorage {
   async createFeaturedContent(insertFeatured: InsertFeaturedContent): Promise<FeaturedContent> {
     const [featured] = await db.insert(featuredContent).values(insertFeatured).returning();
     return featured;
+  }
+
+  // Shmiras Halashon methods
+  async getShmirasHalashonByDate(date: string): Promise<ShmirasHalashon | undefined> {
+    try {
+      const [result] = await db.select().from(shmirasHalashon)
+        .where(and(
+          lte(shmirasHalashon.fromDate, date),
+          gte(shmirasHalashon.untilDate, date)
+        ))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch Shmiras Halashon:', error);
+      return undefined;
+    }
+  }
+
+  async createShmirasHalashon(data: InsertShmirasHalashon): Promise<ShmirasHalashon> {
+    const [result] = await db.insert(shmirasHalashon).values(data).returning();
+    return result;
+  }
+
+  async updateShmirasHalashon(id: number, data: Partial<InsertShmirasHalashon>): Promise<ShmirasHalashon | undefined> {
+    const [result] = await db.update(shmirasHalashon).set(data).where(eq(shmirasHalashon.id, id)).returning();
+    return result;
+  }
+
+  async getAllShmirasHalashon(): Promise<ShmirasHalashon[]> {
+    return db.select().from(shmirasHalashon).orderBy(desc(shmirasHalashon.fromDate));
+  }
+
+  async deleteShmirasHalashon(id: number): Promise<boolean> {
+    const result = await db.delete(shmirasHalashon).where(eq(shmirasHalashon.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Shalom Content methods
+  async getShalomContentByDate(date: string): Promise<ShalomContent | undefined> {
+    try {
+      const [result] = await db.select().from(shalomContent)
+        .where(and(
+          lte(shalomContent.fromDate, date),
+          gte(shalomContent.untilDate, date)
+        ))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch Shalom content:', error);
+      return undefined;
+    }
+  }
+
+  async createShalomContent(data: InsertShalomContent): Promise<ShalomContent> {
+    const [result] = await db.insert(shalomContent).values(data).returning();
+    return result;
+  }
+
+  async updateShalomContent(id: number, data: Partial<InsertShalomContent>): Promise<ShalomContent | undefined> {
+    const [result] = await db.update(shalomContent).set(data).where(eq(shalomContent.id, id)).returning();
+    return result;
+  }
+
+  async getAllShalomContent(): Promise<ShalomContent[]> {
+    return db.select().from(shalomContent).orderBy(desc(shalomContent.fromDate));
+  }
+
+  async deleteShalomContent(id: number): Promise<boolean> {
+    const result = await db.delete(shalomContent).where(eq(shalomContent.id, id)).returning();
+    return result.length > 0;
   }
 
   // Today's Special methods
