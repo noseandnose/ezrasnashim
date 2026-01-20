@@ -201,7 +201,8 @@ export default function LibraryModal() {
   const { data: speakerContent, isLoading: contentLoading } = useQuery<TorahClass[]>({
     queryKey: ['/api/library/speakers', selectedSpeaker],
     enabled: isOpen && view === 'content-list' && !!selectedSpeaker,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
     refetchOnMount: 'always',
   });
 
