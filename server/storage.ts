@@ -51,7 +51,7 @@ import {
   type UserMitzvahProgress
 } from "../shared/schema";
 import { db } from "./db";
-import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, desc, isNull } from "drizzle-orm";
+import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, asc, desc, isNull } from "drizzle-orm";
 import { formatDate } from './typeHelpers';
 
 // Module-level session deduplication (persists across requests)
@@ -1861,7 +1861,10 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(torahClasses)
       .where(eq(torahClasses.speaker, speaker))
-      .orderBy(sql`${torahClasses.displayOrder} ASC NULLS LAST`, torahClasses.title);
+      .orderBy(
+        sql`COALESCE(${torahClasses.displayOrder}, 999999) ASC`,
+        asc(torahClasses.title)
+      );
   }
 
   async getLibraryContentById(id: number): Promise<TorahClass | undefined> {
