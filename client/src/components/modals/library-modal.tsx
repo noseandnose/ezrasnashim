@@ -201,7 +201,8 @@ export default function LibraryModal() {
   const { data: speakerContent, isLoading: contentLoading } = useQuery<TorahClass[]>({
     queryKey: ['/api/library/speakers', selectedSpeaker],
     enabled: isOpen && view === 'content-list' && !!selectedSpeaker,
-    staleTime: 2 * 60 * 1000,
+    staleTime: 0,
+    gcTime: 0,
     refetchOnMount: 'always',
   });
 
@@ -262,7 +263,7 @@ export default function LibraryModal() {
     setTriggerHeartExplosion(true);
     setTimeout(() => {
       setTriggerHeartExplosion(false);
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         setView('content-list');

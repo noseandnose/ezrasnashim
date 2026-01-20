@@ -45,7 +45,7 @@ export default function DailyEmunaModal() {
     setTimeout(() => {
       setShowHeartExplosion(false);
       
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         closeModal();

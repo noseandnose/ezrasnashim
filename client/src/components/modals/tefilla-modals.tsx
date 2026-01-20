@@ -427,7 +427,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
                           setFullscreenContent({ isOpen: false, title: '', content: null });
                           
                           // Check if all tasks are completed and show congratulations
-                          if (checkAndShowCongratulations()) {
+                          if (checkAndShowCongratulations('tefilla')) {
                             openModal('congratulations', 'tefilla');
                           }
                         }}
@@ -551,7 +551,7 @@ function MorningBrochasModal({ setFullscreenContent, language, setLanguage, font
               setShowHeartExplosion(false); // Reset explosion state
               
               // Check if all tasks are completed and show congratulations
-              if (checkAndShowCongratulations()) {
+              if (checkAndShowCongratulations('tefilla')) {
                 openModal('congratulations', 'tefilla');
               } else {
                 closeModal();
@@ -640,7 +640,7 @@ function MaarivFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     completeTask('tefilla');
     
     // Check if all tasks are completed and show congratulations
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
     }
     
@@ -702,7 +702,7 @@ function MinchaFullscreenContent({ language, fontSize }: { language: 'hebrew' | 
     completeTask('tefilla');
     
     // Check if all tasks are completed and show congratulations
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
     }
     
@@ -855,7 +855,7 @@ function ShachrisFullscreenContent({
     markModalComplete('shacharis');
     completeTask('tefilla');
     
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
     }
     
@@ -1960,7 +1960,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     
     // Check if all tasks are completed and show congratulations
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
       return;
     }
@@ -2004,7 +2004,7 @@ function TehillimFullscreenContent({ language, fontSize }: { language: 'hebrew' 
     completeTask('tefilla');
     
     // Check if congratulations should be shown - if yes, show it and stop navigation
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
       return; // Early exit - don't navigate to next psalm
     }
@@ -2330,7 +2330,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     advanceChainMutation.mutate();
     
     // Check if congratulations should be shown - if yes, show it and stop closing
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
     } else {
       // Only close fullscreen if congratulations wasn't shown
@@ -2346,7 +2346,7 @@ function GlobalTehillimFullscreenContent({ language, fontSize }: { language: 'he
     completeTask('tefilla');
     
     // Check if congratulations should be shown - if yes, show it and stop navigation
-    if (checkAndShowCongratulations()) {
+    if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
       return; // Early exit - don't open next fullscreen
     }
@@ -2885,7 +2885,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
       
       // Check if all tasks are completed and show congratulations
       setTimeout(() => {
-        if (checkAndShowCongratulations()) {
+        if (checkAndShowCongratulations('tefilla')) {
           openModal('congratulations', 'tefilla');
         }
       }, 200);
@@ -3073,7 +3073,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                           setFullscreenContent({ isOpen: false, title: '', content: null });
                           
                           // Check if all tasks are completed and show congratulations
-                          if (checkAndShowCongratulations()) {
+                          if (checkAndShowCongratulations('tefilla')) {
                             openModal('congratulations', 'tefilla');
                           }
                         }}
@@ -3387,7 +3387,7 @@ export default function TefillaModals({ onSectionChange }: TefillaModalsProps) {
                             setFullscreenContent({ isOpen: false, title: '', content: null });
                             
                             // Check if all tasks are completed and show congratulations
-                            if (checkAndShowCongratulations()) {
+                            if (checkAndShowCongratulations('tefilla')) {
                               openModal('congratulations', 'tefilla');
                             }
                           }}
@@ -4076,7 +4076,7 @@ function IndividualPrayerContent({ prayerId, fontSize, setFontSize }: {
               setShowHeartExplosion(false); // Reset explosion state
               
               // Check if all tasks are completed and show congratulations
-              if (checkAndShowCongratulations()) {
+              if (checkAndShowCongratulations('tefilla')) {
                 openModal('congratulations', 'tefilla');
               } else {
                 closeModal();
@@ -4711,7 +4711,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                               setFullscreenContent({ isOpen: false, title: '', content: null });
                               
                               // Check if congratulations should be shown
-                              if (checkAndShowCongratulations()) {
+                              if (checkAndShowCongratulations('tefilla')) {
                                 openModal('congratulations', 'tefilla');
                               } else {
                                 // Only open special-tehillim if congratulations wasn't shown
@@ -4882,7 +4882,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                               setShowHeartExplosion(false);
                               
                               // Check if congratulations should be shown
-                              if (checkAndShowCongratulations()) {
+                              if (checkAndShowCongratulations('tefilla')) {
                                 openModal('congratulations', 'tefilla');
                               } else {
                                 // Only navigate to next psalm if congratulations wasn't shown
@@ -5006,7 +5006,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
               setShowHeartExplosion(false);
               
               // Check if congratulations should be shown
-              if (checkAndShowCongratulations()) {
+              if (checkAndShowCongratulations('tefilla')) {
                 openModal('congratulations', 'tefilla');
               } else {
                 // Only open special-tehillim if congratulations wasn't shown
@@ -5050,7 +5050,7 @@ function IndividualTehillimModal({ setFullscreenContent }: { setFullscreenConten
                 setShowHeartExplosion(false);
                 
                 // Check if congratulations should be shown
-                if (checkAndShowCongratulations()) {
+                if (checkAndShowCongratulations('tefilla')) {
                   openModal('congratulations', 'tefilla');
                 } else {
                   // Only navigate if congratulations wasn't shown

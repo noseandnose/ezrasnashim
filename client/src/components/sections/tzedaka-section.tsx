@@ -162,7 +162,7 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
         completeTask('tzedaka');
         
         // Check if all tasks are completed and show congratulations
-        if (checkAndShowCongratulations()) {
+        if (checkAndShowCongratulations('tzedaka')) {
           openModal('congratulations', 'tzedaka');
         } else {
           // Only navigate if congratulations wasn't shown

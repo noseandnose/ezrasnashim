@@ -83,7 +83,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       setShowHeartExplosion(false);
       
       // Check if all tasks are completed and show congratulations
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       }
     }, 1000);

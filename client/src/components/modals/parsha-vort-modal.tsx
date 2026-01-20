@@ -45,7 +45,7 @@ export default function ParshaVortModal() {
       setShowHeartExplosion(false);
       
       // Check if all tasks are completed and show congratulations
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         closeModal();

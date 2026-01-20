@@ -12,8 +12,8 @@ import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import type { LifeClass } from "@shared/schema";
 
 export default function LifeClassModal() {
-  const { activeModal, closeModal, openModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
+  const { activeModal, closeModal } = useModalStore();
+  const { completeTask } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -44,12 +44,7 @@ export default function LifeClassModal() {
     setTimeout(() => {
       setShowHeartExplosion(false);
       setIsCompleting(false);
-      
-      if (checkAndShowCongratulations()) {
-        openModal('congratulations', 'table');
-      } else {
-        closeModal();
-      }
+      closeModal();
     }, 1000);
   };
 

@@ -45,7 +45,7 @@ export default function DailyChizukModal() {
     setTimeout(() => {
       setShowHeartExplosion(false);
       
-      if (checkAndShowCongratulations()) {
+      if (checkAndShowCongratulations('torah')) {
         openModal('congratulations', 'torah');
       } else {
         closeModal();
