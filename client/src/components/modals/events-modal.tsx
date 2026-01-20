@@ -4,6 +4,7 @@ import { FullscreenModal } from '@/components/ui/fullscreen-modal';
 import axiosClient from '@/lib/axiosClient';
 import { useLocationStore, useJewishTimes } from '@/hooks/use-jewish-times';
 import { Clock, Calendar, MapPin } from 'lucide-react';
+import { useBackButtonHistory } from '@/hooks/use-back-button-history';
 
 interface JewishEvent {
   title: string;
@@ -23,6 +24,8 @@ interface EventsModalProps {
 }
 
 export function EventsModal({ isOpen, onClose }: EventsModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'events-modal', isOpen, onClose });
   const { coordinates } = useLocationStore();
   const [upcomingEventIndex, setUpcomingEventIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'zmanim' | 'days'>('zmanim');

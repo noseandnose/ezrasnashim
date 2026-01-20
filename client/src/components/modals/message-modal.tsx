@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
 import { linkifyText } from "@/lib/text-formatter";
+import { useBackButtonHistory } from "@/hooks/use-back-button-history";
 
 interface MessageModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface MessageModalProps {
 }
 
 export default function MessageModal({ isOpen, onClose, date }: MessageModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'message-modal', isOpen, onClose });
   
   const { data: message, isLoading } = useQuery<Message>({
     queryKey: [`/api/messages/${date}`],

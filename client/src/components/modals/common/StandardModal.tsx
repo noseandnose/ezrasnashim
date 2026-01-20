@@ -1,7 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useId } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { useBackButtonHistory } from "@/hooks/use-back-button-history";
 
 interface StandardModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ interface StandardModalProps {
   headerClassName?: string;
   footerContent?: ReactNode;
   maxHeight?: string;
+  /** Unique identifier for back button history (auto-generated if not provided) */
+  historyId?: string;
 }
 
 export function StandardModal({
@@ -32,8 +35,15 @@ export function StandardModal({
   contentClassName = '',
   headerClassName = '',
   footerContent,
-  maxHeight = '80vh'
+  maxHeight = '80vh',
+  historyId
 }: StandardModalProps) {
+  // Generate stable ID for back button history
+  const autoId = useId();
+  const modalId = historyId || `standard-modal-${autoId}`;
+  
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: modalId, isOpen, onClose });
   const widthClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',

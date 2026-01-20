@@ -4,6 +4,7 @@ import type { SimpleCompass as SimpleCompassType, CompassState } from '@/lib/com
 import bhPinkIcon from '@assets/BH_Pink_1755681221620.png';
 import bhGreenIcon from '@assets/BH_Green_1755681221619.png';
 import { Button } from '@/components/ui/button';
+import { useBackButtonHistory } from '@/hooks/use-back-button-history';
 
 interface MiniCompassModalProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface MiniCompassModalProps {
 }
 
 export function MiniCompassModal({ isOpen, onClose }: MiniCompassModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'mini-compass', isOpen, onClose });
   const [compass, setCompass] = useState<SimpleCompassType | null>(null);
   const [state, setState] = useState<CompassState>({
     deviceHeading: 0,

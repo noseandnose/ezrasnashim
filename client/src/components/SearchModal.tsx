@@ -5,6 +5,7 @@ import { Search, X } from 'lucide-react';
 import { useSearch } from '@/contexts/SearchContext';
 import { searchRecords } from '@/lib/searchUtils';
 import { useLocation } from 'wouter';
+import { useBackButtonHistory } from '@/hooks/use-back-button-history';
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -12,6 +13,8 @@ interface SearchModalProps {
 }
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'search-modal', isOpen, onClose });
   const [query, setQuery] = useState('');
   const { searchIndex, miniSearchIndex } = useSearch();
   const inputRef = useRef<HTMLInputElement>(null);

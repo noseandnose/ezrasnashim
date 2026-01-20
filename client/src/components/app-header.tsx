@@ -2,6 +2,7 @@ import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useAuth } from "@/hooks/use-auth";
+import { useBackButtonHistory } from "@/hooks/use-back-button-history";
 import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, MapPin } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
@@ -29,6 +30,10 @@ export default function AppHeader() {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  
+  // Register hamburger menu with back button history for Android WebView support
+  // Note: Other modals (SearchModal, LocationModal, AddToHomeScreenModal) register themselves
+  useBackButtonHistory({ id: 'hamburger-menu', isOpen: menuOpen, onClose: () => setMenuOpen(false) });
   
   // Close menu when clicking outside - using pointerdown for WebView compatibility
   useEffect(() => {

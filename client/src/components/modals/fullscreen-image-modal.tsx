@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useBackButtonHistory } from '@/hooks/use-back-button-history';
 
 interface FullscreenImageModalProps {
   isOpen: boolean;
@@ -9,6 +10,8 @@ interface FullscreenImageModalProps {
 }
 
 export function FullscreenImageModal({ isOpen, onClose, images, initialIndex }: FullscreenImageModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'fullscreen-image', isOpen, onClose });
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);

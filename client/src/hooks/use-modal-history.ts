@@ -94,13 +94,18 @@ export function useModalHistory() {
 }
 
 /**
- * Ensures there's a base history entry so back button doesn't exit app immediately
+ * Ensures there's a base history entry so back button doesn't exit app immediately.
+ * This pushes an actual buffer entry, not just replacing the current state.
  */
 export function useBaseHistoryEntry() {
   useEffect(() => {
-    // Only set up once on mount
-    if (!window.history.state) {
-      window.history.replaceState({ base: true }, '');
+    // Only set up once on mount - need to push a buffer entry
+    // so Android back button has somewhere to go before exiting
+    if (!window.history.state || !window.history.state.base) {
+      // Mark current entry as base
+      window.history.replaceState({ base: true, app: 'ezras-nashim' }, '');
+      // Push a buffer entry so first back press doesn't exit
+      window.history.pushState({ base: true, buffer: true, app: 'ezras-nashim' }, '');
     }
   }, []);
 }
