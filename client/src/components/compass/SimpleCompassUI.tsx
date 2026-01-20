@@ -165,7 +165,7 @@ export function SimpleCompassUI() {
             <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 text-sm">{loadError}</p>
           </div>
-          <Button onPointerDown={() => window.location.reload()} variant="outline">
+          <Button onClick={() => window.location.reload()} variant="outline">
             Refresh Page
           </Button>
         </div>
@@ -188,7 +188,7 @@ export function SimpleCompassUI() {
             <MapPin className="w-6 h-6 text-red-500 mx-auto mb-2" />
             <p className="text-red-700 text-sm">{state.error}</p>
           </div>
-          <Button onPointerDown={handleRetry} variant="outline">
+          <Button onClick={handleRetry} variant="outline">
             Try Again
           </Button>
         </div>

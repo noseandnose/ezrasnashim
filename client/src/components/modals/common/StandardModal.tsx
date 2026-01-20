@@ -1,7 +1,8 @@
-import { ReactNode } from 'react';
+import { ReactNode, useId } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import { useBackButtonHistory } from "@/hooks/use-back-button-history";
 
 interface StandardModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ interface StandardModalProps {
   headerClassName?: string;
   footerContent?: ReactNode;
   maxHeight?: string;
+  /** Unique identifier for back button history (auto-generated if not provided) */
+  historyId?: string;
 }
 
 export function StandardModal({
@@ -32,8 +35,15 @@ export function StandardModal({
   contentClassName = '',
   headerClassName = '',
   footerContent,
-  maxHeight = '80vh'
+  maxHeight = '80vh',
+  historyId
 }: StandardModalProps) {
+  // Generate stable ID for back button history
+  const autoId = useId();
+  const modalId = historyId || `standard-modal-${autoId}`;
+  
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: modalId, isOpen, onClose });
   const widthClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -59,7 +69,7 @@ export function StandardModal({
           {/* Custom Close Button */}
           {showCloseX && (
             <button
-              onPointerDown={onClose}
+              onClick={onClose}
               className="absolute right-4 top-4 rounded-full w-8 h-8 bg-warm-gray/10 hover:bg-warm-gray/20 flex items-center justify-center transition-all duration-200 z-10"
               aria-label="Close modal"
             >
@@ -122,7 +132,7 @@ export function StandardModalButton({
 
   return (
     <Button
-      onPointerDown={onClick}
+      onClick={onClick}
       disabled={disabled}
       className={`${baseClasses} ${variantClasses[variant]} ${className}`}
     >

@@ -125,7 +125,7 @@ Questions or requests? Email team@ezrasnashim.app.
           </div>
 
           <button
-            onPointerDown={handleClose}
+            onClick={handleClose}
             className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
           >
             <X className="w-5 h-5 text-white" />

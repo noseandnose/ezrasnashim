@@ -472,7 +472,7 @@ export default function TableModals() {
           )}
 
           <Button 
-            onPointerDown={() => handleComplete('recipe')}
+            onClick={() => handleComplete('recipe')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Done
@@ -551,10 +551,10 @@ export default function TableModals() {
                             src={currentMedia.url} 
                             alt={`Creative Jewish Living ${currentMediaIndex + 1}`}
                             className="w-full h-full object-contain cursor-pointer"
-                            onPointerDown={() => handleImageTap(currentMedia.url!, allImageUrls)}
+                            onClick={() => handleImageTap(currentMedia.url!, allImageUrls)}
                           />
                           <button
-                            onPointerDown={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
+                            onClick={() => handleImageDoubleClick(currentMedia.url!, allImageUrls)}
                             className="absolute top-2 right-2 bg-black/50 text-white p-1.5 rounded-full hover:bg-black/70 transition-colors"
                             title="View fullscreen"
                           >
@@ -674,7 +674,7 @@ export default function TableModals() {
                                 <div className="text-gray-500 text-center">
                                   <p className="mb-2">Video unavailable</p>
                                   <button 
-                                    onPointerDown={() => currentMedia.url && window.open(currentMedia.url, '_blank')}
+                                    onClick={() => currentMedia.url && window.open(currentMedia.url, '_blank')}
                                     className="text-blush underline text-sm"
                                   >
                                     Open in new tab
@@ -722,7 +722,7 @@ export default function TableModals() {
                       {mediaItems.length > 1 && (
                         <>
                           <button
-                            onPointerDown={(e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               // Prevent double-firing if touch just happened
                               if (Date.now() - lastArrowTouchTime.current < 500) return;
@@ -744,7 +744,7 @@ export default function TableModals() {
                             <ChevronLeft size={24} strokeWidth={3} />
                           </button>
                           <button
-                            onPointerDown={(e) => {
+                            onClick={(e) => {
                               e.stopPropagation();
                               // Prevent double-firing if touch just happened
                               if (Date.now() - lastArrowTouchTime.current < 500) return;
@@ -821,7 +821,7 @@ export default function TableModals() {
           )}
 
           <Button 
-            onPointerDown={() => handleComplete('inspiration')}
+            onClick={() => handleComplete('inspiration')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Done
@@ -859,7 +859,7 @@ export default function TableModals() {
           />
 
           <Button 
-            onPointerDown={() => handleComplete('parsha')}
+            onClick={() => handleComplete('parsha')}
             className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0 mt-4"
           >
             Completed Parsha
@@ -1040,7 +1040,7 @@ export default function TableModals() {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onPointerDown={isModalComplete('recipe') ? undefined : () => {
+                  onClick={isModalComplete('recipe') ? undefined : () => {
                     handleComplete('recipe');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
                   }}
@@ -1135,7 +1135,7 @@ export default function TableModals() {
                           {mediaItems.length > 1 && (
                             <>
                               <button
-                                onPointerDown={(e) => {
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   // Prevent double-firing if touch just happened
                                   if (Date.now() - lastArrowTouchTime.current < 500) return;
@@ -1157,7 +1157,7 @@ export default function TableModals() {
                                 <ChevronLeft size={24} strokeWidth={3} />
                               </button>
                               <button
-                                onPointerDown={(e) => {
+                                onClick={(e) => {
                                   e.stopPropagation();
                                   // Prevent double-firing if touch just happened
                                   if (Date.now() - lastArrowTouchTime.current < 500) return;
@@ -1218,7 +1218,7 @@ export default function TableModals() {
               
               <div className="heart-explosion-container">
                 <Button 
-                  onPointerDown={isModalComplete('inspiration') ? undefined : () => {
+                  onClick={isModalComplete('inspiration') ? undefined : () => {
                     handleComplete('inspiration');
                     setFullscreenContent({ isOpen: false, title: '', content: null });
                   }}
@@ -1270,7 +1270,7 @@ export default function TableModals() {
               <div className="heart-explosion-container">
                 <Button 
                   data-testid="button-complete-marriage-insights"
-                  onPointerDown={isModalComplete('marriage-insights') ? undefined : handleMarriageInsightComplete}
+                  onClick={isModalComplete('marriage-insights') ? undefined : handleMarriageInsightComplete}
                   disabled={isModalComplete('marriage-insights')}
                   className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 ${
                     isModalComplete('marriage-insights') 

@@ -91,7 +91,7 @@ function SegmentedControl({ value, onChange }: SegmentedControlProps) {
       {options.map((option) => (
         <button
           key={option.value}
-          onPointerDown={() => onChange(option.value)}
+          onClick={() => onChange(option.value)}
           className={`flex-1 py-2.5 px-3 rounded-xl text-center transition-all duration-200 ${
             value === option.value
               ? "bg-gradient-feminine text-white shadow-lg"
@@ -591,7 +591,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
       >
         <div className="flex items-center justify-between px-4 py-3">
           <button
-            onPointerDown={() => setLocation("/")}
+            onClick={() => setLocation("/")}
             className="p-2 -ml-2 touch-manipulation"
             aria-label="Back to Home"
           >
@@ -599,12 +599,12 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
           </button>
           <h1 
             className="platypi-bold text-xl text-black cursor-pointer"
-            onPointerDown={scrollToTop}
+            onClick={scrollToTop}
           >
             Analytics
           </h1>
           <button
-            onPointerDown={handleRefresh}
+            onClick={handleRefresh}
             className="p-2 -mr-2 touch-manipulation"
             aria-label="Refresh Analytics"
             disabled={isRefreshing}

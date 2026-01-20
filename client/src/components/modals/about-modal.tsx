@@ -96,7 +96,7 @@ export default function AboutModal() {
             className="h-8 opacity-80 cursor-pointer hover:opacity-60 transition-opacity select-none" 
             style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
             draggable={false}
-            onPointerDown={handleChesedLogoTap}
+            onClick={handleChesedLogoTap}
             onTouchEnd={(e) => {
               e.preventDefault();
               handleChesedLogoTap(e as any);
@@ -106,7 +106,7 @@ export default function AboutModal() {
 
         {/* Complete Button */}
         <Button
-          onPointerDown={() => closeModal(true)}
+          onClick={() => closeModal(true)}
           className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium border-0"
         >
           Close

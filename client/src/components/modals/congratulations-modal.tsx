@@ -45,7 +45,7 @@ export default function CongratulationsModal() {
           </div>
 
           <Button 
-            onPointerDown={() => {
+            onClick={() => {
               closeModal();
               // Navigate to home and scroll to progress
               window.location.hash = '#/?section=home&scrollToProgress=true';

@@ -1,15 +1,34 @@
 import { useEffect, useRef } from 'react';
 import { useModalStore } from '@/lib/types';
+import { 
+  registerModal, 
+  unregisterModal, 
+  isModalRegistered,
+  isHandling,
+  ensureBaseHistoryEntry,
+  removeFromStackSilently
+} from './use-shared-modal-history';
 
 /**
- * Simple, robust modal history management for Android back button support
+ * Hook to ensure a base history entry exists on app mount.
+ * This prevents the first back button press from exiting the app.
+ */
+export function useBaseHistoryEntry() {
+  useEffect(() => {
+    ensureBaseHistoryEntry();
+  }, []);
+}
+
+/**
+ * Modal history management for central store modals (Android back button support)
+ * 
+ * Uses the shared modal history manager to coordinate with local-state modals.
  * 
  * Strategy:
- * - When modal opens: push a history entry
- * - When back button pressed: popstate fires, we close the modal
- * - When modal closed via X/Escape: we go back in history
- * 
- * Uses a simple tracking approach without complex depth management.
+ * - When modal opens: register with shared manager (pushes history entry)
+ * - When back button pressed: shared manager closes the topmost modal
+ * - When modal closed via X/Escape: unregister (goes back in history)
+ * - Handles modal replacement (A→B): unregisters A, registers B
  */
 export function useModalHistory() {
   const activeModal = useModalStore(state => state.activeModal);
@@ -18,89 +37,44 @@ export function useModalHistory() {
   // Track previous modal state to detect transitions
   const prevModalRef = useRef<string | null>(null);
   
-  // Track if we have a modal entry in history
-  const hasModalEntryRef = useRef(false);
+  // Create a stable close function reference
+  const closeRef = useRef(closeModal);
+  closeRef.current = closeModal;
   
-  // Flag to prevent loops when we trigger navigation
-  const isClosingRef = useRef(false);
-  
-  // Handle back button (popstate event)
-  useEffect(() => {
-    const handlePopstate = () => {
-      // If we're in the middle of programmatic close, ignore
-      if (isClosingRef.current) {
-        return;
-      }
-      
-      // If modal is open and we got a popstate, user pressed back
-      if (activeModal && hasModalEntryRef.current) {
-        isClosingRef.current = true;
-        hasModalEntryRef.current = false;
-        closeModal();
-        
-        // Reset flag after close completes
-        setTimeout(() => {
-          isClosingRef.current = false;
-        }, 100);
-      }
-    };
-    
-    window.addEventListener('popstate', handlePopstate);
-    return () => window.removeEventListener('popstate', handlePopstate);
-  }, [activeModal, closeModal]);
-  
-  // Manage history entries when modal state changes
+  // Manage registration when modal state changes
   useEffect(() => {
     const prevModal = prevModalRef.current;
     const currentModal = activeModal;
     
-    // Modal just opened
+    // Store IDs are prefixed to avoid collision with local modal IDs
+    const prevId = prevModal ? `store-${prevModal}` : null;
+    const currentId = currentModal ? `store-${currentModal}` : null;
+    
+    // Modal just opened (null → A)
     if (currentModal && !prevModal) {
-      if (!isClosingRef.current) {
-        // Push a history entry for the modal
-        window.history.pushState({ modal: currentModal }, '');
-        hasModalEntryRef.current = true;
+      if (!isHandling()) {
+        registerModal(currentId!, closeRef.current, 'store');
       }
     }
     
-    // Modal just closed
+    // Modal just closed (A → null)
     else if (!currentModal && prevModal) {
-      // If we have a modal entry and this wasn't triggered by back button
-      if (hasModalEntryRef.current && !isClosingRef.current) {
-        isClosingRef.current = true;
-        hasModalEntryRef.current = false;
-        
-        // Go back to remove our entry
-        window.history.back();
-        
-        setTimeout(() => {
-          isClosingRef.current = false;
-        }, 100);
+      if (isModalRegistered(prevId!)) {
+        unregisterModal(prevId!);
       }
     }
     
-    // Modal changed (switched from one to another)
+    // Modal replaced (A → B)
     else if (currentModal && prevModal && currentModal !== prevModal) {
-      // Just replace the current state with new modal info
-      if (hasModalEntryRef.current) {
-        window.history.replaceState({ modal: currentModal }, '');
+      // Unregister the old modal silently (don't trigger history.back)
+      removeFromStackSilently(prevId!);
+      
+      // Register the new modal
+      if (!isHandling()) {
+        registerModal(currentId!, closeRef.current, 'store');
       }
     }
     
     prevModalRef.current = currentModal;
   }, [activeModal]);
-  
-  return { activeModal };
-}
-
-/**
- * Ensures there's a base history entry so back button doesn't exit app immediately
- */
-export function useBaseHistoryEntry() {
-  useEffect(() => {
-    // Only set up once on mount
-    if (!window.history.state) {
-      window.history.replaceState({ base: true }, '');
-    }
-  }, []);
 }

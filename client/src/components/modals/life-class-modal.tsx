@@ -136,7 +136,7 @@ export default function LifeClassModal() {
           />
 
           <Button
-            onPointerDown={isCompleted ? undefined : handleComplete}
+            onClick={isCompleted ? undefined : handleComplete}
             disabled={isCompleted}
             className={`w-full py-3 rounded-xl platypi-medium border-0 ${
               isCompleted 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Smartphone, Download, Plus, Home } from "lucide-react";
+import { useBackButtonHistory } from "@/hooks/use-back-button-history";
 
 interface AddToHomeScreenModalProps {
   isOpen: boolean;
@@ -8,6 +9,8 @@ interface AddToHomeScreenModalProps {
 }
 
 export default function AddToHomeScreenModal({ isOpen, onClose }: AddToHomeScreenModalProps) {
+  // Register with back button history for Android WebView support
+  useBackButtonHistory({ id: 'add-to-home-screen', isOpen, onClose });
   const [deviceType, setDeviceType] = useState<'ios' | 'android' | 'desktop'>('desktop');
   const [iOSBrowser, setIOSBrowser] = useState<'safari' | 'chrome' | 'other'>('safari');
 

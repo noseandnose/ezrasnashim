@@ -314,7 +314,7 @@ export default function Profile() {
       >
         <div className="flex items-center h-12">
           <button 
-            onPointerDown={() => setLocation("/")} 
+            onClick={() => setLocation("/")} 
             className="p-2 -ml-2 text-black"
             data-testid="button-back"
           >
@@ -350,7 +350,7 @@ export default function Profile() {
                   )}
                 </div>
                 <button 
-                  onPointerDown={startEditing}
+                  onClick={startEditing}
                   className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
                   data-testid="button-edit-profile"
                 >
@@ -376,7 +376,7 @@ export default function Profile() {
                 <div className="flex justify-end mb-3">
                   <div className="flex gap-2">
                     <button 
-                      onPointerDown={cancelEditing}
+                      onClick={cancelEditing}
                       className="p-2 rounded-full bg-white/60 hover:bg-white/80 transition-colors shadow-sm"
                       disabled={isSaving}
                       data-testid="button-cancel-edit"
@@ -384,7 +384,7 @@ export default function Profile() {
                       <X className="w-4 h-4 text-gray-500" />
                     </button>
                     <button 
-                      onPointerDown={saveProfile}
+                      onClick={saveProfile}
                       className="p-2 rounded-full bg-green-100 hover:bg-green-200 transition-colors shadow-sm"
                       disabled={isSaving}
                       data-testid="button-save-profile"
@@ -438,7 +438,7 @@ export default function Profile() {
                     <div className="flex items-center gap-1.5 flex-shrink-0">
                       <button
                         type="button"
-                        onPointerDown={() => setEditAfterSunset(!editAfterSunset)}
+                        onClick={() => setEditAfterSunset(!editAfterSunset)}
                         className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
                           editAfterSunset 
                             ? 'bg-blush border-blush' 
@@ -451,7 +451,7 @@ export default function Profile() {
                         )}
                       </button>
                       <label 
-                        onPointerDown={() => setEditAfterSunset(!editAfterSunset)}
+                        onClick={() => setEditAfterSunset(!editAfterSunset)}
                         className="platypi-regular text-[10px] text-black/60 cursor-pointer whitespace-nowrap"
                       >
                         After sunset
@@ -583,7 +583,7 @@ export default function Profile() {
         </div>
         
         <button 
-          onPointerDown={() => setLocation('/settings')}
+          onClick={() => setLocation('/settings')}
           className="w-full rounded-lg p-2.5 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
           style={{ 
             background: 'rgba(255,255,255,0.85)',
@@ -597,7 +597,7 @@ export default function Profile() {
         </button>
         
         <button 
-          onPointerDown={() => logout()}
+          onClick={() => logout()}
           className="w-full rounded-lg p-2.5 border border-white/30 flex items-center justify-center gap-2 hover:bg-white/90 transition-colors"
           style={{ 
             background: 'rgba(255,255,255,0.85)',

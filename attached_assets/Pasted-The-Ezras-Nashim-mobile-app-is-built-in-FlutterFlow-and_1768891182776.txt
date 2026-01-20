@@ -1,0 +1,94 @@
+The Ezras Nashim mobile app is built in FlutterFlow and uses a full-screen built-in WebView (no WebView controller access).
+Android users report that pressing the system back button still exits the app instead of navigating back inside the site.
+
+Important constraints:
+
+The FlutterFlow WebView does not expose a controller
+
+We cannot intercept canGoBack() / goBack() from Flutter
+
+The fix must be website-side, using browser history
+
+The app relies on Android WebView behavior
+
+Known findings so far:
+
+The site uses Wouter for routing
+
+Modals do NOT push browser history
+
+A popstate listener exists, but often does not fire because no history entry exists
+
+This causes Android WebView to exit the app on back press
+
+Your task:
+Perform a full audit of all navigation paths on the site and ensure that every user-perceived navigation state correctly participates in browser history.
+
+Specifically:
+
+Verify Wouter routing
+
+Confirm all route changes use Wouter navigation (not window.location.replace)
+
+Ensure route changes always push history
+
+Audit modals
+
+For every modal that feels like a “screen”:
+
+Ensure history.pushState() is called when opening
+
+Ensure a single popstate listener closes the modal
+
+Avoid duplicate pushState calls
+
+Audit sections / tabs / drawers
+
+Any UI that visually replaces content should:
+
+Push history on open/change
+
+Restore previous UI state on popstate
+
+Android WebView behavior
+
+Confirm that pressing Android back:
+
+First closes modals
+
+Then navigates previous routes
+
+Only exits the app at true root
+
+Edge cases
+
+Opening a modal on initial page load
+
+Deep-linked entry (from OneSignal / deep link)
+
+Multiple modals stacked
+
+Deliverables:
+
+Clear explanation of why Android back still exits the app
+
+Exact code changes (files + snippets)
+
+Confirmation that Android back now works correctly in:
+
+Chrome Android
+
+Android WebView (FlutterFlow app)
+
+Rules:
+
+Do NOT add native/mobile code
+
+Do NOT rely on Flutter APIs
+
+Do NOT add hacks or timers
+
+Use correct browser history semantics only
+
+Success criteria:
+Android back button behaves exactly like browser back when embedded in a WebView.

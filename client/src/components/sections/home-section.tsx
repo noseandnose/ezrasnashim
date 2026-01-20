@@ -445,7 +445,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           <h1 className="platypi-bold text-xl text-black tracking-wide">{greeting}</h1>
           <div className="relative shrink-0">
             <button
-              onPointerDown={() => window.location.href = '/feed'}
+              onClick={() => window.location.href = '/feed'}
               className="flex items-center justify-center rounded-full active:scale-95 transition-transform"
               style={{
                 width: '32px',
@@ -470,7 +470,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         
         {/* Sponsor Section */}
         <button 
-          onPointerDown={() => {
+          onClick={() => {
             if (sponsor) {
               openModal('sponsor-details', 'home');
             }
@@ -504,7 +504,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
         <div className="grid grid-cols-2 gap-2">
           {/* Time-based Prayer - Dynamic based on current time - Apple Glass Style */}
           <button 
-            onPointerDown={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
+            onClick={() => !currentPrayer.disabled && openModal(currentPrayer.modal, 'tefilla')}
             disabled={currentPrayer.disabled}
             className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 ${
               currentPrayer.disabled 
@@ -543,7 +543,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
 
           {/* Shkia - Location badge and time - Apple Glass Style */}
           <button 
-            onPointerDown={() => openModal('events', 'home')}
+            onClick={() => openModal('events', 'home')}
             className="w-full h-full rounded-xl p-4 text-center hover:scale-105 transition-all duration-300"
             style={{
               background: 'rgba(255, 255, 255, 0.85)',
@@ -578,7 +578,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             {/* Collapsed/Header Bar */}
             <button
-              onPointerDown={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
+              onClick={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
               className="w-full p-3 text-left hover:bg-white/90 transition-colors"
               data-testid="button-todays-special-toggle"
             >
@@ -632,7 +632,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 
                 {/* Floating Settings Button - Bottom Left */}
                 <button
-                  onPointerDown={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
+                  onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
                   className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
                   data-testid="button-todays-special-settings"
                 >
@@ -645,7 +645,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                     {/* Backdrop */}
                     <div 
                       className="fixed inset-0 z-40"
-                      onPointerDown={() => setShowTodaysSpecialSettings(false)}
+                      onClick={() => setShowTodaysSpecialSettings(false)}
                     />
                     <div className="absolute bottom-14 left-3 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-50 min-w-[180px]">
                       <div className="space-y-3">
@@ -655,7 +655,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                             <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Language</p>
                             <div className="flex bg-gradient-feminine rounded-xl p-0.5">
                               <button
-                                onPointerDown={() => {
+                                onClick={() => {
                                   setTodaysSpecialLanguage('english');
                                   setShowTodaysSpecialSettings(false);
                                 }}
@@ -668,7 +668,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                                 English
                               </button>
                               <button
-                                onPointerDown={() => {
+                                onClick={() => {
                                   setTodaysSpecialLanguage('hebrew');
                                   setShowTodaysSpecialSettings(false);
                                 }}
@@ -689,7 +689,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                           <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Font Size</p>
                           <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-xl p-1.5">
                             <button
-                              onPointerDown={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
                               className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                             >
                               A-
@@ -698,7 +698,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                               {todaysSpecialFontSize}px
                             </span>
                             <button
-                              onPointerDown={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
+                              onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
                               className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
                             >
                               A+
@@ -869,7 +869,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             {/* Weather badge */}
             {weather && (
               <div 
-                onPointerDown={(e) => {
+                onClick={(e) => {
                   e.stopPropagation();
                   toggleTempUnit();
                 }}
