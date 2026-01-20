@@ -1,24 +1,91 @@
-import { forwardRef, useRef, useCallback, useEffect, useState } from 'react';
+import { forwardRef, useRef, useCallback } from 'react';
 
 const SCROLL_THRESHOLD = 10;
 const TAP_DEBOUNCE_MS = 300;
+const BACKGROUND_THRESHOLD_MS = 5000; // Refresh if in background for more than 5 seconds
 
 interface TapButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   onTap: () => void;
   children: React.ReactNode;
 }
 
+// Global background time tracking
+let lastHiddenTime = 0;
+
+function setupGlobalResumeHandler() {
+  if (typeof window === 'undefined') return;
+  
+  // Only set up once
+  if ((window as any).__resumeHandlerSetup) return;
+  (window as any).__resumeHandlerSetup = true;
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'hidden') {
+      lastHiddenTime = Date.now();
+    } else if (document.visibilityState === 'visible') {
+      const timeInBackground = Date.now() - lastHiddenTime;
+      if (lastHiddenTime > 0 && timeInBackground > BACKGROUND_THRESHOLD_MS) {
+        console.log('[TapButton] App resumed after', Math.round(timeInBackground / 1000), 'seconds - refreshing page');
+        window.location.reload();
+      }
+    }
+  };
+
+  const handlePageShow = (e: PageTransitionEvent) => {
+    if (e.persisted) {
+      console.log('[TapButton] Page restored from bfcache - refreshing');
+      window.location.reload();
+    }
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('pageshow', handlePageShow);
+}
+
+// Initialize global handler
+setupGlobalResumeHandler();
+
 export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
   ({ onTap, children, disabled, ...props }, ref) => {
-    const internalRef = useRef<HTMLButtonElement>(null);
-    const buttonRef = (ref as React.RefObject<HTMLButtonElement>) || internalRef;
-    
-    const pointerStartPos = useRef<{ x: number; y: number } | null>(null);
+    const touchStartPos = useRef<{ x: number; y: number } | null>(null);
     const isScrolling = useRef(false);
     const lastTapTime = useRef(0);
-    const [, forceUpdate] = useState(0);
 
-    const handleTap = useCallback(() => {
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+      isScrolling.current = false;
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+      if (!touchStartPos.current) return;
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+      const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+      if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
+        isScrolling.current = true;
+      }
+    }, []);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+      if (disabled) {
+        touchStartPos.current = null;
+        return;
+      }
+      
+      const now = Date.now();
+      if (!isScrolling.current && touchStartPos.current) {
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          e.preventDefault();
+          onTap();
+        }
+      }
+      touchStartPos.current = null;
+      isScrolling.current = false;
+    }, [onTap, disabled]);
+
+    const handleClick = useCallback(() => {
       if (disabled) return;
       const now = Date.now();
       if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
@@ -27,87 +94,13 @@ export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
       }
     }, [onTap, disabled]);
 
-    useEffect(() => {
-      const element = buttonRef.current;
-      if (!element) return;
-
-      const onPointerDown = (e: PointerEvent) => {
-        pointerStartPos.current = { x: e.clientX, y: e.clientY };
-        isScrolling.current = false;
-      };
-
-      const onPointerMove = (e: PointerEvent) => {
-        if (!pointerStartPos.current) return;
-        const deltaX = Math.abs(e.clientX - pointerStartPos.current.x);
-        const deltaY = Math.abs(e.clientY - pointerStartPos.current.y);
-        if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
-          isScrolling.current = true;
-        }
-      };
-
-      const onPointerUp = (e: PointerEvent) => {
-        if (!isScrolling.current && pointerStartPos.current) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleTap();
-        }
-        pointerStartPos.current = null;
-        isScrolling.current = false;
-      };
-
-      const onPointerCancel = () => {
-        pointerStartPos.current = null;
-        isScrolling.current = false;
-      };
-
-      element.addEventListener('pointerdown', onPointerDown);
-      element.addEventListener('pointermove', onPointerMove);
-      element.addEventListener('pointerup', onPointerUp);
-      element.addEventListener('pointercancel', onPointerCancel);
-      element.addEventListener('pointerleave', onPointerCancel);
-
-      return () => {
-        element.removeEventListener('pointerdown', onPointerDown);
-        element.removeEventListener('pointermove', onPointerMove);
-        element.removeEventListener('pointerup', onPointerUp);
-        element.removeEventListener('pointercancel', onPointerCancel);
-        element.removeEventListener('pointerleave', onPointerCancel);
-      };
-    }, [buttonRef, handleTap]);
-
-    // Re-attach event listeners when app returns from background
-    useEffect(() => {
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible') {
-          // Force re-render to re-attach event listeners
-          forceUpdate(n => n + 1);
-        }
-      };
-
-      const handlePageShow = (e: PageTransitionEvent) => {
-        if (e.persisted) {
-          forceUpdate(n => n + 1);
-        }
-      };
-
-      const handleFocus = () => {
-        forceUpdate(n => n + 1);
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('pageshow', handlePageShow);
-      window.addEventListener('focus', handleFocus);
-
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-        window.removeEventListener('pageshow', handlePageShow);
-        window.removeEventListener('focus', handleFocus);
-      };
-    }, []);
-
     return (
       <button
-        ref={buttonRef}
+        ref={ref}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         disabled={disabled}
         style={{ touchAction: 'manipulation', ...props.style }}
         {...props}
@@ -128,15 +121,45 @@ interface TapDivProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onClic
 
 export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
   ({ onTap, children, disabled, ...props }, ref) => {
-    const internalRef = useRef<HTMLDivElement>(null);
-    const divRef = (ref as React.RefObject<HTMLDivElement>) || internalRef;
-    
-    const pointerStartPos = useRef<{ x: number; y: number } | null>(null);
+    const touchStartPos = useRef<{ x: number; y: number } | null>(null);
     const isScrolling = useRef(false);
     const lastTapTime = useRef(0);
-    const [, forceUpdate] = useState(0);
 
-    const handleTap = useCallback(() => {
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+      const touch = e.touches[0];
+      touchStartPos.current = { x: touch.clientX, y: touch.clientY };
+      isScrolling.current = false;
+    }, []);
+
+    const handleTouchMove = useCallback((e: React.TouchEvent) => {
+      if (!touchStartPos.current) return;
+      const touch = e.touches[0];
+      const deltaX = Math.abs(touch.clientX - touchStartPos.current.x);
+      const deltaY = Math.abs(touch.clientY - touchStartPos.current.y);
+      if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
+        isScrolling.current = true;
+      }
+    }, []);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+      if (disabled) {
+        touchStartPos.current = null;
+        return;
+      }
+      
+      const now = Date.now();
+      if (!isScrolling.current && touchStartPos.current) {
+        if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
+          lastTapTime.current = now;
+          e.preventDefault();
+          onTap();
+        }
+      }
+      touchStartPos.current = null;
+      isScrolling.current = false;
+    }, [onTap, disabled]);
+
+    const handleClick = useCallback(() => {
       if (disabled) return;
       const now = Date.now();
       if (now - lastTapTime.current > TAP_DEBOUNCE_MS) {
@@ -145,86 +168,13 @@ export const TapDiv = forwardRef<HTMLDivElement, TapDivProps>(
       }
     }, [onTap, disabled]);
 
-    useEffect(() => {
-      const element = divRef.current;
-      if (!element) return;
-
-      const onPointerDown = (e: PointerEvent) => {
-        pointerStartPos.current = { x: e.clientX, y: e.clientY };
-        isScrolling.current = false;
-      };
-
-      const onPointerMove = (e: PointerEvent) => {
-        if (!pointerStartPos.current) return;
-        const deltaX = Math.abs(e.clientX - pointerStartPos.current.x);
-        const deltaY = Math.abs(e.clientY - pointerStartPos.current.y);
-        if (deltaX > SCROLL_THRESHOLD || deltaY > SCROLL_THRESHOLD) {
-          isScrolling.current = true;
-        }
-      };
-
-      const onPointerUp = (e: PointerEvent) => {
-        if (!isScrolling.current && pointerStartPos.current) {
-          e.preventDefault();
-          e.stopPropagation();
-          handleTap();
-        }
-        pointerStartPos.current = null;
-        isScrolling.current = false;
-      };
-
-      const onPointerCancel = () => {
-        pointerStartPos.current = null;
-        isScrolling.current = false;
-      };
-
-      element.addEventListener('pointerdown', onPointerDown);
-      element.addEventListener('pointermove', onPointerMove);
-      element.addEventListener('pointerup', onPointerUp);
-      element.addEventListener('pointercancel', onPointerCancel);
-      element.addEventListener('pointerleave', onPointerCancel);
-
-      return () => {
-        element.removeEventListener('pointerdown', onPointerDown);
-        element.removeEventListener('pointermove', onPointerMove);
-        element.removeEventListener('pointerup', onPointerUp);
-        element.removeEventListener('pointercancel', onPointerCancel);
-        element.removeEventListener('pointerleave', onPointerCancel);
-      };
-    }, [divRef, handleTap]);
-
-    // Re-attach event listeners when app returns from background
-    useEffect(() => {
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible') {
-          forceUpdate(n => n + 1);
-        }
-      };
-
-      const handlePageShow = (e: PageTransitionEvent) => {
-        if (e.persisted) {
-          forceUpdate(n => n + 1);
-        }
-      };
-
-      const handleFocus = () => {
-        forceUpdate(n => n + 1);
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('pageshow', handlePageShow);
-      window.addEventListener('focus', handleFocus);
-
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-        window.removeEventListener('pageshow', handlePageShow);
-        window.removeEventListener('focus', handleFocus);
-      };
-    }, []);
-
     return (
       <div
-        ref={divRef}
+        ref={ref}
+        onClick={handleClick}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         role="button"
         tabIndex={disabled ? -1 : 0}
         style={{ touchAction: 'manipulation', ...props.style }}
