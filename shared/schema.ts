@@ -605,6 +605,62 @@ export const insertFeaturedContentSchema = createInsertSchema(featuredContent).o
   hebrewDate: z.string().optional(),
 });
 
+// Shmiras Halashon - CCHF content for Torah page
+export const shmirasHalashon = pgTable("shmiras_halashon", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(),
+  untilDate: date("until_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content"),
+  audioUrl: text("audio_url"),
+  videoUrl: text("video_url"),
+  imageUrl: text("image_url"),
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
+  footnotes: text("footnotes"),
+  thankYouMessage: text("thank_you_message"),
+  attributionLogoUrl: text("attribution_logo_url"),
+  attributionAboutText: text("attribution_about_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateRangeIdx: index("shmiras_halashon_date_range_idx").on(table.fromDate, table.untilDate),
+}));
+
+export const insertShmirasHalashonSchema = createInsertSchema(shmirasHalashon).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
+});
+
+// Shalom - CCHF content for Torah page
+export const shalomContent = pgTable("shalom_content", {
+  id: serial("id").primaryKey(),
+  fromDate: date("from_date").notNull(),
+  untilDate: date("until_date").notNull(),
+  title: text("title").notNull(),
+  content: text("content"),
+  audioUrl: text("audio_url"),
+  videoUrl: text("video_url"),
+  imageUrl: text("image_url"),
+  speaker: text("speaker"),
+  speakerWebsite: text("speaker_website"),
+  footnotes: text("footnotes"),
+  thankYouMessage: text("thank_you_message"),
+  attributionLogoUrl: text("attribution_logo_url"),
+  attributionAboutText: text("attribution_about_text"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => ({
+  dateRangeIdx: index("shalom_content_date_range_idx").on(table.fromDate, table.untilDate),
+}));
+
+export const insertShalomContentSchema = createInsertSchema(shalomContent).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  hebrewDate: z.string().optional(),
+});
+
 export const insertPirkeiAvotSchema = createInsertSchema(pirkeiAvot).omit({
   id: true,
   createdAt: true,
@@ -748,6 +804,12 @@ export type DailyChizuk = typeof dailyChizuk.$inferSelect;
 export type InsertDailyChizuk = z.infer<typeof insertDailyChizukSchema>;
 export type FeaturedContent = typeof featuredContent.$inferSelect;
 export type InsertFeaturedContent = z.infer<typeof insertFeaturedContentSchema>;
+
+export type ShmirasHalashon = typeof shmirasHalashon.$inferSelect;
+export type InsertShmirasHalashon = z.infer<typeof insertShmirasHalashonSchema>;
+
+export type ShalomContent = typeof shalomContent.$inferSelect;
+export type InsertShalomContent = z.infer<typeof insertShalomContentSchema>;
 
 // Weekly Torah content types
 export type DailyRecipe = typeof dailyRecipes.$inferSelect;
