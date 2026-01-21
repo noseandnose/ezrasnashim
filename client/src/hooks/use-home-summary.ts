@@ -32,6 +32,13 @@ interface TodaysSpecial {
   contentHebrew?: string | null;
   linkTitle?: string | null;
   url?: string | null;
+  // Community Challenge fields
+  challengeType?: string | null; // e.g., 'tehillim', 'nishmas', 'halacha', 'custom'
+  challengeContentId?: number | null; // e.g., psalm number for tehillim
+  targetCount?: number | null; // e.g., 100 for "Say Tehillim 100 times together"
+  currentCount?: number | null; // Tracks community completions
+  pillarType?: string | null; // 'torah' or 'tefilla' - for mitzvah tracking
+  modalName?: string | null; // e.g., 'tehillim', 'nishmas', 'halacha' - for usage tracking
   createdAt?: string | null;
 }
 

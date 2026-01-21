@@ -3320,6 +3320,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Community Challenge - increment completion count
+  app.post("/api/challenge/:id/complete", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid challenge ID" });
+      }
+      
+      const updated = await storage.incrementChallengeCount(id);
+      if (!updated) {
+        return res.status(404).json({ error: "Challenge not found" });
+      }
+      
+      return res.json({
+        success: true,
+        currentCount: updated.currentCount,
+        targetCount: updated.targetCount
+      });
+    } catch (error) {
+      console.error('Error incrementing challenge count:', error);
+      return res.status(500).json({ error: "Failed to update challenge" });
+    }
+  });
+
   // Batched homepage data endpoint - reduces initial load requests
   // Now includes: message, sponsor, todaysSpecial (3 calls → 1)
   app.get("/api/home-summary", async (req, res) => {

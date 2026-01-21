@@ -93,6 +93,7 @@ export interface IStorage {
   // Today's Special methods
   getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined>;
   createTodaysSpecial(special: InsertTodaysSpecial): Promise<TodaysSpecial>;
+  incrementChallengeCount(id: number): Promise<TodaysSpecial | undefined>;
   
   // Gift of Chatzos methods
   getGiftOfChatzosByDayOfWeek(dayOfWeek: number): Promise<GiftOfChatzos | undefined>;
@@ -1604,6 +1605,22 @@ export class DatabaseStorage implements IStorage {
   async createTodaysSpecial(insertSpecial: InsertTodaysSpecial): Promise<TodaysSpecial> {
     const [special] = await db.insert(todaysSpecial).values(insertSpecial).returning();
     return special;
+  }
+
+  async incrementChallengeCount(id: number): Promise<TodaysSpecial | undefined> {
+    try {
+      const [updated] = await db
+        .update(todaysSpecial)
+        .set({
+          currentCount: sql`COALESCE(${todaysSpecial.currentCount}, 0) + 1`
+        })
+        .where(eq(todaysSpecial.id, id))
+        .returning();
+      return updated;
+    } catch (error) {
+      console.error('Failed to increment challenge count:', error);
+      return undefined;
+    }
   }
 
   // Gift of Chatzos methods

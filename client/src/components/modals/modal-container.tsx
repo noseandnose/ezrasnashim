@@ -21,6 +21,7 @@ const AboutModal = lazy(() => import("./about-modal"));
 const SponsorDetailsModal = lazy(() => import("./sponsor-details-modal"));
 const CommunityImpactModal = lazy(() => import("./community-impact-modal").then(m => ({ default: m.CommunityImpactModal })));
 const EventsModal = lazy(() => import("./events-modal").then(m => ({ default: m.EventsModal })));
+const CommunityChallengeModal = lazy(() => import("./community-challenge-modal"));
 
 interface ModalContainerProps {
   onSectionChange?: ((section: any) => void) | undefined;
@@ -65,6 +66,10 @@ export default function ModalContainer({ onSectionChange }: ModalContainerProps)
       
       <Suspense fallback={null}>
         {activeModal === 'events' && <EventsModal isOpen={true} onClose={closeModal} />}
+      </Suspense>
+      
+      <Suspense fallback={null}>
+        {activeModal === 'community-challenge' && <CommunityChallengeModal />}
       </Suspense>
     </>
   );

@@ -137,7 +137,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
     {
       id: 'shmiras-halashon',
       icon: MessageCircle,
-      title: 'Shmiras Halashon',
+      title: 'Shemiras Halashon',
       subtitle: 'CCHF',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -149,7 +149,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       id: 'shalom',
       icon: Heart,
       title: 'Shalom',
-      subtitle: 'CCHF',
+      subtitle: 'Live The Blessing',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
@@ -357,9 +357,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 isError = !!sectionErrors.shalomContent;
                 isLoading = torahLoading;
                 hasContent = !!(shalomContent?.content || shalomContent?.audioUrl || shalomContent?.videoUrl) && !isError;
-                if (hasContent && !isCompleted && shalomContent) {
-                  displaySubtitle = toCamelCase(shalomContent.title || '') || 'CCHF';
-                } else if (isError) {
+                // Keep "Live The Blessing" subtitle - don't override with content title
+                if (isError) {
                   displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';

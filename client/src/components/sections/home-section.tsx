@@ -1,4 +1,4 @@
-import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail } from "lucide-react";
+import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail, ChevronRight, Users } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo, useEffect, useMemo } from "react";
@@ -578,7 +578,13 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             {/* Collapsed/Header Bar */}
             <button
-              onClick={() => setTodaysSpecialExpanded(!todaysSpecialExpanded)}
+              onClick={() => {
+                if (todaysSpecial.challengeType) {
+                  openModal('community-challenge', 'home');
+                } else {
+                  setTodaysSpecialExpanded(!todaysSpecialExpanded);
+                }
+              }}
               className="w-full p-3 text-left hover:bg-white/90 transition-colors"
               data-testid="button-todays-special-toggle"
             >
@@ -604,11 +610,24 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                   {todaysSpecial.subtitle && (
                     <p className="platypi-regular text-xs text-black/70">{replacePlaceholders(todaysSpecial.subtitle)}</p>
                   )}
+                  {/* Challenge progress preview */}
+                  {todaysSpecial.challengeType && (
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Users size={12} className="text-blush" />
+                      <span className="platypi-regular text-xs text-blush">
+                        {(todaysSpecial.currentCount || 0).toLocaleString()} / {(todaysSpecial.targetCount || 100).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 
-                {/* Expand/Collapse indicator */}
+                {/* Expand/Collapse or Open indicator */}
                 <div className="text-black/40">
-                  {todaysSpecialExpanded ? <Minus size={18} /> : <Plus size={18} />}
+                  {todaysSpecial.challengeType ? (
+                    <ChevronRight size={18} />
+                  ) : (
+                    todaysSpecialExpanded ? <Minus size={18} /> : <Plus size={18} />
+                  )}
                 </div>
               </div>
             </button>

@@ -19,6 +19,7 @@ import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
 import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
+import { initResumeManager } from "./lib/resume-manager";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -143,6 +144,11 @@ function Router() {
 }
 
 export default function App() {
+  // Initialize ResumeManager for WebView resume handling
+  useEffect(() => {
+    initResumeManager();
+  }, []);
+  
   // Defer Google Analytics initialization until after first paint
   // This saves ~80-100KB on critical boot path
   useEffect(() => {
