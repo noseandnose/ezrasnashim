@@ -7,7 +7,8 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { formatTextContent } from "@/lib/text-formatter";
 import { useHomeSummary } from "@/hooks/use-home-summary";
-import { Users, Sparkles, Target } from "lucide-react";
+import { Users, Sparkles, Target, Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import axiosClient from "@/lib/axiosClient";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -28,6 +29,7 @@ export default function CommunityChallengeModal() {
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(18);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const isOpen = activeModal === 'community-challenge';
 
@@ -122,6 +124,32 @@ export default function CommunityChallengeModal() {
   }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, closeModal]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
+
+  const handleShare = async () => {
+    const title = challenge?.title || "Community Challenge";
+    const text = `Join me in the ${title}! Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`;
+    const url = window.location.origin;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text, url });
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Share failed:', err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${text}\n${url}`);
+        toast({
+          title: "Copied to clipboard",
+          description: "Share link copied! Send it to a friend.",
+        });
+      } catch (err) {
+        console.error('Copy failed:', err);
+      }
+    }
+  };
 
   const renderContent = () => {
     if (!challenge) return null;
@@ -264,6 +292,14 @@ export default function CommunityChallengeModal() {
                   <Sparkles size={16} />
                 </div>
               )}
+              
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center gap-2 mt-3 w-full py-2 bg-white/60 rounded-xl hover:bg-white/80 transition-colors"
+              >
+                <Share2 size={16} className="text-blush" />
+                <span className="platypi-medium text-sm text-black/70">Share with a Friend</span>
+              </button>
             </div>
           )}
 
