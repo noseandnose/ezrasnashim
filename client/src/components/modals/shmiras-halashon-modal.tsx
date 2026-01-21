@@ -61,7 +61,7 @@ export default function ShmirasHalashonModal() {
     <FullscreenModal
       isOpen={isOpen}
       onClose={closeModal}
-      title="Shmiras Halashon"
+      title="Shemiras Halashon"
     >
       {isLoading ? (
         <div className="text-center py-8">

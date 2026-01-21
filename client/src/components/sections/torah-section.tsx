@@ -137,7 +137,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
     {
       id: 'shmiras-halashon',
       icon: MessageCircle,
-      title: 'Shmiras Halashon',
+      title: 'Shemiras Halashon',
       subtitle: 'CCHF',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
@@ -149,7 +149,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       id: 'shalom',
       icon: Heart,
       title: 'Shalom',
-      subtitle: 'CCHF',
+      subtitle: 'Master Your Words',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
