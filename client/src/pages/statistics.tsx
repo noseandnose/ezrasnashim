@@ -223,7 +223,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   };
 
   const getTorahTotal = (modalCompletions: Record<string, number>) => {
-    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge'];
+    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge', 'shalom', 'shmiras-halashon'];
     return torahKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
   };
 
@@ -268,6 +268,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     chizuk: "Chizuk",
     emuna: "Emuna", 
     halacha: "Halacha",
+    shalom: "Shalom",
+    "shmiras-halashon": "Shemiras Halashon",
     "featured-content": "Featured Content",
     featured: "Featured",
     "parsha-vort": "Parsha Shiur",
@@ -312,6 +314,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     emuna: Shield,
     "gems-of-gratitude": Sparkles,
     halacha: Scale,
+    shalom: Heart,
+    "shmiras-halashon": ScrollText,
     "featured-content": Megaphone,
     featured: Megaphone,
     "pirkei-avot": Quote,
