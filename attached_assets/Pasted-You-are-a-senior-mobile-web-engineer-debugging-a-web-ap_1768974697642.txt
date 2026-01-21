@@ -1,0 +1,91 @@
+You are a senior mobile-web engineer debugging a web app running inside a FlutterFlow WebView.
+
+Key symptom (IMPORTANT):
+- After background → foreground, the UI still scrolls and the user can navigate back, and tapped items often show a selected/pressed visual state — but nothing opens (no navigation / no modal).
+- A forced page refresh on foreground currently “fixes” it, but it’s annoying. We want to remove that refresh workaround.
+- Previous handler changes caused “too touch sensitive” accidental activation during scroll, so the final solution must be scroll-safe.
+
+Goal:
+Fix the root cause so taps reliably activate actions after resume WITHOUT refreshing, WITHOUT accidental taps during scroll, WITHOUT double-fires, and WITHOUT freezes.
+
+Constraints:
+- I cannot rely on console logs / debug mode because the bug only happens inside FlutterFlow WebView for real users.
+- Minimal behavior changes. Preserve existing UX.
+
+Interpretation of symptom:
+Because pressed state appears but action doesn’t occur, investigate issues where:
+1) pointerdown happens but pointerup/click doesn’t (WebView resume quirk)
+2) the action handler runs but navigation is blocked (router/state lock)
+3) an invisible overlay/backdrop is intercepting “up/click” or preventing default activation
+4) event listeners are detached or stale after resume (react hydration / listeners lost / duplicate handlers)
+
+PHASE 1 — Remove “refresh on resume” by implementing proper resume rehydration
+Implement a single global ResumeManager at app root (idempotent, runs on visibilitychange/pageshow/focus when the document becomes visible):
+A) Clear interaction state:
+   - Clear any global “isPressing”, “dragging”, “scrolling intent” flags
+   - Release pointer capture if any component uses it
+B) Fix DOM/CSS blockers:
+   - Ensure body/html pointer-events is not set to none
+   - Ensure any overlay/backdrop that is not visibly open is either unmounted OR has pointer-events:none
+   - Ensure scroll-lock (overflow:hidden/position:fixed) is consistent with actual modal state
+C) Fix “router blocked” situations:
+   - If the app uses a router/navigation library, ensure it is not left in a “transition pending” or “navigation locked” state after resume.
+   - If there is any global “loading” gate that blocks navigation (e.g., auth re-check, data rehydrate), ensure it completes or fails fast on resume.
+D) Re-arm event listeners safely:
+   - If any events are attached via addEventListener in effects, ensure they are attached exactly once and not lost after resume.
+   - Guard against duplicate attachments (a common source of double presses).
+
+PHASE 2 — Fix the “pressed but no open” tap lifecycle issue
+Audit tappables and determine where the activation is tied to pointerup/click:
+- If tappables use pointerdown to set active styling and pointerup/click to activate:
+  - Ensure pointerup/click is reliably reached after resume.
+  - If WebView fails to emit pointerup/click sometimes after resume, move activation to:
+    - pointerup (preferred) with scroll-guard, OR
+    - click on real <button> / <a> elements where stable
+  - Do NOT activate on pointerdown (causes scroll accidental activation).
+
+PHASE 3 — Scroll-safe activation (avoid “too touch sensitive”)
+Implement a reusable “ScrollIntentGuard” utility (no logging needed):
+- Record start (x,y,t) on pointerdown/touchstart
+- If movement > 10px OR the nearest scrollable parent scrolls before release, treat as scroll and CANCEL activation
+- Only activate on pointerup/click when guard says it was a real tap
+Apply this guard to:
+- Cards/list rows/tappable containers in scroll views (highest priority)
+- Any “tap to open” item that users may press while scrolling
+
+PHASE 4 — Deterministic double-fire prevention
+Fix:
+- Elements with both pointer and click activating the same action
+- Nested tappables where parent + child both fire
+Rule:
+- For each interactive element, there must be exactly ONE activation path.
+- If pointer events are used, suppress synthetic click only when needed (or implement a per-interaction “runOnce” guard keyed by timestamp/pointerId).
+- Use stopPropagation for inner controls only where required.
+
+PHASE 5 — Modal/backdrop correctness (common dead-tap cause)
+Audit all modals/drawers/backdrops:
+- Hidden backdrops must not capture taps (pointer-events:none when closed).
+- Ensure close/open state is driven by a single source of truth.
+- On resume, if backdrop exists but modal is not visible, forcibly disable its pointer events or unmount.
+
+PHASE 6 — Apply fixes in priority order with minimal diffs
+1) ResumeManager (root)
+2) Backdrops/overlays cleanup
+3) ScrollIntentGuard on scrollable tappables
+4) Activation handler fixes (prefer pointerup for tappable containers; click for real buttons)
+5) Double-fire cleanup
+
+Deliverables:
+1) A brief summary explaining:
+   - Why pressed state happened without activation
+   - What ResumeManager resets (exact state/CSS)
+   - Where ScrollIntentGuard was applied and threshold used
+   - How you prevented double fire
+2) File-by-file list of changes
+
+Manual verification (no logs):
+- In FlutterFlow WebView:
+  - Tap items after resume (should open every time)
+  - Aggressively scroll lists and release on items (should NOT open)
+  - Open/close modals then background/foreground (taps still work; no invisible blockers)
+  - Ensure no refresh-on-resume is needed

@@ -2,48 +2,11 @@ import { forwardRef, useRef, useCallback } from 'react';
 
 const SCROLL_THRESHOLD = 10;
 const TAP_DEBOUNCE_MS = 300;
-const BACKGROUND_THRESHOLD_MS = 5000; // Refresh if in background for more than 5 seconds
 
 interface TapButtonProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, 'onClick'> {
   onTap: () => void;
   children: React.ReactNode;
 }
-
-// Global background time tracking
-let lastHiddenTime = 0;
-
-function setupGlobalResumeHandler() {
-  if (typeof window === 'undefined') return;
-  
-  // Only set up once
-  if ((window as any).__resumeHandlerSetup) return;
-  (window as any).__resumeHandlerSetup = true;
-
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') {
-      lastHiddenTime = Date.now();
-    } else if (document.visibilityState === 'visible') {
-      const timeInBackground = Date.now() - lastHiddenTime;
-      if (lastHiddenTime > 0 && timeInBackground > BACKGROUND_THRESHOLD_MS) {
-        console.log('[TapButton] App resumed after', Math.round(timeInBackground / 1000), 'seconds - refreshing page');
-        window.location.reload();
-      }
-    }
-  };
-
-  const handlePageShow = (e: PageTransitionEvent) => {
-    if (e.persisted) {
-      console.log('[TapButton] Page restored from bfcache - refreshing');
-      window.location.reload();
-    }
-  };
-
-  document.addEventListener('visibilitychange', handleVisibilityChange);
-  window.addEventListener('pageshow', handlePageShow);
-}
-
-// Initialize global handler
-setupGlobalResumeHandler();
 
 export const TapButton = forwardRef<HTMLButtonElement, TapButtonProps>(
   ({ onTap, children, disabled, ...props }, ref) => {
