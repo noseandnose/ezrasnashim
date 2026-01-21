@@ -8,7 +8,6 @@ import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { AttributionSection } from "@/components/ui/attribution-section";
 import { formatTextContent } from "@/lib/text-formatter";
-import { Play } from "lucide-react";
 
 export default function ShalomModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
@@ -16,7 +15,6 @@ export default function ShalomModal() {
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
-  const [videoStarted, setVideoStarted] = useState(false);
 
   const isOpen = activeModal === 'shalom';
   const isCompleted = isModalComplete('shalom');
@@ -117,24 +115,13 @@ export default function ShalomModal() {
           )}
 
           {content.videoUrl && (
-            <div className="rounded-xl overflow-hidden aspect-video relative bg-black">
-              {!videoStarted ? (
-                <button
-                  onClick={() => setVideoStarted(true)}
-                  className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-black/20 to-black/40 hover:from-black/30 hover:to-black/50 transition-all group"
-                >
-                  <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <Play className="w-10 h-10 text-blush ml-1" fill="currentColor" />
-                  </div>
-                </button>
-              ) : (
-                <iframe
-                  src={`${content.videoUrl}${content.videoUrl.includes('?') ? '&' : '?'}autoplay=1`}
-                  className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              )}
+            <div className="rounded-xl overflow-hidden aspect-video">
+              <iframe
+                src={content.videoUrl}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
             </div>
           )}
 
