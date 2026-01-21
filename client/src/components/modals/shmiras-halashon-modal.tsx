@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -17,8 +17,26 @@ export default function ShmirasHalashonModal() {
   const { trackModalComplete } = useTrackModalComplete();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [videoStarted, setVideoStarted] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const isOpen = activeModal === 'shmiras-halashon';
+
+  // Request fullscreen when video starts
+  useEffect(() => {
+    if (videoStarted && iframeRef.current) {
+      const iframe = iframeRef.current;
+      // Small delay to let iframe load
+      setTimeout(() => {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen().catch(() => {});
+        } else if ((iframe as any).webkitRequestFullscreen) {
+          (iframe as any).webkitRequestFullscreen();
+        } else if ((iframe as any).webkitEnterFullscreen) {
+          (iframe as any).webkitEnterFullscreen();
+        }
+      }, 100);
+    }
+  }, [videoStarted]);
   const isCompleted = isModalComplete('shmiras-halashon');
 
   const today = new Date().toISOString().split('T')[0];
@@ -129,9 +147,10 @@ export default function ShmirasHalashonModal() {
                 </button>
               ) : (
                 <iframe
+                  ref={iframeRef}
                   src={`${content.videoUrl}${content.videoUrl.includes('?') ? '&' : '?'}autoplay=1`}
                   className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                   allowFullScreen
                 />
               )}
