@@ -3,6 +3,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
+import VideoPlayer from "@/components/video-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
@@ -115,14 +116,7 @@ export default function ShalomModal() {
           )}
 
           {content.videoUrl && (
-            <div className="rounded-xl overflow-hidden aspect-video">
-              <iframe
-                src={content.videoUrl}
-                className="w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
+            <VideoPlayer videoUrl={content.videoUrl} title={content.title || 'Shalom'} />
           )}
 
           {content.content && (
