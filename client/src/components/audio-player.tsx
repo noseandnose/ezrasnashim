@@ -17,6 +17,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const [audioError, setAudioError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
+  const [hasTriggeredCompletion, setHasTriggeredCompletion] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
 
@@ -91,8 +92,9 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       setProgress(0);
       setCurrentTime("0:00");
       
-      // Call the completion callback if provided
-      if (onAudioEnded) {
+      // Call the completion callback if provided (and not already triggered by progress check)
+      if (onAudioEnded && !hasTriggeredCompletion) {
+        setHasTriggeredCompletion(true);
         onAudioEnded();
       }
     };
@@ -102,6 +104,12 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         const progressPercent = (audio.currentTime / audio.duration) * 100;
         setProgress(progressPercent);
         setCurrentTime(formatTime(Math.floor(audio.currentTime)));
+        
+        // Fallback: trigger completion when audio reaches 98%+ (in case 'ended' event doesn't fire)
+        if (progressPercent >= 98 && !hasTriggeredCompletion && onAudioEnded) {
+          setHasTriggeredCompletion(true);
+          onAudioEnded();
+        }
       }
     };
 
@@ -142,7 +150,7 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [audioUrl]);
+  }, [audioUrl, onAudioEnded, hasTriggeredCompletion]);
 
   useEffect(() => {
     if (audioRef.current) {

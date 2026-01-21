@@ -149,7 +149,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       id: 'shalom',
       icon: Heart,
       title: 'Shalom',
-      subtitle: 'Master Your Words',
+      subtitle: 'Live The Blessing',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
