@@ -357,9 +357,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 isError = !!sectionErrors.shalomContent;
                 isLoading = torahLoading;
                 hasContent = !!(shalomContent?.content || shalomContent?.audioUrl || shalomContent?.videoUrl) && !isError;
-                if (hasContent && !isCompleted && shalomContent) {
-                  displaySubtitle = toCamelCase(shalomContent.title || '') || 'CCHF';
-                } else if (isError) {
+                // Keep "Live The Blessing" subtitle - don't override with content title
+                if (isError) {
                   displaySubtitle = 'Unavailable';
                 } else if (isLoading) {
                   displaySubtitle = 'Loading...';
