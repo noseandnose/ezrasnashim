@@ -139,13 +139,13 @@ export default function CommunityChallengeModal() {
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
   const handleShare = async () => {
-    const title = challenge?.title || "Community Challenge";
-    const text = `Join me in the ${title}! Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`;
-    const url = window.location.origin;
+    const challengeName = challenge?.title || "Community Challenge";
+    const text = `Join us in the Ezras Nashim Community Challenge! ${challengeName}. Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`;
+    const url = "https://ezrasnashim.app/";
 
     if (navigator.share) {
       try {
-        await navigator.share({ title, text, url });
+        await navigator.share({ title: "Ezras Nashim Community Challenge", text, url });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           console.error('Share failed:', err);
