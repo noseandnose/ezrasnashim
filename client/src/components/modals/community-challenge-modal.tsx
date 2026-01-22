@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -21,6 +21,7 @@ interface TehillimText {
 export default function CommunityChallengeModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -127,6 +128,7 @@ export default function CommunityChallengeModal() {
       
       if (modalName) {
         trackModalComplete(modalName);
+        markModalComplete(modalName);
       }
       
       if (pillarType) {
@@ -151,7 +153,7 @@ export default function CommunityChallengeModal() {
       setLocalCount(prev => prev !== null ? prev - 1 : serverCount);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, serverCount]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, trackEvent, serverCount]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
