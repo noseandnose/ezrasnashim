@@ -291,13 +291,13 @@ export default function CommunityChallengeModal() {
                 </div>
               </div>
               
-              <div className="h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+              <div className="h-4 rounded-full overflow-hidden border border-blush/30 relative">
                 <div 
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ 
-                    width: `${progressPercent}%`,
-                    background: 'linear-gradient(90deg, #F8B4C4 0%, #8BC34A 100%)'
-                  }}
+                  className="absolute inset-0 bg-gradient-to-r from-blush to-lavender"
+                />
+                <div 
+                  className="absolute inset-y-0 left-0 bg-sage rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
                 />
               </div>
               
@@ -308,6 +308,14 @@ export default function CommunityChallengeModal() {
                   <Sparkles size={16} />
                 </div>
               )}
+            </div>
+          )}
+
+          {challenge?.challengeMessage && (
+            <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-xl p-4 border border-blush/20">
+              <p className="platypi-regular text-center text-black/80 text-sm leading-relaxed">
+                {challenge.challengeMessage}
+              </p>
             </div>
           )}
 

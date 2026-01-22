@@ -578,14 +578,22 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             {/* Collapsed/Header Bar */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (todaysSpecial.challengeType) {
                   openModal('community-challenge', 'home');
                 } else {
                   setTodaysSpecialExpanded(!todaysSpecialExpanded);
                 }
               }}
-              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              onTouchEnd={(e) => {
+                if (todaysSpecial.challengeType) {
+                  e.preventDefault();
+                  openModal('community-challenge', 'home');
+                }
+              }}
+              className="w-full p-3 text-left hover:bg-white/90 transition-colors active:bg-white/95"
               data-testid="button-todays-special-toggle"
             >
               <div className="flex items-center gap-3">
