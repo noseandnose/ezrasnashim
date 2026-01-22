@@ -26,6 +26,7 @@ export default function CommunityChallengeModal() {
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [hasCompletedThisSession, setHasCompletedThisSession] = useState(false);
+  const [localCount, setLocalCount] = useState<number | null>(null);
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(18);
   const queryClient = useQueryClient();
@@ -41,7 +42,8 @@ export default function CommunityChallengeModal() {
   const pillarType = challenge?.pillarType as 'torah' | 'tefilla' | undefined;
   const modalName = challenge?.modalName || 'community-challenge';
   
-  const currentCount = challenge?.currentCount || 0;
+  const serverCount = challenge?.currentCount || 0;
+  const currentCount = localCount !== null ? localCount : serverCount;
   const targetCount = challenge?.targetCount || 100;
   const progressPercent = Math.min((currentCount / targetCount) * 100, 100);
   const isGoalReached = currentCount >= targetCount;
@@ -93,6 +95,8 @@ export default function CommunityChallengeModal() {
     if (isCompleting || !challenge) return;
     setIsCompleting(true);
     
+    setLocalCount(prev => (prev !== null ? prev : serverCount) + 1);
+    
     try {
       if (isChallenge) {
         await completeMutation.mutateAsync();
@@ -119,7 +123,7 @@ export default function CommunityChallengeModal() {
       setShowHeartExplosion(true);
       setHasCompletedThisSession(true);
       
-      await refetchHomeSummary();
+      queryClient.invalidateQueries({ queryKey: ['/api/home-summary'] });
       
       setTimeout(() => {
         setShowHeartExplosion(false);
@@ -127,9 +131,10 @@ export default function CommunityChallengeModal() {
       }, 1000);
     } catch (error) {
       console.error('Failed to complete challenge:', error);
+      setLocalCount(prev => prev !== null ? prev - 1 : serverCount);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, refetchHomeSummary]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, serverCount, queryClient]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
