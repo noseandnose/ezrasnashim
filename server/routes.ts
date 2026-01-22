@@ -3333,6 +3333,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Challenge not found" });
       }
       
+      // Track analytics for challenge completion
+      const today = new Date().toISOString().split('T')[0];
+      
+      // Track tehillim_complete if it's a tehillim challenge
+      if (updated.challengeType === 'tehillim') {
+        await storage.trackEvent({
+          eventType: 'tehillim_complete',
+          eventData: {
+            perekNumber: updated.challengeContentId,
+            source: 'community-challenge',
+            challengeId: id
+          },
+          sessionId: null,
+          analyticsDate: today
+        });
+      }
+      
+      // Track feature_usage for the challenge type
+      await storage.trackEvent({
+        eventType: 'feature_usage',
+        eventData: {
+          feature: updated.challengeType === 'tehillim' ? 'tehillim' : updated.challengeType,
+          category: 'community-challenge',
+          challengeId: id
+        },
+        sessionId: null,
+        analyticsDate: today
+      });
+      
       return res.json({
         success: true,
         currentCount: updated.currentCount,
