@@ -121,12 +121,8 @@ export default function CommunityChallengeModal() {
         completeTask(pillarType);
       }
       
-      if (challenge.challengeType === 'tehillim' && challenge.challengeContentId) {
-        trackEvent("tehillim_complete", { 
-          psalmNumber: challenge.challengeContentId,
-          source: 'community-challenge'
-        });
-        
+      // Dispatch event for UI refresh (server handles analytics tracking)
+      if (challenge.challengeType === 'tehillim') {
         const refreshEvent = new CustomEvent('tehillimCompleted');
         window.dispatchEvent(refreshEvent);
       }
