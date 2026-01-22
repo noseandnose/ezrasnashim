@@ -293,8 +293,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
   
-  // Check if Today's Special has content
-  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
+  // Check if Today's Special has content (including challenges which load content from challengeContentId)
+  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew || todaysSpecial.challengeType);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
   
   // Memoized placeholder replacement helper
