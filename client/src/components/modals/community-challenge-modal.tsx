@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore } from "@/lib/types";
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -19,13 +19,13 @@ interface TehillimText {
 }
 
 export default function CommunityChallengeModal() {
-  const { activeModal, closeModal, openModal } = useModalStore();
-  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { activeModal, closeModal } = useModalStore();
+  const { completeTask } = useDailyCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
+  const [hasCompletedThisSession, setHasCompletedThisSession] = useState(false);
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(18);
   const queryClient = useQueryClient();
@@ -117,22 +117,19 @@ export default function CommunityChallengeModal() {
       }
       
       setShowHeartExplosion(true);
+      setHasCompletedThisSession(true);
+      
+      await refetchHomeSummary();
       
       setTimeout(() => {
         setShowHeartExplosion(false);
         setIsCompleting(false);
-        
-        if (pillarType && checkAndShowCongratulations(pillarType)) {
-          openModal('congratulations', pillarType);
-        } else {
-          closeModal();
-        }
       }, 1000);
     } catch (error) {
       console.error('Failed to complete challenge:', error);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, checkAndShowCongratulations, openModal, closeModal]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, refetchHomeSummary]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
@@ -321,10 +318,10 @@ export default function CommunityChallengeModal() {
             </div>
           )}
 
-          {challenge?.challengeMessage && (
+          {(challenge as any)?.challengeMessage && (
             <div className="bg-gradient-to-r from-blush/10 to-lavender/10 rounded-xl p-4 border border-blush/20">
               <p className="platypi-regular text-center text-black/80 text-sm leading-relaxed">
-                {challenge.challengeMessage}
+                {(challenge as any).challengeMessage}
               </p>
             </div>
           )}
@@ -346,9 +343,13 @@ export default function CommunityChallengeModal() {
             <Button 
               onClick={handleComplete}
               disabled={isCompleting}
-              className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0 hover:scale-105 transition-transform"
+              className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 transition-all duration-300 ${
+                hasCompletedThisSession 
+                  ? 'bg-sage text-white hover:bg-sage/90' 
+                  : 'bg-gradient-feminine text-white hover:scale-105'
+              }`}
             >
-              {isCompleting ? 'Completing...' : 'Complete'}
+              {isCompleting ? 'Completing...' : hasCompletedThisSession ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
