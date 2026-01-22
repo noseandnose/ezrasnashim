@@ -19,8 +19,8 @@ interface TehillimText {
 }
 
 export default function CommunityChallengeModal() {
-  const { activeModal, closeModal } = useModalStore();
-  const { completeTask } = useDailyCompletionStore();
+  const { activeModal, closeModal, openModal } = useModalStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
@@ -53,7 +53,10 @@ export default function CommunityChallengeModal() {
     return undefined;
   };
   const pillarType = getPillarType();
-  const modalName = challenge?.modalName || 'community-challenge';
+  // For tehillim challenges, use the standard individual-tehillim-{perek} format for consistent flower counting
+  const modalName = challenge?.challengeType === 'tehillim' && challenge?.challengeContentId
+    ? `individual-tehillim-${challenge.challengeContentId}`
+    : (challenge?.modalName || 'community-challenge');
   
   const serverCount = challenge?.currentCount || 0;
   const currentCount = localCount !== null ? localCount : serverCount;
@@ -147,13 +150,20 @@ export default function CommunityChallengeModal() {
       setTimeout(() => {
         setShowHeartExplosion(false);
         setIsCompleting(false);
+        
+        // Check if all 3 pillars are complete and show congratulations
+        if (pillarType && (pillarType === 'torah' || pillarType === 'tefilla')) {
+          if (checkAndShowCongratulations(pillarType)) {
+            openModal('congratulations', pillarType);
+          }
+        }
       }, 1000);
     } catch (error) {
       console.error('Failed to complete challenge:', error);
       setLocalCount(prev => prev !== null ? prev - 1 : serverCount);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, trackEvent, serverCount]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, trackEvent, serverCount]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
