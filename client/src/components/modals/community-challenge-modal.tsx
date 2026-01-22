@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useModalStore, useDailyCompletionStore } from "@/lib/types";
+import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from "@/lib/types";
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
@@ -21,6 +21,7 @@ interface TehillimText {
 export default function CommunityChallengeModal() {
   const { activeModal, closeModal } = useModalStore();
   const { completeTask } = useDailyCompletionStore();
+  const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
@@ -39,7 +40,19 @@ export default function CommunityChallengeModal() {
 
   const isChallenge = !!challenge?.challengeType;
   const challengeId = challenge?.id;
-  const pillarType = challenge?.pillarType as 'torah' | 'tefilla' | undefined;
+  
+  // Determine pillar type - use database value if set, otherwise default based on challenge type
+  const getPillarType = (): 'torah' | 'tefilla' | undefined => {
+    if (challenge?.pillarType) {
+      return challenge.pillarType as 'torah' | 'tefilla';
+    }
+    // Default mapping for challenge types without explicit pillar
+    const challengeType = challenge?.challengeType;
+    if (challengeType === 'tehillim') return 'tefilla';
+    if (challengeType === 'halacha' || challengeType === 'shalom' || challengeType === 'shmiras-halashon') return 'torah';
+    return undefined;
+  };
+  const pillarType = getPillarType();
   const modalName = challenge?.modalName || 'community-challenge';
   
   const serverCount = challenge?.currentCount || 0;
@@ -115,18 +128,15 @@ export default function CommunityChallengeModal() {
       
       if (modalName) {
         trackModalComplete(modalName);
+        markModalComplete(modalName);
       }
       
       if (pillarType) {
         completeTask(pillarType);
       }
       
-      if (challenge.challengeType === 'tehillim' && challenge.challengeContentId) {
-        trackEvent("tehillim_complete", { 
-          psalmNumber: challenge.challengeContentId,
-          source: 'community-challenge'
-        });
-        
+      // Dispatch event for UI refresh (server handles analytics tracking)
+      if (challenge.challengeType === 'tehillim') {
         const refreshEvent = new CustomEvent('tehillimCompleted');
         window.dispatchEvent(refreshEvent);
       }
@@ -143,7 +153,7 @@ export default function CommunityChallengeModal() {
       setLocalCount(prev => prev !== null ? prev - 1 : serverCount);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, serverCount]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, trackEvent, serverCount]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 

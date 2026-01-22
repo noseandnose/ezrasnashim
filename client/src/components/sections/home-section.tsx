@@ -120,6 +120,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     // Tefilla repeatables - matches what's stored locally via markModalComplete:
     // global-tehillim-chain (new aligned key), tehillim-text (legacy), individual-tehillim-X,
     // chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X, brocha-X, womens-prayer-X
+    // Also 'tehillim' for community challenge tehillim completions
     if (todaysData.repeatables) {
       Object.entries(todaysData.repeatables).forEach(([key, value]) => {
         if (key.startsWith('individual-tehillim-') || 
@@ -128,6 +129,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             key.startsWith('womens-prayer-') ||
             key === 'global-tehillim-chain' ||  // New aligned identifier
             key === 'tehillim-text' ||  // Legacy identifier for backward compatibility
+            key === 'tehillim' ||  // Community challenge tehillim
             key.startsWith('meditation-')) {
           count += value;
         }
@@ -152,6 +154,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     
     let count = 0;
     // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort, gems-of-gratitude, torah-challenge, torah-class
+    // Also includes community challenge modals: shalom, shmiras-halashon, library
     // All Torah items are repeatables (not in SINGLE_COMPLETION_PRAYERS set)
     if (todaysData.repeatables) {
       count += todaysData.repeatables['halacha'] || 0;
@@ -163,6 +166,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       count += todaysData.repeatables['gems-of-gratitude'] || 0;
       count += todaysData.repeatables['torah-challenge'] || 0;
       count += todaysData.repeatables['torah-class'] || 0;
+      // Community challenge modals that award Torah flowers
+      count += todaysData.repeatables['shalom'] || 0;
+      count += todaysData.repeatables['shmiras-halashon'] || 0;
+      count += todaysData.repeatables['library'] || 0;
     }
     return count;
   }, [completedModals]);
