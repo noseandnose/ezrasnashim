@@ -2770,12 +2770,13 @@ export class DatabaseStorage implements IStorage {
       if (torahActs.includes(modalType) || tefillaActs.includes(modalType) || tzedakaActs.includes(modalType) || lifeActs.includes(modalType)) {
         totalActs += count;
       }
-      // Also count individual tehillim, chain tehillim (with psalm number), womens prayers, and individual brochas
+      // Also count individual tehillim, chain tehillim (with psalm number), womens prayers, individual brochas, and library classes
       if (
         modalType.startsWith('individual-tehillim-') ||
         modalType.startsWith('chain-tehillim-') ||  // Personal chain tehillim completions
         modalType.startsWith('womens-prayer-') ||
-        modalType.startsWith('brocha-')  // Count individual brochas like Asher Yatzar
+        modalType.startsWith('brocha-') ||  // Count individual brochas like Asher Yatzar
+        modalType.startsWith('Library - ')  // Count library/speaker classes
       ) {
         totalActs += count;
       }

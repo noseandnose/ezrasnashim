@@ -223,7 +223,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   };
 
   const getTorahTotal = (modalCompletions: Record<string, number>) => {
-    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge', 'shalom', 'shmiras-halashon'];
+    const torahKeys = ['chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-challenge', 'shalom', 'shmiras-halashon', 'torah-class', 'library'];
     return torahKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
   };
 
@@ -276,6 +276,9 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "pirkei-avot": "Pirkei Avot",
     "gems-of-gratitude": "Gems of Gratitude",
     "torah-challenge": "Bitachon Challenge",
+    "torah-class": "Torah Class",
+    "library": "Library Classes",
+    "gave-elsewhere": "Tzedaka (External)",
     recipe: "Daily Recipe",
     inspiration: "Creative Jewish Living",
     "sponsor-day": "Day Sponsorship",
@@ -320,6 +323,9 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     featured: Megaphone,
     "pirkei-avot": Quote,
     "torah-challenge": Trophy,
+    "torah-class": BookOpen,
+    "library": BookOpen,
+    "gave-elsewhere": HandCoins,
     recipe: Utensils,
     inspiration: Palette,
     "sponsor-day": Trophy,
@@ -339,6 +345,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     let tehillimChainsTotal = 0;
     let womensPrayerTotal = 0;
     let brochasTotal = 0;
+    let libraryTotal = 0;
 
     Object.entries(modalCompletions).forEach(([modalType, count]) => {
       if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim') {
@@ -352,6 +359,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
       } else if (modalType.startsWith('brocha-')) {
         brochasTotal += (count as number) || 0;
       } else if (modalType.startsWith('meditation-') || modalType === 'meditation') {
+      } else if (modalType.startsWith('Library - ')) {
+        libraryTotal += (count as number) || 0;
       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
         processedEntries.push([modalType, count as number]);
       }
@@ -371,6 +380,19 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     
     if (brochasTotal > 0) {
       processedEntries.push(['brochas', brochasTotal]);
+    }
+
+    if (libraryTotal > 0) {
+      processedEntries.push(['library', libraryTotal]);
+    }
+
+    // Add gave-elsewhere tzedaka from gaveElsewhereCount
+    const gaveElsewhereCount = selectedPeriod === 'today'
+      ? (currentData as any)?.gaveElsewhereCount || 0
+      : (currentData as any)?.totalGaveElsewhereCount || 0;
+    
+    if (gaveElsewhereCount > 0) {
+      processedEntries.push(['gave-elsewhere', gaveElsewhereCount]);
     }
 
     const tzedakaActs = selectedPeriod === 'today' 

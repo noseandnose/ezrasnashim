@@ -292,9 +292,10 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
   const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
   const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
+  const [challengeLoading, setChallengeLoading] = useState(false);
   
-  // Check if Today's Special has content
-  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew);
+  // Check if Today's Special has content (including challenges which load content from challengeContentId)
+  const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew || todaysSpecial.challengeType);
   const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
   
   // Memoized placeholder replacement helper
@@ -578,14 +579,21 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           >
             {/* Collapsed/Header Bar */}
             <button
-              onClick={() => {
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (todaysSpecial.challengeType) {
+                  setChallengeLoading(true);
                   openModal('community-challenge', 'home');
+                  setTimeout(() => setChallengeLoading(false), 500);
                 } else {
                   setTodaysSpecialExpanded(!todaysSpecialExpanded);
                 }
               }}
-              className="w-full p-3 text-left hover:bg-white/90 transition-colors"
+              disabled={challengeLoading}
+              className={`w-full p-3 text-left transition-all active:scale-[0.98] ${
+                challengeLoading ? 'opacity-70' : 'hover:bg-white/90'
+              }`}
               data-testid="button-todays-special-toggle"
             >
               <div className="flex items-center gap-3">
@@ -624,7 +632,11 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 {/* Expand/Collapse or Open indicator */}
                 <div className="text-black/40">
                   {todaysSpecial.challengeType ? (
-                    <ChevronRight size={18} />
+                    challengeLoading ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-blush border-t-transparent" />
+                    ) : (
+                      <ChevronRight size={18} />
+                    )
                   ) : (
                     todaysSpecialExpanded ? <Minus size={18} /> : <Plus size={18} />
                   )}

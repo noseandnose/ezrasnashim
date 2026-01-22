@@ -423,6 +423,7 @@ export const todaysSpecial = pgTable("todays_special", {
   currentCount: integer("current_count").default(0), // Tracks community completions
   pillarType: text("pillar_type"), // 'torah' or 'tefilla' - for mitzvah tracking
   modalName: text("modal_name"), // e.g., 'tehillim', 'nishmas', 'halacha' - for usage tracking
+  challengeMessage: text("challenge_message"), // Optional message to display between progress and content
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   dateRangeIdx: index("todays_special_date_range_idx").on(table.fromDate, table.untilDate),
