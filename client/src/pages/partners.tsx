@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 import { useLocationStore } from "@/hooks/use-jewish-times";
 import axiosClient from "@/lib/axiosClient";
@@ -22,6 +22,7 @@ type TabType = "deals" | "resources";
 
 export default function Partners() {
   const [activeTab, setActiveTab] = useState<TabType>("deals");
+  const [loadingPartnerId, setLoadingPartnerId] = useState<number | null>(null);
   const { coordinates } = useLocationStore();
 
   const { data: partners, isLoading } = useQuery<Partner[]>({
@@ -39,8 +40,10 @@ export default function Partners() {
 
   const filteredPartners = partners?.filter(p => p.type === (activeTab === "deals" ? "deal" : "resource")) || [];
 
-  const handleClick = (linkUrl: string) => {
+  const handleClick = (partnerId: number, linkUrl: string) => {
+    setLoadingPartnerId(partnerId);
     window.open(linkUrl, "_blank", "noopener,noreferrer");
+    setTimeout(() => setLoadingPartnerId(null), 1000);
   };
 
   return (
@@ -94,32 +97,41 @@ export default function Partners() {
             </p>
           </div>
         ) : (
-          filteredPartners.map((partner) => (
-            <TapDiv
-              key={partner.id}
-              className="bg-white rounded-2xl p-4 cursor-pointer shadow-sm border border-blush/10
-                         hover:shadow-md transition-shadow duration-200"
-              onTap={() => handleClick(partner.linkUrl)}
-              data-testid={`partner-card-${partner.id}`}
-            >
-              <div className="flex items-center gap-4">
-                <img
-                  src={partner.logoUrl}
-                  alt={partner.title}
-                  className="w-14 h-14 min-w-14 flex-shrink-0 rounded-xl object-cover border-2 border-blush/10 shadow-sm"
-                />
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-base platypi-bold text-black leading-tight truncate">
-                    {partner.title}
-                  </h3>
-                  <p className="text-sm text-black/60 mt-1 line-clamp-2">
-                    {partner.subtitle}
-                  </p>
+          filteredPartners.map((partner) => {
+            const isLoading = loadingPartnerId === partner.id;
+            return (
+              <TapDiv
+                key={partner.id}
+                className={`bg-white rounded-2xl p-4 cursor-pointer shadow-sm border border-blush/10
+                           transition-all duration-200 active:scale-[0.98] ${
+                             isLoading ? 'opacity-70' : 'hover:shadow-md'
+                           }`}
+                onTap={() => !isLoading && handleClick(partner.id, partner.linkUrl)}
+                data-testid={`partner-card-${partner.id}`}
+              >
+                <div className="flex items-center gap-4">
+                  <img
+                    src={partner.logoUrl}
+                    alt={partner.title}
+                    className="w-14 h-14 min-w-14 flex-shrink-0 rounded-xl object-cover border-2 border-blush/10 shadow-sm"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base platypi-bold text-black leading-tight truncate">
+                      {partner.title}
+                    </h3>
+                    <p className="text-sm text-black/60 mt-1 line-clamp-2">
+                      {partner.subtitle}
+                    </p>
+                  </div>
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 text-blush flex-shrink-0 animate-spin" />
+                  ) : (
+                    <ExternalLink className="w-5 h-5 text-black/40 flex-shrink-0" />
+                  )}
                 </div>
-                <ExternalLink className="w-5 h-5 text-black/40 flex-shrink-0" />
-              </div>
-            </TapDiv>
-          ))
+              </TapDiv>
+            );
+          })
         )}
       </div>
     </div>
