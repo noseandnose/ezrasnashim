@@ -259,7 +259,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     nishmas: "Nishmas",
     "birkat-hamazon": "Birkat Hamazon",
     "tehillim": "Tehillim",
-    "individual-tehillim": "Individual Tehillim",
+    "individual-tehillim": "Tehillim",
     "tehillim-chains": "Tehillim Chains",
     "special-tehillim": "Special Tehillim", 
     "nishmas-campaign": "Nishmas Kol Chai",

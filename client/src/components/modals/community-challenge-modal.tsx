@@ -53,7 +53,10 @@ export default function CommunityChallengeModal() {
     return undefined;
   };
   const pillarType = getPillarType();
-  const modalName = challenge?.modalName || 'community-challenge';
+  // For tehillim challenges, use the standard individual-tehillim-{perek} format for consistent flower counting
+  const modalName = challenge?.challengeType === 'tehillim' && challenge?.challengeContentId
+    ? `individual-tehillim-${challenge.challengeContentId}`
+    : (challenge?.modalName || 'community-challenge');
   
   const serverCount = challenge?.currentCount || 0;
   const currentCount = localCount !== null ? localCount : serverCount;
