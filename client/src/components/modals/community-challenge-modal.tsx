@@ -34,7 +34,7 @@ export default function CommunityChallengeModal() {
 
   const isOpen = activeModal === 'community-challenge';
 
-  const { data: homeSummary, refetch: refetchHomeSummary } = useHomeSummary();
+  const { data: homeSummary } = useHomeSummary();
   const challenge = homeSummary?.todaysSpecial;
 
   const isChallenge = !!challenge?.challengeType;
@@ -83,11 +83,22 @@ export default function CommunityChallengeModal() {
   const completeMutation = useMutation({
     mutationFn: async () => {
       if (!challengeId) throw new Error("No challenge ID");
-      return apiRequest('POST', `/api/challenge/${challengeId}/complete`);
+      const response = await apiRequest('POST', `/api/challenge/${challengeId}/complete`);
+      return response.data;
     },
-    onSuccess: () => {
-      refetchHomeSummary();
-      queryClient.invalidateQueries({ queryKey: ['/api/home-summary'] });
+    onSuccess: (data: { success: boolean; currentCount: number; targetCount: number }) => {
+      setLocalCount(data.currentCount);
+      
+      queryClient.setQueriesData({ queryKey: ['/api/home-summary'] }, (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          todaysSpecial: oldData.todaysSpecial ? {
+            ...oldData.todaysSpecial,
+            currentCount: data.currentCount
+          } : null
+        };
+      });
     }
   });
 
@@ -123,8 +134,6 @@ export default function CommunityChallengeModal() {
       setShowHeartExplosion(true);
       setHasCompletedThisSession(true);
       
-      queryClient.invalidateQueries({ queryKey: ['/api/home-summary'] });
-      
       setTimeout(() => {
         setShowHeartExplosion(false);
         setIsCompleting(false);
@@ -134,7 +143,7 @@ export default function CommunityChallengeModal() {
       setLocalCount(prev => prev !== null ? prev - 1 : serverCount);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, serverCount, queryClient]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, serverCount]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
