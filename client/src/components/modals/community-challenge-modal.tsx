@@ -34,7 +34,7 @@ export default function CommunityChallengeModal() {
 
   const isOpen = activeModal === 'community-challenge';
 
-  const { data: homeSummary, refetch: refetchHomeSummary } = useHomeSummary();
+  const { data: homeSummary } = useHomeSummary();
   const challenge = homeSummary?.todaysSpecial;
 
   const isChallenge = !!challenge?.challengeType;
@@ -84,7 +84,7 @@ export default function CommunityChallengeModal() {
     mutationFn: async () => {
       if (!challengeId) throw new Error("No challenge ID");
       const response = await apiRequest('POST', `/api/challenge/${challengeId}/complete`);
-      return response.json();
+      return response.data;
     },
     onSuccess: (data: { success: boolean; currentCount: number; targetCount: number }) => {
       setLocalCount(data.currentCount);
