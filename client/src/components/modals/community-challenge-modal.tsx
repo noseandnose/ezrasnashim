@@ -13,10 +13,9 @@ import axiosClient from "@/lib/axiosClient";
 import { apiRequest } from "@/lib/queryClient";
 
 interface TehillimText {
-  id: number;
-  psalm_number: number;
-  hebrew_text: string;
-  english_text: string;
+  text: string;
+  perek: number;
+  language: string;
 }
 
 export default function CommunityChallengeModal() {
@@ -49,7 +48,9 @@ export default function CommunityChallengeModal() {
   const { data: tehillimText, isLoading: tehillimLoading } = useQuery<TehillimText>({
     queryKey: ['/api/tehillim/text', challenge?.challengeContentId, language],
     queryFn: async () => {
-      const response = await axiosClient.get(`/api/tehillim/text/${challenge?.challengeContentId}?language=${language}`);
+      const response = await axiosClient.get(`/api/tehillim/text/${challenge?.challengeContentId}`, {
+        params: { language }
+      });
       return response.data;
     },
     enabled: isOpen && challenge?.challengeType === 'tehillim' && !!challenge?.challengeContentId,
@@ -155,11 +156,10 @@ export default function CommunityChallengeModal() {
     if (!challenge) return null;
 
     if (challenge.challengeType === 'tehillim' && tehillimText) {
-      const text = language === 'hebrew' ? tehillimText.hebrew_text : tehillimText.english_text;
       return (
         <div className="bg-white rounded-2xl p-6 border border-blush/10">
           <h3 className="platypi-bold text-lg text-black text-center mb-4">
-            Tehillim {tehillimText.psalm_number}
+            Tehillim {tehillimText.perek}
           </h3>
           <div 
             className={`leading-relaxed text-black whitespace-pre-line ${
@@ -167,7 +167,7 @@ export default function CommunityChallengeModal() {
             }`}
             style={{ fontSize: `${fontSize}px` }}
             dir={language === 'hebrew' ? 'rtl' : 'ltr'}
-            dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(tehillimText.text) }}
           />
         </div>
       );
@@ -238,6 +238,18 @@ export default function CommunityChallengeModal() {
     (challenge?.challengeType === 'nishmas') ||
     (challenge?.contentHebrew && challenge?.contentEnglish);
 
+  const shareButton = isChallenge ? (
+    <button
+      onClick={handleShare}
+      className="px-3 py-1.5 flex items-center gap-1.5 rounded-lg bg-blush/10 hover:bg-blush/20 transition-colors"
+      aria-label="Share challenge"
+      type="button"
+    >
+      <Share2 size={16} className="text-blush" />
+      <span className="platypi-medium text-sm text-black">Share</span>
+    </button>
+  ) : undefined;
+
   return (
     <FullscreenModal
       isOpen={isOpen}
@@ -246,9 +258,10 @@ export default function CommunityChallengeModal() {
       showFontControls={true}
       fontSize={fontSize}
       onFontSizeChange={setFontSize}
-      showLanguageControls={showLanguageToggle}
+      showLanguageControls={!!showLanguageToggle}
       language={language}
       onLanguageChange={setLanguage}
+      headerAction={shareButton}
     >
       {isLoading ? (
         <div className="text-center py-8">
@@ -278,10 +291,13 @@ export default function CommunityChallengeModal() {
                 </div>
               </div>
               
-              <div className="h-3 bg-white/50 rounded-full overflow-hidden">
+              <div className="h-4 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                 <div 
-                  className="h-full bg-gradient-feminine rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${progressPercent}%`,
+                    background: 'linear-gradient(90deg, #F8B4C4 0%, #8BC34A 100%)'
+                  }}
                 />
               </div>
               
@@ -292,14 +308,6 @@ export default function CommunityChallengeModal() {
                   <Sparkles size={16} />
                 </div>
               )}
-              
-              <button
-                onClick={handleShare}
-                className="flex items-center justify-center gap-2 mt-3 w-full py-2 bg-white/60 rounded-xl hover:bg-white/80 transition-colors"
-              >
-                <Share2 size={16} className="text-blush" />
-                <span className="platypi-medium text-sm text-black/70">Share with a Friend</span>
-              </button>
             </div>
           )}
 

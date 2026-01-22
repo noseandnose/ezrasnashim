@@ -203,6 +203,8 @@ interface FullscreenModalProps {
   floatingElement?: React.ReactNode;
   // Compass button (for prayer modals)
   showCompassButton?: boolean;
+  // Header action button (e.g., share button)
+  headerAction?: React.ReactNode;
 }
 
 export function FullscreenModal({ 
@@ -223,7 +225,8 @@ export function FullscreenModal({
   infoContent,
   showInfoPopover = false,
   floatingElement,
-  showCompassButton = false
+  showCompassButton = false,
+  headerAction
 }: FullscreenModalProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [, setLocation] = useLocation();
@@ -524,6 +527,7 @@ export function FullscreenModal({
                   </PopoverContent>
                 </Popover>
               )}
+              {headerAction}
               <button
                 onClick={(e) => {
                   e.preventDefault();
