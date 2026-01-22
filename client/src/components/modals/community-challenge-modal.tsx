@@ -3,7 +3,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { useState, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
-import { useTrackModalComplete } from "@/hooks/use-analytics";
+import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { formatTextContent } from "@/lib/text-formatter";
 import { useHomeSummary } from "@/hooks/use-home-summary";
@@ -23,6 +23,7 @@ export default function CommunityChallengeModal() {
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { trackEvent } = useAnalytics();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
@@ -99,11 +100,20 @@ export default function CommunityChallengeModal() {
       
       if (modalName) {
         trackModalComplete(modalName);
-        markModalComplete(modalName);
       }
       
       if (pillarType) {
         completeTask(pillarType);
+      }
+      
+      if (challenge.challengeType === 'tehillim' && challenge.challengeContentId) {
+        trackEvent("tehillim_complete", { 
+          psalmNumber: challenge.challengeContentId,
+          source: 'community-challenge'
+        });
+        
+        const refreshEvent = new CustomEvent('tehillimCompleted');
+        window.dispatchEvent(refreshEvent);
       }
       
       setShowHeartExplosion(true);
@@ -122,7 +132,7 @@ export default function CommunityChallengeModal() {
       console.error('Failed to complete challenge:', error);
       setIsCompleting(false);
     }
-  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, closeModal]);
+  }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, pillarType, completeTask, trackEvent, checkAndShowCongratulations, openModal, closeModal]);
 
   const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
 
@@ -338,7 +348,7 @@ export default function CommunityChallengeModal() {
               disabled={isCompleting}
               className="w-full bg-gradient-feminine text-white py-3 rounded-xl platypi-medium mt-4 border-0 hover:scale-105 transition-transform"
             >
-              {isCompleting ? 'Completing...' : 'Completed'}
+              {isCompleting ? 'Completing...' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
