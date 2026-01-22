@@ -39,7 +39,19 @@ export default function CommunityChallengeModal() {
 
   const isChallenge = !!challenge?.challengeType;
   const challengeId = challenge?.id;
-  const pillarType = challenge?.pillarType as 'torah' | 'tefilla' | undefined;
+  
+  // Determine pillar type - use database value if set, otherwise default based on challenge type
+  const getPillarType = (): 'torah' | 'tefilla' | undefined => {
+    if (challenge?.pillarType) {
+      return challenge.pillarType as 'torah' | 'tefilla';
+    }
+    // Default mapping for challenge types without explicit pillar
+    const challengeType = challenge?.challengeType;
+    if (challengeType === 'tehillim') return 'tefilla';
+    if (challengeType === 'halacha' || challengeType === 'shalom' || challengeType === 'shmiras-halashon') return 'torah';
+    return undefined;
+  };
+  const pillarType = getPillarType();
   const modalName = challenge?.modalName || 'community-challenge';
   
   const serverCount = challenge?.currentCount || 0;
