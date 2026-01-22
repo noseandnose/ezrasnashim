@@ -253,12 +253,12 @@ export default function CommunityChallengeModal() {
   const shareButton = isChallenge ? (
     <button
       onClick={handleShare}
-      className="px-3 py-1.5 flex items-center gap-1.5 rounded-lg bg-blush/10 hover:bg-blush/20 transition-colors"
+      className="px-4 py-2 flex items-center gap-2 rounded-full bg-gradient-to-r from-blush to-lavender hover:from-blush/90 hover:to-lavender/90 active:scale-95 transition-all shadow-md"
       aria-label="Share challenge"
       type="button"
     >
-      <Share2 size={16} className="text-blush" />
-      <span className="platypi-medium text-sm text-black">Share</span>
+      <Share2 size={16} className="text-white" />
+      <span className="platypi-medium text-sm text-white font-medium">Share</span>
     </button>
   ) : undefined;
 
