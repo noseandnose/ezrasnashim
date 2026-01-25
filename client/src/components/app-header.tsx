@@ -178,7 +178,7 @@ export default function AppHeader() {
             />
           </div>
           <div className="flex flex-col items-end flex-1">
-            <span className="font-hebrew text-[8px] text-black/50 leading-none" dir="rtl">בס״ד</span>
+            <span className="font-hebrew text-[0.5rem] text-black/50 leading-none" dir="rtl">בס״ד</span>
             <button
               onClick={() => setShowSearchModal(true)}
               className="flex items-center justify-center rounded-full transition-colors"

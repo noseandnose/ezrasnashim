@@ -443,7 +443,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                       ) : hasAudio ? (
                         <Headphones className="w-2.5 h-2.5" />
                       ) : hasText ? (
-                        <span className="platypi-bold text-[10px]">T</span>
+                        <span className="platypi-bold text-[0.625rem]">T</span>
                       ) : null}
                     </div>
                   );
@@ -473,7 +473,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   ) : (
                     <Icon className="text-black" size={12} />
                   )}
-                  <p className="platypi-bold text-[11px] text-black whitespace-nowrap">{title}</p>
+                  <p className="platypi-bold text-[0.6875rem] text-black whitespace-nowrap">{title}</p>
                 </div>
                 
                 {/* Subtitle */}

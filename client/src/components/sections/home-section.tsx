@@ -746,7 +746,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                           </div>
                         </div>
                       </div>
-                      <p className="text-[10px] text-gray-500 mt-2 text-center">Tap outside to close</p>
+                      <p className="text-[0.625rem] text-gray-500 mt-2 text-center">Tap outside to close</p>
                     </div>
                   </>
                 )}
@@ -923,7 +923,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 }}
               >
                 <span className="text-xs">{getWeatherEmoji(weather.weatherCode)}</span>
-                <span className="platypi-bold text-[10px] text-black/80">
+                <span className="platypi-bold text-[0.625rem] text-black/80">
                   {tempUnit === 'C' ? weather.temperatureC : weather.temperatureF}°{tempUnit}
                 </span>
               </div>

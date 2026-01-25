@@ -396,13 +396,13 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
                 <p className="platypi-bold text-sm text-black">
                   {isLoadingGlobalStats ? "..." : (globalStats?.totalRead || 0).toLocaleString()}
                 </p>
-                <p className="platypi-regular text-[10px] text-black/50">Tehillim Read</p>
+                <p className="platypi-regular text-[0.625rem] text-black/50">Tehillim Read</p>
               </div>
               <div className="border-l border-blush/10 pl-8">
                 <p className="platypi-bold text-sm text-black">
                   {isLoadingGlobalStats ? "..." : (globalStats?.booksCompleted || 0).toLocaleString()}
                 </p>
-                <p className="platypi-regular text-[10px] text-black/50">Books Completed</p>
+                <p className="platypi-regular text-[0.625rem] text-black/50">Books Completed</p>
               </div>
             </div>
           </div>

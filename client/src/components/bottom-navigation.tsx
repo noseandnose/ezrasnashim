@@ -110,7 +110,7 @@ export default function BottomNavigation({
                   fill="none"
                 />
                 <span
-                  className={`text-[10px] transition-all duration-300 ${
+                  className={`text-[0.625rem] transition-all duration-300 ${
                     isActive 
                       ? "text-rose-700 font-semibold"
                       : "text-gray-500/70 font-medium"

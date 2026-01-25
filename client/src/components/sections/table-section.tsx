@@ -246,7 +246,7 @@ export default function TableSection() {
                 {/* Content */}
                 <div 
                   className="platypi-regular text-black/80 leading-relaxed text-left"
-                  style={{ fontSize: '16px' }}
+                  style={{ fontSize: '1rem' }}
                   dangerouslySetInnerHTML={{ 
                     __html: formatGiftMarkdown(giftOfChatzos.contentEnglish) 
                   }}
@@ -353,7 +353,7 @@ export default function TableSection() {
             {/* Content Type Indicator - Top Right */}
             {recipeContent && !isModalComplete('recipe') && (
               <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
-                <span className="platypi-bold text-[10px]">T</span>
+                <span className="platypi-bold text-[0.625rem]">T</span>
               </div>
             )}
             
@@ -406,7 +406,7 @@ export default function TableSection() {
             {/* Content Type Indicator - Top Right */}
             {!isModalComplete('marriage-insights') && (
               <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
-                <span className="platypi-bold text-[10px]">T</span>
+                <span className="platypi-bold text-[0.625rem]">T</span>
               </div>
             )}
             
@@ -462,7 +462,7 @@ export default function TableSection() {
                 ) : currentLifeClass.audioUrl ? (
                   <Headphones className="w-2.5 h-2.5" />
                 ) : (
-                  <span className="platypi-bold text-[10px]">T</span>
+                  <span className="platypi-bold text-[0.625rem]">T</span>
                 )}
               </div>
             )}

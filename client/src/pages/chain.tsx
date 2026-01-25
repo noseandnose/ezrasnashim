@@ -477,7 +477,7 @@ export default function ChainPage() {
                     return <ReasonIcon size={20} className="text-blush" />;
                   })()}
                 </div>
-                <p className="platypi-regular text-[10px] text-black/50 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
+                <p className="platypi-regular text-[0.625rem] text-black/50 whitespace-nowrap">{toTitleCase(chain.reason)}</p>
               </div>
             </div>
             {chain.description && isDescriptionExpanded && (
@@ -514,12 +514,12 @@ export default function ChainPage() {
                     style={{ width: `${percentage}%` }}
                   >
                     {showCountInside && (
-                      <span className="platypi-bold text-[10px] text-white ml-auto mr-2 whitespace-nowrap">{completed}/171{booksText}</span>
+                      <span className="platypi-bold text-[0.625rem] text-white ml-auto mr-2 whitespace-nowrap">{completed}/171{booksText}</span>
                     )}
                   </div>
                   {!showCountInside && completed > 0 && (
                     <span 
-                      className="absolute top-1/2 -translate-y-1/2 platypi-bold text-[10px] text-black/70 whitespace-nowrap"
+                      className="absolute top-1/2 -translate-y-1/2 platypi-bold text-[0.625rem] text-black/70 whitespace-nowrap"
                       style={{ left: `calc(${percentage}% + 6px)` }}
                     >
                       {completed}/171{booksText}

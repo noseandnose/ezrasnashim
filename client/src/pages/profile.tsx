@@ -454,7 +454,7 @@ export default function Profile() {
                       </button>
                       <label 
                         onClick={() => setEditAfterSunset(!editAfterSunset)}
-                        className="platypi-regular text-[10px] text-black/60 cursor-pointer whitespace-nowrap"
+                        className="platypi-regular text-[0.625rem] text-black/60 cursor-pointer whitespace-nowrap"
                       >
                         After sunset
                       </label>
@@ -487,7 +487,7 @@ export default function Profile() {
                 <BookOpen className="w-2.5 h-2.5 text-blush" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayTorah}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Torah</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Torah</div>
             </div>
             
             <div className="bg-lavender/10 rounded-lg p-1.5 text-center">
@@ -495,7 +495,7 @@ export default function Profile() {
                 <Heart className="w-2.5 h-2.5 text-lavender" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayTefilla}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Tefilla</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Tefilla</div>
             </div>
             
             <div className="bg-sage/10 rounded-lg p-1.5 text-center">
@@ -503,7 +503,7 @@ export default function Profile() {
                 <HandCoins className="w-2.5 h-2.5 text-sage" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayTzedaka}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Tzedaka</div>
             </div>
             
             <div className="rounded-lg p-1.5 text-center">
@@ -511,7 +511,7 @@ export default function Profile() {
                 <Star className="w-2.5 h-2.5 text-black/60" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayLife}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Life</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Life</div>
             </div>
           </div>
         </div>
@@ -535,19 +535,19 @@ export default function Profile() {
           <div className="grid grid-cols-4 gap-1 mb-2">
             <div className="bg-blush/10 rounded-lg p-1.5 text-center">
               <div className="platypi-bold text-base text-blush">{stats.totalTorah}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Torah</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Torah</div>
             </div>
             <div className="bg-lavender/10 rounded-lg p-1.5 text-center">
               <div className="platypi-bold text-base text-lavender">{stats.totalTefilla}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Tefilla</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Tefilla</div>
             </div>
             <div className="bg-sage/10 rounded-lg p-1.5 text-center">
               <div className="platypi-bold text-base text-sage">{stats.totalTzedaka}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Tzedaka</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Tzedaka</div>
             </div>
             <div className="rounded-lg p-1.5 text-center">
               <div className="platypi-bold text-base text-black">{stats.totalLife}</div>
-              <div className="platypi-regular text-[8px] text-black/60">Life</div>
+              <div className="platypi-regular text-[0.5rem] text-black/60">Life</div>
             </div>
           </div>
           
@@ -575,11 +575,11 @@ export default function Profile() {
           <div className="grid grid-cols-2 gap-2">
             <div className="bg-gradient-to-br from-blush/20 to-blush/10 rounded-lg p-3 text-center">
               <div className="platypi-bold text-2xl text-blush">{stats.currentStreak}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Day Streak</div>
+              <div className="platypi-regular text-[0.625rem] text-black/60">Day Streak</div>
             </div>
             <div className="bg-gradient-to-br from-lavender/20 to-lavender/10 rounded-lg p-3 text-center">
               <div className="platypi-bold text-2xl text-lavender">{stats.totalDays}</div>
-              <div className="platypi-regular text-[10px] text-black/60">Active Days</div>
+              <div className="platypi-regular text-[0.625rem] text-black/60">Active Days</div>
             </div>
           </div>
         </div>
