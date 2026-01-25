@@ -124,15 +124,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
       contentType: 'text'
     },
     {
-      id: 'library',
-      icon: BookOpen,
-      title: 'The Library',
-      subtitle: 'Browse by speaker',
+      id: 'shalom',
+      icon: Heart,
+      title: 'Shalom',
+      subtitle: 'Live The Blessing',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'text'
+      contentType: 'dynamic'
     },
     {
       id: 'shmiras-halashon',
@@ -146,15 +146,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
       contentType: 'dynamic'
     },
     {
-      id: 'shalom',
-      icon: Heart,
-      title: 'Shalom',
-      subtitle: 'Live The Blessing',
+      id: 'library',
+      icon: BookOpen,
+      title: 'The Library',
+      subtitle: 'Browse by speaker',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'dynamic'
+      contentType: 'text'
     }
   ];
 
