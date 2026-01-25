@@ -234,6 +234,9 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     total += (modalCompletions['global-tehillim-chain'] || 0) + (modalCompletions['tehillim-text'] || 0) + (modalCompletions['chain-tehillim'] || 0);
     total += Object.keys(modalCompletions).filter(key => key.startsWith('brocha-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     total += Object.keys(modalCompletions).filter(key => key.startsWith('womens-prayer')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Morning brochas and shacharis sections (individual section completions)
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('morning-brochas-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('shacharis-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     return total;
   };
 

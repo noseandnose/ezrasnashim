@@ -157,11 +157,13 @@ export default function Profile() {
               key.includes('daily-wisdom') || key.includes('torah-class')) {
             torah += count;
           }
-          // Tefilla content (matching analytics: individual-tehillim-*, chain-tehillim-*, brocha-*, womens-prayer-*, global-tehillim-chain, tehillim-text, meditation-*, al-hamichiya, birkat-hamazon, nishmas-campaign, special-tehillim)
+          // Tefilla content (matching analytics: individual-tehillim-*, chain-tehillim-*, brocha-*, womens-prayer-*, global-tehillim-chain, tehillim-text, meditation-*, al-hamichiya, birkat-hamazon, nishmas-campaign, special-tehillim, morning-brochas-*, shacharis-*)
           else if (key.startsWith('individual-tehillim-') || 
               key.startsWith('chain-tehillim-') ||
               key.startsWith('brocha-') ||
               key.startsWith('womens-prayer-') ||
+              key.startsWith('morning-brochas-') ||  // Morning brochas sections
+              key.startsWith('shacharis-') ||  // Shacharis sections
               key === 'global-tehillim-chain' ||
               key === 'tehillim-text' ||
               key === 'special-tehillim' ||

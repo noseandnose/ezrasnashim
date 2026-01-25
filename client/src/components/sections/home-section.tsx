@@ -127,6 +127,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             key.startsWith('chain-tehillim-') ||
             key.startsWith('brocha-') ||
             key.startsWith('womens-prayer-') ||
+            key.startsWith('morning-brochas-') ||  // Morning brochas sections
+            key.startsWith('shacharis-') ||  // Shacharis sections
             key === 'global-tehillim-chain' ||  // New aligned identifier
             key === 'tehillim-text' ||  // Legacy identifier for backward compatibility
             key === 'tehillim' ||  // Community challenge tehillim
