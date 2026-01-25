@@ -114,6 +114,13 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     // Get today's date key - must use getLocalDateString to match the store
     const today = getLocalDateString();
     const todaysData = completedModals[today];
+    // Debug logging for morning brochas sections
+    if (todaysData?.repeatables) {
+      const morningBrochasSections = Object.entries(todaysData.repeatables).filter(([key]) => key.startsWith('morning-brochas-') || key.startsWith('shacharis-'));
+      if (morningBrochasSections.length > 0) {
+        console.log('[TefillaFlowerCount] Section completions:', morningBrochasSections);
+      }
+    }
     if (!todaysData) return 0;
     
     let count = 0;
