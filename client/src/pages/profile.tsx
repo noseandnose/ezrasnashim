@@ -507,7 +507,7 @@ export default function Profile() {
             </div>
             
             <div className="rounded-lg p-1.5 text-center">
-              <div className="w-5 h-5 rounded-full bg-black/10 flex items-center justify-center mx-auto mb-0.5">
+              <div className="w-5 h-5 flex items-center justify-center mx-auto mb-0.5">
                 <Star className="w-2.5 h-2.5 text-black/60" />
               </div>
               <div className="platypi-bold text-base text-black">{stats.todayLife}</div>
