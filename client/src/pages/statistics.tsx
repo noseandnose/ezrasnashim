@@ -256,7 +256,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "shabbat-table": "Shabbat Table",
     congratulations: "All Tasks Complete",
     "morning-brochas": "Morning Brochas",
-    "morning-brochas-sections": "Morning Brochas Sections",
+    "morning-brochas-sections": "Shacharis",
     "shacharis-sections": "Shacharis Sections",
     "brochas": "Brochas",
     mincha: "Mincha",
