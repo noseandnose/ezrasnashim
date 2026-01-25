@@ -140,6 +140,7 @@ export default function ShalomModal() {
               label={content.thankYouMessage}
               logoUrl={content.attributionLogoUrl}
               aboutText={content.attributionAboutText}
+              websiteUrl={content.speakerWebsite}
             />
           )}
 

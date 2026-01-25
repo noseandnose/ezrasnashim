@@ -850,17 +850,22 @@ function ShachrisFullscreenContent({
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
-  const handleComplete = () => {
-    trackModalComplete('shacharis');
-    markModalComplete('shacharis');
+  // Handle section-specific completion - each section tracks independently
+  const handleSectionComplete = (sectionTitle: string) => {
+    const sectionModalName = `shacharis-${sectionTitle.toLowerCase().replace(/\s+/g, '-')}`;
+    trackModalComplete(sectionModalName);
+    markModalComplete(sectionModalName);
     completeTask('tefilla');
     
     if (checkAndShowCongratulations('tefilla')) {
       openModal('congratulations', 'tefilla');
     }
-    
-    const event = new CustomEvent('closeFullscreen');
-    window.dispatchEvent(event);
+  };
+  
+  // Check if a specific section is complete
+  const isSectionComplete = (sectionTitle: string) => {
+    const sectionModalName = `shacharis-${sectionTitle.toLowerCase().replace(/\s+/g, '-')}`;
+    return isModalComplete(sectionModalName);
   };
 
   // Handle section expansion with scroll-to-top
@@ -944,15 +949,15 @@ function ShachrisFullscreenContent({
                 
                 {/* Done Button for this section */}
                 <Button
-                  onClick={isModalComplete('shacharis') ? undefined : handleComplete}
-                  disabled={isModalComplete('shacharis')}
+                  onClick={isSectionComplete(sectionTitle) ? undefined : () => handleSectionComplete(sectionTitle)}
+                  disabled={isSectionComplete(sectionTitle)}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
-                    isModalComplete('shacharis') 
+                    isSectionComplete(sectionTitle) 
                       ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform'
                   }`}
                 >
-                  {isModalComplete('shacharis') ? 'Completed Today' : 'Complete'}
+                  {isSectionComplete(sectionTitle) ? 'Completed Today' : 'Complete'}
                 </Button>
               </div>
             )}
@@ -1594,19 +1599,29 @@ function MorningBrochasFullscreenContent({
   });
 
   const tefillaConditions = useTefillaConditions();
-  const { completeTask } = useDailyCompletionStore();
+  const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
   const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
+  const { openModal } = useModalStore();
 
   if (isLoading) return <div className="text-center py-8">Loading prayers...</div>;
 
-  const handleComplete = () => {
-    trackModalComplete('morning-brochas');
-    markModalComplete('morning-brochas');
+  // Handle section-specific completion - each section tracks independently
+  const handleSectionComplete = (sectionTitle: string) => {
+    const sectionModalName = `morning-brochas-${sectionTitle.toLowerCase().replace(/\s+/g, '-')}`;
+    trackModalComplete(sectionModalName);
+    markModalComplete(sectionModalName);
     completeTask('tefilla');
-    // Close fullscreen
-    const event = new CustomEvent('closeFullscreen');
-    window.dispatchEvent(event);
+    
+    if (checkAndShowCongratulations('tefilla')) {
+      openModal('congratulations', 'tefilla');
+    }
+  };
+  
+  // Check if a specific section is complete
+  const isSectionComplete = (sectionTitle: string) => {
+    const sectionModalName = `morning-brochas-${sectionTitle.toLowerCase().replace(/\s+/g, '-')}`;
+    return isModalComplete(sectionModalName);
   };
 
   // Handle section expansion with scroll-to-top
@@ -1690,15 +1705,15 @@ function MorningBrochasFullscreenContent({
                 
                 {/* Done Button for this section */}
                 <Button
-                  onClick={isModalComplete('morning-brochas') ? undefined : handleComplete}
-                  disabled={isModalComplete('morning-brochas')}
+                  onClick={isSectionComplete(sectionTitle) ? undefined : () => handleSectionComplete(sectionTitle)}
+                  disabled={isSectionComplete(sectionTitle)}
                   className={`w-full py-3 rounded-xl platypi-medium border-0 mt-4 ${
-                    isModalComplete('morning-brochas') 
+                    isSectionComplete(sectionTitle) 
                       ? 'bg-sage text-white' 
                       : 'bg-gradient-feminine text-white hover:scale-105 transition-transform complete-button-pulse'
                   }`}
                 >
-                  {isModalComplete('morning-brochas') ? 'Completed Today' : 'Complete'}
+                  {isSectionComplete(sectionTitle) ? 'Completed Today' : 'Complete'}
                 </Button>
               </div>
             )}

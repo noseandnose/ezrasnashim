@@ -124,15 +124,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
       contentType: 'text'
     },
     {
-      id: 'speakers',
-      icon: BookOpen,
-      title: 'Parsha Inspiration',
-      subtitle: 'Weekly Torah wisdom',
+      id: 'shalom',
+      icon: Heart,
+      title: 'Shalom',
+      subtitle: 'Live The Blessing',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'dynamic' // Will be determined based on content
+      contentType: 'dynamic'
     },
     {
       id: 'shmiras-halashon',
@@ -146,15 +146,15 @@ function TorahSectionComponent({}: TorahSectionProps) {
       contentType: 'dynamic'
     },
     {
-      id: 'shalom',
-      icon: Heart,
-      title: 'Shalom',
-      subtitle: 'Live The Blessing',
+      id: 'library',
+      icon: BookOpen,
+      title: 'The Library',
+      subtitle: 'Browse by speaker',
       gradient: 'bg-white',
       iconBg: 'bg-gradient-feminine',
       iconColor: 'text-white',
       border: 'border-blush/10',
-      contentType: 'dynamic'
+      contentType: 'text'
     }
   ];
 
@@ -251,6 +251,49 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
       </div>
 
+      {/* Parsha Inspiration Bar - Only shows when content available */}
+      {(() => {
+        const todayStr = getLocalDateString();
+        const activeVorts = Array.isArray(parshaVorts) ? parshaVorts.filter(p => 
+          p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
+        ) : [];
+        const firstVort = activeVorts[0];
+        const hasParshaContent = activeVorts.length > 0 && !sectionErrors.parshaVorts;
+        
+        if (!hasParshaContent) return null;
+        
+        return (
+          <div className="px-2 pt-2">
+            <button 
+              onClick={() => {
+                if (firstVort) {
+                  openModal('parsha-vort', 'torah', undefined, firstVort.id);
+                }
+              }}
+              className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
+              data-testid="button-parsha-inspiration"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
+                  <BookOpen className="text-white" size={18} />
+                </div>
+                <div className="text-left">
+                  <h3 className="platypi-bold text-sm text-black">Parsha Inspiration</h3>
+                  <p className="platypi-regular text-xs text-black/70">
+                    {firstVort?.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom'}
+                  </p>
+                </div>
+              </div>
+              {isModalComplete('parsha-vort') ? (
+                <Check className="text-sage flex-shrink-0" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40 flex-shrink-0" size={18} />
+              )}
+            </button>
+          </div>
+        );
+      })()}
+
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
       <div className="p-2 grid grid-cols-2 gap-2">
           {torahItems.filter(({ id }) => {
@@ -262,12 +305,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 return !!chizukContent?.audioUrl && !sectionErrors.chizuk;
               case 'emuna':
                 return !!emunaContent?.audioUrl && !sectionErrors.emuna;
-              case 'speakers':
-                const todayStr = getLocalDateString();
-                const activeVorts = Array.isArray(parshaVorts) ? parshaVorts.filter(p => 
-                  p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
-                ) : [];
-                return activeVorts.length > 0 && !sectionErrors.parshaVorts;
+              case 'library':
+                return true;
               case 'shmiras-halashon':
                 return !!(shmirasHalashonContent?.content || shmirasHalashonContent?.audioUrl || shmirasHalashonContent?.videoUrl) && !sectionErrors.shmirasHalashon;
               case 'shalom':
@@ -276,7 +315,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 return true;
             }
           }).map(({ id, icon: Icon, title, subtitle }) => {
-            const modalId = id === 'speakers' ? 'parsha-vort' : id;
+            const modalId = id;
             const isCompleted = isModalComplete(modalId);
             
             let hasContent = true; // Already filtered, so hasContent is always true
@@ -322,24 +361,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   displaySubtitle = 'Loading...';
                 }
                 break;
-              case 'speakers':
-                const todayStr = getLocalDateString();
-                const activeVortsForButton = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
-                  if (!parsha.fromDate || !parsha.untilDate) return false;
-                  return todayStr >= parsha.fromDate && todayStr <= parsha.untilDate;
-                }) : []) || [];
-                const firstVort = activeVortsForButton[0];
-                
-                isError = !!sectionErrors.parshaVorts;
-                isLoading = torahLoading;
-                hasContent = activeVortsForButton.length > 0 && !isError;
-                if (hasContent && !isCompleted && firstVort) {
-                  displaySubtitle = firstVort.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom';
-                } else if (isError) {
-                  displaySubtitle = 'Unavailable';
-                } else if (isLoading) {
-                  displaySubtitle = 'Loading...';
-                }
+              case 'library':
+                hasContent = true;
                 break;
               case 'shmiras-halashon':
                 isError = !!sectionErrors.shmirasHalashon;
@@ -382,17 +405,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   
                   if (id === 'halacha') {
                     handleDirectFullscreen(id);
-                  } else if (id === 'speakers') {
-                    const todayStr = getLocalDateString();
-                    const activeVortsForClick = (Array.isArray(parshaVorts) ? parshaVorts.filter(parsha => {
-                      if (!parsha.fromDate || !parsha.untilDate) return false;
-                      return todayStr >= parsha.fromDate && todayStr <= parsha.untilDate;
-                    }) : []) || [];
-                    if (activeVortsForClick[0]) {
-                      openModal('parsha-vort', 'torah', undefined, activeVortsForClick[0].id);
-                    }
                   } else {
-                    // For other content types, use regular modal
                     openModal(id, 'torah');
                   }
                 }}
@@ -418,14 +431,8 @@ function TorahSectionComponent({}: TorahSectionProps) {
                     // Emuna has audioUrl and optional content
                     hasAudio = !!emunaContent?.audioUrl;
                     hasText = !!emunaContent?.content && !emunaContent?.audioUrl;
-                  } else if (id === 'speakers') {
-                    const todayStr = getLocalDateString();
-                    const firstVort = (Array.isArray(parshaVorts) ? parshaVorts.find(p => 
-                      p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
-                    ) : null);
-                    hasVideo = !!firstVort?.videoUrl;
-                    hasAudio = !!firstVort?.audioUrl;
-                    hasText = !!firstVort?.content && !firstVort?.audioUrl && !firstVort?.videoUrl;
+                  } else if (id === 'library') {
+                    hasText = true;
                   } else if (id === 'shmiras-halashon') {
                     hasVideo = !!shmirasHalashonContent?.videoUrl;
                     hasAudio = !!shmirasHalashonContent?.audioUrl;
@@ -443,7 +450,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                       ) : hasAudio ? (
                         <Headphones className="w-2.5 h-2.5" />
                       ) : hasText ? (
-                        <span className="platypi-bold text-[10px]">T</span>
+                        <span className="platypi-bold text-[0.625rem]">T</span>
                       ) : null}
                     </div>
                   );
@@ -473,7 +480,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
                   ) : (
                     <Icon className="text-black" size={12} />
                   )}
-                  <p className="platypi-bold text-[11px] text-black whitespace-nowrap">{title}</p>
+                  <p className="platypi-bold text-[0.6875rem] text-black whitespace-nowrap">{title}</p>
                 </div>
                 
                 {/* Subtitle */}
@@ -599,21 +606,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
             </div>
           </button>
         )}
-
-        {/* The Library Bar - Permanent content grouped by speaker */}
-        <button 
-          onClick={() => openModal('library', 'torah')}
-          className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-start gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
-          data-testid="button-library"
-        >
-          <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
-            <BookOpen className="text-white" size={18} />
-          </div>
-          <div className="text-left">
-            <h3 className="platypi-bold text-sm text-black">The Library</h3>
-            <p className="platypi-regular text-xs text-black/70">Browse Torah classes by speaker</p>
-          </div>
-        </button>
 
         {/* Bottom padding */}
         <div className="h-16"></div>

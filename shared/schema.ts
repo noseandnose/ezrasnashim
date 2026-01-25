@@ -361,7 +361,8 @@ export const dailyEmuna = pgTable("daily_emuna", {
   date: date("date").notNull().unique(), // unique constraint creates implicit index
   title: text("title").notNull(),
   content: text("content"),
-  audioUrl: text("audio_url").notNull(),
+  audioUrl: text("audio_url"),
+  videoUrl: text("video_url"),
   speaker: text("speaker"),
   speakerWebsite: text("speaker_website"),
   attributionLabel: text("attribution_label"), // Short label for collapsed attribution

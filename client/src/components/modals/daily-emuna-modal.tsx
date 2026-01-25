@@ -3,6 +3,7 @@ import { useModalStore, useDailyCompletionStore, useModalCompletionStore } from 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import AudioPlayer from "@/components/audio-player";
+import VideoPlayer from "@/components/video-player";
 import { HeartExplosion } from "@/components/ui/heart-explosion";
 import { useTrackModalComplete } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
@@ -24,6 +25,7 @@ export default function DailyEmunaModal() {
     title?: string;
     content?: string;
     audioUrl?: string;
+    videoUrl?: string;
     duration?: string;
     speaker?: string;
     speakerWebsite?: string;
@@ -83,7 +85,16 @@ export default function DailyEmunaModal() {
             </div>
           )}
 
-          {emunaContent.audioUrl && (
+          {emunaContent.videoUrl && (
+            <div className="rounded-2xl overflow-hidden">
+              <VideoPlayer 
+                videoUrl={emunaContent.videoUrl} 
+                title={emunaContent.title || 'Daily Emuna'}
+              />
+            </div>
+          )}
+
+          {emunaContent.audioUrl && !emunaContent.videoUrl && (
             <div className="bg-white rounded-2xl p-4 border border-blush/10">
               <AudioPlayer 
                 audioUrl={emunaContent.audioUrl} 

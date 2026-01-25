@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Users, BookOpen, Heart, ScrollText, Calendar, ArrowLeft, Sun, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2, Music, Dumbbell, Gem, Moon, Megaphone, Palette, Gift, Scale, Quote, Utensils } from "lucide-react";
+import { Users, BookOpen, Heart, ScrollText, Calendar, ArrowLeft, Sun, Sunrise, Clock, Star, Shield, Sparkles, Clock3, HandCoins, DollarSign, Trophy, RefreshCw, HandHeart, Brain, Link2, Music, Dumbbell, Gem, Moon, Megaphone, Palette, Gift, Scale, Quote, Utensils } from "lucide-react";
 import { useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { getLocalDateString } from "@/lib/dateUtils";
@@ -234,6 +234,9 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     total += (modalCompletions['global-tehillim-chain'] || 0) + (modalCompletions['tehillim-text'] || 0) + (modalCompletions['chain-tehillim'] || 0);
     total += Object.keys(modalCompletions).filter(key => key.startsWith('brocha-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     total += Object.keys(modalCompletions).filter(key => key.startsWith('womens-prayer')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    // Morning brochas and shacharis sections (individual section completions)
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('morning-brochas-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
+    total += Object.keys(modalCompletions).filter(key => key.startsWith('shacharis-')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     return total;
   };
 
@@ -253,6 +256,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "shabbat-table": "Shabbat Table",
     congratulations: "All Tasks Complete",
     "morning-brochas": "Morning Brochas",
+    "morning-brochas-sections": "Shacharis",
+    "shacharis-sections": "Shacharis Sections",
     "brochas": "Brochas",
     mincha: "Mincha",
     maariv: "Maariv",
@@ -298,6 +303,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "shabbat-table": Sparkles,
     congratulations: Star,
     "morning-brochas": Sun,
+    "morning-brochas-sections": Sun,
+    "shacharis-sections": Sunrise,
     "brochas": Heart,
     mincha: Clock,
     maariv: Moon,
@@ -346,6 +353,8 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     let womensPrayerTotal = 0;
     let brochasTotal = 0;
     let libraryTotal = 0;
+    let morningBrochasSectionsTotal = 0;
+    let shacharisSectionsTotal = 0;
 
     Object.entries(modalCompletions).forEach(([modalType, count]) => {
       if (modalType.startsWith('individual-tehillim-') || modalType === 'individual-tehillim') {
@@ -361,6 +370,12 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
       } else if (modalType.startsWith('meditation-') || modalType === 'meditation') {
       } else if (modalType.startsWith('Library - ')) {
         libraryTotal += (count as number) || 0;
+      } else if (modalType.startsWith('morning-brochas-')) {
+        // Aggregate morning brochas section completions
+        morningBrochasSectionsTotal += (count as number) || 0;
+      } else if (modalType.startsWith('shacharis-')) {
+        // Aggregate shacharis section completions
+        shacharisSectionsTotal += (count as number) || 0;
       } else if (modalTypeNames[modalType] && !['unknown', 'test', ''].includes(modalType.toLowerCase())) {
         processedEntries.push([modalType, count as number]);
       }
@@ -384,6 +399,14 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
 
     if (libraryTotal > 0) {
       processedEntries.push(['library', libraryTotal]);
+    }
+
+    if (morningBrochasSectionsTotal > 0) {
+      processedEntries.push(['morning-brochas-sections', morningBrochasSectionsTotal]);
+    }
+
+    if (shacharisSectionsTotal > 0) {
+      processedEntries.push(['shacharis-sections', shacharisSectionsTotal]);
     }
 
     // Add gave-elsewhere tzedaka from gaveElsewhereCount
