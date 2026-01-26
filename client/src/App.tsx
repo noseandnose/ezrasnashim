@@ -166,12 +166,22 @@ export default function App() {
   
   // Invalidate queries when app resumes to fetch fresh data
   useEffect(() => {
+    let lastRefreshTime = 0;
+    const MIN_REFRESH_INTERVAL = 500; // Minimum 500ms between refreshes to prevent spam
+    
     const handleVisibilityChange = () => {
       if (!document.hidden) {
+        const now = Date.now();
+        // Debounce rapid visibility changes
+        if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) return;
+        lastRefreshTime = now;
+        
         const today = getLocalDateString();
-        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today] });
-        queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'] });
-        queryClient.invalidateQueries({ queryKey: ['/api/global-progress'] });
+        // Force refetch of all critical data immediately
+        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today], refetchType: 'all' });
+        queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'], refetchType: 'all' });
+        queryClient.invalidateQueries({ queryKey: ['/api/global-progress'], refetchType: 'all' });
+        queryClient.invalidateQueries({ queryKey: ['/api/community-challenge'], refetchType: 'all' });
       }
     };
     
