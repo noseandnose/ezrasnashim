@@ -418,14 +418,16 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
       processedEntries.push(['gave-elsewhere', gaveElsewhereCount]);
     }
 
+    // Get total tzedaka acts and subtract gave-elsewhere to get actual in-app donations
     const tzedakaActs = selectedPeriod === 'today' 
       ? (currentData as any)?.tzedakaActs || 0
       : (currentData as any)?.totalTzedakaActs || 0;
     
-    const totalTzedaka = tzedakaActs;
+    // Only show "Tzedaka" line for actual in-app donations (not gave-elsewhere)
+    const inAppDonations = tzedakaActs - gaveElsewhereCount;
     
-    if (totalTzedaka > 0) {
-      processedEntries.push(['tzedaka', totalTzedaka]);
+    if (inAppDonations > 0) {
+      processedEntries.push(['tzedaka', inAppDonations]);
     }
 
     const meditationCompletions = selectedPeriod === 'today'
