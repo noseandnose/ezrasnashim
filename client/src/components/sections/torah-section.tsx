@@ -251,49 +251,6 @@ function TorahSectionComponent({}: TorahSectionProps) {
 
       </div>
 
-      {/* Parsha Inspiration Bar - Only shows when content available */}
-      {(() => {
-        const todayStr = getLocalDateString();
-        const activeVorts = Array.isArray(parshaVorts) ? parshaVorts.filter(p => 
-          p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
-        ) : [];
-        const firstVort = activeVorts[0];
-        const hasParshaContent = activeVorts.length > 0 && !sectionErrors.parshaVorts;
-        
-        if (!hasParshaContent) return null;
-        
-        return (
-          <div className="px-2 pt-2">
-            <button 
-              onClick={() => {
-                if (firstVort) {
-                  openModal('parsha-vort', 'torah', undefined, firstVort.id);
-                }
-              }}
-              className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
-              data-testid="button-parsha-inspiration"
-            >
-              <div className="flex items-center gap-3">
-                <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
-                  <BookOpen className="text-white" size={18} />
-                </div>
-                <div className="text-left">
-                  <h3 className="platypi-bold text-sm text-black">Parsha Inspiration</h3>
-                  <p className="platypi-regular text-xs text-black/70">
-                    {firstVort?.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom'}
-                  </p>
-                </div>
-              </div>
-              {isModalComplete('parsha-vort') ? (
-                <Check className="text-sage flex-shrink-0" size={18} />
-              ) : (
-                <ChevronRight className="text-black/40 flex-shrink-0" size={18} />
-              )}
-            </button>
-          </div>
-        );
-      })()}
-
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
       <div className="p-2 grid grid-cols-2 gap-2">
           {torahItems.filter(({ id }) => {
@@ -491,6 +448,49 @@ function TorahSectionComponent({}: TorahSectionProps) {
             );
           })}
       </div>
+
+      {/* Parsha Inspiration Bar - Only shows when content available */}
+      {(() => {
+        const todayStr = getLocalDateString();
+        const activeVorts = Array.isArray(parshaVorts) ? parshaVorts.filter(p => 
+          p.fromDate && p.untilDate && todayStr >= p.fromDate && todayStr <= p.untilDate
+        ) : [];
+        const firstVort = activeVorts[0];
+        const hasParshaContent = activeVorts.length > 0 && !sectionErrors.parshaVorts;
+        
+        if (!hasParshaContent) return null;
+        
+        return (
+          <div className="px-2 pt-2">
+            <button 
+              onClick={() => {
+                if (firstVort) {
+                  openModal('parsha-vort', 'torah', undefined, firstVort.id);
+                }
+              }}
+              className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
+              data-testid="button-parsha-inspiration"
+            >
+              <div className="flex items-center gap-3">
+                <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
+                  <BookOpen className="text-white" size={18} />
+                </div>
+                <div className="text-left">
+                  <h3 className="platypi-bold text-sm text-black">Parsha Inspiration</h3>
+                  <p className="platypi-regular text-xs text-black/70">
+                    {firstVort?.speaker ? `by ${firstVort.speaker}` : 'Weekly Torah wisdom'}
+                  </p>
+                </div>
+              </div>
+              {isModalComplete('parsha-vort') ? (
+                <Check className="text-sage flex-shrink-0" size={18} />
+              ) : (
+                <ChevronRight className="text-black/40 flex-shrink-0" size={18} />
+              )}
+            </button>
+          </div>
+        );
+      })()}
 
       {/* Bitachon Challenge - Below 4 buttons - Now opens fullscreen page */}
       {torahChallenge && (
