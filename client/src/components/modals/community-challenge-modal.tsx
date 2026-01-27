@@ -21,12 +21,11 @@ interface TehillimText {
 export default function CommunityChallengeModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
-  const { markModalComplete } = useModalCompletionStore();
+  const { markModalComplete, isModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
   const { trackEvent } = useAnalytics();
   const [showHeartExplosion, setShowHeartExplosion] = useState(false);
   const [isCompleting, setIsCompleting] = useState(false);
-  const [hasCompletedThisSession, setHasCompletedThisSession] = useState(false);
   const [localCount, setLocalCount] = useState<number | null>(null);
   const [language, setLanguage] = useState<'hebrew' | 'english'>('hebrew');
   const [fontSize, setFontSize] = useState(18);
@@ -54,9 +53,15 @@ export default function CommunityChallengeModal() {
   };
   const pillarType = getPillarType();
   // For tehillim challenges, use the standard individual-tehillim-{perek} format for consistent flower counting
+  // For womens-prayer, use womens-prayer-{contentId} format for analytics tracking
   const modalName = challenge?.challengeType === 'tehillim' && challenge?.challengeContentId
     ? `individual-tehillim-${challenge.challengeContentId}`
+    : challenge?.challengeType === 'womens-prayer' && challenge?.challengeContentId
+    ? `womens-prayer-${challenge.challengeContentId}`
     : (challenge?.modalName || 'community-challenge');
+  
+  // Check if this challenge has already been completed today (persisted across modal reopens)
+  const hasCompletedToday = modalName ? isModalComplete(modalName) : false;
   
   const serverCount = challenge?.currentCount || 0;
   const currentCount = localCount !== null ? localCount : serverCount;
@@ -158,7 +163,6 @@ export default function CommunityChallengeModal() {
       }
       
       setShowHeartExplosion(true);
-      setHasCompletedThisSession(true);
       
       setTimeout(() => {
         setShowHeartExplosion(false);
@@ -426,12 +430,12 @@ export default function CommunityChallengeModal() {
               onClick={handleComplete}
               disabled={isCompleting}
               className={`w-full py-3 rounded-xl platypi-medium mt-4 border-0 transition-all duration-300 ${
-                hasCompletedThisSession 
+                hasCompletedToday 
                   ? 'bg-sage text-white hover:bg-sage/90' 
                   : 'bg-gradient-feminine text-white hover:scale-105'
               }`}
             >
-              {isCompleting ? 'Completing...' : hasCompletedThisSession ? 'Complete Again' : 'Complete'}
+              {isCompleting ? 'Completing...' : hasCompletedToday ? 'Complete Again' : 'Complete'}
             </Button>
             <HeartExplosion trigger={showHeartExplosion} />
           </div>
