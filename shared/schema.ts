@@ -312,6 +312,9 @@ export const womensPrayers = pgTable("womens_prayers", {
   hebrewText: text("hebrew_text"),
   englishTranslation: text("english_translation"),
   description: text("description"),
+  thankYouMessage: text("thank_you_message"), // Dynamic thank you message with support for clickable links
+  attributionLogoUrl: text("attribution_logo_url"), // Logo image for attribution section
+  attributionAboutText: text("attribution_about_text"), // About text for attribution section
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => ({
   categoryIdx: index("womens_prayers_category_idx").on(table.category),
