@@ -228,7 +228,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
   };
 
   const getTefillaTotal = (modalCompletions: Record<string, number>) => {
-    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer', 'gift-of-chatzos'];
+    const tefillaKeys = ['morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'birkat-hamazon', 'tehillim', 'special-tehillim', 'nishmas-campaign', 'al-hamichiya', 'individual-prayer', 'gift-of-chatzos', 'parshat-hamann'];
     let total = tefillaKeys.reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     total += Object.keys(modalCompletions).filter(key => key.startsWith('individual-tehillim')).reduce((sum, key) => sum + (modalCompletions[key] || 0), 0);
     total += (modalCompletions['global-tehillim-chain'] || 0) + (modalCompletions['tehillim-text'] || 0) + (modalCompletions['chain-tehillim'] || 0);
@@ -289,6 +289,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "sponsor-day": "Day Sponsorship",
     refuah: "Refuah Names",
     "womens-prayer": "Women's Prayers",
+    "parshat-hamann": "Parshat HaMann",
     "life-class": "Life Class",
     donate: "Donations",
     meditation: "Meditations",
@@ -320,6 +321,7 @@ export default function Statistics({ initialPeriod = 'today', simplified = false
     "al-hamichiya": Clock3,
     "individual-prayer": Heart,
     "womens-prayer": HandHeart,
+    "parshat-hamann": HandHeart,
     chizuk: Dumbbell,
     emuna: Shield,
     "gems-of-gratitude": Sparkles,

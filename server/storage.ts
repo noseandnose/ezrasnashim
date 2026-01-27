@@ -2759,7 +2759,7 @@ export class DatabaseStorage implements IStorage {
   // Helper method to calculate total acts
   private calculateTotalActs(modalCompletions: Record<string, number>, gaveElsewhereCompletions: number = 0, namesProcessed: number = 0, meditationsCompleted: number = 0): number {
     const torahActs = ['torah', 'chizuk', 'emuna', 'halacha', 'featured', 'featured-content', 'parsha-vort', 'pirkei-avot', 'gems-of-gratitude', 'torah-class', 'torah-challenge', 'shalom', 'shmiras-halashon', 'library'];
-    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'tehillim', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim', 'individual-prayer', 'gift-of-chatzos'];
+    const tefillaActs = ['tefilla', 'morning-brochas', 'mincha', 'maariv', 'shacharis', 'nishmas', 'nishmas-campaign', 'birkat-hamazon', 'al-hamichiya', 'tehillim', 'special-tehillim', 'global-tehillim-chain', 'tehillim-text', 'chain-tehillim', 'individual-prayer', 'gift-of-chatzos', 'parshat-hamann'];
     const tzedakaActs = ['tzedaka', 'donate'];
     const lifeActs = ['life-class', 'marriage-insights', 'recipe'];
     
