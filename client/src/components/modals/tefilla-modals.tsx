@@ -27,6 +27,7 @@ import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { BirkatHamazonModal, MeeinShaloshFullscreenContent, BirkatHamazonFullscreenContent } from "@/components/modals/birkat-hamazon-modal";
 import { useLocationStore } from '@/hooks/use-jewish-times';
 import { formatTextContent } from "@/lib/text-formatter";
+import { formatThankYouMessageFull } from "@/lib/link-formatter";
 import { processTefillaText, getCurrentTefillaConditions, type TefillaConditions } from "@/utils/tefilla-processor";
 import { useJewishTimes } from "@/hooks/use-jewish-times";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
@@ -2513,9 +2514,20 @@ function IndividualPrayerFullscreenContent({ language, fontSize }: { language: '
         )}
       </div>
       
-      {/* Conditional attribution based on prayer name and ID */}
-      {prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
-        <ChuppahThankYou />
+      {/* Conditional attribution - use custom thank you if available, otherwise use ChuppahThankYou for legacy prayers */}
+      {prayer.thankYouMessage || prayer.attributionLogoUrl || prayer.attributionAboutText ? (
+        <AttributionSection
+          label={prayer.thankYouMessage 
+            ? formatThankYouMessageFull(prayer.thankYouMessage)
+            : `Thank you for saying ${prayer.prayerName}`}
+          labelHtml={!!prayer.thankYouMessage}
+          logoUrl={prayer.attributionLogoUrl}
+          aboutText={prayer.attributionAboutText}
+        />
+      ) : (
+        prayer.prayerName !== "Parshat Hamann" && prayer.prayerName !== "Hafrashas Challah" && prayer.id !== 10 && (
+          <ChuppahThankYou />
+        )
       )}
       
       <Button 
