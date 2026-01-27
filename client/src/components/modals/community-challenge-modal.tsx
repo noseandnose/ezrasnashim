@@ -60,9 +60,10 @@ export default function CommunityChallengeModal() {
   
   const serverCount = challenge?.currentCount || 0;
   const currentCount = localCount !== null ? localCount : serverCount;
-  const targetCount = challenge?.targetCount || 100;
-  const progressPercent = Math.min((currentCount / targetCount) * 100, 100);
-  const isGoalReached = currentCount >= targetCount;
+  const targetCount = challenge?.targetCount; // null means no target (unlimited/one-per-person challenge)
+  const hasTargetCount = targetCount !== null && targetCount !== undefined && targetCount > 0;
+  const progressPercent = hasTargetCount ? Math.min((currentCount / targetCount) * 100, 100) : 0;
+  const isGoalReached = hasTargetCount && currentCount >= targetCount;
 
   const { data: tehillimText, isLoading: tehillimLoading } = useQuery<TehillimText>({
     queryKey: ['/api/tehillim/text', challenge?.challengeContentId, language],
@@ -93,6 +94,18 @@ export default function CommunityChallengeModal() {
       return response.data;
     },
     enabled: isOpen && challenge?.challengeType === 'halacha',
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const { data: womensPrayer, isLoading: womensPrayerLoading } = useQuery<{
+    id: number;
+    prayerName: string;
+    hebrewText: string;
+    englishTranslation: string;
+    description: string;
+  }>({
+    queryKey: [`/api/womens-prayers/prayer/${challenge?.challengeContentId}`],
+    enabled: isOpen && challenge?.challengeType === 'womens-prayer' && !!challenge?.challengeContentId,
     staleTime: 60 * 60 * 1000,
   });
 
@@ -165,11 +178,13 @@ export default function CommunityChallengeModal() {
     }
   }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, trackEvent, serverCount]);
 
-  const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
+  const isLoading = tehillimLoading || nishmasLoading || halachaLoading || womensPrayerLoading;
 
   const handleShare = async () => {
     const challengeName = challenge?.title || "Community Challenge";
-    const text = `Join us in the Ezras Nashim Community Challenge! ${challengeName}. Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`;
+    const text = hasTargetCount 
+      ? `Join us in the Ezras Nashim Community Challenge! ${challengeName}. Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`
+      : `Join us in the Ezras Nashim Community Challenge! ${challengeName}. ${currentCount.toLocaleString()} have joined so far!`;
     const url = "https://ezrasnashim.app/";
 
     if (navigator.share) {
@@ -250,6 +265,25 @@ export default function CommunityChallengeModal() {
       );
     }
 
+    if (challenge.challengeType === 'womens-prayer' && womensPrayer) {
+      const text = language === 'hebrew' ? womensPrayer.hebrewText : womensPrayer.englishTranslation;
+      return (
+        <div className="bg-white rounded-2xl p-6 border border-blush/10">
+          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+            {womensPrayer.prayerName}
+          </h3>
+          <div 
+            className={`leading-relaxed text-black whitespace-pre-line ${
+              language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'platypi-regular text-left'
+            }`}
+            style={{ fontSize: `${fontSize}px` }}
+            dir={language === 'hebrew' ? 'rtl' : 'ltr'}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+          />
+        </div>
+      );
+    }
+
     if (challenge.challengeType === 'custom' || !challenge.challengeType) {
       const text = language === 'hebrew' && challenge.contentHebrew 
         ? challenge.contentHebrew 
@@ -277,6 +311,7 @@ export default function CommunityChallengeModal() {
   const showLanguageToggle = 
     (challenge?.challengeType === 'tehillim') || 
     (challenge?.challengeType === 'nishmas') ||
+    (challenge?.challengeType === 'womens-prayer') ||
     (challenge?.contentHebrew && challenge?.contentEnglish);
 
   const shareButton = isChallenge ? (
@@ -325,22 +360,35 @@ export default function CommunityChallengeModal() {
                   <span className="platypi-medium text-sm text-black">Community Progress</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Target className="text-sage" size={16} />
-                  <span className="platypi-bold text-sm text-black">
-                    {currentCount.toLocaleString()} / {targetCount.toLocaleString()}
-                  </span>
+                  {hasTargetCount ? (
+                    <>
+                      <Target className="text-sage" size={16} />
+                      <span className="platypi-bold text-sm text-black">
+                        {currentCount.toLocaleString()} / {targetCount.toLocaleString()}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="text-sage" size={16} />
+                      <span className="platypi-bold text-sm text-black">
+                        {currentCount.toLocaleString()} joined
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
               
-              <div className="h-4 rounded-full overflow-hidden border border-blush/30 relative">
-                <div 
-                  className="absolute inset-0 bg-gradient-to-r from-blush to-lavender"
-                />
-                <div 
-                  className="absolute inset-y-0 left-0 bg-sage rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
-              </div>
+              {hasTargetCount && (
+                <div className="h-4 rounded-full overflow-hidden border border-blush/30 relative">
+                  <div 
+                    className="absolute inset-0 bg-gradient-to-r from-blush to-lavender"
+                  />
+                  <div 
+                    className="absolute inset-y-0 left-0 bg-sage rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
+              )}
               
               {isGoalReached && (
                 <div className="flex items-center justify-center gap-2 mt-3 text-sage">
