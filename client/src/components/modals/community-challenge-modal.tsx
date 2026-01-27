@@ -97,6 +97,18 @@ export default function CommunityChallengeModal() {
     staleTime: 60 * 60 * 1000,
   });
 
+  const { data: womensPrayer, isLoading: womensPrayerLoading } = useQuery<{
+    id: number;
+    prayerName: string;
+    hebrewText: string;
+    englishTranslation: string;
+    description: string;
+  }>({
+    queryKey: [`/api/womens-prayers/prayer/${challenge?.challengeContentId}`],
+    enabled: isOpen && challenge?.challengeType === 'womens-prayer' && !!challenge?.challengeContentId,
+    staleTime: 60 * 60 * 1000,
+  });
+
   const completeMutation = useMutation({
     mutationFn: async () => {
       if (!challengeId) throw new Error("No challenge ID");
@@ -166,7 +178,7 @@ export default function CommunityChallengeModal() {
     }
   }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, trackEvent, serverCount]);
 
-  const isLoading = tehillimLoading || nishmasLoading || halachaLoading;
+  const isLoading = tehillimLoading || nishmasLoading || halachaLoading || womensPrayerLoading;
 
   const handleShare = async () => {
     const challengeName = challenge?.title || "Community Challenge";
@@ -253,6 +265,25 @@ export default function CommunityChallengeModal() {
       );
     }
 
+    if (challenge.challengeType === 'womens-prayer' && womensPrayer) {
+      const text = language === 'hebrew' ? womensPrayer.hebrewText : womensPrayer.englishTranslation;
+      return (
+        <div className="bg-white rounded-2xl p-6 border border-blush/10">
+          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+            {womensPrayer.prayerName}
+          </h3>
+          <div 
+            className={`leading-relaxed text-black whitespace-pre-line ${
+              language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'platypi-regular text-left'
+            }`}
+            style={{ fontSize: `${fontSize}px` }}
+            dir={language === 'hebrew' ? 'rtl' : 'ltr'}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+          />
+        </div>
+      );
+    }
+
     if (challenge.challengeType === 'custom' || !challenge.challengeType) {
       const text = language === 'hebrew' && challenge.contentHebrew 
         ? challenge.contentHebrew 
@@ -280,6 +311,7 @@ export default function CommunityChallengeModal() {
   const showLanguageToggle = 
     (challenge?.challengeType === 'tehillim') || 
     (challenge?.challengeType === 'nishmas') ||
+    (challenge?.challengeType === 'womens-prayer') ||
     (challenge?.contentHebrew && challenge?.contentEnglish);
 
   const shareButton = isChallenge ? (
