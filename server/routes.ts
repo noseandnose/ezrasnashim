@@ -2760,9 +2760,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
             console.log('Webhook: Updated donation with correct payment intent ID');
             
-            // Extract metadata from session
-            const buttonType = session.metadata?.buttonType || 'active_campaign';
-            const amount = session.amount_total || 100;
+            // Extract metadata from session OR donation record (donation is source of truth)
+            const donationMetadata = sessionDonation.metadata as Record<string, any> || {};
+            const buttonType = session.metadata?.buttonType || donationMetadata.buttonType || sessionDonation.type || 'put_a_coin';
+            const amount = session.amount_total || sessionDonation.amount || 100;
             
             // Create an act record for tracking
             await storage.createAct({
@@ -2918,12 +2919,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const metadata = donation.metadata as Record<string, any> || {};
       const buttonType = metadata.buttonType || donation.type || 'put_a_coin';
       
-      // Create an act record if it doesn't exist already
+      // Get the actual payment intent ID (may differ from session ID)
+      const paymentIntentId = donation.stripePaymentIntentId?.startsWith('pi_') 
+        ? donation.stripePaymentIntentId 
+        : donation.stripeSessionId; // Fallback to session ID
+      
+      // Check for existing act to prevent duplicates (idempotency)
+      if (paymentIntentId) {
+        const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
+        if (existingAct) {
+          console.log(`Act already exists for ${paymentIntentId} - skipping duplicate creation`);
+          return res.json({ 
+            success: true, 
+            buttonType: buttonType,
+            message: `${buttonType} already recorded`,
+            alreadyProcessed: true
+          });
+        }
+      }
+      
+      // Create an act record with payment intent ID for idempotency
       await storage.createAct({
         userId: null,
         category: 'tzedaka',
         subtype: buttonType,
-        amount: donation.amount
+        amount: donation.amount,
+        paymentIntentId: paymentIntentId || undefined
       });
       
       console.log('SUCCESS: Donation success processing complete');
