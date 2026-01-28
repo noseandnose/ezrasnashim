@@ -164,10 +164,10 @@ export default function App() {
     }, 500);
   }, []);
   
-  // Invalidate queries when app resumes to fetch fresh data
+  // Force refetch of critical queries when app resumes from background
   useEffect(() => {
     let lastRefreshTime = 0;
-    const MIN_REFRESH_INTERVAL = 500; // Minimum 500ms between refreshes to prevent spam
+    const MIN_REFRESH_INTERVAL = 1000; // Minimum 1s between refreshes to prevent spam
     
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -177,11 +177,22 @@ export default function App() {
         lastRefreshTime = now;
         
         const today = getLocalDateString();
-        // Force refetch of all critical data immediately
-        queryClient.invalidateQueries({ queryKey: ['/api/home-summary', today], refetchType: 'all' });
-        queryClient.invalidateQueries({ queryKey: ['/api/daily-completion'], refetchType: 'all' });
-        queryClient.invalidateQueries({ queryKey: ['/api/global-progress'], refetchType: 'all' });
-        queryClient.invalidateQueries({ queryKey: ['/api/community-challenge'], refetchType: 'all' });
+        
+        // Use refetchQueries instead of invalidateQueries to force immediate network fetch
+        // This ensures users see fresh data immediately when returning to the app
+        queryClient.refetchQueries({ queryKey: ['/api/home-summary', today], type: 'active' });
+        queryClient.refetchQueries({ queryKey: ['/api/daily-completion'], type: 'active' });
+        queryClient.refetchQueries({ queryKey: ['/api/global-progress'], type: 'active' });
+        queryClient.refetchQueries({ queryKey: ['/api/community-challenge'], type: 'active' });
+        
+        // Also refetch time-sensitive data like zmanim
+        queryClient.refetchQueries({ 
+          predicate: (query) => {
+            const key = query.queryKey[0] as string;
+            return key?.includes('/api/zmanim') || key?.includes('/api/jewish-times');
+          },
+          type: 'active'
+        });
       }
     };
     
