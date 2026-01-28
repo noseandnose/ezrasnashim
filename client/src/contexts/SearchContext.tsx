@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useEffect } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { SearchRecord, createSearchIndex } from '@/lib/searchUtils';
 import { useModalStore } from '@/lib/types';
@@ -473,52 +473,52 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     
     const finalIndex = [...index, ...fixedItems];
     
-    // Debug logging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('[SearchContext] Search index built:', finalIndex.length, 'items');
-      console.log('[SearchContext] Torah data:', { 
-        hasHalacha: !!halachaContent,
-        hasChizuk: !!chizukContent,
-        hasEmuna: !!emunaContent
-      });
-    }
+    // Debug logging removed to reduce console spam during startup
     
     return finalIndex;
   }, [halachaContent, chizukContent, emunaContent, minchaPrayers, maarivPrayers, morningPrayers, dailyBrochas, specialBrochas, recipeContent, marriageInsight, pirkeiAvot, refuahPrayers, familyPrayers, lifePrayers, openModal]);
   
   // Build MiniSearch index for fuzzy matching with enhanced error handling
+  // Debounced to prevent rebuilding on every API response (15+ times on startup)
   const [miniSearchIndex, setMiniSearchIndex] = useState<MiniSearch<any> | null>(null);
+  const searchIndexLengthRef = useRef(0);
   
   useEffect(() => {
     if (searchIndex.length === 0) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('[SearchContext] Search index is empty, skipping MiniSearch creation');
-      }
+      return;
+    }
+    
+    // Skip if index hasn't grown significantly (prevents redundant rebuilds)
+    if (miniSearchIndex && searchIndex.length === searchIndexLengthRef.current) {
       return;
     }
     
     let cancelled = false;
     
-    createSearchIndex(searchIndex)
-      .then(index => {
-        if (!cancelled) {
-          setMiniSearchIndex(index);
-          if (process.env.NODE_ENV === 'development') {
-            console.log('[SearchContext] MiniSearch index created successfully with', searchIndex.length, 'records');
+    // Debounce the MiniSearch creation to batch rapid updates
+    const debounceTimer = setTimeout(() => {
+      if (cancelled) return;
+      
+      searchIndexLengthRef.current = searchIndex.length;
+      
+      createSearchIndex(searchIndex)
+        .then(index => {
+          if (!cancelled) {
+            setMiniSearchIndex(index);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('[SearchContext] MiniSearch index created with', searchIndex.length, 'records');
+            }
           }
-        }
-      })
-      .catch(error => {
-        console.error('[SearchContext] Failed to create MiniSearch index:', error);
-        if (error instanceof Error) {
-          console.error('[SearchContext] Error details:', {
-            message: error.message,
-            stack: error.stack
-          });
-        }
-      });
+        })
+        .catch(error => {
+          console.error('[SearchContext] Failed to create MiniSearch index:', error);
+        });
+    }, 300); // Wait 300ms for batch of API responses to settle
     
-    return () => { cancelled = true; };
+    return () => { 
+      cancelled = true;
+      clearTimeout(debounceTimer);
+    };
   }, [searchIndex]);
   
   const isLoading = false; // Using cached TanStack Query data, no explicit loading state needed
