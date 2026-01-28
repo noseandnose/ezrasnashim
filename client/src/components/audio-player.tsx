@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Loader2 } from "lucide-react";
 
 interface AudioPlayerProps {
   title: string;
@@ -16,10 +16,12 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const [playbackSpeed, setPlaybackSpeed] = useState("1");
   const [audioError, setAudioError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBuffering, setIsBuffering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [hasTriggeredCompletion, setHasTriggeredCompletion] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
+  const wasPlayingBeforeHidden = useRef(false);
 
   // Convert various hosting URLs to proxied streaming URLs
   const getDirectAudioUrl = (url: string) => {
@@ -105,8 +107,10 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         setProgress(progressPercent);
         setCurrentTime(formatTime(Math.floor(audio.currentTime)));
         
-        // Fallback: trigger completion when audio reaches 98%+ (in case 'ended' event doesn't fire)
-        if (progressPercent >= 98 && !hasTriggeredCompletion && onAudioEnded) {
+        // Fallback: trigger completion only when within 1 second of the end
+        // This prevents early completion while still catching cases where 'ended' doesn't fire
+        const remainingTime = audio.duration - audio.currentTime;
+        if (remainingTime <= 1 && !hasTriggeredCompletion && onAudioEnded) {
           setHasTriggeredCompletion(true);
           onAudioEnded();
         }
@@ -131,6 +135,24 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
 
     const handleCanPlay = () => {
       setAudioError(false);
+      setIsBuffering(false);
+    };
+    
+    const handleWaiting = () => {
+      setIsBuffering(true);
+    };
+    
+    const handlePlaying = () => {
+      setIsBuffering(false);
+    };
+    
+    const handleStalled = () => {
+      console.log('[AudioPlayer] Audio stalled - network issue or buffering');
+      setIsBuffering(true);
+    };
+    
+    const handleSuspend = () => {
+      console.log('[AudioPlayer] Audio suspended by browser');
     };
 
     audio.addEventListener('play', handlePlay);
@@ -140,6 +162,10 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('error', handleError);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('waiting', handleWaiting);
+    audio.addEventListener('playing', handlePlaying);
+    audio.addEventListener('stalled', handleStalled);
+    audio.addEventListener('suspend', handleSuspend);
 
     return () => {
       audio.removeEventListener('play', handlePlay);
@@ -149,6 +175,10 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('waiting', handleWaiting);
+      audio.removeEventListener('playing', handlePlaying);
+      audio.removeEventListener('stalled', handleStalled);
+      audio.removeEventListener('suspend', handleSuspend);
     };
   }, [audioUrl, onAudioEnded, hasTriggeredCompletion]);
 
@@ -157,6 +187,28 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       audioRef.current.playbackRate = parseFloat(playbackSpeed);
     }
   }, [playbackSpeed]);
+  
+  // Handle visibility change - resume audio when app comes back from background
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
+      
+      if (document.visibilityState === 'hidden') {
+        wasPlayingBeforeHidden.current = !audio.paused;
+      } else if (document.visibilityState === 'visible') {
+        if (wasPlayingBeforeHidden.current && audio.paused && !audio.ended) {
+          console.log('[AudioPlayer] Resuming audio after visibility change');
+          audio.play().catch(err => {
+            console.error('[AudioPlayer] Failed to resume after visibility change:', err);
+          });
+        }
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
 
   const formatTime = (seconds: number): string => {
@@ -245,7 +297,9 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
           data-testid="button-audio-play"
           type="button"
         >
-          {isPlaying ? (
+          {isBuffering ? (
+            <Loader2 className="w-7 h-7 animate-spin" />
+          ) : isPlaying ? (
             <Pause className="w-7 h-7" />
           ) : (
             <Play className="w-7 h-7 ml-0.5" />
