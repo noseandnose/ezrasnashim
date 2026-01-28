@@ -107,8 +107,10 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         setProgress(progressPercent);
         setCurrentTime(formatTime(Math.floor(audio.currentTime)));
         
-        // Fallback: trigger completion when audio reaches 98%+ (in case 'ended' event doesn't fire)
-        if (progressPercent >= 98 && !hasTriggeredCompletion && onAudioEnded) {
+        // Fallback: trigger completion only when within 1 second of the end
+        // This prevents early completion while still catching cases where 'ended' doesn't fire
+        const remainingTime = audio.duration - audio.currentTime;
+        if (remainingTime <= 1 && !hasTriggeredCompletion && onAudioEnded) {
           setHasTriggeredCompletion(true);
           onAudioEnded();
         }
