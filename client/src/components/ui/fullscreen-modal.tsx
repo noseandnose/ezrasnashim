@@ -152,6 +152,7 @@ export function ensurePointerEventsUnlocked() {
 if (typeof window !== 'undefined') {
   (window as any).__forceResetScrollLock = forceResetScrollLock;
   (window as any).__ensurePointerEventsUnlocked = ensurePointerEventsUnlocked;
+  (window as any).__getActiveModalCount = () => activeFullscreenModals;
   
   // Safety net: Reset scroll lock when page becomes visible if no modals are actually mounted
   // This catches cases where modals got stuck during background/foreground transitions
@@ -170,6 +171,22 @@ if (typeof window !== 'undefined') {
       }, 100);
     }
   });
+  
+  // Periodic safety check: every 30 seconds, verify counter matches DOM state
+  // This catches any edge cases where modals close without proper cleanup
+  setInterval(() => {
+    if (activeFullscreenModals > 0) {
+      const modalElements = document.querySelectorAll('[data-fullscreen-modal]');
+      if (modalElements.length === 0) {
+        console.warn('[FullscreenModal] Periodic check: counter stuck at', activeFullscreenModals, 'but no modals found. Resetting.');
+        forceResetScrollLock();
+      } else if (modalElements.length !== activeFullscreenModals) {
+        // Sync counter to actual DOM state
+        console.warn('[FullscreenModal] Counter mismatch: counter=', activeFullscreenModals, 'DOM=', modalElements.length, '. Syncing.');
+        activeFullscreenModals = modalElements.length;
+      }
+    }
+  }, 30000);
 }
 
 // Export helper functions for external use (e.g., App.tsx visibility handler)

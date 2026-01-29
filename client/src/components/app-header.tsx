@@ -3,7 +3,7 @@ import { useHebrewDate } from "@/hooks/use-hebrew-date";
 import { useInstallHighlight } from "@/hooks/use-install-highlight";
 import { useAuth } from "@/hooks/use-auth";
 import { useBackButtonHistory } from "@/hooks/use-back-button-history";
-import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, MapPin } from "lucide-react";
+import { BarChart3, Info, Share2, Heart, Share, X, Menu, MessageSquare, Search, Calendar, User, MapPin, Users } from "lucide-react";
 import { useLocation } from "wouter";
 import { useModalStore } from "@/lib/types";
 import { useState, useEffect, useRef } from "react";
@@ -312,6 +312,18 @@ export default function AppHeader() {
           >
             <MessageSquare className="h-5 w-5 mr-2" />
             Community Feedback
+          </div>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(false);
+              window.open('https://chat.whatsapp.com/KgPtWtTSd77CUdXNk1TRj0?mode=gi_t', '_blank');
+            }}
+            className="relative flex cursor-pointer select-none items-center rounded-lg px-2 py-2 text-sm transition-colors hover:bg-blush/10 active:bg-blush/20"
+            data-testid="menu-item-community"
+          >
+            <Users className="h-5 w-5 mr-2" />
+            Community
           </div>
           <div
             onClick={(e) => {

@@ -178,6 +178,18 @@ export default function ChainPage() {
       const nextData = nextResponse.ok ? await nextResponse.json() : null;
       return { nextPsalm: nextData?.psalmNumber || null, stats: completeData.stats, completedPsalm: psalmNumber };
     },
+    onMutate: async () => {
+      // Optimistic update: immediately increment the count
+      const previousStats = localStats;
+      if (localStats) {
+        setLocalStats({
+          ...localStats,
+          totalCompleted: localStats.totalCompleted + 1,
+          available: Math.max(0, localStats.available - 1),
+        });
+      }
+      return { previousStats };
+    },
     onSuccess: (data) => {
       // Mark modal complete for flower tracking
       if (data.completedPsalm) {
@@ -210,7 +222,11 @@ export default function ChainPage() {
         setCurrentPsalm(null);
       }
     },
-    onError: () => {
+    onError: (_error, _variables, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousStats) {
+        setLocalStats(context.previousStats);
+      }
       toast({
         title: "Error",
         description: "Could not save completion. Please try again.",
