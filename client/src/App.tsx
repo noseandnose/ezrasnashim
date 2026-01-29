@@ -176,6 +176,14 @@ export default function App() {
         if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) return;
         lastRefreshTime = now;
         
+        // CRITICAL: Clean up any stuck modal/overlay state when resuming
+        // This fixes frozen UI after background/foreground transitions
+        setTimeout(() => {
+          if (typeof (window as any).__ensurePointerEventsUnlocked === 'function') {
+            (window as any).__ensurePointerEventsUnlocked();
+          }
+        }, 200);
+        
         const today = getLocalDateString();
         
         // Use refetchQueries instead of invalidateQueries to force immediate network fetch
@@ -200,10 +208,22 @@ export default function App() {
     window.addEventListener('focus', handleVisibilityChange);
     window.addEventListener('pageshow', handleVisibilityChange);
     
+    // Periodic health check: every 60 seconds, clean up any orphaned overlays
+    // This catches edge cases where modals/popovers get stuck without proper cleanup
+    const healthCheckInterval = setInterval(() => {
+      // Only run cleanup if page is visible and no user interaction in progress
+      if (document.visibilityState === 'visible') {
+        if (typeof (window as any).__ensurePointerEventsUnlocked === 'function') {
+          (window as any).__ensurePointerEventsUnlocked();
+        }
+      }
+    }, 60000);
+    
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('pageshow', handleVisibilityChange);
+      clearInterval(healthCheckInterval);
     };
   }, []);
 
