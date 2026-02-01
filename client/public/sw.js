@@ -395,13 +395,9 @@ self.addEventListener('fetch', (event) => {
         if (response.ok) {
           // Clone immediately before caching
           const responseClone = response.clone();
-          // Cache successful API responses with shorter TTL
+          // Cache successful API responses (cleanup handled by periodic cache trimming)
           caches.open(API_CACHE).then(cache => {
             cache.put(event.request, responseClone);
-            // Auto-expire API cache entries after 1 hour
-            setTimeout(() => {
-              cache.delete(event.request);
-            }, 60 * 60 * 1000);
           });
         }
         return response;

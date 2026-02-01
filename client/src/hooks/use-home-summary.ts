@@ -66,6 +66,6 @@ export function useHomeSummary() {
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: true, // Refetch when user returns to app
+    refetchOnWindowFocus: false, // App.tsx handles visibility refetching centrally
   });
 }

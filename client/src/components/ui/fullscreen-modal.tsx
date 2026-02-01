@@ -174,7 +174,9 @@ if (typeof window !== 'undefined') {
   
   // Periodic safety check: every 30 seconds, verify counter matches DOM state
   // This catches any edge cases where modals close without proper cleanup
+  // Only run when page is visible to save battery
   setInterval(() => {
+    if (document.visibilityState !== 'visible') return;
     if (activeFullscreenModals > 0) {
       const modalElements = document.querySelectorAll('[data-fullscreen-modal]');
       if (modalElements.length === 0) {

@@ -2,44 +2,12 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { initializeOptimizations } from "./lib/optimization";
+import { resumeCoordinator } from "./lib/app-resume-coordinator";
 
-// Auto-reload workaround for FlutterFlow WebView freeze bug
-// When WebView resumes from background, React click events stop working
-// This detects the resume and forces a reload to restore functionality
+// Initialize central resume coordinator for background/foreground handling
+// This consolidates all visibility change handlers into one system
 if (typeof window !== 'undefined') {
-  let lastVisibilityTime = Date.now();
-  let wasHidden = false;
-  const BACKGROUND_THRESHOLD = 30000; // Only reload if background for 30+ seconds
-  
-  // Detect when page becomes hidden (app goes to background)
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      wasHidden = true;
-      lastVisibilityTime = Date.now();
-    } else if (wasHidden) {
-      // Page is now visible again after being hidden
-      const timeInBackground = Date.now() - lastVisibilityTime;
-      
-      // Only reload if we were in background long enough for WebView to freeze
-      if (timeInBackground > BACKGROUND_THRESHOLD) {
-        console.log('[WebView Recovery] Reloading after background resume...');
-        // Small delay to let WebView stabilize before reload
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      }
-      wasHidden = false;
-    }
-  }, { capture: true });
-  
-  // Also handle pageshow event for bfcache scenarios
-  window.addEventListener('pageshow', (event) => {
-    if (event.persisted) {
-      // Page was restored from bfcache - always reload
-      console.log('[WebView Recovery] Reloading from bfcache...');
-      window.location.reload();
-    }
-  });
+  resumeCoordinator.init();
   
   // Emergency manual recovery: Tap 5 times quickly in top-right corner
   let cornerTapCount = 0;

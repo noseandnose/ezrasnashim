@@ -119,11 +119,13 @@ export default function ChainPage() {
     }
   }, [initialStats, localStats]);
 
-  // Periodic stats refresh (every 10 seconds for real-time feedback)
+  // Periodic stats refresh (every 30 seconds - chain data doesn't change frequently)
   useEffect(() => {
     if (!slug || !chainData) return;
     
     const refreshStats = async () => {
+      // Skip refresh if page is not visible (saves battery when backgrounded)
+      if (document.visibilityState !== 'visible') return;
       try {
         // Add cache-busting timestamp to prevent browser caching
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats?t=${Date.now()}`);
@@ -136,7 +138,7 @@ export default function ChainPage() {
       }
     };
     
-    const interval = setInterval(refreshStats, 10000);
+    const interval = setInterval(refreshStats, 30000);
     return () => clearInterval(interval);
   }, [slug, chainData]);
 
