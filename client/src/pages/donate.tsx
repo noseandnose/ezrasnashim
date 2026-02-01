@@ -59,11 +59,7 @@ export default function Donate() {
   
   // Function to mark individual button as complete (from tzedaka-section)
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
-    const getLocalDateString = () => {
-      return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
-    };
-
-    const today = getLocalDateString();
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
     
     if (!completions[today]) {

@@ -90,12 +90,10 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   const { trackEvent } = useAnalytics();
 
   // Individual button completion tracking using localStorage with daily reset
-  const getLocalDateString = () => {
-    return new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
-  };
+  const getTodayDateString = () => new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
 
   const isTzedakaButtonCompleted = (buttonType: TzedakaButtonType): boolean => {
-    const today = getLocalDateString();
+    const today = getTodayDateString();
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
     // For gave_elsewhere, check if count > 0
     if (buttonType === 'gave_elsewhere') {
@@ -105,13 +103,13 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
   };
 
   const getGaveElsewhereCount = (): number => {
-    const today = getLocalDateString();
+    const today = getTodayDateString();
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
     return completions[today]?.gave_elsewhere_count || 0;
   };
 
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
-    const today = getLocalDateString();
+    const today = getTodayDateString();
     const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
     
     if (!completions[today]) {
