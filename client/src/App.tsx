@@ -20,6 +20,7 @@ import { initGA } from "./lib/analytics";
 import { useAnalytics } from "./hooks/use-analytics";
 import { initializePerformance, whenIdle } from "./lib/startup-performance";
 import { initResumeManager } from "./lib/resume-manager";
+import { resumeCoordinator } from "./lib/app-resume-coordinator";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));
@@ -164,55 +165,39 @@ export default function App() {
     }, 500);
   }, []);
   
-  // Force refetch of critical queries when app resumes from background
+  // Register recovery callback with central coordinator for query refetching
   useEffect(() => {
-    let lastRefreshTime = 0;
-    const MIN_REFRESH_INTERVAL = 1000; // Minimum 1s between refreshes to prevent spam
-    
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
-        const now = Date.now();
-        // Debounce rapid visibility changes
-        if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) return;
-        lastRefreshTime = now;
-        
-        // CRITICAL: Clean up any stuck modal/overlay state when resuming
-        // This fixes frozen UI after background/foreground transitions
-        setTimeout(() => {
-          if (typeof (window as any).__ensurePointerEventsUnlocked === 'function') {
-            (window as any).__ensurePointerEventsUnlocked();
-          }
-        }, 200);
-        
-        const today = getLocalDateString();
-        
-        // Use refetchQueries instead of invalidateQueries to force immediate network fetch
-        // This ensures users see fresh data immediately when returning to the app
-        queryClient.refetchQueries({ queryKey: ['/api/home-summary', today], type: 'active' });
-        queryClient.refetchQueries({ queryKey: ['/api/daily-completion'], type: 'active' });
-        queryClient.refetchQueries({ queryKey: ['/api/global-progress'], type: 'active' });
-        queryClient.refetchQueries({ queryKey: ['/api/community-challenge'], type: 'active' });
-        
-        // Also refetch time-sensitive data like zmanim
+    // Register query refetch as a recovery callback
+    // The coordinator handles debouncing and sequencing
+    const unsubscribe = resumeCoordinator.registerRecoveryCallback('app-query-refetch', async () => {
+      // Clean up any stuck modal/overlay state
+      if (typeof (window as any).__ensurePointerEventsUnlocked === 'function') {
+        (window as any).__ensurePointerEventsUnlocked();
+      }
+      
+      const today = getLocalDateString();
+      
+      // Refetch critical queries for fresh data when returning to the app
+      await Promise.all([
+        queryClient.refetchQueries({ queryKey: ['/api/home-summary', today], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['/api/daily-completion'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['/api/global-progress'], type: 'active' }),
+        queryClient.refetchQueries({ queryKey: ['/api/community-challenge'], type: 'active' }),
         queryClient.refetchQueries({ 
           predicate: (query) => {
             const key = query.queryKey[0] as string;
             return key?.includes('/api/zmanim') || key?.includes('/api/jewish-times');
           },
           type: 'active'
-        });
-      }
-    };
-    
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleVisibilityChange);
-    window.addEventListener('pageshow', handleVisibilityChange);
+        }),
+      ]);
+    });
     
     // Periodic health check: every 60 seconds, clean up any orphaned overlays
     // This catches edge cases where modals/popovers get stuck without proper cleanup
     const healthCheckInterval = setInterval(() => {
-      // Only run cleanup if page is visible and no user interaction in progress
-      if (document.visibilityState === 'visible') {
+      // Only run cleanup if page is visible
+      if (resumeCoordinator.isVisible()) {
         if (typeof (window as any).__ensurePointerEventsUnlocked === 'function') {
           (window as any).__ensurePointerEventsUnlocked();
         }
@@ -220,9 +205,7 @@ export default function App() {
     }, 60000);
     
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('focus', handleVisibilityChange);
-      window.removeEventListener('pageshow', handleVisibilityChange);
+      unsubscribe();
       clearInterval(healthCheckInterval);
     };
   }, []);

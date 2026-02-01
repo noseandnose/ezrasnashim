@@ -802,6 +802,7 @@ export function ShachrisNavigationArrow() {
   
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       forceUpdate(n => n + 1);
     }, 100); // Poll for state changes
     
@@ -1736,6 +1737,7 @@ export function MorningBrochasNavigationArrow() {
   
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       forceUpdate(n => n + 1);
     }, 100); // Poll for state changes
     

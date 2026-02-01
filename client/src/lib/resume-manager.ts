@@ -8,11 +8,14 @@
  * 3. Stale interaction state from before backgrounding
  * 
  * Solution: Reset all interaction state and ensure DOM is clean on resume.
+ * 
+ * NOTE: This module now registers with the central resume coordinator
+ * instead of setting up its own visibility change listeners.
  */
 
+import { resumeCoordinator } from './app-resume-coordinator';
+
 let isInitialized = false;
-let lastHiddenTime = 0;
-const STALE_THRESHOLD_MS = 2000; // Consider state stale after 2 seconds in background
 
 // Track resume state
 let isInRecoveryMode = false;
@@ -264,61 +267,34 @@ function installNativeClickRecovery() {
 
 /**
  * Main resume handler - called when app returns from background
+ * NOTE: The central coordinator already handles:
+ * - Filtering short backgrounds (< 2s)
+ * - Force reload after 30+ seconds
+ * So this function always runs full recovery when called.
  */
 function handleResume() {
-  const timeInBackground = lastHiddenTime > 0 ? Date.now() - lastHiddenTime : 0;
-  
-  // Only do full reset if was in background for significant time
-  if (timeInBackground > STALE_THRESHOLD_MS) {
-    // Phase 1: Reset interaction state
-    resetInteractionState();
-    releasePointerCaptures();
-    
-    // Phase 2: Fix DOM/CSS blockers
-    fixPointerEventBlockers();
-    fixScrollLockState();
-    
-    // Phase 3: Clear stuck focus
-    clearStuckFocus();
-    
-    // Phase 4: Re-arm event listeners
-    rearmEventListeners();
-    
-    // Phase 5: Reset pointer events on all interactives to ensure they're clickable
-    resetPointerEventsOnInteractives();
-    
-    // Phase 6: Install native click recovery as fallback
-    installNativeClickRecovery();
-    
-    // Dispatch custom event for components that need to know about resume
-    window.dispatchEvent(new CustomEvent('app-resume', { 
-      detail: { timeInBackground } 
-    }));
-    
-    // Phase 7: Last resort - if was in background for very long (>30s), 
-    // there's a higher chance the JS engine is in a bad state
-    // Schedule a delayed check and soft-reload if needed
-    if (timeInBackground > 30000) {
-      setTimeout(() => {
-        // Check if any interaction has happened since resume
-        // If not, the app might truly be stuck - offer a refresh
-        if (isInRecoveryMode) {
-          // Still in recovery mode after 5 seconds = likely stuck
-          window.location.reload();
-        }
-      }, 5000);
-    }
-  }
-}
-
-/**
- * Track when app goes to background
- */
-function handleHidden() {
-  lastHiddenTime = Date.now();
-  
-  // Pre-emptively reset interaction state when going to background
+  // Phase 1: Reset interaction state
   resetInteractionState();
+  releasePointerCaptures();
+  
+  // Phase 2: Fix DOM/CSS blockers
+  fixPointerEventBlockers();
+  fixScrollLockState();
+  
+  // Phase 3: Clear stuck focus
+  clearStuckFocus();
+  
+  // Phase 4: Re-arm event listeners
+  rearmEventListeners();
+  
+  // Phase 5: Reset pointer events on all interactives to ensure they're clickable
+  resetPointerEventsOnInteractives();
+  
+  // Phase 6: Install native click recovery as fallback
+  installNativeClickRecovery();
+  
+  // Dispatch custom event for components that need to know about resume
+  window.dispatchEvent(new CustomEvent('app-resume'));
 }
 
 /**
@@ -390,40 +366,11 @@ export function initResumeManager() {
   if (typeof window === 'undefined' || isInitialized) return;
   isInitialized = true;
   
-  // Handle visibility change (most reliable)
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      handleHidden();
-    } else if (document.visibilityState === 'visible') {
-      // Small delay to let WebView fully resume
-      setTimeout(() => {
-        handleResume();
-        // Enable dead-click detection as a fallback
-        enableDeadClickDetection();
-      }, 50);
-    }
-  });
-  
-  // Handle pageshow (for bfcache restoration)
-  window.addEventListener('pageshow', (e: PageTransitionEvent) => {
-    if (e.persisted) {
-      // Page restored from bfcache
-      setTimeout(() => {
-        handleResume();
-        enableDeadClickDetection();
-      }, 50);
-    }
-  });
-  
-  // Handle focus (additional fallback)
-  window.addEventListener('focus', () => {
-    // Only handle if we were hidden
-    if (lastHiddenTime > 0) {
-      setTimeout(() => {
-        handleResume();
-        enableDeadClickDetection();
-      }, 100);
-    }
+  // Register recovery actions with the central coordinator
+  // The coordinator handles visibility changes and debouncing
+  resumeCoordinator.registerRecoveryCallback('resume-manager', () => {
+    handleResume();
+    enableDeadClickDetection();
   });
   
   // Listen for custom recovery event (from fullscreen-modal.tsx)
@@ -431,7 +378,7 @@ export function initResumeManager() {
     handleResume();
   });
   
-  // Also mark clicks as handled when any React onClick fires
+  // Mark clicks as handled when any React onClick fires
   // This is done by adding a capture-phase listener that tracks if events bubble properly
   document.addEventListener('click', () => {
     // If this fires, the event system is working

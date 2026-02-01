@@ -31,6 +31,7 @@ export default function Profile() {
   
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       setBackgroundImage(getTimeBasedBackground());
     }, 60000);
     return () => clearInterval(interval);
