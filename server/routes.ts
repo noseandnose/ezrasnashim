@@ -2310,82 +2310,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { amount, donationType, metadata } = req.body;
-      
-      // console.log('=== PAYMENT INTENT REQUEST ===');
-      // console.log('Request body:', { amount, donationType, metadata });
-      // console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
-      // console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
-      
-      // if (!amount || amount <= 0) {
-      //   console.log('Invalid amount provided:', amount);
-      //   return res.status(400).json({ message: "Invalid amount" });
-      // }
-
-      // if (!process.env.STRIPE_SECRET_KEY) {
-      //   console.error('STRIPE_SECRET_KEY not found in environment');
-      //   return res.status(500).json({ message: "Stripe not configured" });
-      // }
-
-      // console.log('Creating payment intent with:', { 
-      //   amount, 
-      //   donationType, 
-      //   metadata,
-      //   stripeConfigured: !!process.env.STRIPE_SECRET_KEY
-      // });
-      
-      // const paymentIntentData: any = {
-      //   amount: Math.round(amount * 100), // Convert to cents
-      //   currency: "usd",
-      //   metadata: {
-      //     source: "ezras-nashim-donation",
-      //     donationType: donationType || "General Donation",
-      //     sponsorName: metadata?.sponsorName || "",
-      //     dedication: metadata?.dedication || "",
-      //     email: email || metadata?.email || "",
-      //     timestamp: new Date().toISOString()
-      //   },
-      //   // Enable automatic payment methods including Apple Pay and Google Pay
-      //   automatic_payment_methods: {
-      //     enabled: true,
-      //     allow_redirects: 'never' as const // Keep on same page for better UX
-      //   }
-      // };
-      
-      // // Add receipt_email if provided - this will trigger Stripe to send receipts
-      // const receiptEmail = email || metadata?.email;
-      // if (receiptEmail && receiptEmail.includes('@')) {
-      //   paymentIntentData.receipt_email = receiptEmail;
-      //   console.log('Receipt email will be sent to:', receiptEmail);
-      // }
-      
-      // console.log('Payment intent configuration:', paymentIntentData);
-      
-      // const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-      
-      // console.log('Payment intent created successfully:', {
-      //   id: paymentIntent.id,
-      //   status: paymentIntent.status,
-      //   amount: paymentIntent.amount,
-      //   client_secret_exists: !!paymentIntent.client_secret
-      // });
-      
-      // // Track the donation attempt in our database
-      // try {
-      //   await storage.createDonation({
-      //     stripePaymentIntentId: paymentIntent.id,
-      //     amount: paymentIntent.amount, // Already in cents
-      //     donationType: donationType || "General Donation",
-      //     sponsorName: metadata?.sponsorName,
-      //     dedication: metadata?.dedication,
-      //     email: receiptEmail,
-      //     status: 'pending'
-      //   });
-      //   console.log('Donation tracked in database:', paymentIntent.id);
-      // } catch (dbError) {
-      //   console.error('Error saving donation to database:', dbError);
-      //   // Continue even if database save fails
-      // }
-
       const returnUrl = req.body.returnUrl;
       const session = await stripe.checkout.sessions.create({
         currency: 'usd',
@@ -2542,20 +2466,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.redirect(`/api/media-proxy/gdrive/${fileId}`);
   });
 
-  // Serve frontend application on root route
-  // app.get("/", (req, res) => {
-  //   // In Replit environment, we need to serve the frontend differently
-  //   if (process.env.REPLIT_DOMAINS) {
-  //     // For Replit, redirect to the frontend port
-  //     const replitDomain = process.env.REPLIT_DOMAINS;
-  //     res.redirect(`https://${replitDomain}`);
-  //   } else {
-  //     // Local development
-  //     res.redirect("http://localhost:5173");
-  //   }
-  // });
-
-  // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
 
   // Debug endpoint to verify webhook secret is loaded
   app.get("/api/webhooks/stripe/debug", async (_req, res) => {
