@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import compression from "compression";
@@ -232,6 +233,7 @@ app.use('/api/webhooks/stripe', express.raw({ type: 'application/json' }));
 // Increase JSON limit for large payloads (for all other routes)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(cookieParser());
 
 
 

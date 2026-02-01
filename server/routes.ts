@@ -166,7 +166,7 @@ import {
   insertMessagesSchema
 } from "../shared/schema";
 
-// Admin authentication middleware - JWT only (legacy password fallback removed)
+// Admin authentication middleware - JWT only (httpOnly cookie or Authorization header)
 function requireAdminAuth(req: any, res: any, next: any) {
   if (!isAdminConfigured()) {
     return res.status(500).json({ 
@@ -174,10 +174,14 @@ function requireAdminAuth(req: any, res: any, next: any) {
     });
   }
   
+  // Check for token in httpOnly cookie first, then Authorization header (backwards compatible)
+  const cookieToken = req.cookies?.admin_token;
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ') 
+  const headerToken = authHeader && authHeader.startsWith('Bearer ') 
     ? authHeader.slice(7) 
     : null;
+  
+  const token = cookieToken || headerToken;
   
   if (!token) {
     return res.status(401).json({ 
@@ -252,9 +256,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await validateAdminLogin(password);
       
       if (result.success && result.token) {
+        // Set httpOnly cookie for secure token storage
+        res.cookie('admin_token', result.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+          path: '/'
+        });
+        
         return res.json({ 
-          success: true, 
-          token: result.token,
+          success: true,
           expiresIn: '24h'
         });
       }
@@ -275,6 +287,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin auth status check - verifies if current token is valid
   app.get("/api/admin/auth-status", requireAdminAuth, (_req, res) => {
     return res.json({ authenticated: true });
+  });
+
+  // Admin logout - clears httpOnly cookie
+  app.post("/api/admin/logout", (_req, res) => {
+    res.clearCookie('admin_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/'
+    });
+    return res.json({ success: true });
   });
 
   // Calendar download endpoint using GET request to avoid CORS issues
