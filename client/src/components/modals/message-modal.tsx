@@ -19,7 +19,7 @@ export default function MessageModal({ isOpen, onClose, date }: MessageModalProp
   const { data: message, isLoading } = useQuery<Message>({
     queryKey: [`/api/messages/${date}`],
     enabled: isOpen && !!date,
-    refetchOnWindowFocus: false, // Messages are date-specific, don't need frequent refetch
+    refetchOnWindowFocus: true, // Refetch when user returns to check for updates
     staleTime: 2 * 60 * 1000, // Consider data stale after 2 minutes
   });
 

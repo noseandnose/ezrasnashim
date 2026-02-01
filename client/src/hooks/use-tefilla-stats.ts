@@ -27,7 +27,7 @@ export function useTefillaStats() {
     },
     staleTime: 60 * 1000, // 1 minute
     gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false, // App.tsx handles visibility refetching centrally
+    refetchOnWindowFocus: true, // Refetch on resume to update prayer stats
     refetchOnMount: 'always',
   });
 }

@@ -29,7 +29,7 @@ export default function SponsorshipBar({ className = "" }: SponsorshipBarProps) 
     staleTime: 6 * 60 * 60 * 1000, // Cache for 6 hours (sponsors set once per day)
     gcTime: 12 * 60 * 60 * 1000, // Keep in cache for 12 hours
     refetchOnMount: false,
-    refetchOnWindowFocus: false, // Sponsors change infrequently, don't refetch on every resume
+    refetchOnWindowFocus: true, // Refetch when user returns to page (for mid-day sponsor updates)
   });
 
   if (isLoading || !sponsor) {
