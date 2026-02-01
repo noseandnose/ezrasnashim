@@ -218,6 +218,11 @@ export default function ChainPage() {
       // Load next psalm silently (no popup)
       if (data.nextPsalm) {
         setCurrentPsalm(data.nextPsalm);
+        // Scroll to top so user sees the new chapter
+        setTimeout(() => {
+          const scrollContainer = document.querySelector('[data-scroll-container]');
+          scrollContainer?.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
       } else {
         setCurrentPsalm(null);
       }
@@ -473,7 +478,7 @@ export default function ChainPage() {
       </div>
 
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" data-scroll-container>
         <div className="p-4 space-y-4">
           {/* Tehillim Chain section with border */}
           <div 
