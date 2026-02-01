@@ -11,6 +11,46 @@
 
 /* Safe Area CSS Variables - CSS-first approach for instant load without layout shift */
 :root {
+  /* ===== THEME COLORS ===== */
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(0, 0%, 0%);
+  --muted: hsl(300, 18%, 94%);
+  --muted-foreground: hsl(0, 0%, 0%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(0, 0%, 0%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(0, 0%, 0%);
+  --border: hsl(300, 18%, 90%);
+  --input: hsl(300, 18%, 90%);
+  --primary: hsl(345, 55%, 82%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(300, 18%, 94%);
+  --secondary-foreground: hsl(0, 0%, 0%);
+  --accent: hsl(262, 40%, 88%);
+  --accent-foreground: hsl(0, 0%, 0%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(345, 55%, 82%);
+  --radius: 1.25rem;
+  
+  /* ===== QUIET JOY - SPIRITUAL RETREAT COLORS ===== */
+  --rose-blush: hsl(350, 45%, 85%);
+  --ivory: hsl(45, 70%, 96%);
+  --sand-gold: hsl(40, 35%, 80%);
+  --muted-lavender: hsl(260, 30%, 85%);
+  --warm-gray: hsl(0, 0%, 0%);
+  --soft-white: hsl(45, 70%, 98%);
+  --blush: hsl(350, 45%, 85%);
+  --lavender: hsl(260, 30%, 85%);
+  --sage: hsl(120, 20%, 75%);
+  
+  /* ===== ADMIN INTERFACE COLORS ===== */
+  --rose-blush-hover: hsl(350, 45%, 70%);
+  --rose-icon-bg: hsl(350, 45%, 95%);
+  --rose-icon-text: hsl(350, 45%, 65%);
+  --rose-bg-light: hsl(350, 45%, 96%);
+  
+  /* ===== LAYOUT DIMENSIONS ===== */
   /* Header/Footer padding values */
   --header-padding-vertical: 0.625rem; /* 10px top + 10px bottom = 20px total */
   --footer-padding-vertical: 0; /* Footer has no additional padding */
@@ -20,7 +60,11 @@
   --header-row-height: 48px; /* Menu + Logo + Message buttons (p-2 buttons with h-6 w-6 icons + touch targets) */
   --footer-content-height: 76px; /* Bottom navigation height (updated for larger icons) */
   
-  /* Safe area insets from browser (automatically resolved by CSS engine) */
+  /* Legacy header/footer heights for content padding (backward compatibility) */
+  --header-height: 56px;
+  --footer-height: 88px;
+  
+  /* ===== SAFE AREA INSETS ===== */
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
@@ -43,7 +87,7 @@
     --browser-ui-bottom: 0px;
   }
   
-  /* Computed layout dimensions (pure CSS calc, includes ALL spacing) */
+  /* ===== COMPUTED LAYOUT DIMENSIONS ===== */
   /* Header total = safe-area + top-padding + row-height + bottom-padding */
   --header-total-height: calc(var(--safe-area-top) + var(--header-padding-vertical) + var(--header-row-height) + var(--header-padding-vertical));
   /* Footer total = content height + safe-area */
@@ -55,6 +99,10 @@
   --sal: var(--safe-area-left);
   --sar: var(--safe-area-right);
   
+  /* Total bottom safe area (safe-area + browser UI offset) */
+  --safe-bottom-total: calc(var(--safe-area-bottom) + var(--browser-ui-bottom));
+  
+  /* ===== TYPOGRAPHY ===== */
   /* Default font for the app - Platypi for English text */
   font-family: Platypi, serif;
 }
@@ -236,46 +284,6 @@ button,
 }
 
 /* Grey boxes use font stack defined above */
-
-/* Removed old English text styling */
-
-:root {
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(0, 0%, 0%);
-  --muted: hsl(300, 18%, 94%);
-  --muted-foreground: hsl(0, 0%, 0%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(0, 0%, 0%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(0, 0%, 0%);
-  --border: hsl(300, 18%, 90%);
-  --input: hsl(300, 18%, 90%);
-  --primary: hsl(345, 55%, 82%);
-  --primary-foreground: hsl(0, 0%, 0%);
-  --secondary: hsl(300, 18%, 94%);
-  --secondary-foreground: hsl(0, 0%, 0%);
-  --accent: hsl(262, 40%, 88%);
-  --accent-foreground: hsl(0, 0%, 0%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(60, 9.1%, 97.8%);
-  --ring: hsl(345, 55%, 82%);
-  --radius: 1.25rem;
-  
-  /* Quiet Joy - Spiritual Retreat Colors */
-  --rose-blush: hsl(350, 45%, 85%);
-  --ivory: hsl(45, 70%, 96%);
-  --sand-gold: hsl(40, 35%, 80%);
-  --muted-lavender: hsl(260, 30%, 85%);
-  --warm-gray: hsl(0, 0%, 0%);
-  --soft-white: hsl(45, 70%, 98%);
-  --blush: hsl(350, 45%, 85%);
-  --lavender: hsl(260, 30%, 85%);
-  --sage: hsl(120, 20%, 75%);
-  
-  /* Header and footer heights for content padding */
-  --header-height: 56px;
-  --footer-height: 88px;
-}
 
 /* Fix for Hebrew text alignment in modals */
 .text-right {
@@ -610,14 +618,6 @@ h1, h2, h3, h4, h5, h6,
 /* Ensure buttons and interactive elements use black text */
 button, .btn, [role="button"] {
   color: #000000 !important;
-}
-
-/* Additional CSS variables for admin interface */
-:root {
-  --rose-blush-hover: hsl(350, 45%, 70%);
-  --rose-icon-bg: hsl(350, 45%, 95%);
-  --rose-icon-text: hsl(350, 45%, 65%);
-  --rose-bg-light: hsl(350, 45%, 96%);
 }
 
 /* Base text styling - ensure Platypi is used for all English text */
