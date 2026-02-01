@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { Campaign } from "@shared/schema";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 interface CommunityImpact {
   id: number;
@@ -13,10 +14,6 @@ interface TzedakaSummary {
   communityImpact: CommunityImpact | null;
   errors?: Record<string, boolean>;
   fetchedAt: string;
-}
-
-function getLocalDateString(): string {
-  return new Date().toISOString().split('T')[0];
 }
 
 export function useTzedakaSummary() {

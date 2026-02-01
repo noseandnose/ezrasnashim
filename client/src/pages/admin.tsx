@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,22 +33,18 @@ type AdminTab = 'messages' | 'recipes' | 'inspirations' | 'notifications' | 'par
 export default function Admin() {
   const [activeTab, setActiveTab] = useState<AdminTab>('messages');
   const [adminPassword, setAdminPassword] = useState('');
-  const [authToken, setAuthToken] = useState<string | null>(() => {
-    // Try to restore token from sessionStorage on mount
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('adminToken');
-    }
-    return null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    // Check if we have a stored token
-    if (typeof window !== 'undefined') {
-      return !!sessionStorage.getItem('adminToken');
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { toast } = useToast();
+  
+  // Check auth status on mount via API (httpOnly cookie is sent automatically)
+  useEffect(() => {
+    axiosClient.get('/api/admin/auth-status')
+      .then(() => setIsAuthenticated(true))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setIsCheckingAuth(false));
+  }, []);
 
   // Messages state
   const [messageFormData, setMessageFormData] = useState({
@@ -142,17 +138,15 @@ export default function Admin() {
   const [monthComparison, setMonthComparison] = useState<any>(null);
   const [isLoadingAnalytics, setIsLoadingAnalytics] = useState(false);
 
-  // Set up authorization headers for authenticated requests
-  const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${authToken}`
-  });
-
-  // Handle logout
-  const handleLogout = () => {
-    setAuthToken(null);
+  // Handle logout - calls API to clear httpOnly cookie
+  const handleLogout = async () => {
+    try {
+      await axiosClient.post('/api/admin/logout');
+    } catch (error) {
+      // Ignore errors - user is logged out regardless
+    }
     setIsAuthenticated(false);
     setAdminPassword('');
-    sessionStorage.removeItem('adminToken');
     toast({
       title: 'Logged Out',
       description: 'You have been logged out.',
@@ -166,7 +160,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'messages') return [];
       try {
         const response = await axiosClient.get('/api/messages?upcoming=true', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -187,7 +181,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'recipes') return [];
       try {
         const response = await axiosClient.get('/api/table/recipes', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -208,7 +202,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'inspirations') return [];
       try {
         const response = await axiosClient.get('/api/table/inspirations', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -229,7 +223,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
         const response = await axiosClient.get('/api/push/history', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -249,7 +243,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
         const response = await axiosClient.get('/api/scheduled-notifications', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -269,7 +263,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'notifications') return [];
       try {
         const response = await axiosClient.get('/api/push/subscriptions', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -289,7 +283,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'notifications') return null;
       try {
         const response = await axiosClient.get('/api/push/queue-status', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -311,7 +305,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'parsha-vorts') return [];
       try {
         const response = await axiosClient.get('/api/table/vorts', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -332,7 +326,7 @@ export default function Admin() {
       if (!isAuthenticated || activeTab !== 'gems-of-gratitude') return [];
       try {
         const response = await axiosClient.get('/api/gems-of-gratitude/all', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -365,12 +359,10 @@ export default function Admin() {
         password: trimmedPassword
       });
       
-      if (response.data.success && response.data.token) {
-        const token = response.data.token;
-        setAuthToken(token);
+      if (response.data.success) {
+        // Token is now set via httpOnly cookie - no need to store manually
         setIsAuthenticated(true);
         setAdminPassword(''); // Clear password from memory
-        sessionStorage.setItem('adminToken', token);
         toast({
           title: 'Login Successful',
           description: 'You are now authenticated as admin.',
@@ -430,11 +422,11 @@ export default function Admin() {
       let response;
       if (editingMessage) {
         response = await axiosClient.put(`/api/messages/${editingMessage.id}`, messageData, {
-          headers: getAuthHeaders()
+
         });
       } else {
         response = await axiosClient.post('/api/messages', messageData, {
-          headers: getAuthHeaders()
+
         });
       }
 
@@ -470,7 +462,7 @@ export default function Admin() {
 
     try {
       await axiosClient.delete(`/api/messages/${message.id}`, {
-        headers: getAuthHeaders()
+
       });
       
       toast({
@@ -495,7 +487,7 @@ export default function Admin() {
   const handleMediaUpload = async () => {
     try {
       const response = await axiosClient.post('/api/objects/upload', {}, {
-        headers: getAuthHeaders()
+
       });
       const { uploadURL } = response.data;
       return { method: 'PUT' as const, url: uploadURL };
@@ -535,7 +527,7 @@ export default function Admin() {
         const response = await axiosClient.post('/api/objects/upload-complete', {
           objectURL: uploadURL
         }, {
-          headers: getAuthHeaders()
+
         });
         
         if (response.status === 200) {
@@ -601,7 +593,7 @@ export default function Admin() {
       };
 
       const response = await axiosClient.post('/api/table/recipe', recipeData, {
-        headers: getAuthHeaders()
+
       });
 
       if (response.status === 200 || response.status === 201) {
@@ -658,11 +650,11 @@ export default function Admin() {
       let response;
       if (editingInspiration) {
         response = await axiosClient.put(`/api/table/inspiration/${editingInspiration.id}`, inspirationData, {
-          headers: getAuthHeaders()
+
         });
       } else {
         response = await axiosClient.post('/api/table/inspiration', inspirationData, {
-          headers: getAuthHeaders()
+
         });
       }
 
@@ -699,7 +691,7 @@ export default function Admin() {
 
     try {
       const response = await axiosClient.delete(`/api/table/inspiration/${inspiration.id}`, {
-        headers: getAuthHeaders()
+
       });
       
       if (response.status === 200 || response.status === 204) {
@@ -755,11 +747,11 @@ export default function Admin() {
       let response;
       if (editingParshaVort) {
         response = await axiosClient.put(`/api/table/vort/${editingParshaVort.id}`, vortData, {
-          headers: getAuthHeaders()
+
         });
       } else {
         response = await axiosClient.post('/api/table/vort', vortData, {
-          headers: getAuthHeaders()
+
         });
       }
 
@@ -794,7 +786,7 @@ export default function Admin() {
 
     try {
       const response = await axiosClient.delete(`/api/table/vort/${vort.id}`, {
-        headers: getAuthHeaders()
+
       });
       
       if (response.status === 200 || response.status === 204) {
@@ -834,7 +826,7 @@ export default function Admin() {
 
       if (editingGem) {
         await axiosClient.put(`/api/gems-of-gratitude/${editingGem.id}`, payload, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Gem Updated',
@@ -842,7 +834,7 @@ export default function Admin() {
         });
       } else {
         await axiosClient.post('/api/gems-of-gratitude', payload, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Gem Created',
@@ -872,7 +864,7 @@ export default function Admin() {
 
     try {
       await axiosClient.delete(`/api/gems-of-gratitude/${gem.id}`, {
-        headers: getAuthHeaders()
+
       });
       
       toast({
@@ -931,11 +923,11 @@ export default function Admin() {
         let response;
         if (editingNotification) {
           response = await axiosClient.patch(`/api/scheduled-notifications/${editingNotification.id}`, scheduledData, {
-            headers: getAuthHeaders()
+  
           });
         } else {
           response = await axiosClient.post('/api/scheduled-notifications', scheduledData, {
-            headers: getAuthHeaders()
+  
           });
         }
 
@@ -959,7 +951,7 @@ export default function Admin() {
         };
 
         const response = await axiosClient.post('/api/push/send', instantData, {
-          headers: getAuthHeaders()
+
         });
 
         if (response.status === 200 || response.status === 201) {
@@ -987,7 +979,7 @@ export default function Admin() {
     setIsValidatingSubscriptions(true);
     try {
       const response = await axiosClient.post('/api/push/validate-subscriptions', {}, {
-        headers: getAuthHeaders()
+
       });
 
       if (response.status === 200) {
@@ -1017,7 +1009,7 @@ export default function Admin() {
 
     try {
       await axiosClient.delete(`/api/scheduled-notifications/${notification.id}`, {
-        headers: getAuthHeaders()
+
       });
       
       toast({
@@ -1051,7 +1043,7 @@ export default function Admin() {
     try {
       const response = await axiosClient.get(
         `/api/analytics/stats/range?startDate=${analyticsStartDate}&endDate=${analyticsEndDate}`,
-        { headers: getAuthHeaders() }
+        {}
       );
       setDateRangeStats(response.data);
       toast({
@@ -1076,7 +1068,7 @@ export default function Admin() {
     setIsLoadingAnalytics(true);
     try {
       const response = await axiosClient.get('/api/analytics/stats/compare?period=week', {
-        headers: getAuthHeaders()
+
       });
       setWeekComparison(response.data);
       toast({
@@ -1101,7 +1093,7 @@ export default function Admin() {
     setIsLoadingAnalytics(true);
     try {
       const response = await axiosClient.get('/api/analytics/stats/compare?period=month', {
-        headers: getAuthHeaders()
+
       });
       setMonthComparison(response.data);
       toast({
@@ -1122,6 +1114,18 @@ export default function Admin() {
     }
   };
 
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen admin-bg-gradient flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

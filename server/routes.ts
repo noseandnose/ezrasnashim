@@ -166,7 +166,7 @@ import {
   insertMessagesSchema
 } from "../shared/schema";
 
-// Admin authentication middleware - JWT only (legacy password fallback removed)
+// Admin authentication middleware - JWT only (httpOnly cookie or Authorization header)
 function requireAdminAuth(req: any, res: any, next: any) {
   if (!isAdminConfigured()) {
     return res.status(500).json({ 
@@ -174,10 +174,14 @@ function requireAdminAuth(req: any, res: any, next: any) {
     });
   }
   
+  // Check for token in httpOnly cookie first, then Authorization header (backwards compatible)
+  const cookieToken = req.cookies?.admin_token;
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith('Bearer ') 
+  const headerToken = authHeader && authHeader.startsWith('Bearer ') 
     ? authHeader.slice(7) 
     : null;
+  
+  const token = cookieToken || headerToken;
   
   if (!token) {
     return res.status(401).json({ 
@@ -252,9 +256,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await validateAdminLogin(password);
       
       if (result.success && result.token) {
+        // Set httpOnly cookie for secure token storage
+        res.cookie('admin_token', result.token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 24 * 60 * 60 * 1000, // 24 hours
+          path: '/'
+        });
+        
         return res.json({ 
-          success: true, 
-          token: result.token,
+          success: true,
           expiresIn: '24h'
         });
       }
@@ -275,6 +287,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin auth status check - verifies if current token is valid
   app.get("/api/admin/auth-status", requireAdminAuth, (_req, res) => {
     return res.json({ authenticated: true });
+  });
+
+  // Admin logout - clears httpOnly cookie
+  app.post("/api/admin/logout", (_req, res) => {
+    res.clearCookie('admin_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      path: '/'
+    });
+    return res.json({ success: true });
   });
 
   // Calendar download endpoint using GET request to avoid CORS issues
@@ -2183,16 +2206,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { buttonType, donationType, sponsorName, dedication, message, email } = req.body;
       
-      console.log('📋 Donation completion request received:', {
-        donationType,
-        sponsorName,
-        email,
-        dedication,
-        message,
-        hasName: !!sponsorName,
-        donationTypeMatch: donationType === 'Sponsor a Day of Ezras Nashim'
-      });
-      
       // Only create sponsor record for "Sponsor a Day" donations
       if (buttonType === 'sponsor_a_day' && sponsorName) {
         // Day starts at 02:00 local time for analytics
@@ -2212,27 +2225,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isActive: true
         };
         
-        console.log('🎯 Creating sponsor record with data:', sponsorData);
-        
         // Create sponsor record
         const createdSponsor = await storage.createSponsor(sponsorData);
         
-        console.log(`✅ Successfully created sponsor record:`, {
-          id: createdSponsor.id,
-          name: createdSponsor.name,
-          date: createdSponsor.sponsorshipDate,
-          dedication: createdSponsor.inHonorMemoryOf,
-          message: createdSponsor.message
-        });
-        
         return res.json({ success: true, message: 'Sponsor record created', sponsor: createdSponsor });
       } else {
-        console.log('⏭️ No sponsor record needed - conditions not met:', {
-          donationType,
-          sponsorName,
-          isCorrectType: donationType === 'Sponsor a Day of Ezras Nashim',
-          hasName: !!sponsorName
-        });
         return res.json({ success: true, message: 'No sponsor record needed' });
       }
     } catch (error: any) {
@@ -2263,18 +2260,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      console.log('Testing Stripe connection...');
-      console.log('Stripe key configured:', !!process.env.STRIPE_SECRET_KEY);
-      console.log('Stripe key format:', process.env.STRIPE_SECRET_KEY?.substring(0, 7) + '...');
-      
       // Try to create a minimal payment intent for testing
       const testIntent = await stripe.paymentIntents.create({
         amount: 100, // $1.00
         currency: 'usd',
         metadata: { test: 'true' }
       });
-      
-      console.log('Test payment intent created:', testIntent.id);
       
       return res.json({
         success: true,
@@ -2310,82 +2301,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { amount, donationType, metadata } = req.body;
-      
-      // console.log('=== PAYMENT INTENT REQUEST ===');
-      // console.log('Request body:', { amount, donationType, metadata });
-      // console.log('Stripe key exists:', !!process.env.STRIPE_SECRET_KEY);
-      // console.log('Stripe key starts with sk_:', process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
-      
-      // if (!amount || amount <= 0) {
-      //   console.log('Invalid amount provided:', amount);
-      //   return res.status(400).json({ message: "Invalid amount" });
-      // }
-
-      // if (!process.env.STRIPE_SECRET_KEY) {
-      //   console.error('STRIPE_SECRET_KEY not found in environment');
-      //   return res.status(500).json({ message: "Stripe not configured" });
-      // }
-
-      // console.log('Creating payment intent with:', { 
-      //   amount, 
-      //   donationType, 
-      //   metadata,
-      //   stripeConfigured: !!process.env.STRIPE_SECRET_KEY
-      // });
-      
-      // const paymentIntentData: any = {
-      //   amount: Math.round(amount * 100), // Convert to cents
-      //   currency: "usd",
-      //   metadata: {
-      //     source: "ezras-nashim-donation",
-      //     donationType: donationType || "General Donation",
-      //     sponsorName: metadata?.sponsorName || "",
-      //     dedication: metadata?.dedication || "",
-      //     email: email || metadata?.email || "",
-      //     timestamp: new Date().toISOString()
-      //   },
-      //   // Enable automatic payment methods including Apple Pay and Google Pay
-      //   automatic_payment_methods: {
-      //     enabled: true,
-      //     allow_redirects: 'never' as const // Keep on same page for better UX
-      //   }
-      // };
-      
-      // // Add receipt_email if provided - this will trigger Stripe to send receipts
-      // const receiptEmail = email || metadata?.email;
-      // if (receiptEmail && receiptEmail.includes('@')) {
-      //   paymentIntentData.receipt_email = receiptEmail;
-      //   console.log('Receipt email will be sent to:', receiptEmail);
-      // }
-      
-      // console.log('Payment intent configuration:', paymentIntentData);
-      
-      // const paymentIntent = await stripe.paymentIntents.create(paymentIntentData);
-      
-      // console.log('Payment intent created successfully:', {
-      //   id: paymentIntent.id,
-      //   status: paymentIntent.status,
-      //   amount: paymentIntent.amount,
-      //   client_secret_exists: !!paymentIntent.client_secret
-      // });
-      
-      // // Track the donation attempt in our database
-      // try {
-      //   await storage.createDonation({
-      //     stripePaymentIntentId: paymentIntent.id,
-      //     amount: paymentIntent.amount, // Already in cents
-      //     donationType: donationType || "General Donation",
-      //     sponsorName: metadata?.sponsorName,
-      //     dedication: metadata?.dedication,
-      //     email: receiptEmail,
-      //     status: 'pending'
-      //   });
-      //   console.log('Donation tracked in database:', paymentIntent.id);
-      // } catch (dbError) {
-      //   console.error('Error saving donation to database:', dbError);
-      //   // Continue even if database save fails
-      // }
-
       const returnUrl = req.body.returnUrl;
       const session = await stripe.checkout.sessions.create({
         currency: 'usd',
@@ -2446,13 +2361,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
           status: 'pending'
         });
-        console.log('Donation tracked in database with enhanced schema:', session.id);
       } catch (dbError) {
         console.error('Error saving donation to database:', dbError);
         // Continue even if database save fails
       }
 
-      console.log('Session created successfully:', session.id)
       return res.json({ 
         sessionId: session.id,
         amount: amount,
@@ -2542,20 +2455,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     return res.redirect(`/api/media-proxy/gdrive/${fileId}`);
   });
 
-  // Serve frontend application on root route
-  // app.get("/", (req, res) => {
-  //   // In Replit environment, we need to serve the frontend differently
-  //   if (process.env.REPLIT_DOMAINS) {
-  //     // For Replit, redirect to the frontend port
-  //     const replitDomain = process.env.REPLIT_DOMAINS;
-  //     res.redirect(`https://${replitDomain}`);
-  //   } else {
-  //     // Local development
-  //     res.redirect("http://localhost:5173");
-  //   }
-  // });
-
-  // REMOVED: First duplicate /api/payments/confirm endpoint - using the second one below
 
   // Debug endpoint to verify webhook secret is loaded
   app.get("/api/webhooks/stripe/debug", async (_req, res) => {
@@ -2578,14 +2477,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     let event;
 
     try {
-      // Log webhook attempt for debugging
-      console.log('Webhook received:', {
-        hasSignature: !!sig,
-        hasSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
-        bodyType: typeof req.body,
-        bodyLength: req.body ? req.body.length : 0
-      });
-
       // Verify webhook signature for security
       if (!sig) {
         console.error('Missing stripe signature header');
@@ -2602,7 +2493,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
-      console.log('Webhook signature verified successfully');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
       console.error('Webhook signature verification failed:', {
@@ -2644,8 +2534,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentIntentId: paymentIntent.id // Store for idempotency
             });
             
-            console.log(`Created act record for ${buttonType} completion`);
-
             // Track tzedaka completion in analytics for stats counting
             await storage.trackEvent({
               eventType: 'tzedaka_completion',
@@ -2668,8 +2556,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               },
               sessionId: null
             });
-            console.log('Tracked donation as modal_complete for Feature Usage display');
-
             // Update campaign progress if this is an active_campaign donation
             if (buttonType === 'active_campaign') {
               try {
@@ -2678,7 +2564,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 if (activeCampaign) {
                   const newAmount = activeCampaign.currentAmount + (paymentIntent.amount / 100); // Convert from cents
                   await storage.updateCampaignProgress(activeCampaign.id, newAmount);
-                  console.log(`Updated campaign progress: $${newAmount}`);
                 }
               } catch (campaignError) {
                 console.error('Error updating campaign progress:', campaignError);
@@ -2695,7 +2580,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = now.toISOString().split('T')[0];
             try {
               await storage.recalculateDailyStats(today);
-              console.log('Recalculated daily stats after donation');
             } catch (statsError) {
               console.error('Error recalculating daily stats:', statsError);
             }
@@ -2713,7 +2597,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 },
                 sessionId: null
               });
-              console.log(`Stored ${buttonType} completion event for frontend pickup`);
             } catch (completionError) {
               console.error('Error storing completion event:', completionError);
             }
@@ -2758,8 +2641,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               stripePaymentIntentId: paymentIntentId as string,
               status: 'succeeded'
             });
-            console.log('Webhook: Updated donation with correct payment intent ID');
-            
             // Extract metadata from session OR donation record (donation is source of truth)
             const donationMetadata = sessionDonation.metadata as Record<string, any> || {};
             const buttonType = session.metadata?.buttonType || donationMetadata.buttonType || sessionDonation.type || 'put_a_coin';
@@ -2774,8 +2655,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentIntentId: paymentIntentId as string // Store for idempotency
             });
             
-            console.log(`Created act record for ${buttonType} completion from checkout session`);
-
             // Track tzedaka completion in analytics
             await storage.trackEvent({
               eventType: 'tzedaka_completion',
@@ -2799,7 +2678,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               },
               sessionId: null
             });
-            console.log('Tracked checkout donation as modal_complete for Feature Usage');
 
             // Update campaign progress if this is an active_campaign donation
             if (buttonType === 'active_campaign') {
@@ -2825,7 +2703,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const today = now.toISOString().split('T')[0];
             try {
               await storage.recalculateDailyStats(today);
-              console.log('Recalculated daily stats after checkout donation');
             } catch (statsError) {
               console.error('Error recalculating daily stats:', statsError);
             }
@@ -2884,34 +2761,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Donation success callback - marks individual button as complete
   app.post("/api/donations/success", async (req, res) => {
-    console.log('=== DONATIONS SUCCESS ENDPOINT CALLED ===');
-    console.log('Request body:', req.body);
-    
     try {
       const { sessionId } = req.body;
       
       if (!sessionId) {
-        console.log('ERROR: No session ID provided');
         return res.status(400).json({ message: "Session ID required" });
       }
-      
-      console.log('Looking up donation with session ID:', sessionId);
       
       // Get donation by session ID
       const donation = await storage.getDonationBySessionId(sessionId);
       
-      console.log('Donation found:', donation ? 'YES' : 'NO');
-      if (donation) {
-        console.log('Donation details:', {
-          id: donation.id,
-          amount: donation.amount,
-          type: donation.type,
-          metadata: donation.metadata
-        });
-      }
-      
       if (!donation) {
-        console.log('ERROR: Donation not found in database');
         return res.status(404).json({ message: "Donation not found" });
       }
       
@@ -2928,7 +2788,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (paymentIntentId) {
         const existingAct = await storage.getActByPaymentIntentId(paymentIntentId);
         if (existingAct) {
-          console.log(`Act already exists for ${paymentIntentId} - skipping duplicate creation`);
           return res.json({ 
             success: true, 
             buttonType: buttonType,
@@ -2946,9 +2805,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount: donation.amount,
         paymentIntentId: paymentIntentId || undefined
       });
-      
-      console.log('SUCCESS: Donation success processing complete');
-      console.log('Button type processed:', buttonType);
       
       return res.json({ 
         success: true, 
@@ -3195,7 +3051,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: paymentIntent.amount
           });
           
-          console.log('Created donation record and act for successful payment:', paymentIntentId);
         } catch (err) {
           console.error('Error retrieving payment intent from Stripe:', err);
           // Fallback - create with minimal info

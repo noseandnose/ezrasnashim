@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -29,19 +29,17 @@ const categoryOptions: { value: MessageCategory; label: string; color: string }[
 
 export default function AdminMessages() {
   const [adminPassword, setAdminPassword] = useState('');
-  const [authToken, setAuthToken] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('adminToken');
-    }
-    return null;
-  });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return !!sessionStorage.getItem('adminToken');
-    }
-    return false;
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  
+  // Check auth status on mount via API (httpOnly cookie is sent automatically)
+  useEffect(() => {
+    axiosClient.get('/api/admin/auth-status')
+      .then(() => setIsAuthenticated(true))
+      .catch(() => setIsAuthenticated(false))
+      .finally(() => setIsCheckingAuth(false));
+  }, []);
   const [formData, setFormData] = useState({
     date: '',
     title: '',
@@ -52,10 +50,6 @@ export default function AdminMessages() {
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
-  // Set up authorization headers for authenticated requests
-  const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${authToken}`
-  });
 
   // Fetch upcoming messages if authenticated
   const { data: messages, refetch: refetchMessages } = useQuery({
@@ -64,7 +58,7 @@ export default function AdminMessages() {
       if (!isAuthenticated) return [];
       try {
         const response = await axiosClient.get('/api/messages?upcoming=true', {
-          headers: getAuthHeaders()
+
         });
         return response.data;
       } catch (error: any) {
@@ -94,12 +88,10 @@ export default function AdminMessages() {
         password: adminPassword.trim()
       });
       
-      if (response.data.success && response.data.token) {
-        const token = response.data.token;
-        setAuthToken(token);
+      if (response.data.success) {
+        // Token is now set via httpOnly cookie - no need to store manually
         setIsAuthenticated(true);
         setAdminPassword('');
-        sessionStorage.setItem('adminToken', token);
         toast({
           title: 'Login Successful',
           description: 'You are now authenticated as admin.',
@@ -183,7 +175,7 @@ export default function AdminMessages() {
       if (editingMessage) {
         // Update existing message
         response = await axiosClient.put(`/api/messages/${editingMessage.id}`, messageData, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Message Updated!',
@@ -192,7 +184,7 @@ export default function AdminMessages() {
       } else {
         // Create new message
         response = await axiosClient.post('/api/messages', messageData, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Message Created!',
@@ -243,7 +235,6 @@ export default function AdminMessages() {
 
     try {
       await axiosClient.delete(`/api/messages/${message.id}`, {
-        headers: getAuthHeaders()
       });
       toast({
         title: 'Message Deleted',
@@ -278,7 +269,7 @@ export default function AdminMessages() {
     try {
       if (message.isPinned) {
         await axiosClient.delete(`/api/messages/${message.id}/pin`, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Message Unpinned',
@@ -286,7 +277,7 @@ export default function AdminMessages() {
         });
       } else {
         await axiosClient.post(`/api/messages/${message.id}/pin`, {}, {
-          headers: getAuthHeaders()
+
         });
         toast({
           title: 'Message Pinned',
@@ -314,6 +305,18 @@ export default function AdminMessages() {
       }
     }
   };
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-blush/10 to-white flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (

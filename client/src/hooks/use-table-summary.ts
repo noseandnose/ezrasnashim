@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import type { LifeClass } from "@shared/schema";
+import { getLocalDateString } from "@/lib/dateUtils";
 
 interface GiftOfChatzos {
   title?: string;
@@ -20,15 +21,6 @@ interface TableSummary {
   shopItems: Record<string, any>[];
   errors?: Record<string, boolean>;
   fetchedAt: string;
-}
-
-function getLocalDateString(): string {
-  const now = new Date();
-  const hours = now.getHours();
-  if (hours < 2) {
-    now.setDate(now.getDate() - 1);
-  }
-  return now.toISOString().split('T')[0];
 }
 
 export function useTableSummary() {
