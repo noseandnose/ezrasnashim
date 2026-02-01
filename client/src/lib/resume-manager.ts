@@ -203,17 +203,16 @@ function rearmEventListeners() {
 
 /**
  * Force all interactive elements to be re-clickable
- * by briefly disabling and re-enabling pointer events
+ * Simplified: Only reset document-level pointer events to reduce DOM thrashing
+ * Individual element manipulation was causing 100-200ms jank
  */
 function resetPointerEventsOnInteractives() {
-  const interactives = document.querySelectorAll('button, a, [role="button"], [onclick], [data-testid]');
-  interactives.forEach(el => {
-    const htmlEl = el as HTMLElement;
-    const original = htmlEl.style.pointerEvents;
-    htmlEl.style.pointerEvents = 'none';
-    requestAnimationFrame(() => {
-      htmlEl.style.pointerEvents = original || '';
-    });
+  // Single DOM operation instead of iterating all elements
+  const html = document.documentElement;
+  const original = html.style.pointerEvents;
+  html.style.pointerEvents = 'none';
+  requestAnimationFrame(() => {
+    html.style.pointerEvents = original || '';
   });
 }
 
@@ -344,9 +343,10 @@ function enableDeadClickDetection() {
       if (Date.now() - lastClickHandledTime > 100) {
         deadClickCount++;
         
-        // After 3 dead clicks in a row, reload
+        // Log dead clicks for debugging but don't force reload
+        // The 30-second auto-reload in main.tsx handles stuck states
         if (deadClickCount >= 3) {
-          window.location.reload();
+          console.warn('[ResumeManager] Multiple dead clicks detected - app may be unresponsive');
         }
       } else {
         // Reset dead click counter on successful interaction

@@ -103,6 +103,7 @@ const useTefillaConditions = () => {
   // Refresh conditions every minute to catch sunset transitions
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       setRefreshTrigger(prev => prev + 1);
     }, 60000); // 1 minute
     
@@ -164,6 +165,7 @@ const useMaarivTefillaConditions = () => {
   // Refresh conditions every minute to catch sunset transitions
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       setRefreshTrigger(prev => prev + 1);
     }, 60000); // 1 minute
     

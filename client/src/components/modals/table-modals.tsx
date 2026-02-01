@@ -253,7 +253,7 @@ export default function TableModals() {
     queryKey: [`/api/marriage-insights/${getLocalDateString()}`],
     enabled: activeModal === 'marriage-insights' || fullscreenContent.contentType === 'marriage-insights',
     staleTime: 15 * 60 * 1000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false, // Daily content, doesn't need refetch on every resume
     refetchOnMount: 'always',
   });
 

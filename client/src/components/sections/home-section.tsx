@@ -196,6 +196,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const [currentMinute, setCurrentMinute] = useState(() => Math.floor(Date.now() / 60000));
   useEffect(() => {
     const interval = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
       setCurrentMinute(Math.floor(Date.now() / 60000));
     }, 60000); // Check every minute
     return () => clearInterval(interval);
