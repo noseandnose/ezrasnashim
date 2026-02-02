@@ -18,6 +18,23 @@ interface TehillimText {
   language: string;
 }
 
+interface Brocha {
+  id: number;
+  title: string;
+  hebrewText: string | null;
+  englishText: string | null;
+  description: string | null;
+}
+
+interface ParshaVort {
+  id: number;
+  title: string;
+  content: string;
+  contentHebrew: string | null;
+  week: string;
+  attributionLabel: string | null;
+}
+
 export default function CommunityChallengeModal() {
   const { activeModal, closeModal, openModal } = useModalStore();
   const { completeTask, checkAndShowCongratulations } = useDailyCompletionStore();
@@ -52,13 +69,21 @@ export default function CommunityChallengeModal() {
     return undefined;
   };
   const pillarType = getPillarType();
-  // For tehillim challenges, use the standard individual-tehillim-{perek} format for consistent flower counting
-  // For womens-prayer, use womens-prayer-{contentId} format for analytics tracking
-  const modalName = challenge?.challengeType === 'tehillim' && challenge?.challengeContentId
-    ? `individual-tehillim-${challenge.challengeContentId}`
-    : challenge?.challengeType === 'womens-prayer' && challenge?.challengeContentId
-    ? `womens-prayer-${challenge.challengeContentId}`
-    : (challenge?.modalName || 'community-challenge');
+  // Determine the modal name for completion tracking
+  // Each challenge type maps to its appropriate modal name for flower counting
+  const getModalName = (): string => {
+    const type = challenge?.challengeType;
+    const contentId = challenge?.challengeContentId;
+    
+    if (type === 'tehillim' && contentId) return `individual-tehillim-${contentId}`;
+    if (type === 'womens-prayer' && contentId) return `womens-prayer-${contentId}`;
+    if (type === 'asher-yatzar') return 'morning-brochas-waking-up-and-morning-brochas';
+    if (type === 'birkat-hamazon') return 'birkat-hamazon';
+    if (type === 'parsha-vort') return 'parsha-vort';
+    
+    return challenge?.modalName || 'community-challenge';
+  };
+  const modalName = getModalName();
   
   // Check if this challenge has already been completed today (persisted across modal reopens)
   const hasCompletedToday = modalName ? isModalComplete(modalName) : false;
@@ -111,6 +136,23 @@ export default function CommunityChallengeModal() {
   }>({
     queryKey: [`/api/womens-prayers/prayer/${challenge?.challengeContentId}`],
     enabled: isOpen && challenge?.challengeType === 'womens-prayer' && !!challenge?.challengeContentId,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const { data: brochaContent, isLoading: brochaLoading } = useQuery<Brocha>({
+    queryKey: ['/api/tefilla/brocha', challenge?.challengeContentId],
+    queryFn: async () => {
+      const response = await axiosClient.get('/api/tefilla-summary');
+      const brochas = response.data?.brochas || [];
+      return brochas.find((b: Brocha) => b.id === challenge?.challengeContentId) || null;
+    },
+    enabled: isOpen && (challenge?.challengeType === 'asher-yatzar' || challenge?.challengeType === 'birkat-hamazon') && !!challenge?.challengeContentId,
+    staleTime: 60 * 60 * 1000,
+  });
+
+  const { data: parshaVortContent, isLoading: parshaVortLoading } = useQuery<ParshaVort[]>({
+    queryKey: ['/api/table/vort'],
+    enabled: isOpen && challenge?.challengeType === 'parsha-vort',
     staleTime: 60 * 60 * 1000,
   });
 
@@ -182,7 +224,7 @@ export default function CommunityChallengeModal() {
     }
   }, [isCompleting, challenge, isChallenge, completeMutation, modalName, trackModalComplete, markModalComplete, pillarType, completeTask, checkAndShowCongratulations, openModal, trackEvent, serverCount]);
 
-  const isLoading = tehillimLoading || nishmasLoading || halachaLoading || womensPrayerLoading;
+  const isLoading = tehillimLoading || nishmasLoading || halachaLoading || womensPrayerLoading || brochaLoading || parshaVortLoading;
 
   const handleShare = async () => {
     const challengeName = challenge?.title || "Community Challenge";
@@ -288,6 +330,50 @@ export default function CommunityChallengeModal() {
       );
     }
 
+    if ((challenge.challengeType === 'asher-yatzar' || challenge.challengeType === 'birkat-hamazon') && brochaContent) {
+      const text = language === 'hebrew' ? brochaContent.hebrewText : brochaContent.englishText;
+      return (
+        <div className="bg-white rounded-2xl p-6 border border-blush/10">
+          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+            {brochaContent.title}
+          </h3>
+          <div 
+            className={`leading-relaxed text-black whitespace-pre-line ${
+              language === 'hebrew' ? 'vc-koren-hebrew text-right' : 'platypi-regular text-left'
+            }`}
+            style={{ fontSize: `${fontSize}px` }}
+            dir={language === 'hebrew' ? 'rtl' : 'ltr'}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(text || '') }}
+          />
+        </div>
+      );
+    }
+
+    if (challenge.challengeType === 'parsha-vort' && parshaVortContent && parshaVortContent.length > 0) {
+      const vort = parshaVortContent[0];
+      const text = language === 'hebrew' && vort.contentHebrew ? vort.contentHebrew : vort.content;
+      return (
+        <div className="bg-white rounded-2xl p-6 border border-blush/10">
+          <h3 className="platypi-bold text-lg text-black text-center mb-4">
+            {vort.title}
+          </h3>
+          <div 
+            className={`leading-relaxed text-black whitespace-pre-line ${
+              language === 'hebrew' && vort.contentHebrew ? 'vc-koren-hebrew text-right' : 'platypi-regular text-left'
+            }`}
+            style={{ fontSize: `${fontSize}px` }}
+            dir={language === 'hebrew' && vort.contentHebrew ? 'rtl' : 'ltr'}
+            dangerouslySetInnerHTML={{ __html: formatTextContent(text) }}
+          />
+          {vort.attributionLabel && (
+            <p className="platypi-regular text-sm text-black/60 text-center mt-4">
+              {vort.attributionLabel}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     if (challenge.challengeType === 'custom' || !challenge.challengeType) {
       const text = language === 'hebrew' && challenge.contentHebrew 
         ? challenge.contentHebrew 
@@ -316,6 +402,9 @@ export default function CommunityChallengeModal() {
     (challenge?.challengeType === 'tehillim') || 
     (challenge?.challengeType === 'nishmas') ||
     (challenge?.challengeType === 'womens-prayer') ||
+    (challenge?.challengeType === 'asher-yatzar') ||
+    (challenge?.challengeType === 'birkat-hamazon') ||
+    (challenge?.challengeType === 'parsha-vort') ||
     (challenge?.contentHebrew && challenge?.contentEnglish);
 
   const shareButton = isChallenge ? (
