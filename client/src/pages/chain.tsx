@@ -128,10 +128,8 @@ export default function ChainPage() {
       // Skip refresh if page is not visible (saves battery when backgrounded)
       if (document.visibilityState !== 'visible') return;
       try {
-        // Use stale-while-revalidate caching instead of cache-busting
-        const response = await fetch(`/api/tehillim-chains/${slug}/stats`, {
-          headers: { 'Cache-Control': 'max-age=30' }
-        });
+        // Removed cache-busting timestamp, rely on browser's normal caching
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats`);
         if (response.ok) {
           const stats = await response.json();
           setLocalStats(stats);
