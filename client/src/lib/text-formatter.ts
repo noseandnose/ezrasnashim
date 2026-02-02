@@ -66,6 +66,30 @@ export function applyFootnoteSuperscripts(text: string, footnoteNumbers: Set<str
 }
 
 /**
+ * Escapes special characters for safe use in HTML attributes
+ */
+function escapeHtmlAttribute(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+/**
+ * Validates that a URL uses a safe protocol (http or https only)
+ */
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Converts URLs in plain text to clickable links
  */
 export function linkifyText(text: string): string {
@@ -78,7 +102,17 @@ export function linkifyText(text: string): string {
   const linkedText = text.replace(urlPattern, (url) => {
     // Add https:// to www links
     const href = url.startsWith('www.') ? `https://${url}` : url;
-    return `<a href="${href}" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">${url}</a>`;
+    
+    // Only allow http/https protocols to prevent javascript: and data: URL attacks
+    if (!isSafeUrl(href)) {
+      return url; // Return as plain text if URL is not safe
+    }
+    
+    // Escape the URL for safe insertion into href attribute
+    const safeHref = escapeHtmlAttribute(href);
+    const safeDisplayText = escapeHtmlAttribute(url);
+    
+    return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">${safeDisplayText}</a>`;
   });
   
   // Replace newlines with <br> tags
@@ -302,9 +336,22 @@ export function formatTextContent(text: string | null | undefined, footnoteNumbe
   // Use negative lookahead to avoid matching --- (line breaks)
   formatted = formatted.replace(/--(?!-)([\s\S]+?)--(?!-)/g, '<span style="font-size: 0.85em; font-family: inherit;">$1</span>');
   
-  // Process markdown-style links [text](url)
-  formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, 
-    '<a href="$2" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">$1</a>');
+  // Process markdown-style links [text](url) with XSS protection
+  formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_match, text, url) => {
+    // Add https:// to www links
+    const href = url.startsWith('www.') ? `https://${url}` : url;
+    
+    // Only allow http/https protocols to prevent javascript: and data: URL attacks
+    if (!isSafeUrl(href)) {
+      return text; // Return just the text if URL is not safe
+    }
+    
+    // Escape for safe insertion into HTML
+    const safeHref = escapeHtmlAttribute(href);
+    const safeText = escapeHtmlAttribute(text);
+    
+    return `<a href="${safeHref}" target="_blank" rel="noopener noreferrer" style="color: #E91E63; text-decoration: underline;">${safeText}</a>`;
+  });
   
   let result = formatted;
   
