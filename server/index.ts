@@ -179,8 +179,16 @@ app.use((req, res, next) => {
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) return callback(null, true);
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
+      
+      // No-origin requests are allowed because:
+      // 1. Mobile app wrappers (FlutterFlow WebView) don't send Origin headers
+      // 2. Same-origin requests from the app itself have no Origin
+      // 3. Server-to-server requests (webhooks) have no Origin
+      // CSRF protection is handled via session tokens and Stripe webhook signatures
+      if (!origin) {
+        return callback(null, true);
+      }
 
       const allowedOrigins = [
         'http://localhost:5173',
@@ -209,7 +217,6 @@ app.use(
       }
       
       // In production/staging, be strict; in development, allow any origin
-      const isProduction = process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'staging';
       if (isProduction) {
         console.error(`CORS rejection: Origin ${origin} not in allowed list`);
         return callback(new Error('Not allowed by CORS'), false);
