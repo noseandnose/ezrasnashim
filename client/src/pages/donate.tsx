@@ -353,22 +353,6 @@ export default function Donate() {
     hasRedirectedToStripeRef.current = true;
     localStorage.setItem('has_been_redirected_to_stripe', 'true');
 
-    // // Use ref to ensure payment intent is only created once
-    // if (paymentIntentCreatedRef.current || clientSecret) {
-    //   console.log('Payment intent already created or in progress, skipping...');
-    //   return;
-    // }
-
-    // // Mark as created immediately using ref
-    // paymentIntentCreatedRef.current = true;
-
-    // Create PaymentIntent when component loads
-    // console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
-    // console.log('Amount:', amount);
-    // console.log('Donation type:', donationType);
-    // console.log('Sponsor name:', sponsorName);
-    // console.log('Dedication:', dedication);
-
     apiRequest('POST', '/api/create-session-checkout', {
       amount,
       donationType,
@@ -396,18 +380,6 @@ export default function Donate() {
         }));
         
         return stripe && stripe.redirectToCheckout({ sessionId: sessionId });
-        // console.log('Payment intent response:', response);
-        // const data = response.data;
-        // console.log('Payment intent data:', data);
-        // const decoded = decodeURIComponent(data.id);
-        // setClientSecret(decoded);
-        // if (data.clientSecret) {
-        //   console.log('Client secret received successfully');
-        //   setClientSecret(decodeURIComponent(data.id));
-        // } else {
-        //   console.error('No client secret in response:', data);
-        //   throw new Error('No client secret received');
-        // }
       })
       .catch((error) => {
         console.error('Error creating session:', error);
@@ -481,14 +453,6 @@ export default function Donate() {
       </div>
     );
   }
-
-  // if (!clientSecret) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center">
-  //       <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full" />
-  //     </div>
-  //   );
-  // }
 
   // Show loading spinner while redirecting to Stripe
   if (showLoadingScreen) {

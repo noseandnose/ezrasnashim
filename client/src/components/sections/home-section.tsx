@@ -24,6 +24,27 @@ import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
 
 // ============ PURE UTILITY FUNCTIONS (extracted for performance) ============
 
+// Pre-defined sets for O(1) category lookup (avoids multiple startsWith() per iteration)
+const TEFILLA_EXACT_KEYS = new Set([
+  'global-tehillim-chain', 'tehillim-text', 'tehillim',
+  'nishmas-campaign', 'al-hamichiya', 'birkat-hamazon'
+]);
+const TEFILLA_PREFIXES = ['individual-tehillim-', 'chain-tehillim-', 'brocha-', 'womens-prayer-', 'morning-brochas-', 'shacharis-', 'meditation-'];
+const TORAH_EXACT_KEYS = new Set([
+  'halacha', 'chizuk', 'emuna', 'featured', 'pirkei-avot',
+  'parsha-vort', 'gems-of-gratitude', 'torah-challenge', 'torah-class',
+  'shalom', 'shmiras-halashon', 'library'
+]);
+
+// O(1) check for exact match, O(p) for prefix where p = number of prefixes (constant ~7)
+function isTefillaKey(key: string): boolean {
+  if (TEFILLA_EXACT_KEYS.has(key)) return true;
+  for (const prefix of TEFILLA_PREFIXES) {
+    if (key.startsWith(prefix)) return true;
+  }
+  return false;
+}
+
 // Parse time string like "6:30 AM" into a Date object for today
 function parseTimeToday(timeStr: string | undefined): Date | null {
   if (!timeStr) return null;
@@ -109,38 +130,21 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   const completedModals = useModalCompletionStore((state) => state.completedModals);
   
   // Get flower counts for each category - recomputes when completedModals changes
+  // Optimized: Uses pre-defined sets for O(1) exact match + O(p) prefix check
   const tefillaFlowerCount = useMemo(() => {
-    // Count all tefilla-related completions
-    // Get today's date key - must use getLocalDateString to match the store
     const today = getLocalDateString();
     const todaysData = completedModals[today];
     if (!todaysData) return 0;
     
     let count = 0;
-    // Tefilla repeatables - matches what's stored locally via markModalComplete:
-    // global-tehillim-chain (new aligned key), tehillim-text (legacy), individual-tehillim-X,
-    // chain-tehillim-X, nishmas-campaign, al-hamichiya, birkat-hamazon, meditation-X, brocha-X, womens-prayer-X
-    // Also 'tehillim' for community challenge tehillim completions
     if (todaysData.repeatables) {
-      Object.entries(todaysData.repeatables).forEach(([key, value]) => {
-        if (key.startsWith('individual-tehillim-') || 
-            key.startsWith('chain-tehillim-') ||
-            key.startsWith('brocha-') ||
-            key.startsWith('womens-prayer-') ||
-            key.startsWith('morning-brochas-') ||  // Morning brochas sections
-            key.startsWith('shacharis-') ||  // Shacharis sections
-            key === 'global-tehillim-chain' ||  // New aligned identifier
-            key === 'tehillim-text' ||  // Legacy identifier for backward compatibility
-            key === 'tehillim' ||  // Community challenge tehillim
-            key.startsWith('meditation-')) {
+      for (const [key, value] of Object.entries(todaysData.repeatables)) {
+        if (isTefillaKey(key)) {
           count += value;
         }
-      });
-      count += todaysData.repeatables['nishmas-campaign'] || 0;
-      count += todaysData.repeatables['al-hamichiya'] || 0;
-      count += todaysData.repeatables['birkat-hamazon'] || 0;
+      }
     }
-    // Tefilla singles: mincha, maariv, morning-brochas (defined in SINGLE_COMPLETION_PRAYERS)
+    // Tefilla singles: mincha, maariv, morning-brochas
     if (todaysData.singles) {
       if (todaysData.singles.has('mincha')) count++;
       if (todaysData.singles.has('maariv')) count++;
@@ -149,30 +153,16 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     return count;
   }, [completedModals]);
 
+  // Torah flower count - O(k) where k = number of torah keys (constant 12)
   const torahFlowerCount = useMemo(() => {
     const today = getLocalDateString();
     const todaysData = completedModals[today];
-    if (!todaysData) return 0;
+    if (!todaysData?.repeatables) return 0;
     
     let count = 0;
-    // Torah modal IDs: halacha, chizuk, emuna, featured, pirkei-avot, parsha-vort, gems-of-gratitude, torah-challenge, torah-class
-    // Also includes community challenge modals: shalom, shmiras-halashon, library
-    // All Torah items are repeatables (not in SINGLE_COMPLETION_PRAYERS set)
-    if (todaysData.repeatables) {
-      count += todaysData.repeatables['halacha'] || 0;
-      count += todaysData.repeatables['chizuk'] || 0;
-      count += todaysData.repeatables['emuna'] || 0;
-      count += todaysData.repeatables['featured'] || 0;
-      count += todaysData.repeatables['pirkei-avot'] || 0;
-      count += todaysData.repeatables['parsha-vort'] || 0;
-      count += todaysData.repeatables['gems-of-gratitude'] || 0;
-      count += todaysData.repeatables['torah-challenge'] || 0;
-      count += todaysData.repeatables['torah-class'] || 0;
-      // Community challenge modals that award Torah flowers
-      count += todaysData.repeatables['shalom'] || 0;
-      count += todaysData.repeatables['shmiras-halashon'] || 0;
-      count += todaysData.repeatables['library'] || 0;
-    }
+    TORAH_EXACT_KEYS.forEach(key => {
+      count += todaysData.repeatables[key] || 0;
+    });
     return count;
   }, [completedModals]);
 
