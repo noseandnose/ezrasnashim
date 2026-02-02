@@ -175,8 +175,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
                  animation: 'gentle-glow-pink 3s ease-in-out infinite'
                }}>
             <div className="flex items-center gap-2 mb-3">
-              <div className="bg-gradient-feminine p-1.5 rounded-full">
-                <Quote className="text-white" size={16} />
+              <div className={`${isModalComplete('pirkei-avot') ? 'bg-sage' : 'bg-gradient-feminine'} p-1.5 rounded-full`}>
+                {isModalComplete('pirkei-avot') ? (
+                  <Check className="text-white" size={16} />
+                ) : (
+                  <Quote className="text-white" size={16} />
+                )}
               </div>
               <h3 className="platypi-bold text-sm text-black">Pirkei Avot</h3>
               {pirkeiAvot && (
@@ -472,8 +476,12 @@ function TorahSectionComponent({}: TorahSectionProps) {
               data-testid="button-parsha-inspiration"
             >
               <div className="flex items-center gap-3">
-                <div className="bg-gradient-feminine p-2.5 rounded-full shadow-sm flex-shrink-0">
-                  <BookOpen className="text-white" size={18} />
+                <div className={`${isModalComplete('parsha-vort') ? 'bg-sage' : 'bg-gradient-feminine'} p-2.5 rounded-full shadow-sm flex-shrink-0`}>
+                  {isModalComplete('parsha-vort') ? (
+                    <Check className="text-white" size={18} />
+                  ) : (
+                    <BookOpen className="text-white" size={18} />
+                  )}
                 </div>
                 <div className="text-left">
                   <h3 className="platypi-bold text-sm text-black">Parsha Inspiration</h3>
@@ -509,7 +517,11 @@ function TorahSectionComponent({}: TorahSectionProps) {
             <div className={`p-2 rounded-full ${
               isModalComplete('torah-challenge') ? 'bg-sage' : 'bg-gradient-feminine'
             }`}>
-              <Trophy className="text-white" size={16} />
+              {isModalComplete('torah-challenge') ? (
+                <Check className="text-white" size={16} />
+              ) : (
+                <Trophy className="text-white" size={16} />
+              )}
             </div>
             
             {/* Title and Subtitle */}
@@ -549,7 +561,11 @@ function TorahSectionComponent({}: TorahSectionProps) {
                 data-testid="button-shmirat-halashon-bar"
               >
                 <div className={`p-2 rounded-full ${isModalComplete('featured') ? 'bg-sage' : 'bg-gradient-feminine'}`}>
-                  <Star className="text-white" size={16} strokeWidth={1.5} />
+                  {isModalComplete('featured') ? (
+                    <Check className="text-white" size={16} />
+                  ) : (
+                    <Star className="text-white" size={16} strokeWidth={1.5} />
+                  )}
                 </div>
                 <div className="text-left flex-grow">
                   <h3 className="platypi-bold text-sm text-black">Inspiration Hub</h3>
@@ -588,7 +604,11 @@ function TorahSectionComponent({}: TorahSectionProps) {
               <div className={`p-2 rounded-full ${
                 isModalComplete('gems-of-gratitude') ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
-                <Star className="text-white" size={16} />
+                {isModalComplete('gems-of-gratitude') ? (
+                  <Check className="text-white" size={16} />
+                ) : (
+                  <Star className="text-white" size={16} />
+                )}
               </div>
               
               {/* Title and Subtitle */}
