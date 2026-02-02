@@ -119,7 +119,8 @@ export default function ChainPage() {
     }
   }, [initialStats, localStats]);
 
-  // Periodic stats refresh (every 30 seconds - chain data doesn't change frequently)
+  // Periodic stats refresh (every 60 seconds - chain data doesn't change frequently)
+  // Reduced from 30s to 60s to lower server load (Issue 15 optimization)
   useEffect(() => {
     if (!slug || !chainData) return;
     
@@ -127,8 +128,10 @@ export default function ChainPage() {
       // Skip refresh if page is not visible (saves battery when backgrounded)
       if (document.visibilityState !== 'visible') return;
       try {
-        // Add cache-busting timestamp to prevent browser caching
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/tehillim-chains/${slug}/stats?t=${Date.now()}`);
+        // Use stale-while-revalidate caching instead of cache-busting
+        const response = await fetch(`/api/tehillim-chains/${slug}/stats`, {
+          headers: { 'Cache-Control': 'max-age=30' }
+        });
         if (response.ok) {
           const stats = await response.json();
           setLocalStats(stats);
@@ -138,7 +141,7 @@ export default function ChainPage() {
       }
     };
     
-    const interval = setInterval(refreshStats, 30000);
+    const interval = setInterval(refreshStats, 60000);
     return () => clearInterval(interval);
   }, [slug, chainData]);
 
