@@ -140,7 +140,12 @@ export default function Profile() {
     const totalDays = allDates.length;
     
     // Get tzedaka button completions from separate storage
-    const tzedakaButtonCompletions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    let tzedakaButtonCompletions: Record<string, any> = {};
+    try {
+      tzedakaButtonCompletions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    } catch (e) {
+      console.warn('Failed to parse tzedaka_button_completions');
+    }
     
     const countForDay = (dayData: any, date: string) => {
       let torah = 0;

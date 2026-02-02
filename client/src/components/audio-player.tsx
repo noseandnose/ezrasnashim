@@ -18,8 +18,8 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
   const [isLoading, setIsLoading] = useState(true);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [hasTriggeredCompletion, setHasTriggeredCompletion] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const hasTriggeredCompletion = useRef(false);
   const progressIntervalRef = useRef<NodeJS.Timeout>();
   const wasPlayingBeforeHidden = useRef(false);
 
@@ -95,8 +95,9 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       setCurrentTime("0:00");
       
       // Call the completion callback if provided (and not already triggered by progress check)
-      if (onAudioEnded && !hasTriggeredCompletion) {
-        setHasTriggeredCompletion(true);
+      // Using ref for synchronous check to prevent race condition
+      if (onAudioEnded && !hasTriggeredCompletion.current) {
+        hasTriggeredCompletion.current = true;
         onAudioEnded();
       }
     };
@@ -109,9 +110,10 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
         
         // Fallback: trigger completion only when within 1 second of the end
         // This prevents early completion while still catching cases where 'ended' doesn't fire
+        // Using ref for synchronous check to prevent race condition
         const remainingTime = audio.duration - audio.currentTime;
-        if (remainingTime <= 1 && !hasTriggeredCompletion && onAudioEnded) {
-          setHasTriggeredCompletion(true);
+        if (remainingTime <= 1 && !hasTriggeredCompletion.current && onAudioEnded) {
+          hasTriggeredCompletion.current = true;
           onAudioEnded();
         }
       }
@@ -180,7 +182,12 @@ export default function AudioPlayer({ duration, audioUrl, onAudioEnded }: AudioP
       audio.removeEventListener('stalled', handleStalled);
       audio.removeEventListener('suspend', handleSuspend);
     };
-  }, [audioUrl, onAudioEnded, hasTriggeredCompletion]);
+  }, [audioUrl, onAudioEnded]);
+
+  // Reset completion flag when audio source changes
+  useEffect(() => {
+    hasTriggeredCompletion.current = false;
+  }, [audioUrl]);
 
   useEffect(() => {
     if (audioRef.current) {

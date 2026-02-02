@@ -92,9 +92,18 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
   // Individual button completion tracking using localStorage with daily reset
 
+  const getTzedakaCompletions = (): Record<string, any> => {
+    try {
+      return JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    } catch (e) {
+      console.warn('Failed to parse tzedaka_button_completions');
+      return {};
+    }
+  };
+
   const isTzedakaButtonCompleted = (buttonType: TzedakaButtonType): boolean => {
     const today = getLocalDateString();
-    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    const completions = getTzedakaCompletions();
     // For gave_elsewhere, check if count > 0
     if (buttonType === 'gave_elsewhere') {
       return (completions[today]?.gave_elsewhere_count || 0) > 0;
@@ -104,13 +113,13 @@ function TzedakaSectionComponent({ onSectionChange }: TzedakaSectionProps) {
 
   const getGaveElsewhereCount = (): number => {
     const today = getLocalDateString();
-    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    const completions = getTzedakaCompletions();
     return completions[today]?.gave_elsewhere_count || 0;
   };
 
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
     const today = getLocalDateString();
-    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    const completions = getTzedakaCompletions();
     
     if (!completions[today]) {
       completions[today] = {};
