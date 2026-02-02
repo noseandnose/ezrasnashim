@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { sanitizeHTML } from "@/lib/text-formatter";
+import { sanitizeHTML } from "@/lib/sanitize";
 import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
