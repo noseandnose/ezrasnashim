@@ -1,11 +1,32 @@
 import { useEffect } from 'react';
 
 /**
+ * Detect if running inside a mobile app webview (FlutterFlow or other app wrappers)
+ * These wrappers typically handle safe areas at the native level
+ */
+function isInNativeAppWrapper(): boolean {
+  const userAgent = navigator.userAgent.toLowerCase();
+  return (
+    document.referrer.includes('android-app://') ||
+    userAgent.includes('wv') ||
+    userAgent.includes('webview') ||
+    ((/iphone|ipod|ipad/.test(userAgent) && !userAgent.includes('safari')) ||
+     (/android/.test(userAgent) && !userAgent.includes('chrome')))
+  );
+}
+
+/**
  * Ensures safe-area CSS variables are applied to the document root
  * Call this after modal close to restore proper header/footer padding
  */
 export function ensureSafeAreaVariables() {
   const root = document.documentElement;
+  
+  // If in native app wrapper, FlutterFlow handles safe areas - don't override
+  if (isInNativeAppWrapper()) {
+    return;
+  }
+  
   const computedStyle = getComputedStyle(root);
   
   // Read the current computed values
@@ -22,13 +43,27 @@ export function ensureSafeAreaVariables() {
 }
 
 /**
- * Lightweight safe-area hook for legacy Safari fallback only
- * Modern browsers use CSS env(safe-area-inset-*) natively
- * FlutterFlow handles safe areas at the native wrapper level
- * This hook only runs AFTER first paint, preventing any blocking or layout freeze
+ * Safe-area hook that handles native app wrappers and legacy browsers
+ * - FlutterFlow and other native wrappers handle safe areas at the native level,
+ *   so we set CSS safe-area values to 0 to prevent double padding
+ * - Modern browsers use CSS env(safe-area-inset-*) natively
+ * - Legacy Safari gets fallback values
  */
 export function useSafeArea() {
   useEffect(() => {
+    const root = document.documentElement;
+    
+    // Check if running inside a native app wrapper (FlutterFlow, etc.)
+    // These handle safe areas at the native level, so we should NOT apply CSS safe areas
+    if (isInNativeAppWrapper()) {
+      // Set all safe areas to 0 since native wrapper handles them
+      root.style.setProperty('--safe-area-top', '0px');
+      root.style.setProperty('--safe-area-bottom', '0px');
+      root.style.setProperty('--safe-area-left', '0px');
+      root.style.setProperty('--safe-area-right', '0px');
+      return;
+    }
+    
     // Only run fallback for very old Safari versions (< 15.4) that don't support env()
     const needsFallback = (() => {
       const ua = navigator.userAgent;
@@ -54,7 +89,6 @@ export function useSafeArea() {
     
     // Legacy Safari fallback - single passive listener
     const updateFallback = () => {
-      const root = document.documentElement;
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
