@@ -1,5 +1,5 @@
 import { BookOpen, HandHeart, Heart, Sparkles, Coins } from "lucide-react";
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, memo } from "react";
 import type { Section } from "@/pages/home";
 
 interface BottomNavigationProps {
@@ -7,7 +7,7 @@ interface BottomNavigationProps {
   onSectionChange: (section: Section) => void;
 }
 
-export default function BottomNavigation({
+const BottomNavigation = memo(function BottomNavigation({
   activeSection,
   onSectionChange,
 }: BottomNavigationProps) {
@@ -125,4 +125,6 @@ export default function BottomNavigation({
       </div>
     </nav>
   );
-}
+});
+
+export default BottomNavigation;

@@ -21,6 +21,30 @@ import { registerPrayerRoutes } from "./routes/prayers";
 import { registerContentRoutes } from "./routes/content";
 // Supabase Auth - replaces Replit Auth
 import { optionalAuth } from "./supabase-auth";
+import { z } from "zod";
+
+// Input validation schemas for public endpoints
+const CalendarDownloadSchema = z.object({
+  title: z.string().max(200).optional().default("Event"),
+  hebrewDate: z.string().max(100).optional().default(""),
+  gregorianDate: z.string().max(50).optional().default(""),
+  years: z.string().regex(/^\d+$/).optional().default("1"),
+  afterNightfall: z.enum(["true", "false"]).optional().default("false")
+});
+
+const LocationQuerySchema = z.object({
+  lat: z.string().regex(/^-?\d+\.?\d*$/).optional(),
+  lng: z.string().regex(/^-?\d+\.?\d*$/).optional()
+});
+
+const DonationCompleteSchema = z.object({
+  buttonType: z.string().max(50).optional(),
+  donationType: z.string().max(50).optional(),
+  sponsorName: z.string().max(200).optional(),
+  dedication: z.string().max(500).optional(),
+  message: z.string().max(1000).optional(),
+  email: z.string().email().max(255).optional().or(z.literal(""))
+});
 
 // Server-side cache with TTL and request coalescing to prevent API rate limiting
 interface CacheEntry {
@@ -303,12 +327,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Calendar download endpoint using GET request to avoid CORS issues
   app.get("/api/download-calendar", async (req, res) => {
     try {
-      // Parse query parameters
-      const title = req.query.title as string || "Event";
-      const hebrewDate = req.query.hebrewDate as string || "";
-      const gregorianDate = req.query.gregorianDate as string || "";
-      const years = parseInt(req.query.years as string) || 1;
-      const afterNightfall = req.query.afterNightfall === 'true';
+      // Validate query parameters
+      const parseResult = CalendarDownloadSchema.safeParse(req.query);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid parameters", details: parseResult.error.errors });
+      }
+      const validatedQuery = parseResult.data;
+      const title = validatedQuery.title;
+      const hebrewDate = validatedQuery.hebrewDate;
+      const gregorianDate = validatedQuery.gregorianDate;
+      const years = parseInt(validatedQuery.years);
+      const afterNightfall = validatedQuery.afterNightfall === 'true';
       
       // Calendar download request
       
@@ -2177,13 +2206,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Discount promotion routes
   app.get("/api/discount-promotions/active", async (req, res) => {
     try {
-      const { lat, lng } = req.query;
+      // Validate location query parameters
+      const parseResult = LocationQuerySchema.safeParse(req.query);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid location parameters" });
+      }
+      const { lat, lng } = parseResult.data;
       let userLocation = "worldwide";
       
       // Check if coordinates are in Israel (approximate bounding box)
       if (lat && lng) {
-        const latitude = parseFloat(lat as string);
-        const longitude = parseFloat(lng as string);
+        const latitude = parseFloat(lat);
+        const longitude = parseFloat(lng);
         
         // Israel's approximate coordinates: 29.5-33.4°N, 34.3-35.9°E
         if (latitude >= 29.5 && latitude <= 33.4 && longitude >= 34.3 && longitude <= 35.9) {
@@ -2204,7 +2238,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Donation completion handler
   app.post("/api/donation-complete", async (req, res) => {
     try {
-      const { buttonType, donationType, sponsorName, dedication, message, email } = req.body;
+      // Validate request body
+      const parseResult = DonationCompleteSchema.safeParse(req.body);
+      if (!parseResult.success) {
+        return res.status(400).json({ error: "Invalid donation data", details: parseResult.error.errors });
+      }
+      const { buttonType, donationType, sponsorName, dedication, message, email } = parseResult.data;
       
       // Only create sponsor record for "Sponsor a Day" donations
       if (buttonType === 'sponsor_a_day' && sponsorName) {

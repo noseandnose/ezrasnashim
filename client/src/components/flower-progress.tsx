@@ -1,11 +1,11 @@
-import React from 'react';
+import { memo } from 'react';
 
 interface FlowerProgressProps {
   completed: boolean;
   size?: number;
 }
 
-export default function FlowerProgress({ completed, size = 20 }: FlowerProgressProps) {
+const FlowerProgress = memo(function FlowerProgress({ completed, size = 20 }: FlowerProgressProps) {
   if (completed) {
     return (
       <div className="relative">
@@ -47,4 +47,6 @@ export default function FlowerProgress({ completed, size = 20 }: FlowerProgressP
       </svg>
     </div>
   );
-}
+});
+
+export default FlowerProgress;

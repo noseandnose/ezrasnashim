@@ -3,7 +3,6 @@ import { useGeolocation, useJewishTimes, useLocationStore } from "@/hooks/use-je
 import { initializeCache } from "@/lib/cache";
 import { useEffect, lazy, Suspense } from "react";
 import { getLocalDateString, getLocalYesterdayString } from "@/lib/dateUtils";
-import "@/utils/clear-modal-completions";
 
 // Lazy load components for better initial load performance
 const Home = lazy(() => import("@/pages/home"));

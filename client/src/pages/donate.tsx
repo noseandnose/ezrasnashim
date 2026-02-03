@@ -7,6 +7,7 @@ import { Heart } from "lucide-react";
 import { useLocation } from "wouter";
 import { useDailyCompletionStore, useModalStore, useDonationCompletionStore } from "@/lib/types";
 import { useAnalytics } from "@/hooks/use-analytics";
+import { logger } from "@/lib/logger";
 
 // TzedakaButtonType definition
 type TzedakaButtonType = 'gave_elsewhere' | 'active_campaign' | 'put_a_coin' | 'sponsor_a_day';
@@ -60,7 +61,12 @@ export default function Donate() {
   // Function to mark individual button as complete (from tzedaka-section)
   const markTzedakaButtonCompleted = (buttonType: TzedakaButtonType) => {
     const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format in local timezone
-    const completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    let completions: Record<string, any> = {};
+    try {
+      completions = JSON.parse(localStorage.getItem('tzedaka_button_completions') || '{}');
+    } catch (e) {
+      logger.warn('Failed to parse tzedaka_button_completions');
+    }
     
     if (!completions[today]) {
       completions[today] = {};
@@ -79,10 +85,10 @@ export default function Donate() {
 
   // Function to call backend payment confirmation endpoint (idempotent)
   const handleDonationSuccess = async (sessionId: string, buttonType: string, paymentIntentId?: string) => {
-    console.log('=== FRONTEND PAYMENT CONFIRMATION ===');
-    console.log('Session ID:', sessionId);
-    console.log('Payment Intent ID:', paymentIntentId);
-    console.log('Button Type:', buttonType);
+    logger.log('=== FRONTEND PAYMENT CONFIRMATION ===');
+    logger.log('Session ID:', sessionId);
+    logger.log('Payment Intent ID:', paymentIntentId);
+    logger.log('Button Type:', buttonType);
 
     try {
       // Call the new idempotent confirmation endpoint
@@ -102,7 +108,7 @@ export default function Donate() {
         }
       });
       
-      console.log('Payment confirmation response:', response);
+      logger.log('Payment confirmation response:', response);
       
       // Always mark as success locally if we got a response (idempotent backend handles duplicates)
       if (response && response.data) {
@@ -161,14 +167,14 @@ export default function Donate() {
         
         // Force immediate refetch of campaign data to show updated progress bar
         await queryClient.refetchQueries({ queryKey: ['/api/campaigns/active'] });
-        console.log('Invalidated and refetched all donation data for immediate UI update');
+        logger.log('Invalidated and refetched all donation data for immediate UI update');
         
         toast({
           title: "Donation Complete!",
           description: `Your ${buttonType.replace('_', ' ')} action has been recorded.`,
         });
         
-        console.log(`Successfully recorded ${buttonType} completion and daily tzedaka task`);
+        logger.log(`Successfully recorded ${buttonType} completion and daily tzedaka task`);
         
         // Check if all tasks are completed and show congratulations
         setTimeout(() => {
@@ -195,10 +201,10 @@ export default function Donate() {
   useEffect(() => {
     // Check if returning from successful payment
     if (isSuccess) {
-      console.log('SUCCESS DETECTED - Processing donation completion...');
+      logger.log('SUCCESS DETECTED - Processing donation completion...');
 
       // Stripe doesn't send back the session ID with the successful payment, we get it from the pending_donation in localStorage
-      console.log('URL Params:', {
+      logger.log('URL Params:', {
         success: urlParams.get('success'),
         buttonType: urlParams.get('buttonType'),
         amount: urlParams.get('amount')
@@ -225,7 +231,7 @@ export default function Donate() {
       
       // paymentIntentId is not available from the URL since Stripe doesn't send it back with the successful payment - keeping it in because some functions require it
       const paymentIntentId = urlParams.get('payment_intent');
-      console.log('Confirming payment with sessionId:', sessionId, 'paymentIntentId:', paymentIntentId, 'buttonType:', buttonType);
+      logger.log('Confirming payment with sessionId:', sessionId, 'paymentIntentId:', paymentIntentId, 'buttonType:', buttonType);
       
       // Immediately confirm payment and update UI (don't wait for webhook)
       handleDonationSuccess(sessionId, buttonType, paymentIntentId || undefined);
@@ -236,7 +242,7 @@ export default function Donate() {
     // Check if we've already been redirected to Stripe (to prevent recreation on return)
     const hasBeenRedirected = localStorage.getItem('has_been_redirected_to_stripe');
     if (hasBeenRedirected && !isSuccess) {
-      console.log('CANCELLED: User returned from Stripe without success - clearing and redirecting home');
+      logger.log('CANCELLED: User returned from Stripe without success - clearing and redirecting home');
       setShowLoadingScreen(false);
       
       // Clear the redirect flag and any pending donation
@@ -267,17 +273,17 @@ export default function Donate() {
         
         // If donation is less than 5 minutes old, check for completion
         if (donationAge < 5 * 60 * 1000) {
-          console.log('BACKUP: Checking for completed donation:', donation);
+          logger.log('BACKUP: Checking for completed donation:', donation);
           
           // Check backend for completion status
           if (amount <= 0) { // We're on the donate page without parameters - likely returned from Stripe
-            console.log('BACKUP: Checking backend for donation completion');
+            logger.log('BACKUP: Checking backend for donation completion');
             
             // Check if donation was completed
             apiRequest('GET', `/api/donations/check-completion/${donation.sessionId}`)
               .then((response) => {
                 if (response.data && response.data.completed) {
-                  console.log('BACKUP: Backend confirms donation completion');
+                  logger.log('BACKUP: Backend confirms donation completion');
                   
                   // Clear pending donation and mark complete
                   localStorage.removeItem('pending_donation');
@@ -308,7 +314,7 @@ export default function Donate() {
                     }, 1000);
                   }
                 } else {
-                  console.log('BACKUP: No completion found yet');
+                  logger.log('BACKUP: No completion found yet');
                 }
               })
               .catch((error) => {
@@ -335,7 +341,7 @@ export default function Donate() {
 
     // Prevent session recreation if we've already redirected to Stripe
     if (hasRedirectedToStripeRef.current || hasBeenRedirected) {
-      console.log('Already redirected to Stripe, preventing recreation...');
+      logger.log('Already redirected to Stripe, preventing recreation...');
       return;
     }
 
@@ -347,22 +353,6 @@ export default function Donate() {
     // Mark that we're about to redirect to Stripe
     hasRedirectedToStripeRef.current = true;
     localStorage.setItem('has_been_redirected_to_stripe', 'true');
-
-    // // Use ref to ensure payment intent is only created once
-    // if (paymentIntentCreatedRef.current || clientSecret) {
-    //   console.log('Payment intent already created or in progress, skipping...');
-    //   return;
-    // }
-
-    // // Mark as created immediately using ref
-    // paymentIntentCreatedRef.current = true;
-
-    // Create PaymentIntent when component loads
-    // console.log('=== PAYMENT INTENT CREATION (SINGLE INSTANCE) ===');
-    // console.log('Amount:', amount);
-    // console.log('Donation type:', donationType);
-    // console.log('Sponsor name:', sponsorName);
-    // console.log('Dedication:', dedication);
 
     apiRequest('POST', '/api/create-session-checkout', {
       amount,
@@ -380,7 +370,7 @@ export default function Donate() {
       .then(async (response) => {
         const stripe = await stripePromise;
         const sessionId = response.data.sessionId;
-        console.log('Redirecting to Stripe Checkout with session ID:', sessionId);
+        logger.log('Redirecting to Stripe Checkout with session ID:', sessionId);
         
         // Store session info for completion tracking backup
         localStorage.setItem('pending_donation', JSON.stringify({
@@ -391,18 +381,6 @@ export default function Donate() {
         }));
         
         return stripe && stripe.redirectToCheckout({ sessionId: sessionId });
-        // console.log('Payment intent response:', response);
-        // const data = response.data;
-        // console.log('Payment intent data:', data);
-        // const decoded = decodeURIComponent(data.id);
-        // setClientSecret(decoded);
-        // if (data.clientSecret) {
-        //   console.log('Client secret received successfully');
-        //   setClientSecret(decodeURIComponent(data.id));
-        // } else {
-        //   console.error('No client secret in response:', data);
-        //   throw new Error('No client secret received');
-        // }
       })
       .catch((error) => {
         console.error('Error creating session:', error);
@@ -476,14 +454,6 @@ export default function Donate() {
       </div>
     );
   }
-
-  // if (!clientSecret) {
-  //   return (
-  //     <div className="min-h-screen bg-gradient-to-br from-blush/10 to-peach/10 flex items-center justify-center">
-  //       <div className="animate-spin w-8 h-8 border-4 border-blush border-t-transparent rounded-full" />
-  //     </div>
-  //   );
-  // }
 
   // Show loading spinner while redirecting to Stripe
   if (showLoadingScreen) {

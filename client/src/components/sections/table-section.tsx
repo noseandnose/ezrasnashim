@@ -554,7 +554,11 @@ export default function TableSection() {
               <div className={`p-2 rounded-full ${
                 isModalComplete('inspiration') ? 'bg-sage' : 'bg-gradient-feminine'
               }`}>
-                <Star className="text-white" size={16} />
+                {isModalComplete('inspiration') ? (
+                  <Check className="text-white" size={16} />
+                ) : (
+                  <Star className="text-white" size={16} />
+                )}
               </div>
               
               {/* Title and Subtitle */}

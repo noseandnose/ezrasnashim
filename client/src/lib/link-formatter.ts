@@ -1,7 +1,7 @@
 /**
  * Utility functions for formatting thank you messages with clickable links
  */
-import { sanitizeHTML } from './text-formatter';
+import { sanitizeHTML } from './sanitize';
 
 /**
  * Convert markdown-style links to HTML links

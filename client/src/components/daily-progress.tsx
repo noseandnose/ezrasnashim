@@ -1,5 +1,5 @@
 import { useDailyCompletionStore } from "@/lib/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import stage0Image from '@assets/Untitled design (2)_1753301031660.png';
 import stage1Image from '@assets/Stage1_1753300751705.png';
 import stage2Image from '@assets/Stage2_1753300751704.png';
@@ -9,7 +9,7 @@ interface DailyProgressProps {
   size?: number;
 }
 
-export default function DailyProgress({}: DailyProgressProps) {
+const DailyProgress = memo(function DailyProgress({}: DailyProgressProps) {
   const { torahCompleted, tefillaCompleted, tzedakaCompleted } = useDailyCompletionStore();
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [previousCount, setPreviousCount] = useState(0);
@@ -97,4 +97,6 @@ export default function DailyProgress({}: DailyProgressProps) {
       )}
     </div>
   );
-}
+});
+
+export default DailyProgress;

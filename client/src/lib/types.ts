@@ -397,7 +397,7 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
   
   // Production logic: persist to localStorage and reset daily
   const stored = localStorage.getItem('dailyCompletion');
-  const initial = stored ? JSON.parse(stored) : {
+  let initial = {
     torahCompleted: false,
     tefillaCompleted: false,
     tzedakaCompleted: false,
@@ -407,6 +407,13 @@ export const useDailyCompletionStore = create<DailyCompletionState>((set, get) =
     congratulationsShown: false,
     completionDate: today
   };
+  if (stored) {
+    try {
+      initial = JSON.parse(stored);
+    } catch (e) {
+      console.warn('Failed to parse dailyCompletion');
+    }
+  }
   
   // Reset if it's a new day
   if (initial.completionDate !== today) {
