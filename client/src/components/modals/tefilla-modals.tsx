@@ -1473,7 +1473,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           }`}
           data-testid="tab-womens-life"
         >
-          <span className="platypi-semibold text-xs leading-tight block">Life ({lifeArray.length})</span>
+          <span className="platypi-semibold text-xs leading-tight block">Life</span>
         </button>
         <button
           onClick={() => setActiveTab('family')}
@@ -1484,7 +1484,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           }`}
           data-testid="tab-womens-family"
         >
-          <span className="platypi-semibold text-xs leading-tight block">Family ({familyArray.length})</span>
+          <span className="platypi-semibold text-xs leading-tight block">Family</span>
         </button>
         <button
           onClick={() => setActiveTab('pregnancy')}
@@ -1495,7 +1495,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           }`}
           data-testid="tab-womens-pregnancy"
         >
-          <span className="platypi-semibold text-xs leading-tight block">Pregnancy ({pregnancyArray.length})</span>
+          <span className="platypi-semibold text-xs leading-tight block">Pregnancy</span>
         </button>
         <button
           onClick={() => setActiveTab('refuah')}
@@ -1506,7 +1506,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           }`}
           data-testid="tab-womens-refuah"
         >
-          <span className="platypi-semibold text-xs leading-tight block">Refuah ({refuahArray.length})</span>
+          <span className="platypi-semibold text-xs leading-tight block">Refuah</span>
         </button>
       </div>
 
