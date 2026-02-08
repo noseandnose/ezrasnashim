@@ -1378,9 +1378,9 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
   );
 }
 
-// Women's Tefillas fullscreen content with 3 tabs
+// Women's Tefillas fullscreen content with 4 tabs
 function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSize }: { language: 'hebrew' | 'english'; fontSize: number }) {
-  const [activeTab, setActiveTab] = useState<'refuah' | 'family' | 'life'>('life');
+  const [activeTab, setActiveTab] = useState<'refuah' | 'family' | 'life' | 'pregnancy'>('life');
   
   const { data: refuahPrayers = [], isLoading: refuahLoading } = useQuery<WomensPrayer[]>({
     queryKey: ['/api/womens-prayers/refuah'],
@@ -1400,6 +1400,12 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
     gcTime: 10 * 60 * 1000,
   });
 
+  const { data: pregnancyPrayers = [], isLoading: pregnancyLoading } = useQuery<WomensPrayer[]>({
+    queryKey: ['/api/womens-prayers/pregnancy'],
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+
   // Icon mapping for prayer categories
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -1409,6 +1415,8 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
         return Users;
       case 'life':
         return Heart;
+      case 'pregnancy':
+        return Baby;
       default:
         return HandHeart;
     }
@@ -1418,11 +1426,12 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
   const refuahArray = Array.isArray(refuahPrayers) ? refuahPrayers : [];
   const familyArray = Array.isArray(familyPrayers) ? familyPrayers : [];
   const lifeArray = Array.isArray(lifePrayers) ? lifePrayers : [];
+  const pregnancyArray = Array.isArray(pregnancyPrayers) ? pregnancyPrayers : [];
   
   // Show loading only if we have no data at all
-  const hasData = refuahArray.length > 0 || familyArray.length > 0 || lifeArray.length > 0;
+  const hasData = refuahArray.length > 0 || familyArray.length > 0 || lifeArray.length > 0 || pregnancyArray.length > 0;
   
-  if (!hasData && (refuahLoading || familyLoading || lifeLoading)) {
+  if (!hasData && (refuahLoading || familyLoading || lifeLoading || pregnancyLoading)) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
@@ -1441,6 +1450,8 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
         return familyArray;
       case 'life':
         return lifeArray;
+      case 'pregnancy':
+        return pregnancyArray;
       default:
         return [];
     }
@@ -1451,11 +1462,11 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
 
   return (
     <div className="space-y-6">
-      {/* Tab Navigation - 3 tabs */}
+      {/* Tab Navigation - 4 tabs */}
       <div className="flex rounded-2xl bg-blush/10 p-1 border border-blush/20">
         <button
           onClick={() => setActiveTab('life')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+          className={`flex-1 py-2.5 px-1.5 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'life'
               ? 'bg-gradient-feminine text-white shadow-lg'
               : 'text-black/70 hover:bg-blush/10'
@@ -1466,7 +1477,7 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
         </button>
         <button
           onClick={() => setActiveTab('family')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+          className={`flex-1 py-2.5 px-1.5 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'family'
               ? 'bg-gradient-feminine text-white shadow-lg'
               : 'text-black/70 hover:bg-blush/10'
@@ -1476,8 +1487,19 @@ function WomensTefillaFullscreenContent({ language: _language, fontSize: _fontSi
           <span className="platypi-semibold text-xs leading-tight block">Family ({familyArray.length})</span>
         </button>
         <button
+          onClick={() => setActiveTab('pregnancy')}
+          className={`flex-1 py-2.5 px-1.5 rounded-xl text-center transition-all duration-200 ${
+            activeTab === 'pregnancy'
+              ? 'bg-gradient-feminine text-white shadow-lg'
+              : 'text-black/70 hover:bg-blush/10'
+          }`}
+          data-testid="tab-womens-pregnancy"
+        >
+          <span className="platypi-semibold text-xs leading-tight block">Pregnancy ({pregnancyArray.length})</span>
+        </button>
+        <button
           onClick={() => setActiveTab('refuah')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-center transition-all duration-200 ${
+          className={`flex-1 py-2.5 px-1.5 rounded-xl text-center transition-all duration-200 ${
             activeTab === 'refuah'
               ? 'bg-gradient-feminine text-white shadow-lg'
               : 'text-black/70 hover:bg-blush/10'
