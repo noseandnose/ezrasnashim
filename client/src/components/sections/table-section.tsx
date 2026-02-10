@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem, Headphones, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
+import GratitudeJournalBar from "@/components/gratitude-journal-bar";
 import { useModalStore, useModalCompletionStore } from "@/lib/types";
 import { useTrackModalComplete, useTrackFeatureUsage } from "@/hooks/use-analytics";
 import { useShabbosTime } from "@/hooks/use-shabbos-times";
@@ -99,6 +100,8 @@ export default function TableSection() {
 
   return (
     <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
+      <GratitudeJournalBar />
+
       {/* Main Table Section */}
       <div 
         className="rounded-b-3xl p-3 relative"
