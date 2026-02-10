@@ -11,6 +11,7 @@ import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { sanitizeHTML } from "@/lib/sanitize";
+import GratitudeJournalBar from "@/components/gratitude-journal-bar";
 import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1767035380484.png";
 import tefillaFlower from "@assets/Tefilla_1767035380485.png";
@@ -829,6 +830,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             animationClass={tzedakaCompleted ? 'heartbeat-green' : 'heartbeat-pink'}
           />
         </button>
+
+        {/* Gratitude Journal Bar */}
+        <GratitudeJournalBar />
 
         {/* Daily Progress Tracker - Redesigned Garden */}
         <div 
