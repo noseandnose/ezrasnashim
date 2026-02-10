@@ -256,7 +256,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       </div>
 
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
-      <div className="p-2 grid grid-cols-2 gap-2">
+      <div className="px-3 pt-3 grid grid-cols-2 gap-2">
           {torahItems.filter(({ id }) => {
             // Filter out items without content
             switch(id) {
@@ -543,7 +543,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       )}
 
       {/* Full-width bars section */}
-      <div className="px-2 pt-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
+      <div className="px-3 pt-3 space-y-3" style={{ position: 'relative', zIndex: 5 }}>
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
