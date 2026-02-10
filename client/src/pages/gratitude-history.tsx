@@ -2,6 +2,7 @@ import { useLocation } from "wouter";
 import { ArrowLeft, NotebookPen, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useState, useEffect, useCallback } from "react";
+import axiosClient from "@/lib/axiosClient";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 import type { GratitudeJournal } from "@shared/schema";
@@ -46,13 +47,11 @@ export default function GratitudeHistory() {
     
     setIsLoading(true);
     try {
-      const res = await fetch('/api/gratitude', {
+      const response = await axiosClient.get('/api/gratitude', {
         headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (res.ok) {
-        const data = await res.json();
-        setEntries(Array.isArray(data) ? data : []);
-      }
+      const data = response.data;
+      setEntries(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('[GratitudeHistory] Fetch error:', err);
     } finally {
