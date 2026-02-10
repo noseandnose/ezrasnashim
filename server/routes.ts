@@ -3277,6 +3277,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analyticsDate: today
       });
       
+      // Track as modal_complete so it counts in totalActs and Feature Usage stats
+      const modalName = updated.modalName || updated.challengeType || 'community-challenge';
+      await storage.trackEvent({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: modalName,
+          source: 'community-challenge',
+          challengeId: id
+        },
+        sessionId: null,
+        analyticsDate: today
+      });
+      
       return res.json({
         success: true,
         currentCount: updated.currentCount,
