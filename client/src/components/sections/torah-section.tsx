@@ -465,14 +465,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
         if (!hasParshaContent) return null;
         
         return (
-          <div className="px-3 pt-3">
+          <div className="px-3 pt-2">
             <button 
               onClick={() => {
                 if (firstVort) {
                   openModal('parsha-vort', 'torah', undefined, firstVort.id);
                 }
               }}
-              className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
+              className="w-full bg-white rounded-xl p-3 border border-blush/10 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-lg"
               data-testid="button-parsha-inspiration"
             >
               <div className="flex items-center gap-3">
@@ -504,7 +504,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       {torahChallenge && (
         <button
           onClick={() => openModal('torah-challenge', 'torah')}
-          className="mx-3 mt-3 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1.5rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
+          className="mx-3 mt-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1.5rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
           style={{ 
             backgroundColor: '#ffffff', 
             isolation: 'isolate',
@@ -543,7 +543,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       )}
 
       {/* Full-width bars section */}
-      <div className="px-3 pt-3 space-y-3" style={{ position: 'relative', zIndex: 5 }}>
+      <div className="px-3 pt-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;
