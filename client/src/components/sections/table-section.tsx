@@ -322,12 +322,14 @@ export default function TableSection() {
 
       </div>
 
-      <GratitudeJournalBar />
+      <div className="px-3 mt-3">
+        <GratitudeJournalBar />
+      </div>
 
       {/* Shabbos Content Grid - Separate Section */}
-      <div className="py-2 space-y-1">
+      <div className="px-3 py-3 space-y-3">
         {/* Top Row: Daily Recipe and Marriage Insights - Apple Glass Style */}
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Daily Recipe Button */}
           <button
             className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
@@ -436,7 +438,7 @@ export default function TableSection() {
         </div>
 
         {/* Bottom Row: Life Classes and Meditation - Apple Glass Style */}
-        <div className="grid grid-cols-2 gap-2 mb-2">
+        <div className="grid grid-cols-2 gap-2">
           {/* Life Classes Button */}
           <button
             className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
@@ -579,9 +581,7 @@ export default function TableSection() {
         )}
         
         {/* Discount Promotion Bar */}
-        <div className="mt-4">
-          <DiscountBar />
-        </div>
+        <DiscountBar />
         
         {/* Bottom padding to prevent last element from being cut off by navigation */}
         <div className="h-16"></div>
