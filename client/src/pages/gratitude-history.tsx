@@ -1,8 +1,7 @@
 import { useLocation } from "wouter";
 import { ArrowLeft, NotebookPen, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import BottomNavigation from "@/components/bottom-navigation";
 import type { Section } from "@/pages/home";
 import type { GratitudeJournal } from "@shared/schema";
@@ -27,6 +26,8 @@ export default function GratitudeHistory() {
   const [, setLocation] = useLocation();
   const { session, isAuthenticated, isLoading: authLoading } = useAuth();
   const [backgroundImage, setBackgroundImage] = useState(getTimeBasedBackground);
+  const [entries, setEntries] = useState<GratitudeJournal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,19 +37,36 @@ export default function GratitudeHistory() {
     return () => clearInterval(interval);
   }, []);
 
-  const { data: entries = [], isLoading } = useQuery<GratitudeJournal[]>({
-    queryKey: ['/api/gratitude'],
-    enabled: isAuthenticated && !!session?.access_token,
-    queryFn: async () => {
+  const fetchEntries = useCallback(async () => {
+    const token = session?.access_token;
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
       const res = await fetch('/api/gratitude', {
-        headers: { 'Authorization': `Bearer ${session!.access_token}` },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to fetch entries');
-      return res.json();
-    },
-    staleTime: 0,
-    refetchOnMount: 'always',
-  });
+      if (res.ok) {
+        const data = await res.json();
+        setEntries(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('[GratitudeHistory] Fetch error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [session?.access_token]);
+
+  useEffect(() => {
+    if (!authLoading && session?.access_token) {
+      fetchEntries();
+    } else if (!authLoading) {
+      setIsLoading(false);
+    }
+  }, [authLoading, session?.access_token, fetchEntries]);
 
   const handleSectionChange = (section: Section) => {
     setLocation(section === 'home' ? '/' : `/${section}`);
