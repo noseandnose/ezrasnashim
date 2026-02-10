@@ -46,6 +46,8 @@ export default function GratitudeHistory() {
       if (!res.ok) throw new Error('Failed to fetch entries');
       return res.json();
     },
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   const handleSectionChange = (section: Section) => {
