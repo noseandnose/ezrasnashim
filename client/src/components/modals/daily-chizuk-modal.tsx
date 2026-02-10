@@ -85,16 +85,29 @@ export default function DailyChizukModal() {
 
           {chizukContent.audioUrl && (
             <div className="bg-white rounded-2xl p-4 border border-blush/10">
-              <AudioPlayer 
-                audioUrl={chizukContent.audioUrl} 
-                title={chizukContent.title || 'Daily Chizuk'}
-                duration={chizukContent.duration || "0:00"}
-                onAudioEnded={() => {
-                  if (!isCompleted) {
-                    handleComplete();
-                  }
-                }}
-              />
+              {chizukContent.audioUrl.includes('/embed') || chizukContent.audioUrl.includes('iframe') ? (
+                <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                  <iframe
+                    src={chizukContent.audioUrl}
+                    className="absolute top-0 left-0 w-full h-full rounded-xl"
+                    frameBorder="0"
+                    scrolling="no"
+                    allowFullScreen
+                    title={chizukContent.title || 'Daily Chizuk'}
+                  />
+                </div>
+              ) : (
+                <AudioPlayer 
+                  audioUrl={chizukContent.audioUrl} 
+                  title={chizukContent.title || 'Daily Chizuk'}
+                  duration={chizukContent.duration || "0:00"}
+                  onAudioEnded={() => {
+                    if (!isCompleted) {
+                      handleComplete();
+                    }
+                  }}
+                />
+              )}
             </div>
           )}
 
