@@ -140,11 +140,10 @@ export default function CommunityChallengeModal() {
   });
 
   const { data: brochaContent, isLoading: brochaLoading } = useQuery<Brocha>({
-    queryKey: ['/api/tefilla/brocha', challenge?.challengeContentId],
+    queryKey: ['/api/brochas', challenge?.challengeContentId],
     queryFn: async () => {
-      const response = await axiosClient.get('/api/tefilla-summary');
-      const brochas = response.data?.brochas || [];
-      return brochas.find((b: Brocha) => b.id === challenge?.challengeContentId) || null;
+      const response = await axiosClient.get(`/api/brochas/${challenge?.challengeContentId}`);
+      return response.data;
     },
     enabled: isOpen && (challenge?.challengeType === 'asher-yatzar' || challenge?.challengeType === 'birkat-hamazon') && !!challenge?.challengeContentId,
     staleTime: 60 * 60 * 1000,
