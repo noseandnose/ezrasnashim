@@ -465,7 +465,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
         if (!hasParshaContent) return null;
         
         return (
-          <div className="px-2 pt-2">
+          <div className="px-3 pt-3">
             <button 
               onClick={() => {
                 if (firstVort) {
@@ -504,7 +504,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       {torahChallenge && (
         <button
           onClick={() => openModal('torah-challenge', 'torah')}
-          className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
+          className="mx-3 mt-3 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1.5rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
           style={{ 
             backgroundColor: '#ffffff', 
             isolation: 'isolate',
