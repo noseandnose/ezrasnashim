@@ -100,8 +100,6 @@ export default function TableSection() {
 
   return (
     <div className="pb-20 relative overflow-hidden min-h-screen bg-gradient-soft" data-bridge-container>
-      <GratitudeJournalBar />
-
       {/* Main Table Section */}
       <div 
         className="rounded-b-3xl p-3 relative"
@@ -323,6 +321,8 @@ export default function TableSection() {
         )}
 
       </div>
+
+      <GratitudeJournalBar />
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="py-2 space-y-1">
