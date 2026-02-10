@@ -109,7 +109,7 @@ export default function GratitudeJournalBar() {
         onClick={() => setExpanded(!expanded)}
         className="w-full py-3 px-4 text-left flex items-center space-x-4 hover:bg-white/90 transition-all active:scale-[0.98]"
       >
-        <div className="p-2.5 rounded-full bg-gradient-to-br from-amber-300 to-amber-500">
+        <div className="p-2.5 rounded-full bg-gradient-to-br from-blush to-lavender">
           <Heart className="text-white" size={18} strokeWidth={1.5} />
         </div>
         <div className="flex-grow">
@@ -140,7 +140,7 @@ export default function GratitudeJournalBar() {
               <button
                 onClick={() => handleSubmit(false)}
                 disabled={!text.trim() || isSubmitting}
-                className="px-4 py-2 rounded-full text-xs platypi-bold text-white bg-gradient-to-r from-amber-400 to-amber-500 shadow-md hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-1.5"
+                className="px-4 py-2 rounded-full text-xs platypi-bold text-white bg-gradient-to-r from-sage to-sage shadow-md hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-1.5"
               >
                 {isSubmitting ? (
                   <Loader2 size={14} className="animate-spin" />
