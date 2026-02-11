@@ -61,7 +61,7 @@ export default function GratitudeJournalBar() {
       setExpanded(false);
 
       if (withTehillim) {
-        openModal('special-tehillim', 'tefilla', 100);
+        openModal('individual-tehillim', 'tefilla', 100);
       }
     } catch (error) {
       console.error('Failed to save gratitude entry:', error);
@@ -129,7 +129,8 @@ export default function GratitudeJournalBar() {
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="Write what you're grateful for today..."
-            className="w-full mt-3 p-3 rounded-xl border border-blush/20 bg-white/80 text-sm platypi-regular text-black placeholder:text-black/30 resize-none focus:outline-none focus:ring-2 focus:ring-blush/30 focus:border-blush/40"
+            className="w-full mt-3 p-3 rounded-xl border border-blush/20 bg-white/80 text-base platypi-regular text-black placeholder:text-black/30 resize-none focus:outline-none focus:ring-2 focus:ring-blush/30 focus:border-blush/40"
+            style={{ fontSize: '16px' }}
             rows={3}
             maxLength={500}
             autoFocus
