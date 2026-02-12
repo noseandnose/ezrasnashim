@@ -2261,15 +2261,19 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]> {
     try {
-      const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
+      const isInIsrael = userLocation === "israel";
       
-      // Get only promotions that match the exact user location
       const promotions = await db.select()
         .from(discountPromotions)
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            eq(discountPromotions.targetLocation, targetLocation)
+            isInIsrael
+              ? or(
+                  eq(discountPromotions.targetLocation, "israel"),
+                  eq(discountPromotions.targetLocation, "worldwide")
+                )
+              : eq(discountPromotions.targetLocation, "worldwide")
           )
         )
         .orderBy(discountPromotions.id);
