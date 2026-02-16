@@ -1,14 +1,21 @@
 // Tefilla text processor for conditional content based on location, time, and Jewish calendar
 
 // Hebrew date helper functions
+function normalizeHebrewMonth(month: string): string {
+  if (month.includes('Adar')) return 'Adar';
+  if (month === "Sh'vat" || month === "Shvat") return 'Shevat';
+  if (month === 'Nisan') return 'Nissan';
+  if (month === 'Iyyar') return 'Iyar';
+  return month;
+}
+
 function parseHebrewDate(hebrewDate: any): { month: string; day: number } | null {
   if (!hebrewDate) return null;
   
   try {
-    // The hebrewDate object from API has hebrewMonth and hebrewDay properties
-    const month = hebrewDate.hebrewMonth || '';
+    const rawMonth = hebrewDate.hebrewMonth || '';
+    const month = normalizeHebrewMonth(rawMonth);
     const day = parseInt(hebrewDate.hebrewDay) || 0;
-    
     
     return { month, day };
   } catch {
@@ -35,11 +42,7 @@ function isInHebrewDateRange(
     'Nissan', 'Iyar', 'Sivan', 'Tammuz', 'Av', 'Elul'
   ];
   
-  // Handle Adar I/II - treat both as "Adar"
-  const normalizeMonth = (month: string) => {
-    if (month.includes('Adar')) return 'Adar';
-    return month;
-  };
+  const normalizeMonth = normalizeHebrewMonth;
   
   const currentMonthIndex = monthOrder.indexOf(normalizeMonth(currentMonth));
   const startMonthIndex = monthOrder.indexOf(startMonth);
