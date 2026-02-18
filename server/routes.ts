@@ -187,7 +187,8 @@ import {
   insertLifeClassSchema,
   insertGemsOfGratitudeSchema,
   insertNishmasTextSchema,
-  insertMessagesSchema
+  insertMessagesSchema,
+  insertGratitudeJournalSchema
 } from "../shared/schema";
 
 // Admin authentication middleware - JWT only (httpOnly cookie or Authorization header)
@@ -3277,6 +3278,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         analyticsDate: today
       });
       
+      // Track as modal_complete so it counts in totalActs and Feature Usage stats
+      const modalName = updated.modalName || updated.challengeType || 'community-challenge';
+      await storage.trackEvent({
+        eventType: 'modal_complete',
+        eventData: {
+          modalType: modalName,
+          source: 'community-challenge',
+          challengeId: id
+        },
+        sessionId: null,
+        analyticsDate: today
+      });
+      
       return res.json({
         success: true,
         currentCount: updated.currentCount,
@@ -3886,6 +3900,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error updating user mitzvah progress:", error);
       return res.status(500).json({ message: "Failed to update mitzvah progress" });
+    }
+  });
+
+  // Gratitude Journal endpoints (for authenticated users)
+  app.post("/api/gratitude", optionalAuth, async (req, res) => {
+    try {
+      const userId = req.supabaseUser?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const parsed = insertGratitudeJournalSchema.safeParse({
+        ...req.body,
+        userId,
+        text: req.body.text?.trim(),
+        completedWithTehillim: req.body.completedWithTehillim || false
+      });
+      
+      if (!parsed.success) {
+        return res.status(400).json({ message: "Invalid input", errors: parsed.error.flatten().fieldErrors });
+      }
+      
+      const entry = await storage.createGratitudeEntry(parsed.data);
+      
+      return res.json(entry);
+    } catch (error) {
+      console.error("Error creating gratitude entry:", error);
+      return res.status(500).json({ message: "Failed to save gratitude entry" });
+    }
+  });
+
+  app.get("/api/gratitude", optionalAuth, async (req, res) => {
+    try {
+      const userId = req.supabaseUser?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const entries = await storage.getGratitudeEntries(userId);
+      return res.json(entries);
+    } catch (error) {
+      console.error("Error fetching gratitude entries:", error);
+      return res.status(500).json({ message: "Failed to fetch gratitude entries" });
+    }
+  });
+
+  app.get("/api/gratitude/today", optionalAuth, async (req, res) => {
+    try {
+      const userId = req.supabaseUser?.id;
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+      
+      const date = req.query.date as string || new Date().toISOString().split('T')[0];
+      const entry = await storage.getGratitudeEntryByDate(userId, date);
+      return res.json(entry || null);
+    } catch (error) {
+      console.error("Error fetching today's gratitude entry:", error);
+      return res.status(500).json({ message: "Failed to fetch gratitude entry" });
     }
   });
 

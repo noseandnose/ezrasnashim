@@ -8,6 +8,7 @@ import {
   analyticsEvents, dailyStats, acts,
   tehillimChains, tehillimChainReadings,
   userMitzvahProgress,
+  gratitudeJournal,
 
   type ShopItem, type InsertShopItem,
   type GlobalTehillimProgress, type MinchaPrayer, type InsertMinchaPrayer,
@@ -48,7 +49,8 @@ import {
   type TodaysSpecial, type InsertTodaysSpecial,
   type GiftOfChatzos, type InsertGiftOfChatzos,
   type TorahChallenge, type InsertTorahChallenge,
-  type UserMitzvahProgress
+  type UserMitzvahProgress,
+  type GratitudeJournal, type InsertGratitudeJournal
 } from "../shared/schema";
 import { db } from "./db";
 import { eq, gt, lt, gte, lte, and, or, sql, like, ilike, asc, desc, isNull } from "drizzle-orm";
@@ -407,6 +409,11 @@ export interface IStorage {
   // User Mitzvah Progress methods (for authenticated users)
   getUserMitzvahProgress(userId: string): Promise<UserMitzvahProgress | undefined>;
   upsertUserMitzvahProgress(userId: string, modalCompletions: Record<string, any>, tzedakaCompletions: Record<string, any>): Promise<UserMitzvahProgress>;
+
+  // Gratitude Journal methods
+  createGratitudeEntry(entry: InsertGratitudeJournal): Promise<GratitudeJournal>;
+  getGratitudeEntries(userId: string): Promise<GratitudeJournal[]>;
+  getGratitudeEntryByDate(userId: string, date: string): Promise<GratitudeJournal | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -2254,15 +2261,19 @@ export class DatabaseStorage implements IStorage {
 
   async getActiveDiscountPromotions(userLocation?: string): Promise<DiscountPromotion[]> {
     try {
-      const targetLocation = userLocation === "israel" ? "israel" : "worldwide";
+      const isInIsrael = userLocation === "israel";
       
-      // Get only promotions that match the exact user location
       const promotions = await db.select()
         .from(discountPromotions)
         .where(
           and(
             eq(discountPromotions.isActive, true),
-            eq(discountPromotions.targetLocation, targetLocation)
+            isInIsrael
+              ? or(
+                  eq(discountPromotions.targetLocation, "israel"),
+                  eq(discountPromotions.targetLocation, "worldwide")
+                )
+              : eq(discountPromotions.targetLocation, "worldwide")
           )
         )
         .orderBy(discountPromotions.id);
@@ -3816,6 +3827,34 @@ export class DatabaseStorage implements IStorage {
         .returning();
       return created;
     }
+  }
+
+  async createGratitudeEntry(entry: InsertGratitudeJournal): Promise<GratitudeJournal> {
+    const [created] = await db
+      .insert(gratitudeJournal)
+      .values(entry)
+      .returning();
+    return created;
+  }
+
+  async getGratitudeEntries(userId: string): Promise<GratitudeJournal[]> {
+    return await db
+      .select()
+      .from(gratitudeJournal)
+      .where(eq(gratitudeJournal.userId, userId))
+      .orderBy(desc(gratitudeJournal.createdAt));
+  }
+
+  async getGratitudeEntryByDate(userId: string, date: string): Promise<GratitudeJournal | undefined> {
+    const [entry] = await db
+      .select()
+      .from(gratitudeJournal)
+      .where(and(
+        eq(gratitudeJournal.userId, userId),
+        eq(gratitudeJournal.date, date)
+      ))
+      .limit(1);
+    return entry;
   }
 }
 

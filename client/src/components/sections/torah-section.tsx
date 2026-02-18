@@ -256,7 +256,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       </div>
 
       {/* Daily Torah Content - 2x2 Grid with Apple Glass Style */}
-      <div className="p-2 grid grid-cols-2 gap-2">
+      <div className="px-3 pt-3 grid grid-cols-2 gap-2">
           {torahItems.filter(({ id }) => {
             // Filter out items without content
             switch(id) {
@@ -465,14 +465,14 @@ function TorahSectionComponent({}: TorahSectionProps) {
         if (!hasParshaContent) return null;
         
         return (
-          <div className="px-2 pt-2">
+          <div className="px-3 pt-2">
             <button 
               onClick={() => {
                 if (firstVort) {
                   openModal('parsha-vort', 'torah', undefined, firstVort.id);
                 }
               }}
-              className="w-full bg-white/80 rounded-xl p-3 border border-blush/20 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-sm"
+              className="w-full bg-white rounded-xl p-3 border border-blush/10 flex items-center justify-between gap-3 hover:bg-white/90 transition-all duration-300 shadow-lg"
               data-testid="button-parsha-inspiration"
             >
               <div className="flex items-center gap-3">
@@ -504,7 +504,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       {torahChallenge && (
         <button
           onClick={() => openModal('torah-challenge', 'torah')}
-          className="mx-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
+          className="mx-3 mt-2 rounded-xl overflow-hidden border border-blush/10 shadow-lg relative w-[calc(100%-1.5rem)] p-3 text-left transition-colors hover:scale-[1.02] transition-transform"
           style={{ 
             backgroundColor: '#ffffff', 
             isolation: 'isolate',
@@ -543,7 +543,7 @@ function TorahSectionComponent({}: TorahSectionProps) {
       )}
 
       {/* Full-width bars section */}
-      <div className="px-2 pt-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
+      <div className="px-3 pt-2 space-y-2" style={{ position: 'relative', zIndex: 5 }}>
         {/* Inspiration Hub Bar - Uses featured content */}
         {(() => {
           const hasVideo = !!featuredContent?.videoUrl;

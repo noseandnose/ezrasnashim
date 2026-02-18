@@ -996,5 +996,22 @@ export const insertUserMitzvahProgressSchema = createInsertSchema(userMitzvahPro
 export type UserMitzvahProgress = typeof userMitzvahProgress.$inferSelect;
 export type InsertUserMitzvahProgress = z.infer<typeof insertUserMitzvahProgressSchema>;
 
+// Gratitude Journal - daily gratitude entries for logged-in users
+export const gratitudeJournal = pgTable("gratitude_journal", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  text: text("text").notNull(),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  completedWithTehillim: boolean("completed_with_tehillim").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("gratitude_journal_user_id_idx").on(table.userId),
+  dateIdx: index("gratitude_journal_date_idx").on(table.date),
+}));
+
+export const insertGratitudeJournalSchema = createInsertSchema(gratitudeJournal).omit({ id: true, createdAt: true });
+export type GratitudeJournal = typeof gratitudeJournal.$inferSelect;
+export type InsertGratitudeJournal = z.infer<typeof insertGratitudeJournalSchema>;
+
 // Auth models (users, sessions) - required for Replit Auth
 export * from "./models/auth";

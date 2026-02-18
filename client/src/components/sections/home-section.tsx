@@ -830,6 +830,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           />
         </button>
 
+
         {/* Daily Progress Tracker - Redesigned Garden */}
         <div 
           id="daily-progress-garden"

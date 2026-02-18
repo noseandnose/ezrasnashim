@@ -17,6 +17,7 @@ Compass visual enhancements: Center heart doubled in size (w-8 h-8), BH icons 20
 Header layout: Search icon placed next to hamburger menu for quick access. Header shows hamburger menu + search button (left), centered logo, and message button (right). Both sides balanced with flex-1 to keep logo centered.
 Weather display: Real-time weather badge on Shkia button using Open-Meteo API (free, no API key). Displays temperature with weather emoji in Apple glass style. Tappable to toggle between Celsius and Fahrenheit (preference saved in localStorage with key 'weatherTempUnit').
 Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed). Features date dividers, message categories (Yellow=Message, Blue=Feature, Pink=Bug Fix, Green=Poll), and like/dislike buttons with backend tracking. Messages schema includes category, likes, and dislikes fields.
+Gratitude Journal: Collapsible bar on home page (after Tzedaka) for daily gratitude entries. Requires login. Two completion options: "Complete" and "Complete + Tehillim 100". Awards Life flower on completion. History viewable from profile page (/gratitude-history). Uses `gratitude_journal` table with userId, text, date, completedWithTehillim fields. Modal name: 'gratitude-journal'.
 
 ## System Architecture
 ### Frontend
