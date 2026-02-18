@@ -307,18 +307,18 @@ export function processTefillaText(text: string, conditions: TefillaConditions):
     const seed = matchesToCluster.shift()!;
     const cluster = [seed];
     
-    // Find all matches that overlap with any match in the current cluster
     let foundNewOverlaps = true;
     while (foundNewOverlaps) {
       foundNewOverlaps = false;
       for (let i = matchesToCluster.length - 1; i >= 0; i--) {
         const candidate = matchesToCluster[i];
         
-        // Check if this candidate overlaps with any match in the current cluster
-        const overlapsWithCluster = cluster.some(clusterMatch =>
-          Math.abs(candidate.startIndex - clusterMatch.startIndex) <= 300 &&
-          candidate.conditions.some(cond => clusterMatch.conditions.includes(cond))
-        );
+        const overlapsWithCluster = cluster.some(clusterMatch => {
+          const actuallyOverlap = candidate.startIndex < clusterMatch.endIndex && 
+                                  candidate.endIndex > clusterMatch.startIndex;
+          return actuallyOverlap &&
+            candidate.conditions.some(cond => clusterMatch.conditions.includes(cond));
+        });
         
         if (overlapsWithCluster) {
           cluster.push(candidate);
