@@ -1,0 +1,42 @@
+I created a new version of Ezras Nashim as a mobile app which now tracks its own mitzvah completions in the same Supabase in a table called app_mitzvah_completions. This app's analytics should include these completions so the totals reflect both platforms combined.
+Table structure of app_mitzvah_completions:
+* id (serial, primary key)
+* device_id (text)
+* user_id (text, nullable)
+* category (text) — values: Torah, Tefilla, Tzedaka, Life
+* content_type (text) — e.g., daily_chizuk, tehillim, nishmas, brocha, gave_elsewhere, recipe, etc.
+* content_name (text, nullable)
+* created_at (timestamptz, defaults to now)
+What needs to change in the web app's analytics:
+1. Total Acts/Mitzvahs: When computing total_acts for any period (today, this week, this month, all time), also count rows from app_mitzvah_completions within the same date range. For example, for "today": SELECT COUNT(*) FROM app_mitzvah_completions WHERE created_at >= '2026-02-19'.
+2. Tzedaka Acts: Add the count of app_mitzvah_completions rows where category = 'Tzedaka' for the relevant period.
+3. Feature Usage Breakdown: Map the content_type values from app_mitzvah_completions to your existing feature categories. Here's the mapping:
+    * daily_chizuk → Chizuk
+    * daily_emuna → Emuna
+    * daily_halacha → Halacha
+    * pirkei_avos → Pirkei Avot
+    * gems_of_gratitude → Gems of Gratitude
+    * shalom_content → Shalom
+    * shmiras_halashon → Shmiras HaLashon
+    * torah_challenges → Torah Challenge
+    * parsha_vort → Parsha Vort
+    * featured → Featured
+    * library → Library Classes
+    * tehillim → Individual Tehillim
+    * nishmas → Nishmas Campaign
+    * brocha → Brochas
+    * morning_brochas → Morning Brochas Sections
+    * shacharis → Shacharis Sections
+    * mincha → Mincha
+    * maariv → Maariv
+    * special_tefillas → Women's Prayers
+    * recipe → Recipe
+    * marriage_insights → Marriage Insights
+    * inspiration → Inspiration / Congratulations
+    * gift_of_chatzos → Gift of Chatzos
+    * life_class → Life Class
+    * meditation → Meditations
+    * gave_elsewhere → Tzedaka
+    * parenting → Life Class (or a new "Parenting" category)
+4. Period definitions (to stay consistent): "This Week" = Sunday of the current week to today. "This Month" = 1st of the current month to today. "Today" = the current date.
+5. The table already exists in your Supabase database and has RLS policies allowing access for the anon role. You can query it directly with your existing Supabase client.
