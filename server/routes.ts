@@ -245,6 +245,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.supabaseUser || null);
   });
 
+  app.get("/.well-known/apple-app-site-association", (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json({
+      applinks: {
+        apps: [],
+        details: [
+          {
+            appIDs: ["R2W4PB95MA.com.ezrasnashim"],
+            paths: ["/c/*"]
+          }
+        ]
+      }
+    });
+  });
+
+  app.get("/.well-known/assetlinks.json", (_req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.json([
+      {
+        relation: ["delegate_permission/common.handle_all_urls"],
+        target: {
+          namespace: "android_app",
+          package_name: "com.ezrasnashim",
+          sha256_cert_fingerprints: [
+            "58:16:BA:7C:74:E0:D6:AE:5B:D1:A3:3E:7A:E1:9D:3A:A5:75:4F:2F:AB:9C:6A:7B:B9:C6:62:7A:00:03:68:EA"
+          ]
+        }
+      }
+    ]);
+  });
+
   // Register utility routes (healthcheck, version, root handler)
   registerUtilityRoutes(app, { requireAdminAuth });
 

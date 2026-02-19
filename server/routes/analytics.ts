@@ -1,5 +1,6 @@
 import type { Express, Request, Response } from "express";
 import type { IStorage } from "../storage";
+import { getAppCompletionsForPeriod, mergeAppCompletions } from "./app-completions";
 
 export interface AnalyticsRouteDeps {
   requireAdminAuth: (req: any, res: any, next: any) => void;
@@ -128,14 +129,21 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
         stats = await storage.recalculateDailyStats(today);
       }
       
-      return res.json(stats || {
+      const result = stats || {
         date: today,
         uniqueUsers: 0,
         pageViews: 0,
         tehillimCompleted: 0,
         namesProcessed: 0,
         modalCompletions: {}
-      });
+      };
+
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const appStats = await getAppCompletionsForPeriod(today, tomorrow.toISOString().split('T')[0]);
+      mergeAppCompletions(result as any, appStats);
+      
+      return res.json(result);
     } catch (error) {
       console.error('Error fetching today stats:', error);
       return res.status(500).json({ message: "Failed to fetch today's stats" });
@@ -171,6 +179,12 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       }
       
       const weeklyStats = await storage.getWeeklyStats(weekStart);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+      const appStats = await getAppCompletionsForPeriod(weekStart, weekEnd.toISOString().split('T')[0]);
+      mergeAppCompletions(weeklyStats as any, appStats);
+      
       return res.json(weeklyStats);
     } catch (error) {
       console.error('Error fetching weekly stats:', error);
@@ -192,6 +206,13 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       const month = parseInt(req.query.month as string) || (now.getMonth() + 1);
       
       const monthlyStats = await storage.getMonthlyStats(year, month);
+      
+      const monthStart = `${year}-${month.toString().padStart(2, '0')}-01`;
+      const nextMonth = new Date(year, month, 1);
+      const monthEnd = nextMonth.toISOString().split('T')[0];
+      const appStats = await getAppCompletionsForPeriod(monthStart, monthEnd);
+      mergeAppCompletions(monthlyStats as any, appStats);
+      
       return res.json(monthlyStats);
     } catch (error) {
       console.error('Error fetching monthly stats:', error);
@@ -209,6 +230,10 @@ export function registerAnalyticsRoutes(app: Express, deps: AnalyticsRouteDeps) 
       });
       
       const totals = await storage.getTotalStats();
+      
+      const appStats = await getAppCompletionsForPeriod('2020-01-01');
+      mergeAppCompletions(totals as any, appStats);
+      
       return res.json(totals);
     } catch (error) {
       console.error('Error fetching total stats:', error);
