@@ -11,7 +11,6 @@ import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { sanitizeHTML } from "@/lib/sanitize";
-import grassImage from "@assets/Grass2_1766588526836.png";
 import torahFlower from "@assets/Torah_1771759230839.png";
 import tefillaFlower from "@assets/Tefilla_1771759230840.png";
 import tzedakaFlower from "@assets/Tzedaka_1771759230839.png";
@@ -870,18 +869,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
             />
           ))}
           
-          {/* Grass overlay - Layer 4 (covers all flower stems) */}
-          <img 
-            src={grassImage} 
-            alt="" 
-            className="absolute bottom-0 left-0 w-full z-[4]"
-            style={{ 
-              height: '50%',
-              objectFit: 'cover',
-              objectPosition: 'bottom'
-            }}
-            loading="lazy"
-          />
           
           {/* Title - Layer 3 (topmost) */}
           <div className="absolute top-2 left-2 z-10">
