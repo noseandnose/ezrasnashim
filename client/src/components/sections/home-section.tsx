@@ -12,14 +12,12 @@ import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
 import { sanitizeHTML } from "@/lib/sanitize";
 import grassImage from "@assets/Grass2_1766588526836.png";
-import torahFlower from "@assets/Torah_1767035380484.png";
-import tefillaFlower from "@assets/Tefilla_1767035380485.png";
-import tzedakaFlower from "@assets/Tzedaka_1767035380485.png";
-import lifeFlower from "@assets/Life_1767176917530.png";
+import torahFlower from "@assets/Torah_1771759230839.png";
+import tefillaFlower from "@assets/Tefilla_1771759230840.png";
+import tzedakaFlower from "@assets/Tzedaka_1771759230839.png";
+import lifeFlower from "@assets/Life_1771759230838.png";
 import chatzosFlower from "@assets/white_1767699733757.png";
-import morningBackground from "@assets/Morning_1767097697251.png";
-import afternoonBackground from "@assets/Afternoon_1767097697250.png";
-import nightBackground from "@assets/Night_1767097697247.png";
+import gardenImage from "@assets/Untitled_design_(5)_1771759214598.png";
 import sectionMorningBg from "@assets/Morning_Background_1767032607494.png";
 
 // ============ PURE UTILITY FUNCTIONS (extracted for performance) ============
@@ -89,12 +87,6 @@ function getGreetingText(timePeriod: 'night' | 'morning' | 'afternoon', firstNam
   let greeting = greetings[timePeriod];
   if (firstName) greeting += `, ${firstName}`;
   return greeting;
-}
-
-// Get garden background based on time period
-function getGardenBg(timePeriod: 'night' | 'morning' | 'afternoon') {
-  const backgrounds = { night: nightBackground, morning: morningBackground, afternoon: afternoonBackground };
-  return backgrounds[timePeriod];
 }
 
 // Get section background - always use morning (default)
@@ -270,7 +262,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   );
   
   // Memoized backgrounds - depend on timePeriod which updates with currentMinute
-  const gardenBackground = useMemo(() => getGardenBg(timePeriod), [timePeriod]);
   const sectionBackground = useMemo(() => getSectionBg(timePeriod), [timePeriod]);
 
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
@@ -836,12 +827,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
           id="daily-progress-garden"
           className="rounded-2xl shadow-lg border border-blush/10 mt-4 min-h-[120px] relative overflow-hidden"
         >
-          {/* Time-based background - Layer 0 */}
+          {/* Garden background - Layer 0 */}
           <img 
-            src={gardenBackground} 
+            src={gardenImage} 
             alt="" 
             className="absolute inset-0 w-full h-full z-0"
-            style={{ objectFit: 'cover', opacity: 0.3 }}
+            style={{ objectFit: 'cover' }}
             loading="lazy"
           />
           
