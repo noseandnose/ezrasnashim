@@ -199,18 +199,29 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       };
     };
     
-    let overallFlowerIndex = 1; // 1-based overall index for milestone tracking
+    let overallFlowerIndex = 1;
     
-    // Helper to add a flower with truly random position
     const addFlower = (type: 'torah' | 'tefilla' | 'tzedaka' | 'life' | 'chatzos', index: number) => {
       const random = getFlowerRandom(type, index, overallFlowerIndex);
-      // Random scale for size variation (0.65 to 1.05)
-      const scale = 0.65 + (random() * 0.4);
+      const scale = 0.45 + (random() * 0.25);
       const flipped = random() > 0.5;
-      // Stems start near bottom (10 to 15% from bottom)
-      const bottom = 10 + random() * 5;
-      // Truly random horizontal position across full width (5% to 95%)
-      const left = 5 + random() * 90;
+      const bottom = 8 + random() * 8;
+      
+      const minSpacing = 12;
+      let left = 5 + random() * 90;
+      let attempts = 0;
+      while (attempts < 10) {
+        let tooClose = false;
+        for (const p of positions) {
+          if (Math.abs(p.left - left) < minSpacing && Math.abs(p.bottom - bottom) < 6) {
+            tooClose = true;
+            break;
+          }
+        }
+        if (!tooClose) break;
+        left = 5 + ((left - 5 + 15 + random() * 10) % 90);
+        attempts++;
+      }
       
       positions.push({ type, left, bottom, flipped, scale, overallIndex: overallFlowerIndex });
       overallFlowerIndex++;
@@ -860,7 +871,7 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               style={{ 
                 left: `${flower.left}%`,
                 bottom: `${flower.bottom}%`,
-                width: `${64 * flower.scale}px`,
+                width: `${48 * flower.scale}px`,
                 height: 'auto',
                 transform: `translateX(-50%)${flower.flipped ? ' scaleX(-1)' : ''}`,
                 transformOrigin: 'bottom center'
