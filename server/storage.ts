@@ -117,6 +117,7 @@ export interface IStorage {
 
   // Daily recipe methods
   getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined>;
+  getRecipesByDateRange(startDate: string, endDate: string): Promise<DailyRecipe[]>;
   createDailyRecipe(recipe: InsertDailyRecipe): Promise<DailyRecipe>;
   getAllDailyRecipes(): Promise<DailyRecipe[]>;
   
@@ -1722,13 +1723,20 @@ export class DatabaseStorage implements IStorage {
 
   // Daily recipe methods
   async getDailyRecipeByDate(date: string): Promise<DailyRecipe | undefined> {
-    // Find recipe for the specific date
     const [recipe] = await db
       .select()
       .from(dailyRecipes)
       .where(eq(dailyRecipes.date, date))
       .limit(1);
     return recipe;
+  }
+
+  async getRecipesByDateRange(startDate: string, endDate: string): Promise<DailyRecipe[]> {
+    return db
+      .select()
+      .from(dailyRecipes)
+      .where(and(gte(dailyRecipes.date, startDate), lte(dailyRecipes.date, endDate)))
+      .orderBy(asc(dailyRecipes.date));
   }
 
   async createDailyRecipe(insertRecipe: InsertDailyRecipe): Promise<DailyRecipe> {

@@ -1612,6 +1612,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  app.get("/api/table/recipes/week", 
+    cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'weekly-recipes' }),
+    async (req, res) => {
+      try {
+        const dateParam = req.query.date as string;
+        const now = dateParam ? new Date(dateParam + 'T12:00:00') : new Date();
+        const day = now.getDay();
+        const sunday = new Date(now);
+        sunday.setDate(now.getDate() - day);
+        const saturday = new Date(sunday);
+        saturday.setDate(sunday.getDate() + 6);
+        const startDate = sunday.toISOString().split('T')[0];
+        const endDate = saturday.toISOString().split('T')[0];
+        const recipes = await storage.getRecipesByDateRange(startDate, endDate);
+        return res.json(recipes);
+      } catch (error) {
+        return res.status(500).json({ message: "Failed to fetch weekly recipes" });
+      }
+    }
+  );
+
   app.get("/api/table/recipe", 
     cacheMiddleware({ ttl: CACHE_TTL.DAILY_TORAH, category: 'daily-recipes-today' }),
     async (_req, res) => {

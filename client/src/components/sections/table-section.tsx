@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Utensils, Flame, Star, MapPin, Brain, ChevronDown, ChevronUp, ChevronRight, Home, Check, Gem, Headphones, Video } from "lucide-react";
 import customCandleIcon from "@assets/Untitled design (6)_1755630328619.png";
 import DiscountBar from "@/components/discount-bar";
@@ -12,6 +13,7 @@ import DOMPurify from "dompurify";
 
 
 export default function TableSection() {
+  const [, setLocation] = useLocation();
   const { openModal } = useModalStore();
   const { isModalComplete, markModalComplete } = useModalCompletionStore();
   const { trackModalComplete } = useTrackModalComplete();
@@ -41,7 +43,6 @@ export default function TableSection() {
   const giftOfChatzos = tableSummary?.giftOfChatzos;
   const lifeClasses = tableSummary?.lifeClasses || [];
   const inspirationContent = tableSummary?.inspiration;
-  const recipeContent = tableSummary?.recipe;
 
   // Check if Gift of Chatzos has content
   const hasGiftContent = giftOfChatzos && giftOfChatzos.contentEnglish;
@@ -330,68 +331,32 @@ export default function TableSection() {
 
       {/* Shabbos Content Grid - Separate Section */}
       <div className="px-3 py-3 space-y-3">
-        {/* Top Row: Daily Recipe and Marriage Insights - Apple Glass Style */}
+        {/* Top Row: Weekly Recipes and Marriage Insights - Apple Glass Style */}
         <div className="grid grid-cols-2 gap-2">
-          {/* Daily Recipe Button */}
+          {/* Weekly Recipes Button */}
           <button
-            className={`w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative ${
-              !recipeContent ? 'cursor-not-allowed' : 'hover:scale-105'
-            }`}
+            className="w-full h-full rounded-xl p-4 text-center transition-all duration-300 relative hover:scale-105"
             style={{
-              background: !recipeContent ? 'rgba(200, 200, 200, 0.5)' : 'rgba(255, 255, 255, 0.85)',
+              background: 'rgba(255, 255, 255, 0.85)',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
               boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
               border: '1px solid rgba(255, 255, 255, 0.4)',
             }}
-            onClick={() => {
-              if (recipeContent) {
-                const fullscreenEvent = new CustomEvent('openDirectFullscreen', {
-                  detail: {
-                    modalKey: 'recipe',
-                    content: recipeContent
-                  }
-                });
-                window.dispatchEvent(fullscreenEvent);
-              }
-            }}
-            disabled={!recipeContent}
+            onClick={() => setLocation('/weekly-recipes')}
           >
-            {/* Content Type Indicator - Top Right */}
-            {recipeContent && !isModalComplete('recipe') && (
-              <div className="absolute top-2 right-2 bg-white/90 text-black rounded-full w-5 h-5 flex items-center justify-center shadow-sm border border-white/40">
-                <span className="platypi-bold text-[0.625rem]">T</span>
-              </div>
-            )}
-            
-            {!recipeContent && (
-              <div className="absolute inset-0 bg-black/10 rounded-xl flex items-center justify-center z-10">
-                <div className="bg-white/90 px-2 py-1 rounded-lg">
-                  <p className="platypi-medium text-xs text-black">Coming soon</p>
-                </div>
-              </div>
-            )}
-            
             <div 
               className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
-                background: !recipeContent
-                  ? 'rgba(150, 150, 150, 0.35)'
-                  : isModalComplete('recipe')
-                    ? 'rgba(139, 169, 131, 0.35)'
-                    : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              {isModalComplete('recipe') ? (
-                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              ) : (
-                <Utensils className={!recipeContent ? 'text-gray-500' : 'text-black'} size={12} />
-              )}
-              <p className={`platypi-bold text-xs ${!recipeContent ? 'text-gray-500' : 'text-black'}`}>Daily Recipe</p>
+              <Utensils className="text-black" size={12} />
+              <p className="platypi-bold text-xs text-black">Weekly Recipes</p>
             </div>
-            <p className={`platypi-regular text-xs leading-tight ${!recipeContent ? 'text-gray-400' : 'text-black'}`}>
-              {!recipeContent ? 'Coming Soon' : isModalComplete('recipe') ? 'Completed' : recipeContent.title}
+            <p className="platypi-regular text-xs leading-tight text-black">
+              Dinner Ideas and a Dessert
             </p>
           </button>
 
