@@ -1,0 +1,41 @@
+I want to add a new Community Challenge feature , explained simply so you could rebuild it:
+
+The Database Table (todays_special)
+This table stores challenge/special content entries. Each row has:
+* fromDate / untilDate — a date range. The challenge is active for any date that falls within this range.
+* title and subtitle — what the user sees as the heading.
+* imageUrl — an optional image shown on the bar.
+* contentEnglish / contentHebrew — optional text content (used for "custom" type challenges or simple text announcements).
+* challengeType — this is the key field. It can be: tehillim, nishmas, halacha, womens-prayer, asher-yatzar, birkat-hamazon, parsha-vort, shalom, shmiras-halashon, or custom (or null for a simple announcement).
+* challengeContentId — a reference ID to pull the actual content. For example, if the type is tehillim, this would be the perek number. If it's womens-prayer, it's the prayer ID.
+* targetCount — the community goal number (e.g., 1,000 completions). If null, there's no target — it just shows "X joined."
+* currentCount — a running counter that goes up by 1 every time someone taps "Complete."
+* pillarType — either torah or tefilla. This determines which daily pillar gets credit when the user completes it (for the flower/completion tracking system).
+* modalName — used for tracking whether the user already completed this today.
+* challengeMessage — optional extra message displayed between the progress bar and the content.
+* url / linkTitle — optional link button shown at the bottom.
+
+
+What the User Sees on the Home Page
+* If there's an active todaysSpecial, an action bar with the gold pulsing gradient border appears on the home page with the title, subtitle, and image.
+* If it has a challengeType: tapping the bar opens the Community Challenge fullscreen page.
+* If it has no challengeType (just text content): tapping the bar expands it inline on the home page, showing the content with language toggle and font controls right there.
+
+The Fullscreen Modal (community-challenge-modal.tsx)
+When it opens, it does this:
+1. Determines what content to load based on challengeType:
+    * tehillim → fetches the actual tehillimwith Hebrew/English
+    * nishmas → fetches the actual nishmas
+    * halacha → fetches /daily halacha 
+    * womens-prayer → fetches women’s prayer
+    * asher-yatzar or birkat-hamazon fetches that Brocha
+    * parsha-vort → fetches /api/table/vort
+    * custom or null → uses the contentEnglish/contentHebrew fields directly from the table
+2. Shows community progress — a progress bar with "X / Y" if there's a target count, or "X joined" if there's no target.
+3. Shows the content with language toggle (Hebrew/English) and font size controls - that we already use in other full screen pages.
+4. Complete button — when tapped:
+    * Sends updated to the server and increased currentCount by 1
+    * Marks the modal as completed today (so the button changes to "Complete Again")
+    * Credits the appropriate flower 
+    * Checks if all 3 pillars are now complete to trigger the mazaltov message
+5. Share button — lets the user share the challenge via the device share sheet or clipboard - this should share with a url that can be accessed on the normal ezrasnashim.app website but open the app if the user has the app
