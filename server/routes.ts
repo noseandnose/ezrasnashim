@@ -313,6 +313,12 @@ function showMsg(text,type){msg.className='msg '+(type==='error'?'error-msg':'su
 (async()=>{
 const hash=window.location.hash.substring(1);
 const params=new URLSearchParams(hash);
+const errCode=params.get('error');
+const errDesc=params.get('error_description');
+if(errCode){
+showMsg(errDesc?decodeURIComponent(errDesc.replace(/\\+/g,' ')):'This reset link is invalid or has expired. Please request a new one.','error');
+return;
+}
 const access_token=params.get('access_token');
 const refresh_token=params.get('refresh_token');
 if(!access_token||!refresh_token){
