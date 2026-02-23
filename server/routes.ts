@@ -245,6 +245,111 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.supabaseUser || null);
   });
 
+  app.get("/reset-password", (_req, res) => {
+    const supabaseUrl = process.env.SUPABASE_URL || '';
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reset Password - Ezras Nashim</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#faf8f9;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.container{width:100%;max-width:400px;background:#fff;border-radius:20px;padding:32px 24px;box-shadow:0 4px 24px rgba(0,0,0,0.08)}
+h1{text-align:center;font-size:24px;color:#000;margin-bottom:6px}
+.subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:28px}
+.field{margin-bottom:18px;position:relative}
+label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px}
+input{width:100%;padding:12px 44px 12px 14px;border:1.5px solid #e0d8dc;border-radius:12px;font-size:16px;outline:none;transition:border-color .2s}
+input:focus{border-color:#D5CDE4}
+.toggle{position:absolute;right:12px;top:34px;background:none;border:none;color:#999;cursor:pointer;font-size:13px;padding:4px}
+.toggle:hover{color:#666}
+.error{color:#e53e3e;font-size:13px;margin-top:6px;display:none}
+.error.show{display:block}
+.msg{text-align:center;padding:16px;border-radius:12px;margin-bottom:16px;font-size:14px;display:none}
+.msg.error-msg{background:#fee;color:#c53030;display:block}
+.msg.success-msg{background:#f0fff4;color:#276749;display:block}
+button[type=submit]{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,#EAC8CD 0%,#D5CDE4 50%,#B3CCB3 100%);transition:opacity .2s,transform .2s}
+button[type=submit]:hover{opacity:0.9}
+button[type=submit]:active{transform:scale(0.98)}
+button[type=submit]:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.back{display:block;text-align:center;margin-top:18px;color:#D5CDE4;text-decoration:none;font-size:14px;font-weight:500}
+.back:hover{color:#b3a5c7}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>Ezras Nashim</h1>
+<p class="subtitle">Set your new password</p>
+<div id="msg" class="msg"></div>
+<form id="form" style="display:none">
+<div class="field">
+<label for="pw">New Password</label>
+<input type="password" id="pw" placeholder="Enter new password" autocomplete="new-password">
+<button type="button" class="toggle" onclick="togglePw('pw',this)">Show</button>
+<div class="error" id="pw-err"></div>
+</div>
+<div class="field">
+<label for="cpw">Confirm Password</label>
+<input type="password" id="cpw" placeholder="Confirm new password" autocomplete="new-password">
+<button type="button" class="toggle" onclick="togglePw('cpw',this)">Show</button>
+<div class="error" id="cpw-err"></div>
+</div>
+<button type="submit" id="btn">Update Password</button>
+</form>
+<a class="back" href="/">Back to App</a>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const sb=supabase.createClient('${supabaseUrl}','${supabaseAnonKey}');
+const form=document.getElementById('form'),msg=document.getElementById('msg'),btn=document.getElementById('btn');
+const pwIn=document.getElementById('pw'),cpwIn=document.getElementById('cpw');
+const pwErr=document.getElementById('pw-err'),cpwErr=document.getElementById('cpw-err');
+function togglePw(id,el){const i=document.getElementById(id);if(i.type==='password'){i.type='text';el.textContent='Hide'}else{i.type='password';el.textContent='Show'}}
+function showMsg(text,type){msg.className='msg '+(type==='error'?'error-msg':'success-msg');msg.textContent=text}
+(async()=>{
+const hash=window.location.hash.substring(1);
+const params=new URLSearchParams(hash);
+const access_token=params.get('access_token');
+const refresh_token=params.get('refresh_token');
+if(!access_token||!refresh_token){
+showMsg('Invalid or expired password reset link. Please request a new one.','error');
+return;
+}
+try{
+const{error}=await sb.auth.setSession({access_token,refresh_token});
+if(error)throw error;
+form.style.display='block';
+}catch(e){
+showMsg('This reset link has expired. Please request a new one.','error');
+}
+})();
+form.addEventListener('submit',async(e)=>{
+e.preventDefault();
+pwErr.className='error';cpwErr.className='error';
+let valid=true;
+if(pwIn.value.length<6){pwErr.textContent='Password must be at least 6 characters';pwErr.className='error show';valid=false}
+if(pwIn.value!==cpwIn.value){cpwErr.textContent='Passwords do not match';cpwErr.className='error show';valid=false}
+if(!valid)return;
+btn.disabled=true;btn.textContent='Updating...';
+try{
+const{error}=await sb.auth.updateUser({password:pwIn.value});
+if(error)throw error;
+form.style.display='none';
+showMsg('Your password has been updated! You can now log in with your new password.','success');
+}catch(e){
+showMsg(e.message||'Failed to update password. Please try again.','error');
+btn.disabled=false;btn.textContent='Update Password';
+}
+});
+</script>
+</body>
+</html>`);
+  });
+
   app.get("/.well-known/apple-app-site-association", (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.json({
