@@ -263,8 +263,9 @@ h1{text-align:center;font-size:24px;color:#000;margin-bottom:6px}
 .subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:28px}
 .field{margin-bottom:18px;position:relative}
 label{display:block;font-size:13px;font-weight:600;color:#333;margin-bottom:6px}
-input{width:100%;padding:12px 44px 12px 14px;border:1.5px solid #e0d8dc;border-radius:12px;font-size:16px;outline:none;transition:border-color .2s}
+input{width:100%;padding:12px 14px;border:1.5px solid #e0d8dc;border-radius:12px;font-size:16px;outline:none;transition:border-color .2s}
 input:focus{border-color:#D5CDE4}
+input.pw-input{padding-right:44px}
 .toggle{position:absolute;right:12px;top:34px;background:none;border:none;color:#999;cursor:pointer;font-size:13px;padding:4px}
 .toggle:hover{color:#666}
 .field-error{color:#e53e3e;font-size:13px;margin-top:6px;display:none}
@@ -272,10 +273,14 @@ input:focus{border-color:#D5CDE4}
 .msg{text-align:center;padding:16px;border-radius:12px;margin-bottom:16px;font-size:14px;display:none}
 .msg.error-msg{background:#fee;color:#c53030;display:block}
 .msg.success-msg{background:#f0fff4;color:#276749;display:block}
+.msg.info-msg{background:#ebf8ff;color:#2b6cb0;display:block}
 .btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:16px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(135deg,#EAC8CD 0%,#D5CDE4 50%,#B3CCB3 100%);transition:opacity .2s,transform .2s}
 .btn:hover{opacity:0.9}
 .btn:active{transform:scale(0.98)}
 .btn:disabled{opacity:0.5;cursor:not-allowed;transform:none}
+.link-btn{background:none;border:none;color:#D5CDE4;cursor:pointer;font-size:13px;text-align:center;width:100%;margin-top:12px;padding:4px}
+.link-btn:hover{color:#b3a5c7;text-decoration:underline}
+.code-input{text-align:center;font-size:24px;letter-spacing:8px;font-weight:700;padding:16px}
 .spinner{display:none;text-align:center;padding:32px 0}
 .spinner.show{display:block}
 .spinner-ring{display:inline-block;width:36px;height:36px;border:3px solid #e0d8dc;border-top-color:#D5CDE4;border-radius:50%;animation:spin .8s linear infinite}
@@ -284,68 +289,120 @@ input:focus{border-color:#D5CDE4}
 .back{display:block;text-align:center;margin-top:18px;color:#D5CDE4;text-decoration:none;font-size:14px;font-weight:500}
 .back:hover{color:#b3a5c7}
 .hidden{display:none!important}
+.divider{text-align:center;color:#999;font-size:12px;margin:20px 0;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:calc(50% - 20px);height:1px;background:#e0d8dc}
+.divider::before{left:0}
+.divider::after{right:0}
 </style>
 </head>
 <body>
 <div class="container">
 <h1>Ezras Nashim</h1>
-<p class="subtitle" id="subtitle">Set your new password</p>
+<p class="subtitle" id="subtitle">Reset your password</p>
 <div id="msg" class="msg"></div>
-<div id="loading" class="spinner show">
+
+<div id="loading" class="spinner">
 <div class="spinner-ring"></div>
 <p>Verifying your reset link...</p>
 </div>
-<form id="form" class="hidden">
+
+<!-- Email form: request a new reset -->
+<form id="email-form" class="hidden">
+<div class="field">
+<label for="email">Email Address</label>
+<input type="email" id="email" placeholder="Enter your email" autocomplete="email" required>
+<div class="field-error" id="email-err"></div>
+</div>
+<button type="submit" class="btn" id="email-btn">Send Reset Code</button>
+</form>
+
+<!-- OTP code + new password form -->
+<form id="code-form" class="hidden">
+<p style="text-align:center;color:#666;font-size:13px;margin-bottom:16px">We sent a 6-digit code to <strong id="sent-email"></strong></p>
+<div class="field">
+<label for="code">Reset Code</label>
+<input type="text" id="code" class="code-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+<div class="field-error" id="code-err"></div>
+</div>
+<div class="field">
+<label for="code-pw">New Password</label>
+<input type="password" id="code-pw" class="pw-input" placeholder="Enter new password" autocomplete="new-password">
+<button type="button" class="toggle" onclick="togglePw('code-pw',this)">Show</button>
+<div class="field-error" id="code-pw-err"></div>
+</div>
+<div class="field">
+<label for="code-cpw">Confirm Password</label>
+<input type="password" id="code-cpw" class="pw-input" placeholder="Confirm new password" autocomplete="new-password">
+<button type="button" class="toggle" onclick="togglePw('code-cpw',this)">Show</button>
+<div class="field-error" id="code-cpw-err"></div>
+</div>
+<button type="submit" class="btn" id="code-btn">Reset Password</button>
+<button type="button" class="link-btn" id="resend-btn">Didn't receive it? Send again</button>
+</form>
+
+<!-- Password form: when we have a valid session from link -->
+<form id="pw-form" class="hidden">
 <div class="field">
 <label for="pw">New Password</label>
-<input type="password" id="pw" placeholder="Enter new password" autocomplete="new-password">
+<input type="password" id="pw" class="pw-input" placeholder="Enter new password" autocomplete="new-password">
 <button type="button" class="toggle" onclick="togglePw('pw',this)">Show</button>
 <div class="field-error" id="pw-err"></div>
 </div>
 <div class="field">
 <label for="cpw">Confirm Password</label>
-<input type="password" id="cpw" placeholder="Confirm new password" autocomplete="new-password">
+<input type="password" id="cpw" class="pw-input" placeholder="Confirm new password" autocomplete="new-password">
 <button type="button" class="toggle" onclick="togglePw('cpw',this)">Show</button>
 <div class="field-error" id="cpw-err"></div>
 </div>
-<button type="submit" class="btn" id="btn">Update Password</button>
+<button type="submit" class="btn" id="pw-btn">Update Password</button>
 </form>
+
 <a class="back" href="/">Back to App</a>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const sb=supabase.createClient('${supabaseUrl}','${supabaseAnonKey}');
 const $=id=>document.getElementById(id);
+let userEmail='';
 function togglePw(id,el){const i=$(id);if(i.type==='password'){i.type='text';el.textContent='Hide'}else{i.type='password';el.textContent='Show'}}
 function showMsg(text,type){const m=$('msg');m.className='msg '+type+'-msg';m.textContent=text}
-function hideLoading(){$('loading').classList.remove('show')}
-function showForm(){$('form').classList.remove('hidden')}
+function clearMsg(){$('msg').className='msg'}
+function hideAll(){['loading','email-form','code-form','pw-form'].forEach(id=>$(id).classList.add('hidden'))}
+function showSection(id){hideAll();$(id).classList.remove('hidden')}
+function showErr(id,text){$(id).textContent=text;$(id).classList.add('show')}
+function clearErrs(...ids){ids.forEach(id=>$(id).classList.remove('show'))}
 
 (async()=>{
 const hash=window.location.hash.substring(1);
 const hashParams=new URLSearchParams(hash);
 const queryParams=new URLSearchParams(window.location.search);
+const hasTokens=hash&&(hashParams.get('access_token')||hashParams.get('error')||hashParams.get('type'));
+const hasCode=queryParams.get('code');
 
-const errCode=hashParams.get('error')||queryParams.get('error');
-if(errCode){
-const desc=hashParams.get('error_description')||queryParams.get('error_description')||'';
-const friendly=desc.replace(/\\+/g,' ');
-hideLoading();
-showMsg(friendly||'This password reset link has expired or is invalid. Please request a new one from the app.','error');
+if(!hasTokens&&!hasCode){
+showSection('email-form');
 return;
 }
 
-const code=queryParams.get('code');
-if(code){
+showSection('loading');
+
+const errCode=hashParams.get('error')||queryParams.get('error');
+if(errCode){
+showSection('email-form');
+showMsg('Your reset link has expired. Enter your email below to get a new reset code.','info');
+return;
+}
+
+if(hasCode){
 try{
-const{error}=await sb.auth.exchangeCodeForSession(code);
+const{error}=await sb.auth.exchangeCodeForSession(hasCode);
 if(error)throw error;
-hideLoading();
-showForm();
+$('subtitle').textContent='Set your new password';
+showSection('pw-form');
 return;
 }catch(e){
-hideLoading();
-showMsg('This password reset link has expired or is invalid. Please request a new one from the app.','error');
+showSection('email-form');
+showMsg('This reset link has expired. Enter your email below to get a new reset code.','info');
 return;
 }
 }
@@ -356,56 +413,102 @@ if(access_token&&refresh_token){
 try{
 const{error}=await sb.auth.setSession({access_token,refresh_token});
 if(error)throw error;
-hideLoading();
-showForm();
+$('subtitle').textContent='Set your new password';
+showSection('pw-form');
 return;
 }catch(e){
-hideLoading();
-showMsg('This password reset link has expired or is invalid. Please request a new one from the app.','error');
+showSection('email-form');
+showMsg('This reset link has expired. Enter your email below to get a new reset code.','info');
 return;
 }
 }
 
-const type=hashParams.get('type')||queryParams.get('type');
-if(type==='recovery'){
 let ready=false;
 sb.auth.onAuthStateChange((event)=>{
 if(event==='PASSWORD_RECOVERY'&&!ready){
 ready=true;
-hideLoading();
-showForm();
+$('subtitle').textContent='Set your new password';
+showSection('pw-form');
 }
 });
 setTimeout(()=>{
 if(!ready){
-hideLoading();
-showMsg('This password reset link has expired or is invalid. Please request a new one from the app.','error');
+showSection('email-form');
+showMsg('This reset link has expired. Enter your email below to get a new reset code.','info');
 }
-},8000);
-return;
-}
-
-hideLoading();
-showMsg('No reset token found. Please use the password reset link from your email.','error');
+},5000);
 })();
 
-$('form').addEventListener('submit',async(e)=>{
-e.preventDefault();
-[$('pw-err'),$('cpw-err')].forEach(el=>el.classList.remove('show'));
-$('msg').className='msg';
+$('email-form').addEventListener('submit',async(e)=>{
+e.preventDefault();clearMsg();clearErrs('email-err');
+const email=$('email').value.trim();
+if(!email){showErr('email-err','Please enter your email');return}
+$('email-btn').disabled=true;$('email-btn').textContent='Sending...';
+try{
+const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://ezrasnashim.app/reset-password'});
+if(error)throw error;
+userEmail=email;
+$('sent-email').textContent=email;
+showSection('code-form');
+clearMsg();
+}catch(e){
+showMsg(e.message||'Failed to send reset code. Please try again.','error');
+}
+$('email-btn').disabled=false;$('email-btn').textContent='Send Reset Code';
+});
+
+$('resend-btn').addEventListener('click',async()=>{
+clearMsg();
+$('resend-btn').disabled=true;$('resend-btn').textContent='Sending...';
+try{
+const{error}=await sb.auth.resetPasswordForEmail(userEmail,{redirectTo:'https://ezrasnashim.app/reset-password'});
+if(error)throw error;
+showMsg('A new code has been sent to your email.','success');
+}catch(e){
+showMsg(e.message||'Failed to resend code.','error');
+}
+$('resend-btn').disabled=false;$('resend-btn').textContent="Didn't receive it? Send again";
+});
+
+$('code-form').addEventListener('submit',async(e)=>{
+e.preventDefault();clearMsg();clearErrs('code-err','code-pw-err','code-cpw-err');
+const code=$('code').value.trim();
+const pw=$('code-pw').value;
+const cpw=$('code-cpw').value;
 let valid=true;
-if($('pw').value.length<6){$('pw-err').textContent='Password must be at least 6 characters';$('pw-err').classList.add('show');valid=false}
-if($('pw').value!==$('cpw').value){$('cpw-err').textContent='Passwords do not match';$('cpw-err').classList.add('show');valid=false}
+if(!code||code.length!==6){showErr('code-err','Please enter the 6-digit code');valid=false}
+if(pw.length<6){showErr('code-pw-err','Password must be at least 6 characters');valid=false}
+if(pw!==cpw){showErr('code-cpw-err','Passwords do not match');valid=false}
 if(!valid)return;
-$('btn').disabled=true;$('btn').textContent='Updating...';
+$('code-btn').disabled=true;$('code-btn').textContent='Resetting...';
+try{
+const{error:otpErr}=await sb.auth.verifyOtp({email:userEmail,token:code,type:'recovery'});
+if(otpErr)throw otpErr;
+const{error:upErr}=await sb.auth.updateUser({password:pw});
+if(upErr)throw upErr;
+hideAll();
+showMsg('Your password has been updated! You can now sign in with your new password.','success');
+}catch(e){
+showMsg(e.message||'Invalid code or failed to update password. Please try again.','error');
+$('code-btn').disabled=false;$('code-btn').textContent='Reset Password';
+}
+});
+
+$('pw-form').addEventListener('submit',async(e)=>{
+e.preventDefault();clearMsg();clearErrs('pw-err','cpw-err');
+let valid=true;
+if($('pw').value.length<6){showErr('pw-err','Password must be at least 6 characters');valid=false}
+if($('pw').value!==$('cpw').value){showErr('cpw-err','Passwords do not match');valid=false}
+if(!valid)return;
+$('pw-btn').disabled=true;$('pw-btn').textContent='Updating...';
 try{
 const{error}=await sb.auth.updateUser({password:$('pw').value});
 if(error)throw error;
-$('form').classList.add('hidden');
+hideAll();
 showMsg('Your password has been updated! You can now sign in with your new password.','success');
 }catch(e){
 showMsg(e.message||'Failed to update password. Please try again.','error');
-$('btn').disabled=false;$('btn').textContent='Update Password';
+$('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
 }
 });
 </script>
