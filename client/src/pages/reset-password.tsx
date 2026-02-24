@@ -1,9 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const sb = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from "@/lib/supabase";
 
 type View = "loading" | "email" | "code" | "password" | "done";
 type MsgType = "error" | "success" | "info" | null;
@@ -26,85 +22,104 @@ export default function ResetPassword() {
   const [userEmail, setUserEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const sb = supabase;
+
   const clearErrors = useCallback(() => setErrors({}), []);
   const clearMsg = useCallback(() => setMsg({ text: "", type: null }), []);
 
   useEffect(() => {
-    async function processUrl() {
-      const hash = window.location.hash.substring(1);
-      const hashParams = new URLSearchParams(hash);
-      const queryParams = new URLSearchParams(window.location.search);
-      const hasTokens = hash && (hashParams.get("access_token") || hashParams.get("error") || hashParams.get("type"));
-      const hasCode = queryParams.get("code");
+    if (!sb) {
+      setView("email");
+      setMsg({ text: "Unable to connect. Please try again later.", type: "error" });
+      return;
+    }
 
-      if (!hasTokens && !hasCode) {
-        setView("email");
-        return;
+    let ready = false;
+
+    const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" && !ready) {
+        ready = true;
+        setSubtitle("Set your new password");
+        setView("password");
+        window.history.replaceState({}, "", "/reset-password");
       }
+    });
 
-      setView("loading");
+    const hash = window.location.hash.substring(1);
+    const queryParams = new URLSearchParams(window.location.search);
+    const hasCode = queryParams.get("code");
+    const hashParams = new URLSearchParams(hash);
+    const hasTokens = hash && (hashParams.get("access_token") || hashParams.get("error") || hashParams.get("type"));
+    const hasError = hashParams.get("error") || queryParams.get("error");
 
-      const errCode = hashParams.get("error") || queryParams.get("error");
-      if (errCode) {
-        setView("email");
-        setMsg({ text: "Your reset link has expired. Enter your email below to get a new reset code.", type: "info" });
-        return;
-      }
-
-      if (hasCode) {
-        try {
-          const { error } = await sb.auth.exchangeCodeForSession(hasCode);
-          if (error) throw error;
-          setSubtitle("Set your new password");
-          setView("password");
-          window.history.replaceState({}, "", "/reset-password");
-          return;
-        } catch {
+    if (hasError) {
+      ready = true;
+      setView("email");
+      setMsg({ text: "Your reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+    } else if (hasCode) {
+      sb.auth.exchangeCodeForSession(hasCode).then(({ error }) => {
+        if (error && !ready) {
+          ready = true;
           setView("email");
           setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
-          return;
-        }
-      }
-
-      const access_token = hashParams.get("access_token");
-      const refresh_token = hashParams.get("refresh_token");
-      if (access_token && refresh_token) {
-        try {
-          const { error } = await sb.auth.setSession({ access_token, refresh_token });
-          if (error) throw error;
-          setSubtitle("Set your new password");
-          setView("password");
-          window.history.replaceState({}, "", "/reset-password");
-          return;
-        } catch {
-          setView("email");
-          setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
-          return;
-        }
-      }
-
-      let ready = false;
-      const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
-        if (event === "PASSWORD_RECOVERY" && !ready) {
+        } else if (!error && !ready) {
           ready = true;
           setSubtitle("Set your new password");
           setView("password");
+          window.history.replaceState({}, "", "/reset-password");
         }
       });
-
-      setTimeout(() => {
+    } else if (hasTokens) {
+      const access_token = hashParams.get("access_token");
+      const refresh_token = hashParams.get("refresh_token");
+      if (access_token && refresh_token) {
+        sb.auth.setSession({ access_token, refresh_token }).then(({ error }) => {
+          if (error && !ready) {
+            ready = true;
+            setView("email");
+            setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+          } else if (!error && !ready) {
+            ready = true;
+            setSubtitle("Set your new password");
+            setView("password");
+            window.history.replaceState({}, "", "/reset-password");
+          }
+        });
+      }
+    } else {
+      sb.auth.getSession().then(({ data }) => {
         if (!ready) {
-          setView("email");
-          setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+          if (data?.session) {
+            sb.auth.getUser().then(() => {
+              if (!ready) {
+                ready = true;
+                setView("email");
+              }
+            });
+          } else {
+            ready = true;
+            setView("email");
+          }
         }
-        subscription.unsubscribe();
-      }, 5000);
+      });
     }
 
-    processUrl();
-  }, []);
+    const timeout = setTimeout(() => {
+      if (!ready) {
+        ready = true;
+        setView("email");
+        setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+      }
+    }, 6000);
+
+    return () => {
+      clearTimeout(timeout);
+      subscription.unsubscribe();
+    };
+  }, [sb]);
 
   const handleSendCode = async (emailAddr: string) => {
+    if (!sb) return;
     clearMsg();
     clearErrors();
     if (!emailAddr.trim()) {
@@ -127,6 +142,7 @@ export default function ResetPassword() {
   };
 
   const handleVerifyCode = async () => {
+    if (!sb) return;
     clearMsg();
     clearErrors();
     const newErrors: Record<string, string> = {};
@@ -152,6 +168,7 @@ export default function ResetPassword() {
   };
 
   const handleUpdatePassword = async () => {
+    if (!sb) return;
     clearMsg();
     clearErrors();
     const newErrors: Record<string, string> = {};
@@ -428,38 +445,20 @@ export default function ResetPassword() {
           </form>
         )}
 
-        {view !== "done" && (
-          <a
-            href="/"
-            style={{
-              display: "block",
-              textAlign: "center",
-              marginTop: "18px",
-              color: "#D5CDE4",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-            }}
-          >
-            Back to App
-          </a>
-        )}
-        {view === "done" && (
-          <a
-            href="/"
-            style={{
-              display: "block",
-              textAlign: "center",
-              marginTop: "18px",
-              color: "#D5CDE4",
-              textDecoration: "none",
-              fontSize: "14px",
-              fontWeight: 500,
-            }}
-          >
-            Go to App
-          </a>
-        )}
+        <a
+          href="/"
+          style={{
+            display: "block",
+            textAlign: "center",
+            marginTop: "18px",
+            color: "#D5CDE4",
+            textDecoration: "none",
+            fontSize: "14px",
+            fontWeight: 500,
+          }}
+        >
+          {view === "done" ? "Go to App" : "Back to App"}
+        </a>
       </div>
     </div>
   );
