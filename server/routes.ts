@@ -245,6 +245,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.supabaseUser || null);
   });
 
+  app.get("/api/auth/public-config", (_req, res) => {
+    res.json({
+      url: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
+      anonKey: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || ''
+    });
+  });
+
   app.get("/reset-password", (_req, res) => {
     const supabaseUrl = process.env.SUPABASE_URL || '';
     const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
