@@ -547,7 +547,7 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
           namespace: "android_app",
           package_name: "com.ezrasnashim",
           sha256_cert_fingerprints: [
-            "58:16:BA:7C:74:E0:D6:AE:5B:D1:A3:3E:7A:E1:9D:3A:A5:75:4F:2F:AB:9C:6A:7B:B9:C6:62:7A:00:03:68:EA"
+            "67:29:5A:C9:A7:96:D2:B3:A5:8A:DD:41:8A:D4:29:09:6E:01:FF:C9:07:6D:53:50:CA:E4:7A:6C:CB:8B:F4:71"
           ]
         }
       }
