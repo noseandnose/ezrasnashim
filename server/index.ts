@@ -339,7 +339,7 @@ async function initializeServer() {
     
     // Serve React app for any non-API routes (SPA fallback)
     app.get('*', (req: Request, res: Response) => {
-      if (!req.path.startsWith('/api')) {
+      if (!req.path.startsWith('/api') && !req.path.startsWith('/reset-password') && !req.path.startsWith('/.well-known')) {
         res.sendFile(path.join(publicPath, 'index.html'));
       }
     });
@@ -365,7 +365,7 @@ async function initializeServer() {
     
     // Helper to check if URL should bypass proxy (API routes and static assets)
     const shouldBypassProxy = (url: string) => {
-      return url.startsWith('/api') || url.startsWith('/attached_assets') || url.startsWith('/objects');
+      return url.startsWith('/api') || url.startsWith('/attached_assets') || url.startsWith('/objects') || url.startsWith('/reset-password') || url.startsWith('/.well-known');
     };
     
     // Fallback: proxy ONLY frontend GET requests to Vite for SPA routing
