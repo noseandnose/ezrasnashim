@@ -38,6 +38,7 @@ const Feed = lazy(() => import("@/pages/feed"));
 const Partners = lazy(() => import("@/pages/partners"));
 const GratitudeHistory = lazy(() => import("@/pages/gratitude-history"));
 const WeeklyRecipes = lazy(() => import("@/pages/weekly-recipes"));
+const ResetPassword = lazy(() => import("@/pages/reset-password"));
 
 // Unified loading screen with app icon - serves as both splash and loading indicator
 // Using PWA icon instead of attached_assets for faster load (14KB vs 30KB)
@@ -142,6 +143,7 @@ function Router() {
         <Route path="/partners" component={Partners} />
         <Route path="/gratitude-history" component={GratitudeHistory} />
         <Route path="/weekly-recipes" component={WeeklyRecipes} />
+        <Route path="/reset-password" component={ResetPassword} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

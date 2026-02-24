@@ -1,0 +1,466 @@
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const sb = createClient(supabaseUrl, supabaseAnonKey);
+
+type View = "loading" | "email" | "code" | "password" | "done";
+type MsgType = "error" | "success" | "info" | null;
+
+export default function ResetPassword() {
+  const [view, setView] = useState<View>("loading");
+  const [msg, setMsg] = useState<{ text: string; type: MsgType }>({ text: "", type: null });
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [pw, setPw] = useState("");
+  const [cpw, setCpw] = useState("");
+  const [codePw, setCodePw] = useState("");
+  const [codeCpw, setCodeCpw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [showCpw, setShowCpw] = useState(false);
+  const [showCodePw, setShowCodePw] = useState(false);
+  const [showCodeCpw, setShowCodeCpw] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [subtitle, setSubtitle] = useState("Reset your password");
+  const [userEmail, setUserEmail] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const clearErrors = useCallback(() => setErrors({}), []);
+  const clearMsg = useCallback(() => setMsg({ text: "", type: null }), []);
+
+  useEffect(() => {
+    async function processUrl() {
+      const hash = window.location.hash.substring(1);
+      const hashParams = new URLSearchParams(hash);
+      const queryParams = new URLSearchParams(window.location.search);
+      const hasTokens = hash && (hashParams.get("access_token") || hashParams.get("error") || hashParams.get("type"));
+      const hasCode = queryParams.get("code");
+
+      if (!hasTokens && !hasCode) {
+        setView("email");
+        return;
+      }
+
+      setView("loading");
+
+      const errCode = hashParams.get("error") || queryParams.get("error");
+      if (errCode) {
+        setView("email");
+        setMsg({ text: "Your reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+        return;
+      }
+
+      if (hasCode) {
+        try {
+          const { error } = await sb.auth.exchangeCodeForSession(hasCode);
+          if (error) throw error;
+          setSubtitle("Set your new password");
+          setView("password");
+          window.history.replaceState({}, "", "/reset-password");
+          return;
+        } catch {
+          setView("email");
+          setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+          return;
+        }
+      }
+
+      const access_token = hashParams.get("access_token");
+      const refresh_token = hashParams.get("refresh_token");
+      if (access_token && refresh_token) {
+        try {
+          const { error } = await sb.auth.setSession({ access_token, refresh_token });
+          if (error) throw error;
+          setSubtitle("Set your new password");
+          setView("password");
+          window.history.replaceState({}, "", "/reset-password");
+          return;
+        } catch {
+          setView("email");
+          setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+          return;
+        }
+      }
+
+      let ready = false;
+      const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY" && !ready) {
+          ready = true;
+          setSubtitle("Set your new password");
+          setView("password");
+        }
+      });
+
+      setTimeout(() => {
+        if (!ready) {
+          setView("email");
+          setMsg({ text: "This reset link has expired. Enter your email below to get a new reset code.", type: "info" });
+        }
+        subscription.unsubscribe();
+      }, 5000);
+    }
+
+    processUrl();
+  }, []);
+
+  const handleSendCode = async (emailAddr: string) => {
+    clearMsg();
+    clearErrors();
+    if (!emailAddr.trim()) {
+      setErrors({ email: "Please enter your email" });
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(emailAddr.trim(), {
+        redirectTo: "https://ezrasnashim.app/reset-password",
+      });
+      if (error) throw error;
+      setUserEmail(emailAddr.trim());
+      setView("code");
+      clearMsg();
+    } catch (e: any) {
+      setMsg({ text: e.message || "Failed to send reset code. Please try again.", type: "error" });
+    }
+    setSubmitting(false);
+  };
+
+  const handleVerifyCode = async () => {
+    clearMsg();
+    clearErrors();
+    const newErrors: Record<string, string> = {};
+    if (!code || code.length !== 6) newErrors.code = "Please enter the 6-digit code";
+    if (codePw.length < 6) newErrors.codePw = "Password must be at least 6 characters";
+    if (codePw !== codeCpw) newErrors.codeCpw = "Passwords do not match";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error: otpErr } = await sb.auth.verifyOtp({ email: userEmail, token: code, type: "recovery" });
+      if (otpErr) throw otpErr;
+      const { error: upErr } = await sb.auth.updateUser({ password: codePw });
+      if (upErr) throw upErr;
+      setView("done");
+      setMsg({ text: "Your password has been updated! You can now sign in with your new password.", type: "success" });
+    } catch (e: any) {
+      setMsg({ text: e.message || "Invalid code or failed to update password. Please try again.", type: "error" });
+    }
+    setSubmitting(false);
+  };
+
+  const handleUpdatePassword = async () => {
+    clearMsg();
+    clearErrors();
+    const newErrors: Record<string, string> = {};
+    if (pw.length < 6) newErrors.pw = "Password must be at least 6 characters";
+    if (pw !== cpw) newErrors.cpw = "Passwords do not match";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const { error } = await sb.auth.updateUser({ password: pw });
+      if (error) throw error;
+      setView("done");
+      setMsg({ text: "Your password has been updated! You can now sign in with your new password.", type: "success" });
+    } catch (e: any) {
+      setMsg({ text: e.message || "Failed to update password. Please try again.", type: "error" });
+    }
+    setSubmitting(false);
+  };
+
+  const containerStyle: React.CSSProperties = {
+    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    background: "#faf8f9",
+    minHeight: "100vh",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "20px",
+  };
+
+  const cardStyle: React.CSSProperties = {
+    width: "100%",
+    maxWidth: "400px",
+    background: "#fff",
+    borderRadius: "20px",
+    padding: "32px 24px",
+    boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
+  };
+
+  const inputStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "12px 14px",
+    border: "1.5px solid #e0d8dc",
+    borderRadius: "12px",
+    fontSize: "16px",
+    outline: "none",
+    boxSizing: "border-box",
+  };
+
+  const btnStyle: React.CSSProperties = {
+    width: "100%",
+    padding: "14px",
+    border: "none",
+    borderRadius: "12px",
+    fontSize: "16px",
+    fontWeight: 600,
+    color: "#fff",
+    cursor: submitting ? "not-allowed" : "pointer",
+    background: "linear-gradient(135deg, #EAC8CD 0%, #D5CDE4 50%, #B3CCB3 100%)",
+    opacity: submitting ? 0.5 : 1,
+  };
+
+  const labelStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: "13px",
+    fontWeight: 600,
+    color: "#333",
+    marginBottom: "6px",
+  };
+
+  const errorStyle: React.CSSProperties = {
+    color: "#e53e3e",
+    fontSize: "13px",
+    marginTop: "6px",
+  };
+
+  const msgStyle = (type: MsgType): React.CSSProperties => ({
+    textAlign: "center" as const,
+    padding: "16px",
+    borderRadius: "12px",
+    marginBottom: "16px",
+    fontSize: "14px",
+    display: type ? "block" : "none",
+    background: type === "error" ? "#fee" : type === "success" ? "#f0fff4" : "#ebf8ff",
+    color: type === "error" ? "#c53030" : type === "success" ? "#276749" : "#2b6cb0",
+  });
+
+  return (
+    <div style={containerStyle}>
+      <div style={cardStyle}>
+        <h1 style={{ textAlign: "center", fontSize: "24px", color: "#000", marginBottom: "6px" }}>Ezras Nashim</h1>
+        <p style={{ textAlign: "center", color: "#666", fontSize: "14px", marginBottom: "28px" }}>{subtitle}</p>
+
+        {msg.type && <div style={msgStyle(msg.type)}>{msg.text}</div>}
+
+        {view === "loading" && (
+          <div style={{ textAlign: "center", padding: "32px 0" }}>
+            <div
+              style={{
+                display: "inline-block",
+                width: "36px",
+                height: "36px",
+                border: "3px solid #e0d8dc",
+                borderTopColor: "#D5CDE4",
+                borderRadius: "50%",
+                animation: "resetSpinner .8s linear infinite",
+              }}
+            />
+            <p style={{ color: "#666", fontSize: "13px", marginTop: "12px" }}>Verifying your reset link...</p>
+            <style>{`@keyframes resetSpinner{to{transform:rotate(360deg)}}`}</style>
+          </div>
+        )}
+
+        {view === "email" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendCode(email);
+            }}
+          >
+            <div style={{ marginBottom: "18px" }}>
+              <label style={labelStyle}>Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                autoComplete="email"
+                style={inputStyle}
+              />
+              {errors.email && <div style={errorStyle}>{errors.email}</div>}
+            </div>
+            <button type="submit" disabled={submitting} style={btnStyle}>
+              {submitting ? "Sending..." : "Send Reset Code"}
+            </button>
+          </form>
+        )}
+
+        {view === "code" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleVerifyCode();
+            }}
+          >
+            <p style={{ textAlign: "center", color: "#666", fontSize: "13px", marginBottom: "16px" }}>
+              We sent a 6-digit code to <strong>{userEmail}</strong>
+            </p>
+            <div style={{ marginBottom: "18px" }}>
+              <label style={labelStyle}>Reset Code</label>
+              <input
+                type="text"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="000000"
+                maxLength={6}
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                style={{ ...inputStyle, textAlign: "center", fontSize: "24px", letterSpacing: "8px", fontWeight: 700 }}
+              />
+              {errors.code && <div style={errorStyle}>{errors.code}</div>}
+            </div>
+            <div style={{ marginBottom: "18px", position: "relative" }}>
+              <label style={labelStyle}>New Password</label>
+              <input
+                type={showCodePw ? "text" : "password"}
+                value={codePw}
+                onChange={(e) => setCodePw(e.target.value)}
+                placeholder="Enter new password"
+                autoComplete="new-password"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCodePw(!showCodePw)}
+                style={{ position: "absolute", right: "12px", top: "34px", background: "none", border: "none", color: "#999", cursor: "pointer", fontSize: "13px" }}
+              >
+                {showCodePw ? "Hide" : "Show"}
+              </button>
+              {errors.codePw && <div style={errorStyle}>{errors.codePw}</div>}
+            </div>
+            <div style={{ marginBottom: "18px", position: "relative" }}>
+              <label style={labelStyle}>Confirm Password</label>
+              <input
+                type={showCodeCpw ? "text" : "password"}
+                value={codeCpw}
+                onChange={(e) => setCodeCpw(e.target.value)}
+                placeholder="Confirm new password"
+                autoComplete="new-password"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCodeCpw(!showCodeCpw)}
+                style={{ position: "absolute", right: "12px", top: "34px", background: "none", border: "none", color: "#999", cursor: "pointer", fontSize: "13px" }}
+              >
+                {showCodeCpw ? "Hide" : "Show"}
+              </button>
+              {errors.codeCpw && <div style={errorStyle}>{errors.codeCpw}</div>}
+            </div>
+            <button type="submit" disabled={submitting} style={btnStyle}>
+              {submitting ? "Resetting..." : "Reset Password"}
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSendCode(userEmail)}
+              disabled={submitting}
+              style={{
+                background: "none",
+                border: "none",
+                color: "#D5CDE4",
+                cursor: "pointer",
+                fontSize: "13px",
+                textAlign: "center",
+                width: "100%",
+                marginTop: "12px",
+                padding: "4px",
+              }}
+            >
+              Didn't receive it? Send again
+            </button>
+          </form>
+        )}
+
+        {view === "password" && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleUpdatePassword();
+            }}
+          >
+            <div style={{ marginBottom: "18px", position: "relative" }}>
+              <label style={labelStyle}>New Password</label>
+              <input
+                type={showPw ? "text" : "password"}
+                value={pw}
+                onChange={(e) => setPw(e.target.value)}
+                placeholder="Enter new password"
+                autoComplete="new-password"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                style={{ position: "absolute", right: "12px", top: "34px", background: "none", border: "none", color: "#999", cursor: "pointer", fontSize: "13px" }}
+              >
+                {showPw ? "Hide" : "Show"}
+              </button>
+              {errors.pw && <div style={errorStyle}>{errors.pw}</div>}
+            </div>
+            <div style={{ marginBottom: "18px", position: "relative" }}>
+              <label style={labelStyle}>Confirm Password</label>
+              <input
+                type={showCpw ? "text" : "password"}
+                value={cpw}
+                onChange={(e) => setCpw(e.target.value)}
+                placeholder="Confirm new password"
+                autoComplete="new-password"
+                style={{ ...inputStyle, paddingRight: "44px" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCpw(!showCpw)}
+                style={{ position: "absolute", right: "12px", top: "34px", background: "none", border: "none", color: "#999", cursor: "pointer", fontSize: "13px" }}
+              >
+                {showCpw ? "Hide" : "Show"}
+              </button>
+              {errors.cpw && <div style={errorStyle}>{errors.cpw}</div>}
+            </div>
+            <button type="submit" disabled={submitting} style={btnStyle}>
+              {submitting ? "Updating..." : "Update Password"}
+            </button>
+          </form>
+        )}
+
+        {view !== "done" && (
+          <a
+            href="/"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: "18px",
+              color: "#D5CDE4",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 500,
+            }}
+          >
+            Back to App
+          </a>
+        )}
+        {view === "done" && (
+          <a
+            href="/"
+            style={{
+              display: "block",
+              textAlign: "center",
+              marginTop: "18px",
+              color: "#D5CDE4",
+              textDecoration: "none",
+              fontSize: "14px",
+              fontWeight: 500,
+            }}
+          >
+            Go to App
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
