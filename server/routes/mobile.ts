@@ -523,7 +523,6 @@ export function registerMobileRoutes(app: Express, deps: MobileRouteDeps) {
       const impact = await storage.getCommunityImpact("alltime");
       return res.json({
         totalRaised: impact.totalRaised,
-        totalActs: impact.totalActs,
         currency: "USD",
         updatedAt: new Date().toISOString(),
       });
