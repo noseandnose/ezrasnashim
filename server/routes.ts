@@ -19,6 +19,7 @@ import { registerLocationRoutes } from "./routes/location";
 import { registerTehillimRoutes } from "./routes/tehillim";
 import { registerPrayerRoutes } from "./routes/prayers";
 import { registerContentRoutes } from "./routes/content";
+import { registerMobileRoutes } from "./routes/mobile";
 // Supabase Auth - replaces Replit Auth
 import { optionalAuth } from "./supabase-auth";
 import { z } from "zod";
@@ -580,6 +581,9 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
 
   // Register content routes (Torah, Table Inspiration, Marriage Insights, etc.)
   registerContentRoutes(app, { storage, requireAdminAuth });
+
+  // Register mobile-compatible alias and new routes
+  registerMobileRoutes(app, { storage, requireAdminAuth, optionalAuth });
 
   // Admin login endpoint - returns JWT token on successful authentication
   app.post("/api/admin/login", async (req, res) => {

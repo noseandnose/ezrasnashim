@@ -1,0 +1,61 @@
+Tell the web app to do both — add aliases AND add the missing routes. Here's the prompt to give it:
+
+1) Add aliases for these mobile-compatible paths (just point them to your existing handlers):
+
+GET  /api/zmanim              → alias for /api/zmanim/:lat/:lng (take lat/lng from query params)
+GET  /api/shabbat             → alias for /api/shabbos/:lat/:lng (take lat/lng from query params)
+GET  /api/holidays            → alias for /api/events/:lat/:lng (take lat/lng from query params)
+GET  /api/supabase-config     → alias for /api/auth/public-config
+POST /api/notifications/send  → alias for /api/push/send
+POST /api/donations/checkout  → alias for /api/create-session-checkout
+GET  /api/donations/campaign  → alias for /api/campaigns/active
+GET  /api/donations/community-impact → alias for /api/analytics/community-impact
+GET  /api/sponsors/today      → alias for /api/sponsors/daily/:date (use today's date)
+POST /api/tehillim-chains/:slug/complete-reading → alias for /api/tehillim-chains/:slug/complete
+GET  /api/tehillim-chains-global-stats → alias for /api/tehillim-chains/stats/global
+GET  /api/todays-special      → alias for /api/home/todays-special
+POST /api/todays-special/complete → alias for /api/challenge/:id/complete
+2) Add these missing routes that the mobile app uses (they all read/write the same Supabase tables):
+
+Calendar:
+
+GET /api/hebrew-date — returns current Hebrew date from Hebcal
+GET /api/hebrew-date/convert — converts a Gregorian date to Hebrew
+GET /api/hebrew-date/next-occurrences — next Gregorian dates for a Hebrew date
+Auth/Profile:
+
+POST /api/auth/profile — create or update user profile (table: profiles)
+GET /api/auth/profile/:userId — get a user profile
+PATCH /api/auth/profile/:userId — update profile fields
+POST /api/auth/delete-account — delete user account and data
+Content:
+
+GET /api/content-versions — returns row counts for content tables so the app can cache-bust
+Mitzvah Tracking:
+
+POST /api/mitzvah/track — record a mitzvah completion (table: mitzvah_completions)
+GET /api/mitzvah/analytics — aggregated mitzvah stats
+GET /api/mitzvah/personal-analytics — per-user analytics
+GET /api/mitzvah/global-total — total count across all users
+GET /api/mitzvah/completed-tehillim — which Tehillim chapters a device has completed
+POST /api/mitzvah/link-user — link device-based completions to a user account
+Donations:
+
+GET /api/donations/cancel — Stripe checkout cancel callback page
+GET /api/donations/total-raised — total tzedaka raised (combines app_donations + donations tables)
+GET /api/donations/community-impact-content — content entry for community impact display
+POST /api/donations/fix-pending — admin: check Stripe for pending donations and fix them
+POST /api/donations/fix-by-sessions — admin: fix specific donations by Stripe session IDs
+Challenges:
+
+POST /api/challenges/nishmas/join — join 40-day Nishmas challenge (table: nishmas_challenges)
+GET /api/challenges/nishmas/status — get challenge progress with auto-fail logic
+POST /api/challenges/nishmas/complete-day — mark a day completed
+POST /api/challenges/nishmas/restart — restart challenge
+GET /api/badges — get earned badges (table: user_badges)
+Psukim:
+
+GET /api/psukim/for-name — get a pasuk matching first/last Hebrew letter (table: name_psukim)
+GET /api/psukim/for-full-name — get psukim for a full Hebrew name (JSON array of letter pairs)
+All these hit the same Supabase database both apps share, so they should use the same table structures.
+

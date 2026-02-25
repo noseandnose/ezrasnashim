@@ -21,9 +21,19 @@ Gratitude Journal: Collapsible bar on home page (after Tzedaka) for daily gratit
 
 ## API Documentation
 - **OpenAPI Spec**: Generated with swagger-jsdoc (OpenAPI 3.1.0). JSDoc `@openapi` annotations live in `server/swagger-paths.ts` (centralized) and `server/swagger.ts` (config).
-- **Live spec endpoint**: `GET /api/spec.json` — returns the full spec as JSON (126 paths, 138 operations).
+- **Live spec endpoint**: `GET /api/spec.json` — returns the full spec as JSON.
 - **Exported spec file**: `openapi.json` in the repo root — regenerate anytime with `curl http://localhost:5000/api/spec.json > openapi.json`.
 - **Tags**: Health, Auth, Admin, Analytics, Location, Zmanim, Tehillim, Tehillim Chains, Prayers, Torah Content, Life Content, Messages & Feed, Push Notifications, Sponsors, Donations, User, Media.
+- **Mobile API Layer**: `server/routes/mobile.ts` — alias and new routes for mobile app compatibility. Registered last in routes.ts. Key endpoints:
+  - Aliases: `GET /api/supabase-config`, `GET /api/zmanim?lat=&lng=`, `GET /api/shabbat?lat=&lng=`, `GET /api/holidays?lat=&lng=`, `POST /api/donations/checkout`, `GET /api/donations/campaign`, `GET /api/sponsors/today`, `GET /api/todays-special`
+  - Calendar: `GET /api/hebrew-date`, `GET /api/gregorian-to-hebrew?date=YYYY-MM-DD`, `GET /api/hebrew-next-occurrences?hm=Adar&hd=15&years=3`
+  - Auth/Profile CRUD: `POST /api/auth/profile`, `GET /api/auth/profile/:userId`, `PATCH /api/auth/profile/:userId`, `POST /api/auth/delete-account`
+  - Content cache busting: `GET /api/content-versions`
+  - Mitzvah tracking: `POST /api/mitzvah/track`, `GET /api/mitzvah/analytics`, `GET /api/mitzvah/personal-analytics`, `GET /api/mitzvah/global-total`, `GET /api/mitzvah/completed-tehillim`, `POST /api/mitzvah/link-user`
+  - Donation admin: `POST /api/donations/fix-pending`, `POST /api/donations/fix-by-sessions`, `GET /api/donations/total-raised`
+  - 40-day Nishmas challenge: `POST /api/challenges/nishmas/join`, `GET /api/challenges/nishmas/status`, `POST /api/challenges/nishmas/complete-day`, `POST /api/challenges/nishmas/restart`
+  - Badges: `GET /api/badges?deviceId=`
+  - Psukim: `GET /api/psukim/for-name?startLetter=א&endLetter=ה`, `GET /api/psukim/for-full-name?name=[...]`, `POST /api/psukim/seed`
 
 ## System Architecture
 ### Frontend

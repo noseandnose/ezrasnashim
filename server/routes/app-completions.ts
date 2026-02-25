@@ -1,4 +1,5 @@
 import { supabase } from '../supabase-auth';
+import { pool } from '../db';
 
 const CONTENT_TYPE_MAP: Record<string, string> = {
   daily_chizuk: 'chizuk',
@@ -50,53 +51,61 @@ export async function getAppCompletionsForPeriod(
     modalCompletions: {},
   };
 
-  if (!supabase) return result;
+  // 1. Count from Supabase app_mitzvah_completions (native mobile app)
+  if (supabase) {
+    try {
+      let query = supabase
+        .from('app_mitzvah_completions')
+        .select('category, content_type')
+        .gte('created_at', `${startDate}T00:00:00`);
 
-  try {
-    let query = supabase
-      .from('app_mitzvah_completions')
-      .select('category, content_type')
-      .gte('created_at', `${startDate}T00:00:00`);
+      if (endDate) {
+        query = query.lt('created_at', `${endDate}T00:00:00`);
+      }
 
-    if (endDate) {
-      query = query.lt('created_at', `${endDate}T00:00:00`);
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error querying app_mitzvah_completions:', error);
+      } else if (data && data.length > 0) {
+        result.totalActs += data.length;
+
+        for (const row of data) {
+          if (row.category === 'Tzedaka') result.tzedakaActs++;
+          if (row.content_type === 'tehillim') result.tehillimCompleted++;
+          if (row.content_type === 'meditation') result.meditationsCompleted++;
+          const mappedKey = CONTENT_TYPE_MAP[row.content_type];
+          if (mappedKey) {
+            result.modalCompletions[mappedKey] = (result.modalCompletions[mappedKey] || 0) + 1;
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching app completions from Supabase:', err);
     }
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error('Error querying app_mitzvah_completions:', error);
-      return result;
-    }
-
-    if (!data || data.length === 0) return result;
-
-    result.totalActs = data.length;
-
-    for (const row of data) {
-      if (row.category === 'Tzedaka') {
-        result.tzedakaActs++;
-      }
-
-      if (row.content_type === 'tehillim') {
-        result.tehillimCompleted++;
-      }
-
-      if (row.content_type === 'meditation') {
-        result.meditationsCompleted++;
-      }
-
-      const mappedKey = CONTENT_TYPE_MAP[row.content_type];
-      if (mappedKey) {
-        result.modalCompletions[mappedKey] = (result.modalCompletions[mappedKey] || 0) + 1;
-      }
-    }
-
-    return result;
-  } catch (err) {
-    console.error('Error fetching app completions:', err);
-    return result;
   }
+
+  // 2. Count from PostgreSQL mitzvah_completions (new mobile API completions)
+  try {
+    const pgResult = endDate
+      ? await pool.query(
+          `SELECT category FROM mitzvah_completions WHERE date >= $1 AND date < $2`,
+          [startDate, endDate]
+        )
+      : await pool.query(
+          `SELECT category FROM mitzvah_completions WHERE date >= $1`,
+          [startDate]
+        );
+
+    result.totalActs += pgResult.rows.length;
+    for (const row of pgResult.rows) {
+      if (row.category === 'tzedaka') result.tzedakaActs++;
+    }
+  } catch (pgErr) {
+    console.error('Error fetching mitzvah_completions from PostgreSQL:', pgErr);
+  }
+
+  return result;
 }
 
 export function mergeAppCompletions(

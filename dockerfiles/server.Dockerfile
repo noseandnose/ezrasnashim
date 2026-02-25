@@ -1,27 +1,17 @@
-# 1) Build client assets
-FROM node:20 AS builder
+FROM node:20
 WORKDIR /app
 
-COPY ./server/tsconfig.json  ./tsconfig.json
+COPY ./server/tsconfig.json ./tsconfig.json
 COPY package*.json ./
 COPY ./shared shared
 COPY ./server server
-RUN npm ci
 
-RUN npx tsc
+# Install only production dependencies — skips vitest, jsdom, and other
+# dev tools that pull in old package versions blocked by security policy
+RUN npm install --omit=dev --legacy-peer-deps
 
-# 2) Runtime image
-FROM node:20-slim
-WORKDIR /app
-
-# Copy production deps + built client + server source
-COPY package*.json ./
-COPY tsconfig.json ./
-
-COPY --from=builder /app/node_modules ./node_modules
-#COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server ./server
-COPY --from=builder /app/shared ./shared
+# Install tsx separately so we can run TypeScript directly at runtime
+RUN npm install tsx --legacy-peer-deps
 
 ENV NODE_ENV=production
 ENV PORT=80
@@ -29,6 +19,3 @@ ENV PORT=80
 EXPOSE 80
 
 CMD ["npx", "tsx", "server/index.ts"]
-#
-#CMD ["node","server/index.js"]
-#CMD ["sleep","150000"]

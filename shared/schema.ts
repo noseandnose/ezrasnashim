@@ -1013,5 +1013,90 @@ export const insertGratitudeJournalSchema = createInsertSchema(gratitudeJournal)
 export type GratitudeJournal = typeof gratitudeJournal.$inferSelect;
 export type InsertGratitudeJournal = z.infer<typeof insertGratitudeJournalSchema>;
 
+// Mobile-shared tables
+
+// User profiles (shared between web and mobile apps)
+export const profiles = pgTable("profiles", {
+  id: text("id").primaryKey(), // Supabase auth user ID
+  firstName: text("first_name"),
+  lastName: text("last_name"),
+  email: text("email"),
+  hebrewName: text("hebrew_name"),
+  birthday: text("birthday"),
+  profileImageUrl: text("profile_image_url"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertProfileSchema = createInsertSchema(profiles).omit({ createdAt: true, updatedAt: true });
+export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = z.infer<typeof insertProfileSchema>;
+
+// Mitzvah completions (mobile app tracking table)
+export const mitzvahCompletions = pgTable("mitzvah_completions", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"),
+  deviceId: text("device_id"),
+  category: text("category").notNull(), // 'torah', 'tefilla', 'tzedaka', 'life'
+  subtype: text("subtype"),
+  date: text("date").notNull(), // YYYY-MM-DD
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("mitzvah_completions_user_id_idx").on(table.userId),
+  dateIdx: index("mitzvah_completions_date_idx").on(table.date),
+}));
+
+export const insertMitzvahCompletionSchema = createInsertSchema(mitzvahCompletions).omit({ id: true, completedAt: true });
+export type MitzvahCompletion = typeof mitzvahCompletions.$inferSelect;
+export type InsertMitzvahCompletion = z.infer<typeof insertMitzvahCompletionSchema>;
+
+// 40-day Nishmas challenges
+export const nishmasChallenges = pgTable("nishmas_challenges", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"),
+  deviceId: text("device_id"),
+  startDate: text("start_date").notNull(), // YYYY-MM-DD
+  lastCompletedDate: text("last_completed_date"),
+  daysCompleted: integer("days_completed").default(0).notNull(),
+  status: text("status").default("active").notNull(), // 'active', 'failed', 'completed'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("nishmas_challenges_user_id_idx").on(table.userId),
+  deviceIdIdx: index("nishmas_challenges_device_id_idx").on(table.deviceId),
+}));
+
+export const insertNishmasChallengeSchema = createInsertSchema(nishmasChallenges).omit({ id: true, createdAt: true, updatedAt: true });
+export type NishmasChallenge = typeof nishmasChallenges.$inferSelect;
+export type InsertNishmasChallenge = z.infer<typeof insertNishmasChallengeSchema>;
+
+// User badges (earned through completing challenges and milestones)
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id"),
+  deviceId: text("device_id"),
+  badge: text("badge").notNull(), // badge identifier e.g. 'first_mitzvah', '40_day_nishmas'
+  earnedAt: timestamp("earned_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("user_badges_user_id_idx").on(table.userId),
+}));
+
+export const insertUserBadgeSchema = createInsertSchema(userBadges).omit({ id: true, earnedAt: true });
+export type UserBadge = typeof userBadges.$inferSelect;
+export type InsertUserBadge = z.infer<typeof insertUserBadgeSchema>;
+
+// Psukim for Hebrew names (lookup by first/last Hebrew letter)
+export const namePsukim = pgTable("name_psukim", {
+  id: serial("id").primaryKey(),
+  firstLetter: text("first_letter").notNull(), // Hebrew letter the pasuk starts with
+  lastLetter: text("last_letter").notNull(),   // Hebrew letter the pasuk ends with
+  pasuk: text("pasuk").notNull(),              // The verse text in Hebrew
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertNamePsukimSchema = createInsertSchema(namePsukim).omit({ id: true, createdAt: true });
+export type NamePasuk = typeof namePsukim.$inferSelect;
+export type InsertNamePasuk = z.infer<typeof insertNamePsukimSchema>;
+
 // Auth models (users, sessions) - required for Replit Auth
 export * from "./models/auth";

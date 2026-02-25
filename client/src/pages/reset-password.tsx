@@ -134,7 +134,7 @@ export default function ResetPassword() {
     setSubmitting(true);
     try {
       const { error } = await sb.auth.resetPasswordForEmail(emailAddr.trim(), {
-        redirectTo: "https://ezrasnashim.app/auth/callback",
+        redirectTo: "https://ezrasnashim.app/reset-password",
       });
       if (error) throw error;
       setMsg({ text: "We've sent a password reset link to " + emailAddr.trim() + ". Please check your email and click the link to reset your password.", type: "success" });
