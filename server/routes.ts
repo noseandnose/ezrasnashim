@@ -3572,6 +3572,26 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
     }
   });
 
+  // Community Challenge - fetch by ID (for shared links)
+  app.get("/api/challenge/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid challenge ID" });
+      }
+      const challenge = await storage.getTodaysSpecialById(id);
+      if (!challenge) {
+        return res.status(404).json({ error: "Challenge not found" });
+      }
+      const today = new Date().toISOString().split('T')[0];
+      const isExpired = challenge.untilDate < today;
+      return res.json({ ...challenge, isExpired });
+    } catch (error) {
+      console.error('Failed to fetch challenge by ID:', error);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // Community Challenge - increment completion count
   app.post("/api/challenge/:id/complete", async (req, res) => {
     try {

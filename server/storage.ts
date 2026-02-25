@@ -94,6 +94,7 @@ export interface IStorage {
   
   // Today's Special methods
   getTodaysSpecialByDate(date: string): Promise<TodaysSpecial | undefined>;
+  getTodaysSpecialById(id: number): Promise<TodaysSpecial | undefined>;
   createTodaysSpecial(special: InsertTodaysSpecial): Promise<TodaysSpecial>;
   incrementChallengeCount(id: number): Promise<TodaysSpecial | undefined>;
   
@@ -1606,6 +1607,18 @@ export class DatabaseStorage implements IStorage {
       return result;
     } catch (error) {
       console.error('Failed to fetch today\'s special:', error);
+      return undefined;
+    }
+  }
+
+  async getTodaysSpecialById(id: number): Promise<TodaysSpecial | undefined> {
+    try {
+      const [result] = await db.select().from(todaysSpecial)
+        .where(eq(todaysSpecial.id, id))
+        .limit(1);
+      return result;
+    } catch (error) {
+      console.error('Failed to fetch today\'s special by ID:', error);
       return undefined;
     }
   }

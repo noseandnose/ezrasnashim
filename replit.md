@@ -72,6 +72,7 @@ Gratitude Journal: Collapsible bar on home page (after Tzedaka) for daily gratit
 - **Analytics**: Tracking daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard, offline queue support with idempotency, and Google Analytics.
 - **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback.
 - **Partners Page**: Full-screen page (/partners) with "Deals" and "Resources" tabs showing curated partner promotions. Uses `discount_promotions` table with `type` field to categorize content.
+- **Challenge Share Page**: Full-screen page (/challenge/:id) for shared community challenge links from the mobile app (format: https://ezrasnashim.app/challenge/123). Fetches challenge by numeric `todays_special` table ID via `GET /api/challenge/:id`. Returns challenge data plus `isExpired` boolean (true when `untilDate < today`). Shows friendly message if expired or not found, with link back to homepage.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Unified Admin Interface**: Comprehensive dashboard for content management (Messages, Recipes, Table Inspirations, Notifications) with CRUD and secure image upload.
