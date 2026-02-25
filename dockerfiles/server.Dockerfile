@@ -6,7 +6,7 @@ COPY ./server/tsconfig.json  ./tsconfig.json
 COPY package*.json ./
 COPY ./shared shared
 COPY ./server server
-RUN npm ci
+RUN npm install --legacy-peer-deps
 
 RUN npx tsc
 
