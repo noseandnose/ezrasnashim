@@ -1,4 +1,4 @@
-import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Settings, Plus, Minus, Info, Mail, ChevronRight, Users, Check } from "lucide-react";
+import { Heart, BookOpen, HandHeart, Coins, MapPin, Sunrise, Sun, Moon, Sparkles, Info, Mail, ChevronRight, Users, Check } from "lucide-react";
 import { useWeather, getWeatherEmoji, useTemperatureUnit } from "@/hooks/use-weather";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useState, memo, useEffect, useMemo } from "react";
@@ -10,7 +10,6 @@ import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
-import { sanitizeHTML } from "@/lib/sanitize";
 import torahFlower from "@assets/Torah_1771759230839.png";
 import tefillaFlower from "@assets/Tefilla_1771759230840.png";
 import tzedakaFlower from "@assets/Tzedaka_1771759230839.png";
@@ -93,19 +92,6 @@ function getSectionBg(_timePeriod: 'night' | 'morning' | 'afternoon') {
   return sectionMorningBg;
 }
 
-// Format markdown with placeholder replacement
-function formatMarkdownText(text: string | null | undefined, times?: { shkia?: string; sunrise?: string; minchaGedolah?: string; candleLighting?: string; havdalah?: string }): string {
-  if (!text) return '';
-  let result = text
-    .replace(/\{\{shkia\}\}/gi, times?.shkia || '')
-    .replace(/\{\{sunrise\}\}/gi, times?.sunrise || '')
-    .replace(/\{\{mincha\}\}/gi, times?.minchaGedolah || '')
-    .replace(/\{\{candleLighting\}\}/gi, times?.candleLighting || '')
-    .replace(/\{\{havdalah\}\}/gi, times?.havdalah || '');
-  result = result.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  result = result.replace(/\n/g, '<br>');
-  return sanitizeHTML(result);
-}
 
 // ============ TYPES ============
 
@@ -288,16 +274,8 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
     setHasReadMessage(localStorage.getItem(readKey) === 'true');
   }, []);
 
-  // Today's Special state
-  const [todaysSpecialExpanded, setTodaysSpecialExpanded] = useState(false);
-  const [todaysSpecialLanguage, setTodaysSpecialLanguage] = useState<'english' | 'hebrew'>('hebrew');
-  const [todaysSpecialFontSize, setTodaysSpecialFontSize] = useState(16);
-  const [showTodaysSpecialSettings, setShowTodaysSpecialSettings] = useState(false);
-  const [challengeLoading, setChallengeLoading] = useState(false);
-  
   // Check if Today's Special has content (including challenges which load content from challengeContentId)
   const hasTodaysSpecialContent = todaysSpecial && (todaysSpecial.contentEnglish || todaysSpecial.contentHebrew || todaysSpecial.challengeType);
-  const hasBothLanguages = todaysSpecial?.contentEnglish && todaysSpecial?.contentHebrew;
   
   // Memoized placeholder replacement helper
   const replacePlaceholders = useMemo(() => (text: string | null | undefined): string => {
@@ -308,11 +286,6 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
       .replace(/\{\{mincha\}\}/gi, jewishTimesQuery.data?.minchaGedolah || '')
       .replace(/\{\{candleLighting\}\}/gi, jewishTimesQuery.data?.candleLighting || '')
       .replace(/\{\{havdalah\}\}/gi, jewishTimesQuery.data?.havdalah || '');
-  }, [jewishTimesQuery.data]);
-
-  // Format markdown using extracted utility function
-  const formatMarkdown = useMemo(() => (text: string | null | undefined): string => {
-    return formatMarkdownText(text, jewishTimesQuery.data);
   }, [jewishTimesQuery.data]);
 
 
@@ -583,18 +556,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (todaysSpecial.challengeType) {
-                  setChallengeLoading(true);
-                  openModal('community-challenge', 'home');
-                  setTimeout(() => setChallengeLoading(false), 500);
-                } else {
-                  setTodaysSpecialExpanded(!todaysSpecialExpanded);
-                }
+                openModal('community-challenge', 'home');
               }}
-              disabled={challengeLoading}
-              className={`w-full p-3 text-left transition-all active:scale-[0.98] ${
-                challengeLoading ? 'opacity-70' : 'hover:bg-white/90'
-              }`}
+              className="w-full p-3 text-left transition-all active:scale-[0.98] hover:bg-white/90"
               data-testid="button-todays-special-toggle"
             >
               <div className="flex items-center gap-3">
@@ -630,133 +594,13 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                   )}
                 </div>
                 
-                {/* Expand/Collapse or Open indicator */}
+                {/* Open indicator */}
                 <div className="text-black/40">
-                  {todaysSpecial.challengeType ? (
-                    challengeLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-blush border-t-transparent" />
-                    ) : (
-                      <ChevronRight size={18} />
-                    )
-                  ) : (
-                    todaysSpecialExpanded ? <Minus size={18} /> : <Plus size={18} />
-                  )}
+                  <ChevronRight size={18} />
                 </div>
               </div>
             </button>
             
-            {/* Expanded Content */}
-            {todaysSpecialExpanded && (
-              <div className="relative px-3 pb-16 pt-3 border-t border-blush/10">
-                {/* Content */}
-                <div 
-                  className={`text-black leading-relaxed ${
-                    todaysSpecialLanguage === 'hebrew' ? 'vc-koren-hebrew' : 'platypi-regular text-left'
-                  }`}
-                  style={{ fontSize: `${todaysSpecialFontSize}px` }}
-                  dir={todaysSpecialLanguage === 'hebrew' ? 'rtl' : 'ltr'}
-                  dangerouslySetInnerHTML={{
-                    __html: todaysSpecialLanguage === 'hebrew' 
-                      ? formatMarkdown(todaysSpecial.contentHebrew || todaysSpecial.contentEnglish)
-                      : formatMarkdown(todaysSpecial.contentEnglish || todaysSpecial.contentHebrew)
-                  }}
-                />
-                
-                {/* Floating Settings Button - Bottom Left */}
-                <button
-                  onClick={() => setShowTodaysSpecialSettings(!showTodaysSpecialSettings)}
-                  className="absolute bottom-3 left-3 bg-gradient-feminine text-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-200"
-                  data-testid="button-todays-special-settings"
-                >
-                  <Settings size={14} />
-                </button>
-                
-                {/* Settings Panel - Above floating button */}
-                {showTodaysSpecialSettings && (
-                  <>
-                    {/* Backdrop */}
-                    <div 
-                      className="fixed inset-0 z-40"
-                      onClick={() => setShowTodaysSpecialSettings(false)}
-                    />
-                    <div className="absolute bottom-14 left-3 bg-white rounded-2xl shadow-xl border border-gray-200 p-3 z-50 min-w-[180px]">
-                      <div className="space-y-3">
-                        {/* Language Toggle */}
-                        {hasBothLanguages && (
-                          <div>
-                            <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Language</p>
-                            <div className="flex bg-gradient-feminine rounded-xl p-0.5">
-                              <button
-                                onClick={() => {
-                                  setTodaysSpecialLanguage('english');
-                                  setShowTodaysSpecialSettings(false);
-                                }}
-                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
-                                  todaysSpecialLanguage === 'english' 
-                                    ? 'bg-white text-black shadow-sm' 
-                                    : 'text-white hover:text-gray-100'
-                                }`}
-                              >
-                                English
-                              </button>
-                              <button
-                                onClick={() => {
-                                  setTodaysSpecialLanguage('hebrew');
-                                  setShowTodaysSpecialSettings(false);
-                                }}
-                                className={`px-2 py-1.5 rounded-lg text-xs font-medium transition-colors flex-1 ${
-                                  todaysSpecialLanguage === 'hebrew' 
-                                    ? 'bg-white text-black shadow-sm' 
-                                    : 'text-white hover:text-gray-100'
-                                }`}
-                              >
-                                עברית
-                              </button>
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Font Size Controls */}
-                        <div>
-                          <p className="text-xs font-medium text-gray-700 mb-1.5 text-center">Font Size</p>
-                          <div className="flex items-center justify-center gap-2 bg-gradient-feminine rounded-xl p-1.5">
-                            <button
-                              onClick={() => setTodaysSpecialFontSize(prev => Math.max(12, prev - 2))}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
-                            >
-                              A-
-                            </button>
-                            <span className="text-xs text-white font-medium px-1">
-                              {todaysSpecialFontSize}px
-                            </span>
-                            <button
-                              onClick={() => setTodaysSpecialFontSize(prev => Math.min(24, prev + 2))}
-                              className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors shadow-sm"
-                            >
-                              A+
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                      <p className="text-[0.625rem] text-gray-500 mt-2 text-center">Tap outside to close</p>
-                    </div>
-                  </>
-                )}
-                
-                {/* Floating Link Button - Bottom Right */}
-                {todaysSpecial.url && todaysSpecial.linkTitle && (
-                  <a
-                    href={todaysSpecial.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="absolute bottom-3 right-3 bg-gradient-feminine text-white rounded-full px-3 py-1 shadow-lg hover:scale-105 transition-all duration-200 platypi-medium text-xs flex items-center justify-center"
-                    data-testid="link-todays-special"
-                  >
-                    {todaysSpecial.linkTitle}
-                  </a>
-                )}
-              </div>
-            )}
           </div>
         )}
       </div>

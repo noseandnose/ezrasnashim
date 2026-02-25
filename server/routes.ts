@@ -22,6 +22,7 @@ import { registerContentRoutes } from "./routes/content";
 // Supabase Auth - replaces Replit Auth
 import { optionalAuth } from "./supabase-auth";
 import { z } from "zod";
+import { swaggerSpec } from "./swagger";
 
 // Input validation schemas for public endpoints
 const CalendarDownloadSchema = z.object({
@@ -240,6 +241,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Supabase Auth is handled client-side - no server setup needed
   // This endpoint returns the current user (if authenticated) or null
   // It uses optionalAuth to gracefully handle when auth is not configured
+  app.get("/api/spec.json", (_req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.json(swaggerSpec);
+  });
+
   app.get("/api/auth/user", optionalAuth, (req, res) => {
     // Return the user if authenticated, or null if not
     res.json(req.supabaseUser || null);
@@ -3563,6 +3569,26 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
     } catch (error) {
       console.error('Error fetching Jewish events:', error);
       return res.status(500).json({ message: "Failed to fetch Jewish events" });
+    }
+  });
+
+  // Community Challenge - fetch by ID (for shared links)
+  app.get("/api/challenge/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Invalid challenge ID" });
+      }
+      const challenge = await storage.getTodaysSpecialById(id);
+      if (!challenge) {
+        return res.status(404).json({ error: "Challenge not found" });
+      }
+      const today = new Date().toISOString().split('T')[0];
+      const isExpired = challenge.untilDate < today;
+      return res.json({ ...challenge, isExpired });
+    } catch (error) {
+      console.error('Failed to fetch challenge by ID:', error);
+      return res.status(500).json({ error: "Internal server error" });
     }
   });
 

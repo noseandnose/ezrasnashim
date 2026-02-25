@@ -1,0 +1,2366 @@
+/**
+ * @openapi
+ * /healthcheck:
+ *   get:
+ *     tags: [Health]
+ *     summary: Server health check
+ *     description: Returns HTTP 200 when the server is up and healthy.
+ *     responses:
+ *       200:
+ *         description: Server is healthy
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status: { type: string, example: ok }
+ *                 timestamp: { type: string, format: date-time }
+ */
+
+/**
+ * @openapi
+ * /api/version:
+ *   get:
+ *     tags: [Health]
+ *     summary: App version and build info
+ *     description: Returns the current build version and timestamp used for cache-busting.
+ *     responses:
+ *       200:
+ *         description: Version information
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 version: { type: string }
+ *                 buildTime: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/regenerate-cache-version:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Force a cache version bump
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: New cache version generated
+ */
+
+/**
+ * @openapi
+ * /api/auth/user:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Get current authenticated user
+ *     description: Returns the Supabase user object if a valid Bearer token is provided, otherwise null.
+ *     security:
+ *       - SupabaseAuth: []
+ *     responses:
+ *       200:
+ *         description: User object or null
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               nullable: true
+ *               properties:
+ *                 id: { type: string }
+ *                 email: { type: string }
+ *                 user_metadata: { type: object }
+ */
+
+/**
+ * @openapi
+ * /api/auth/public-config:
+ *   get:
+ *     tags: [Auth]
+ *     summary: Supabase public configuration
+ *     description: Returns the public Supabase URL and anon key for client-side initialisation.
+ *     responses:
+ *       200:
+ *         description: Public config
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 supabaseUrl: { type: string }
+ *                 supabaseAnonKey: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/admin/login:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Admin login
+ *     description: Authenticates an admin user and returns a JWT token (24 h expiry). Rate-limited to 10 attempts per 15 minutes per IP.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [password]
+ *             properties:
+ *               password: { type: string }
+ *     responses:
+ *       200:
+ *         description: JWT token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token: { type: string }
+ *       401:
+ *         description: Invalid password
+ */
+
+/**
+ * @openapi
+ * /api/admin/auth-status:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Verify admin JWT
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @openapi
+ * /api/admin/logout:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Admin logout
+ *     description: Clears the admin session cookie.
+ *     responses:
+ *       200:
+ *         description: Logged out
+ */
+
+/**
+ * @openapi
+ * /api/analytics/track:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: Track a single analytics event
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AnalyticsEvent'
+ *     responses:
+ *       200:
+ *         description: Event recorded
+ *       400:
+ *         description: Missing required fields
+ */
+
+/**
+ * @openapi
+ * /api/analytics/sync:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: Batch-sync analytics events
+ *     description: Accepts an array of queued offline events and stores them with idempotency.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               events:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/AnalyticsEvent'
+ *     responses:
+ *       200:
+ *         description: Events synced
+ */
+
+/**
+ * @openapi
+ * /api/feature-usage:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: Record feature usage
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               feature: { type: string }
+ *               deviceId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Recorded
+ */
+
+/**
+ * @openapi
+ * /api/analytics/session:
+ *   post:
+ *     tags: [Analytics]
+ *     summary: Record a session start or heartbeat
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deviceId: { type: string }
+ *               sessionId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Session recorded
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/today:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Today's analytics snapshot
+ *     responses:
+ *       200:
+ *         description: Today's stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/week:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Last 7 days analytics
+ *     responses:
+ *       200:
+ *         description: Weekly stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/month:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Last 30 days analytics
+ *     responses:
+ *       200:
+ *         description: Monthly stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/total:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: All-time cumulative analytics
+ *     responses:
+ *       200:
+ *         description: Total stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/daily:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Per-day analytics breakdown
+ *     responses:
+ *       200:
+ *         description: Daily breakdown array
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/range:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Analytics for a custom date range (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: query
+ *         name: from
+ *         schema: { type: string, format: date }
+ *         required: true
+ *       - in: query
+ *         name: to
+ *         schema: { type: string, format: date }
+ *         required: true
+ *     responses:
+ *       200:
+ *         description: Range stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/stats/compare:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Compare two date ranges (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: query
+ *         name: period1Start
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: period1End
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: period2Start
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: period2End
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Comparison stats
+ */
+
+/**
+ * @openapi
+ * /api/analytics/community-impact:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Community impact metrics (mitzvahs, Tehillim, etc.)
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Impact metrics
+ */
+
+/**
+ * @openapi
+ * /api/analytics/cleanup:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Purge old analytics records (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Cleanup complete
+ */
+
+/**
+ * @openapi
+ * /api/analytics/recalculate-all:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Recalculate all analytics aggregates (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Recalculated
+ */
+
+/**
+ * @openapi
+ * /api/location/ip:
+ *   get:
+ *     tags: [Location]
+ *     summary: Geo-locate current request IP
+ *     description: Returns approximate latitude/longitude derived from the request IP via ip-api.com.
+ *     responses:
+ *       200:
+ *         description: Coordinates
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lat: { type: number }
+ *                 lng: { type: number }
+ *                 city: { type: string }
+ *                 country: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/location/{lat}/{lon}:
+ *   get:
+ *     tags: [Location]
+ *     summary: Reverse geocode coordinates
+ *     description: Uses OpenStreetMap Nominatim to resolve coordinates to a human-readable location name.
+ *     parameters:
+ *       - in: path
+ *         name: lat
+ *         required: true
+ *         schema: { type: number }
+ *       - in: path
+ *         name: lon
+ *         required: true
+ *         schema: { type: number }
+ *     responses:
+ *       200:
+ *         description: Location name
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 name: { type: string }
+ *                 city: { type: string }
+ *                 country: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/hebrew-date/{date}:
+ *   get:
+ *     tags: [Location]
+ *     summary: Convert Gregorian date to Hebrew date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         description: Gregorian date in YYYY-MM-DD format
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Hebrew date string
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 hebrew: { type: string, example: "כ״ה שבט תשפ״ה" }
+ *                 hebrewYear: { type: integer }
+ *                 hebrewMonth: { type: string }
+ *                 hebrewDay: { type: integer }
+ */
+
+/**
+ * @openapi
+ * /api/zmanim/{lat}/{lng}:
+ *   get:
+ *     tags: [Zmanim]
+ *     summary: Jewish prayer times for a location
+ *     description: Fetches today's zmanim (Alot Hashachar, Sunrise, Mincha, Shkia, etc.) from Hebcal.
+ *     parameters:
+ *       - in: path
+ *         name: lat
+ *         required: true
+ *         schema: { type: number }
+ *       - in: path
+ *         name: lng
+ *         required: true
+ *         schema: { type: number }
+ *     responses:
+ *       200:
+ *         description: Zmanim object keyed by name
+ *       500:
+ *         description: Failed to fetch zmanim
+ */
+
+/**
+ * @openapi
+ * /api/events/{lat}/{lng}:
+ *   get:
+ *     tags: [Zmanim]
+ *     summary: Jewish calendar events for today at a location
+ *     parameters:
+ *       - in: path
+ *         name: lat
+ *         required: true
+ *         schema: { type: number }
+ *       - in: path
+ *         name: lng
+ *         required: true
+ *         schema: { type: number }
+ *     responses:
+ *       200:
+ *         description: List of today's Jewish calendar events
+ */
+
+/**
+ * @openapi
+ * /api/shabbos/{lat}/{lng}:
+ *   get:
+ *     tags: [Zmanim]
+ *     summary: Shabbat candle-lighting and Havdalah times
+ *     parameters:
+ *       - in: path
+ *         name: lat
+ *         required: true
+ *         schema: { type: number }
+ *       - in: path
+ *         name: lng
+ *         required: true
+ *         schema: { type: number }
+ *     responses:
+ *       200:
+ *         description: Candle-lighting and Havdalah times with parsha info
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/progress:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Global Tehillim progress with next assigned name
+ *     responses:
+ *       200:
+ *         description: Progress and current assigned name
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/complete:
+ *   post:
+ *     tags: [Tehillim]
+ *     summary: Mark a Tehillim perek as complete
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [currentPerek, language]
+ *             properties:
+ *               currentPerek: { type: integer, minimum: 1, maximum: 171 }
+ *               language: { type: string, enum: [english, hebrew] }
+ *               completedBy: { type: string, description: "Device ID or user identifier" }
+ *     responses:
+ *       200:
+ *         description: Updated progress
+ *       400:
+ *         description: Invalid perek or language
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/global-progress:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Raw global Tehillim progress
+ *     responses:
+ *       200:
+ *         description: Current global progress record
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/text/{perek}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Tehillim text for a perek
+ *     parameters:
+ *       - in: path
+ *         name: perek
+ *         required: true
+ *         schema: { type: integer, minimum: 1, maximum: 171 }
+ *       - in: query
+ *         name: language
+ *         schema: { type: string, enum: [english, hebrew], default: english }
+ *     responses:
+ *       200:
+ *         description: Tehillim text
+ *       400:
+ *         description: Invalid perek or language
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/text/by-id/{id}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Tehillim text by database row ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: language
+ *         schema: { type: string, enum: [english, hebrew], default: english }
+ *     responses:
+ *       200:
+ *         description: Tehillim text
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/info/{id}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Tehillim metadata by database ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Tehillim record metadata
+ *       404:
+ *         description: Not found
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/next-part/{id}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Get the next perek/part after the given ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Next perek info
+ *       404:
+ *         description: Cannot determine next perek
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/preview/{perek}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: First line preview of a Tehillim perek
+ *     parameters:
+ *       - in: path
+ *         name: perek
+ *         required: true
+ *         schema: { type: integer, minimum: 1, maximum: 171 }
+ *       - in: query
+ *         name: language
+ *         schema: { type: string, enum: [english, hebrew], default: hebrew }
+ *     responses:
+ *       200:
+ *         description: Preview text
+ */
+
+/**
+ * @openapi
+ * /api/tehillim/{tehillimId}:
+ *   get:
+ *     tags: [Tehillim]
+ *     summary: Full Tehillim record by ID
+ *     parameters:
+ *       - in: path
+ *         name: tehillimId
+ *         required: true
+ *         schema: { type: integer, minimum: 1, maximum: 171 }
+ *     responses:
+ *       200:
+ *         description: Tehillim record with Hebrew and English text
+ *       404:
+ *         description: Not found
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains:
+ *   post:
+ *     tags: [Tehillim Chains]
+ *     summary: Create a new Tehillim prayer chain
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, reason]
+ *             properties:
+ *               name: { type: string, description: "Person to pray for" }
+ *               reason: { type: string, description: "Reason for the chain" }
+ *               deviceId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Created chain
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TehillimChain'
+ *       400:
+ *         description: Name and reason are required
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/search:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Search Tehillim chains by name
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema: { type: string }
+ *         description: Search query
+ *     responses:
+ *       200:
+ *         description: Array of matching chains
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/stats/global:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Global chain statistics (total read, books completed, unique readers)
+ *     responses:
+ *       200:
+ *         description: Global stats
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 totalRead: { type: integer }
+ *                 booksCompleted: { type: integer }
+ *                 uniqueReaders: { type: integer }
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/stats/total:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Total Tehillim completed across all chains
+ *     responses:
+ *       200:
+ *         description: Total count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 total: { type: integer }
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/stats/active-count:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Number of currently active chains
+ *     responses:
+ *       200:
+ *         description: Active count
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 count: { type: integer }
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/random:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Get a random active chain
+ *     responses:
+ *       200:
+ *         description: Random chain
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TehillimChain'
+ *       404:
+ *         description: No chains found
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Get chain by slug with stats and next psalm
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: deviceId
+ *         schema: { type: string }
+ *         description: Device ID to resume an active reading
+ *     responses:
+ *       200:
+ *         description: Chain with stats and next available psalm
+ *       404:
+ *         description: Chain not found
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/stats:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Stats for a specific chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Chain stats (totalCompleted, booksCompleted, currentlyReading, available)
+ *       404:
+ *         description: Chain not found
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/start-reading:
+ *   post:
+ *     tags: [Tehillim Chains]
+ *     summary: Claim a psalm for reading in a chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [deviceId]
+ *             properties:
+ *               deviceId: { type: string }
+ *               psalmNumber: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Reading record
+ *       404:
+ *         description: Chain not found or no psalms available
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/complete:
+ *   post:
+ *     tags: [Tehillim Chains]
+ *     summary: Complete a psalm reading in a chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [deviceId, psalmNumber]
+ *             properties:
+ *               deviceId: { type: string }
+ *               psalmNumber: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated reading and chain stats
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/next-available:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Get next available psalm number for a chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: deviceId
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Next psalm number
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 psalmNumber: { type: integer }
+ *       404:
+ *         description: No psalms available
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/random-available:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Get a random available psalm for a chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: deviceId
+ *         schema: { type: string }
+ *       - in: query
+ *         name: excludePsalm
+ *         schema: { type: integer }
+ *         description: Psalm number to exclude from selection
+ *     responses:
+ *       200:
+ *         description: Random psalm number
+ *       404:
+ *         description: No psalms available
+ */
+
+/**
+ * @openapi
+ * /api/tehillim-chains/{slug}/reminder.ics:
+ *   get:
+ *     tags: [Tehillim Chains]
+ *     summary: Download a recurring calendar reminder for a chain
+ *     parameters:
+ *       - in: path
+ *         name: slug
+ *         required: true
+ *         schema: { type: string }
+ *       - in: query
+ *         name: time
+ *         schema: { type: string, example: "09:00" }
+ *         description: Reminder time in HH:MM format
+ *     responses:
+ *       200:
+ *         description: iCalendar file
+ *         content:
+ *           text/calendar:
+ *             schema:
+ *               type: string
+ */
+
+/**
+ * @openapi
+ * /api/mincha/prayers:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Mincha (afternoon) prayer texts
+ *     responses:
+ *       200:
+ *         description: Array of Mincha prayer objects
+ */
+
+/**
+ * @openapi
+ * /api/morning/prayers:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Morning Brochas prayer texts
+ *     responses:
+ *       200:
+ *         description: Array of morning prayer objects
+ */
+
+/**
+ * @openapi
+ * /api/maariv/prayers:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Maariv (evening) prayer texts
+ *     responses:
+ *       200:
+ *         description: Array of Maariv prayer objects
+ */
+
+/**
+ * @openapi
+ * /api/brochas:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: All brochas (blessings)
+ *     responses:
+ *       200:
+ *         description: Array of brocha objects
+ *   post:
+ *     tags: [Admin]
+ *     summary: Create a new brocha (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Created brocha
+ */
+
+/**
+ * @openapi
+ * /api/brochas/daily:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Daily brochas only
+ *     responses:
+ *       200:
+ *         description: Array of daily brochas
+ */
+
+/**
+ * @openapi
+ * /api/brochas/special:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Special occasion brochas
+ *     responses:
+ *       200:
+ *         description: Array of special brochas
+ */
+
+/**
+ * @openapi
+ * /api/brochas/{id}:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Get a single brocha by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Brocha object
+ *       404:
+ *         description: Not found
+ */
+
+/**
+ * @openapi
+ * /api/nishmas/{language}:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Nishmas prayer text
+ *     parameters:
+ *       - in: path
+ *         name: language
+ *         required: true
+ *         schema: { type: string, enum: [english, hebrew] }
+ *     responses:
+ *       200:
+ *         description: Nishmas prayer content
+ */
+
+/**
+ * @openapi
+ * /api/pirkei-avot/progress:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Current Pirkei Avot chapter progress
+ *     responses:
+ *       200:
+ *         description: Current chapter and progress info
+ */
+
+/**
+ * @openapi
+ * /api/sefaria/morning-brochas:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Morning Brochas text from Sefaria API
+ *     responses:
+ *       200:
+ *         description: Morning brochas content
+ */
+
+/**
+ * @openapi
+ * /api/womens-prayers/{category}:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Women's special prayers by category
+ *     parameters:
+ *       - in: path
+ *         name: category
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Array of prayers in the category
+ */
+
+/**
+ * @openapi
+ * /api/womens-prayers/prayer/{id}:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Single women's prayer by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Prayer object
+ *       404:
+ *         description: Not found
+ */
+
+/**
+ * @openapi
+ * /api/meditations/categories:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Available meditation categories
+ *     responses:
+ *       200:
+ *         description: Array of category names
+ */
+
+/**
+ * @openapi
+ * /api/meditations/section/{section}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Meditations for a specific section
+ *     parameters:
+ *       - in: path
+ *         name: section
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Array of meditation objects
+ */
+
+/**
+ * @openapi
+ * /api/meditations/all:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: All meditations
+ *     responses:
+ *       200:
+ *         description: Array of all meditation objects
+ */
+
+/**
+ * @openapi
+ * /api/torah/halacha/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Halacha content for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Halacha content object
+ */
+
+/**
+ * @openapi
+ * /api/torah/emuna/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Emuna audio/content for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Emuna content object
+ */
+
+/**
+ * @openapi
+ * /api/torah/chizuk/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Chizuk audio/content for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Chizuk content object
+ */
+
+/**
+ * @openapi
+ * /api/torah/featured/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Featured Torah content for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Featured content object
+ */
+
+/**
+ * @openapi
+ * /api/torah/shmiras-halashon/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Shmiras Halashon content
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Shmiras Halashon content object
+ */
+
+/**
+ * @openapi
+ * /api/torah/shalom/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Shalom content for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Shalom content object
+ */
+
+/**
+ * @openapi
+ * /api/marriage-insights/{date}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Daily Marriage Insights content
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Marriage insight object
+ */
+
+/**
+ * @openapi
+ * /api/table/recipe/{date}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Daily Shabbat recipe for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Recipe object
+ */
+
+/**
+ * @openapi
+ * /api/table/recipes/week:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Recipes for the current week
+ *     responses:
+ *       200:
+ *         description: Array of recipe objects for the week
+ */
+
+/**
+ * @openapi
+ * /api/table/vort/{week}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Parsha vort (Torah thought) for a specific week
+ *     parameters:
+ *       - in: path
+ *         name: week
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Vort object
+ */
+
+/**
+ * @openapi
+ * /api/table/inspiration/{date}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Daily table inspiration for a date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Inspiration object
+ */
+
+/**
+ * @openapi
+ * /api/home/todays-special/{date}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Today's special home page content
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Today's special content
+ */
+
+/**
+ * @openapi
+ * /api/life/gift-of-chatzos/{dayOfWeek}:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Gift of Chatzos content for a day of the week
+ *     parameters:
+ *       - in: path
+ *         name: dayOfWeek
+ *         required: true
+ *         schema: { type: integer, minimum: 0, maximum: 6 }
+ *         description: 0=Sunday, 6=Saturday
+ *     responses:
+ *       200:
+ *         description: Gift of Chatzos content
+ */
+
+/**
+ * @openapi
+ * /api/torah-classes:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Daily Torah classes for today
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Array of Torah class objects
+ */
+
+/**
+ * @openapi
+ * /api/life-classes:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Life classes listing
+ *     responses:
+ *       200:
+ *         description: Array of life class objects
+ */
+
+/**
+ * @openapi
+ * /api/library/speakers:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Library speakers list
+ *     responses:
+ *       200:
+ *         description: Array of speaker names
+ */
+
+/**
+ * @openapi
+ * /api/library/speakers/{speaker}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Content for a specific library speaker
+ *     parameters:
+ *       - in: path
+ *         name: speaker
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Array of content items from this speaker
+ */
+
+/**
+ * @openapi
+ * /api/library/content/{id}:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Single library content item
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Content item
+ *       404:
+ *         description: Not found
+ */
+
+/**
+ * @openapi
+ * /api/discount-promotions/active:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Active partner discount promotions
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema: { type: string, enum: [Deals, Resources] }
+ *     responses:
+ *       200:
+ *         description: Array of active promotions
+ */
+
+/**
+ * @openapi
+ * /api/sponsors/{contentType}/{date}:
+ *   get:
+ *     tags: [Sponsors]
+ *     summary: Sponsor for a specific content type and date
+ *     parameters:
+ *       - in: path
+ *         name: contentType
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Sponsor object or null
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Sponsor'
+ */
+
+/**
+ * @openapi
+ * /api/sponsors/daily/{date}:
+ *   get:
+ *     tags: [Sponsors]
+ *     summary: All sponsors for a given date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Array of sponsors
+ */
+
+/**
+ * @openapi
+ * /api/sponsors:
+ *   get:
+ *     tags: [Sponsors]
+ *     summary: All sponsors (paginated)
+ *     responses:
+ *       200:
+ *         description: Array of sponsor records
+ *   post:
+ *     tags: [Admin]
+ *     summary: Create a sponsor record (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Sponsor'
+ *     responses:
+ *       200:
+ *         description: Created sponsor
+ */
+
+/**
+ * @openapi
+ * /api/messages/{date}:
+ *   get:
+ *     tags: [Messages & Feed]
+ *     summary: App messages for a specific date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Array of messages
+ */
+
+/**
+ * @openapi
+ * /api/messages:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Create a new app message (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Message'
+ *     responses:
+ *       200:
+ *         description: Created message
+ *   get:
+ *     tags: [Admin]
+ *     summary: All messages (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Array of all messages
+ */
+
+/**
+ * @openapi
+ * /api/messages/{id}:
+ *   put:
+ *     tags: [Admin]
+ *     summary: Update a message (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Message'
+ *     responses:
+ *       200:
+ *         description: Updated message
+ *   delete:
+ *     tags: [Admin]
+ *     summary: Delete a message (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Deleted
+ */
+
+/**
+ * @openapi
+ * /api/messages/{id}/pin:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Pin a message (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Message pinned
+ *   delete:
+ *     tags: [Admin]
+ *     summary: Unpin a message (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Message unpinned
+ */
+
+/**
+ * @openapi
+ * /api/feed:
+ *   get:
+ *     tags: [Messages & Feed]
+ *     summary: Full community feed (all messages with engagement)
+ *     responses:
+ *       200:
+ *         description: Array of feed messages with likes and dislikes
+ */
+
+/**
+ * @openapi
+ * /api/feed/{id}/like:
+ *   post:
+ *     tags: [Messages & Feed]
+ *     summary: Like a feed item
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated like count
+ *   delete:
+ *     tags: [Messages & Feed]
+ *     summary: Remove like from a feed item
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated like count
+ */
+
+/**
+ * @openapi
+ * /api/feed/{id}/dislike:
+ *   post:
+ *     tags: [Messages & Feed]
+ *     summary: Dislike a feed item
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated dislike count
+ *   delete:
+ *     tags: [Messages & Feed]
+ *     summary: Remove dislike from a feed item
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated dislike count
+ */
+
+/**
+ * @openapi
+ * /api/push/vapid-public-key:
+ *   get:
+ *     tags: [Push Notifications]
+ *     summary: Get the VAPID public key for push subscription
+ *     responses:
+ *       200:
+ *         description: VAPID public key string
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 publicKey: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/push/subscribe:
+ *   post:
+ *     tags: [Push Notifications]
+ *     summary: Register a push notification subscription
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [subscription]
+ *             properties:
+ *               subscription:
+ *                 type: object
+ *                 description: Web Push PushSubscription JSON
+ *               deviceId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Subscription saved
+ */
+
+/**
+ * @openapi
+ * /api/push/unsubscribe:
+ *   post:
+ *     tags: [Push Notifications]
+ *     summary: Remove a push notification subscription
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               endpoint: { type: string }
+ *     responses:
+ *       200:
+ *         description: Unsubscribed
+ */
+
+/**
+ * @openapi
+ * /api/push/send:
+ *   post:
+ *     tags: [Admin]
+ *     summary: Send a push notification to all subscribers (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, body]
+ *             properties:
+ *               title: { type: string }
+ *               body: { type: string }
+ *               url: { type: string }
+ *               icon: { type: string }
+ *     responses:
+ *       200:
+ *         description: Notification sent
+ */
+
+/**
+ * @openapi
+ * /api/push/subscriptions:
+ *   get:
+ *     tags: [Admin]
+ *     summary: List all push subscriptions (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Array of subscription records
+ */
+
+/**
+ * @openapi
+ * /api/push/history:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Push notification send history (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Array of past notifications
+ */
+
+/**
+ * @openapi
+ * /api/push/queue-status:
+ *   get:
+ *     tags: [Admin]
+ *     summary: Status of the push retry queue (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Queue status
+ */
+
+/**
+ * @openapi
+ * /api/scheduled-notifications:
+ *   get:
+ *     tags: [Admin]
+ *     summary: All scheduled notifications (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     responses:
+ *       200:
+ *         description: Array of scheduled notifications
+ *   post:
+ *     tags: [Admin]
+ *     summary: Create a scheduled notification (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [title, body, scheduledFor]
+ *             properties:
+ *               title: { type: string }
+ *               body: { type: string }
+ *               scheduledFor: { type: string, format: date-time }
+ *               url: { type: string }
+ *     responses:
+ *       200:
+ *         description: Created notification
+ */
+
+/**
+ * @openapi
+ * /api/scheduled-notifications/{id}:
+ *   put:
+ *     tags: [Admin]
+ *     summary: Update a scheduled notification (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Updated notification
+ *   delete:
+ *     tags: [Admin]
+ *     summary: Delete a scheduled notification (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Deleted
+ */
+
+/**
+ * @openapi
+ * /api/create-session-checkout:
+ *   post:
+ *     tags: [Donations]
+ *     summary: Create a Stripe Checkout session for a donation
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [amount]
+ *             properties:
+ *               amount: { type: integer, description: "Amount in cents" }
+ *               donationType: { type: string, enum: [one-time, monthly, yearly] }
+ *               dedication: { type: string }
+ *               sponsorName: { type: string }
+ *               email: { type: string, format: email }
+ *               successUrl: { type: string }
+ *               cancelUrl: { type: string }
+ *     responses:
+ *       200:
+ *         description: Stripe Checkout session
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DonationSession'
+ */
+
+/**
+ * @openapi
+ * /api/donation-complete:
+ *   post:
+ *     tags: [Donations]
+ *     summary: Record a completed donation
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               buttonType: { type: string }
+ *               donationType: { type: string }
+ *               sponsorName: { type: string }
+ *               dedication: { type: string }
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200:
+ *         description: Donation recorded
+ */
+
+/**
+ * @openapi
+ * /api/donations/check-completion/{sessionId}:
+ *   get:
+ *     tags: [Donations]
+ *     summary: Check if a Stripe Checkout session has been completed
+ *     parameters:
+ *       - in: path
+ *         name: sessionId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Completion status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 completed: { type: boolean }
+ *                 status: { type: string }
+ */
+
+/**
+ * @openapi
+ * /api/donations/success:
+ *   post:
+ *     tags: [Donations]
+ *     summary: Handle post-payment success callback
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sessionId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Success recorded
+ */
+
+/**
+ * @openapi
+ * /api/webhooks/stripe:
+ *   post:
+ *     tags: [Donations]
+ *     summary: Stripe webhook endpoint
+ *     description: Receives Stripe webhook events (payment_intent.succeeded, customer.subscription.*, etc.). Verified with Stripe-Signature header.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Webhook received
+ *       400:
+ *         description: Invalid signature
+ */
+
+/**
+ * @openapi
+ * /api/user/mitzvah-progress:
+ *   get:
+ *     tags: [User]
+ *     summary: Get authenticated user's mitzvah progress
+ *     security:
+ *       - SupabaseAuth: []
+ *     responses:
+ *       200:
+ *         description: Progress object with Torah, Tefilla, Tzedaka counts
+ *       401:
+ *         description: Not authenticated
+ *   put:
+ *     tags: [User]
+ *     summary: Update authenticated user's mitzvah progress
+ *     security:
+ *       - SupabaseAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               torah: { type: integer }
+ *               tefilla: { type: integer }
+ *               tzedaka: { type: integer }
+ *     responses:
+ *       200:
+ *         description: Updated progress
+ */
+
+/**
+ * @openapi
+ * /api/gratitude:
+ *   post:
+ *     tags: [User]
+ *     summary: Submit a gratitude journal entry
+ *     security:
+ *       - SupabaseAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [text]
+ *             properties:
+ *               text: { type: string }
+ *               completedWithTehillim: { type: boolean, default: false }
+ *               date: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Created gratitude entry
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GratitudeEntry'
+ *   get:
+ *     tags: [User]
+ *     summary: Get gratitude journal history
+ *     security:
+ *       - SupabaseAuth: []
+ *     responses:
+ *       200:
+ *         description: Array of past entries
+ */
+
+/**
+ * @openapi
+ * /api/gratitude/today:
+ *   get:
+ *     tags: [User]
+ *     summary: Get today's gratitude journal entry (if exists)
+ *     security:
+ *       - SupabaseAuth: []
+ *     responses:
+ *       200:
+ *         description: Today's entry or null
+ */
+
+/**
+ * @openapi
+ * /api/home-summary:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Home screen summary (aggregated daily content)
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, format: date }
+ *       - in: query
+ *         name: lat
+ *         schema: { type: number }
+ *       - in: query
+ *         name: lng
+ *         schema: { type: number }
+ *     responses:
+ *       200:
+ *         description: Home screen content bundle
+ */
+
+/**
+ * @openapi
+ * /api/torah-summary:
+ *   get:
+ *     tags: [Torah Content]
+ *     summary: Torah section summary for today
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Torah content bundle
+ */
+
+/**
+ * @openapi
+ * /api/tzedaka-summary:
+ *   get:
+ *     tags: [Sponsors]
+ *     summary: Tzedaka section summary with campaigns
+ *     responses:
+ *       200:
+ *         description: Active campaigns and tzedaka content
+ */
+
+/**
+ * @openapi
+ * /api/tefilla-stats:
+ *   get:
+ *     tags: [Prayers]
+ *     summary: Global Tefilla completion statistics
+ *     responses:
+ *       200:
+ *         description: Tefilla stats
+ */
+
+/**
+ * @openapi
+ * /api/table-summary:
+ *   get:
+ *     tags: [Life Content]
+ *     summary: Shabbat table summary (recipe, vort, inspiration)
+ *     parameters:
+ *       - in: query
+ *         name: date
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Table content bundle
+ */
+
+/**
+ * @openapi
+ * /api/community/impact/{date}:
+ *   get:
+ *     tags: [Analytics]
+ *     summary: Community impact data for a specific date
+ *     parameters:
+ *       - in: path
+ *         name: date
+ *         required: true
+ *         schema: { type: string, format: date }
+ *     responses:
+ *       200:
+ *         description: Impact metrics for the date
+ */
+
+/**
+ * @openapi
+ * /api/campaigns/active:
+ *   get:
+ *     tags: [Donations]
+ *     summary: Currently active donation campaigns
+ *     responses:
+ *       200:
+ *         description: Array of active campaigns
+ */
+
+/**
+ * @openapi
+ * /api/campaigns:
+ *   get:
+ *     tags: [Donations]
+ *     summary: All campaigns
+ *     responses:
+ *       200:
+ *         description: Array of campaigns
+ *   post:
+ *     tags: [Admin]
+ *     summary: Create a donation campaign (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Created campaign
+ */
+
+/**
+ * @openapi
+ * /api/objects/upload:
+ *   post:
+ *     tags: [Media]
+ *     summary: Get a presigned S3 URL for direct file upload (admin)
+ *     security:
+ *       - AdminBearer: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [filename, contentType]
+ *             properties:
+ *               filename: { type: string }
+ *               contentType: { type: string }
+ *     responses:
+ *       200:
+ *         description: Presigned upload URL and CDN URL
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uploadUrl: { type: string }
+ *                 cdnUrl: { type: string }
+ *                 objectKey: { type: string }
+ */
+
+/**
+ * @openapi
+ * /objects/{objectPath}:
+ *   get:
+ *     tags: [Media]
+ *     summary: Proxy-serve an S3 object
+ *     parameters:
+ *       - in: path
+ *         name: objectPath
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Object content
+ *       404:
+ *         description: Object not found
+ */
+
+/**
+ * @openapi
+ * /api/media-proxy/{service}/{path}:
+ *   get:
+ *     tags: [Media]
+ *     summary: Proxy media content from external service
+ *     parameters:
+ *       - in: path
+ *         name: service
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: path
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Proxied media content
+ */
+
+/**
+ * @openapi
+ * /api/audio-proxy/{fileId}:
+ *   get:
+ *     tags: [Media]
+ *     summary: Proxy an audio file by file ID
+ *     parameters:
+ *       - in: path
+ *         name: fileId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Audio content stream
+ */
+
+/**
+ * @openapi
+ * /api/offline/bootstrap:
+ *   get:
+ *     tags: [Health]
+ *     summary: Offline bootstrap data bundle
+ *     description: Returns a minimal data bundle for offline-first app functionality (prayers, zmanim defaults, etc.)
+ *     responses:
+ *       200:
+ *         description: Bootstrap data object
+ */
+
+/**
+ * @openapi
+ * /api/challenge/{id}/complete:
+ *   post:
+ *     tags: [Torah Content]
+ *     summary: Mark a Torah challenge as complete
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deviceId: { type: string }
+ *     responses:
+ *       200:
+ *         description: Challenge marked complete
+ */
+
+/**
+ * @openapi
+ * /api/download-calendar:
+ *   get:
+ *     tags: [Health]
+ *     summary: Download a Jewish calendar event as ICS
+ *     parameters:
+ *       - in: query
+ *         name: title
+ *         schema: { type: string }
+ *       - in: query
+ *         name: hebrewDate
+ *         schema: { type: string }
+ *       - in: query
+ *         name: gregorianDate
+ *         schema: { type: string }
+ *       - in: query
+ *         name: years
+ *         schema: { type: integer, default: 1 }
+ *       - in: query
+ *         name: afterNightfall
+ *         schema: { type: boolean, default: false }
+ *     responses:
+ *       200:
+ *         description: ICS calendar file
+ *         content:
+ *           text/calendar:
+ *             schema:
+ *               type: string
+ */
+
+// This file exists solely to hold OpenAPI JSDoc annotations.
+// swagger-jsdoc scans it as part of the `apis` glob in server/swagger.ts.
+export {};

@@ -19,6 +19,12 @@ Weather display: Real-time weather badge on Shkia button using Open-Meteo API (f
 Feed: Replaced Daily Messages modal with full-screen scrollable Feed page (/feed). Features date dividers, message categories (Yellow=Message, Blue=Feature, Pink=Bug Fix, Green=Poll), and like/dislike buttons with backend tracking. Messages schema includes category, likes, and dislikes fields.
 Gratitude Journal: Collapsible bar on home page (after Tzedaka) for daily gratitude entries. Requires login. Two completion options: "Complete" and "Complete + Tehillim 100". Awards Life flower on completion. History viewable from profile page (/gratitude-history). Uses `gratitude_journal` table with userId, text, date, completedWithTehillim fields. Modal name: 'gratitude-journal'.
 
+## API Documentation
+- **OpenAPI Spec**: Generated with swagger-jsdoc (OpenAPI 3.1.0). JSDoc `@openapi` annotations live in `server/swagger-paths.ts` (centralized) and `server/swagger.ts` (config).
+- **Live spec endpoint**: `GET /api/spec.json` — returns the full spec as JSON (126 paths, 138 operations).
+- **Exported spec file**: `openapi.json` in the repo root — regenerate anytime with `curl http://localhost:5000/api/spec.json > openapi.json`.
+- **Tags**: Health, Auth, Admin, Analytics, Location, Zmanim, Tehillim, Tehillim Chains, Prayers, Torah Content, Life Content, Messages & Feed, Push Notifications, Sponsors, Donations, User, Media.
+
 ## System Architecture
 ### Frontend
 - **Framework**: React 18 with TypeScript, Vite.
@@ -66,6 +72,7 @@ Gratitude Journal: Collapsible bar on home page (after Tzedaka) for daily gratit
 - **Analytics**: Tracking daily/total users, page views, Tehillim completions, names prayed for, modal completions. In-app analytics dashboard, offline queue support with idempotency, and Google Analytics.
 - **Life Page**: Shabbat countdown, Daily Recipe, Marriage Insights, Creative Jewish Living, Community Feedback.
 - **Partners Page**: Full-screen page (/partners) with "Deals" and "Resources" tabs showing curated partner promotions. Uses `discount_promotions` table with `type` field to categorize content.
+- **Challenge Share Page**: Full-screen page (/challenge/:id) for shared community challenge links from the mobile app (format: https://ezrasnashim.app/challenge/123). Fetches challenge by numeric `todays_special` table ID via `GET /api/challenge/:id`. Returns challenge data plus `isExpired` boolean (true when `untilDate < today`). Shows friendly message if expired or not found, with link back to homepage.
 - **Time-based Prayer System**: Dynamic prayer buttons based on zmanim.
 - **Text Cleaning**: Enhanced Hebrew text cleaning and markdown-style formatting.
 - **Unified Admin Interface**: Comprehensive dashboard for content management (Messages, Recipes, Table Inspirations, Notifications) with CRUD and secure image upload.
