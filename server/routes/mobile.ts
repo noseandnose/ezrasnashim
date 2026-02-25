@@ -403,25 +403,44 @@ export function registerMobileRoutes(app: Express, deps: MobileRouteDeps) {
   });
 
   // GET /api/mitzvah/analytics — aggregated stats
+  // Combines mobile (mitzvah_completions) + web (daily_stats.total_acts) for accurate totals
   app.get("/api/mitzvah/analytics", async (req: Request, res: Response) => {
     try {
       const period = (req.query.period as string) || "week";
-      const days = period === "month" ? 30 : period === "alltime" ? 3650 : 7;
-      const since = new Date(Date.now() - days * 86400000).toISOString().split("T")[0];
+      const today = new Date().toISOString().split("T")[0];
 
-      const [torahRes, tefillaRes, tzedakaRes, totalRes] = await Promise.all([
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'torah' AND date >= $1`, [since]),
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tefilla' AND date >= $1`, [since]),
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tzedaka' AND date >= $1`, [since]),
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE date >= $1`, [since]),
+      let since: string;
+      if (period === "today") {
+        since = today;
+      } else if (period === "month") {
+        since = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+      } else if (period === "alltime") {
+        since = "2020-01-01";
+      } else {
+        since = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+      }
+
+      const untilClause = period === "today" ? `AND date = $1` : `AND date >= $1`;
+
+      const [torahRes, tefillaRes, tzedakaRes, mobileTotal, webTotal] = await Promise.all([
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'torah' ${untilClause}`, [period === "today" ? today : since]),
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tefilla' ${untilClause}`, [period === "today" ? today : since]),
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tzedaka' ${untilClause}`, [period === "today" ? today : since]),
+        pool.query(`SELECT COUNT(*)::bigint AS count FROM mitzvah_completions WHERE ${period === "today" ? "date = $1" : "date >= $1"}`, [period === "today" ? today : since]),
+        pool.query(`SELECT COALESCE(SUM(total_acts), 0)::bigint AS count FROM daily_stats WHERE ${period === "today" ? "date = $1" : "date >= $1"}`, [period === "today" ? today : since]),
       ]);
+
+      const mobileCount = parseInt(mobileTotal.rows[0]?.count ?? "0", 10);
+      const webCount = parseInt(webTotal.rows[0]?.count ?? "0", 10);
 
       return res.json({
         period,
         torah: torahRes.rows[0]?.count ?? 0,
         tefilla: tefillaRes.rows[0]?.count ?? 0,
         tzedaka: tzedakaRes.rows[0]?.count ?? 0,
-        total: totalRes.rows[0]?.count ?? 0,
+        mobileTotal: mobileCount,
+        webTotal: webCount,
+        total: mobileCount + webCount,
       });
     } catch (err) {
       return res.status(500).json({ message: "Failed to fetch analytics" });
