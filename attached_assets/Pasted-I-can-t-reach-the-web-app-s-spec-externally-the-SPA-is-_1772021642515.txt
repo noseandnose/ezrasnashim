@@ -1,0 +1,76 @@
+I can't reach the web app's spec externally — the SPA is catching all routes including /api/spec.json. You'll need to get the spec from the web project directly.
+
+In the meantime, here's the full list of our 48 mobile API routes organized by category. You can paste this into the web app project to compare:
+
+Here's the full mobile app API inventory to compare against the web app. Ask it which of these it's missing:
+
+The mobile app at ezras-nashim-mobile.replit.app has these API routes. Please compare against your own routes and let me know which ones you're missing or have differently:
+
+Calendar
+
+GET /api/hebrew-date — Current Hebrew date
+GET /api/hebrew-date/convert — Gregorian to Hebrew conversion
+GET /api/hebrew-date/next-occurrences — Next Gregorian dates for a Hebrew date
+GET /api/holidays — Upcoming Jewish holidays
+GET /api/shabbat — Shabbat times
+GET /api/zmanim — Daily zmanim
+Auth
+
+POST /api/auth/profile — Create/update user profile
+GET /api/auth/profile/:userId — Get user profile
+PATCH /api/auth/profile/:userId — Update profile fields
+POST /api/auth/delete-account — Delete account
+GET /api/reset-password — Password reset page
+Content
+
+GET /api/content-versions — Content version counts
+GET /api/supabase-config — Supabase connection config
+POST /api/notifications/send — Send push notification via OneSignal
+Mitzvah Tracking
+
+POST /api/mitzvah/track — Track a mitzvah completion
+GET /api/mitzvah/analytics — Mitzvah analytics
+GET /api/mitzvah/personal-analytics — Personal analytics
+GET /api/mitzvah/global-total — Global mitzvah total
+GET /api/mitzvah/completed-tehillim — Completed Tehillim chapters
+POST /api/mitzvah/link-user — Link device completions to user
+Donations
+
+POST /api/donations/checkout — Create Stripe checkout
+GET /api/donations/success — Stripe success callback
+GET /api/donations/cancel — Stripe cancel callback
+GET /api/donations/campaign — Active campaign
+GET /api/donations/total-raised — Total tzedaka raised
+GET /api/donations/community-impact — Community impact stats
+GET /api/donations/community-impact-content — Impact content entry
+POST /api/donations/fix-pending — Fix pending donations
+POST /api/donations/fix-by-sessions — Fix donations by session IDs
+GET /api/sponsors/today — Today's sponsor
+Tehillim Chains
+
+POST /api/tehillim-chains — Create chain
+GET /api/tehillim-chains/search — Search chains
+GET /api/tehillim-chains/random — Random active chain
+GET /api/tehillim-chains/:slug — Chain details + next psalm
+GET /api/tehillim-chains/:slug/stats — Chain stats
+POST /api/tehillim-chains/:slug/start-reading — Start reading
+POST /api/tehillim-chains/:slug/complete-reading — Complete reading
+GET /api/tehillim-chains-global-stats — Global chain stats
+Challenges
+
+POST /api/challenges/nishmas/join — Join 40-day challenge
+GET /api/challenges/nishmas/status — Challenge status
+POST /api/challenges/nishmas/complete-day — Complete a day
+POST /api/challenges/nishmas/restart — Restart challenge
+GET /api/todays-special — Active community challenges
+POST /api/todays-special/complete — Increment challenge counter
+GET /api/badges — User badges
+Psukim
+
+GET /api/psukim/for-name — Pasuk by first/last Hebrew letter
+GET /api/psukim/for-full-name — Psukim for full Hebrew name
+Admin
+
+POST /api/admin/seed-challenge — Seed community challenge
+POST /api/psukim/seed — Re-seed psukim table
+Paste that into your web app project and ask it to compare against its own routes. It'll tell you what it has and what it's missing. Also, the web app's /api/spec.json endpoint isn't reachable externally right now — the SPA frontend is catching that URL and returning HTML. You may want to tell the web project to fix that routing so the spec is publicly accessible.
