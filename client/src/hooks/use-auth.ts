@@ -122,7 +122,7 @@ export function useAuth() {
   const resetPassword = async (email: string) => {
     if (!supabase) throw new Error('Authentication not configured');
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
     if (error) throw error;
   };
