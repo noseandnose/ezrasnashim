@@ -6,6 +6,7 @@ import serverAxiosClient from "../axiosClient";
 import {
   profiles, mitzvahCompletions, nishmasChallenges, userBadges, namePsukim,
 } from "../../shared/schema";
+import { getAppCompletionsForPeriod } from "./app-completions";
 
 export interface MobileRouteDeps {
   storage: IStorage;
@@ -403,44 +404,51 @@ export function registerMobileRoutes(app: Express, deps: MobileRouteDeps) {
   });
 
   // GET /api/mitzvah/analytics — aggregated stats
-  // Combines mobile (mitzvah_completions) + web (daily_stats.total_acts) for accurate totals
+  // Combines all three sources: daily_stats (web) + app_mitzvah_completions (Supabase/native app) + mitzvah_completions (PostgreSQL/new API)
   app.get("/api/mitzvah/analytics", async (req: Request, res: Response) => {
     try {
       const period = (req.query.period as string) || "week";
       const today = new Date().toISOString().split("T")[0];
 
-      let since: string;
+      let startDate: string;
+      let endDate: string | undefined;
+
       if (period === "today") {
-        since = today;
+        startDate = today;
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        endDate = tomorrow.toISOString().split("T")[0];
       } else if (period === "month") {
-        since = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
+        startDate = new Date(Date.now() - 30 * 86400000).toISOString().split("T")[0];
       } else if (period === "alltime") {
-        since = "2020-01-01";
+        startDate = "2020-01-01";
       } else {
-        since = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
+        startDate = new Date(Date.now() - 7 * 86400000).toISOString().split("T")[0];
       }
 
-      const untilClause = period === "today" ? `AND date = $1` : `AND date >= $1`;
+      const dateClause = endDate ? `date >= $1 AND date < $2` : `date >= $1`;
+      const dateParams = endDate ? [startDate, endDate] : [startDate];
 
-      const [torahRes, tefillaRes, tzedakaRes, mobileTotal, webTotal] = await Promise.all([
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'torah' ${untilClause}`, [period === "today" ? today : since]),
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tefilla' ${untilClause}`, [period === "today" ? today : since]),
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tzedaka' ${untilClause}`, [period === "today" ? today : since]),
-        pool.query(`SELECT COUNT(*)::bigint AS count FROM mitzvah_completions WHERE ${period === "today" ? "date = $1" : "date >= $1"}`, [period === "today" ? today : since]),
-        pool.query(`SELECT COALESCE(SUM(total_acts), 0)::bigint AS count FROM daily_stats WHERE ${period === "today" ? "date = $1" : "date >= $1"}`, [period === "today" ? today : since]),
+      const [torahRes, tefillaRes, tzedakaRes, webRes, appStats] = await Promise.all([
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'torah' AND ${dateClause}`, dateParams),
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tefilla' AND ${dateClause}`, dateParams),
+        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions WHERE category = 'tzedaka' AND ${dateClause}`, dateParams),
+        pool.query(`SELECT COALESCE(SUM(total_acts), 0)::bigint AS count FROM daily_stats WHERE ${dateClause}`, dateParams),
+        getAppCompletionsForPeriod(startDate, endDate),
       ]);
 
-      const mobileCount = parseInt(mobileTotal.rows[0]?.count ?? "0", 10);
-      const webCount = parseInt(webTotal.rows[0]?.count ?? "0", 10);
+      const webCount = parseInt(webRes.rows[0]?.count ?? "0", 10);
+      // appStats.totalActs = Supabase + PostgreSQL mitzvah_completions combined
+      const total = webCount + appStats.totalActs;
 
       return res.json({
         period,
         torah: torahRes.rows[0]?.count ?? 0,
         tefilla: tefillaRes.rows[0]?.count ?? 0,
         tzedaka: tzedakaRes.rows[0]?.count ?? 0,
-        mobileTotal: mobileCount,
         webTotal: webCount,
-        total: mobileCount + webCount,
+        appTotal: appStats.totalActs,
+        total,
       });
     } catch (err) {
       return res.status(500).json({ message: "Failed to fetch analytics" });
