@@ -4,6 +4,24 @@ import { supabase } from "@/lib/supabase";
 type View = "loading" | "email" | "password" | "done";
 type MsgType = "error" | "success" | "info" | null;
 
+function buildAppDeepLink(): string | null {
+  const search = window.location.search;
+  const hash = window.location.hash;
+  const queryParams = new URLSearchParams(search);
+  const hashParams = new URLSearchParams(hash.substring(1));
+
+  // Only show the button when the recovery tokens are present in the URL itself.
+  // If the user came via auth-callback redirect, the tokens are already gone from
+  // the URL, so there's nothing useful to pass to the mobile app.
+  const hasCode = !!queryParams.get("code");
+  const hasRecoveryHash = !!(hashParams.get("access_token") || hashParams.get("type") === "recovery");
+
+  if (!hasCode && !hasRecoveryHash) return null;
+
+  // Build deep link passing the same tokens so the mobile app can exchange them
+  return `ezrasnashim://reset-password${search}${hash}`;
+}
+
 export default function ResetPassword() {
   const [view, setView] = useState<View>("loading");
   const [msg, setMsg] = useState<{ text: string; type: MsgType }>({ text: "", type: null });
@@ -15,6 +33,7 @@ export default function ResetPassword() {
   const [submitting, setSubmitting] = useState(false);
   const [subtitle, setSubtitle] = useState("Reset your password");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [appDeepLink, setAppDeepLink] = useState<string | null>(null);
 
   const sb = supabase;
 
@@ -22,6 +41,9 @@ export default function ResetPassword() {
   const clearMsg = useCallback(() => setMsg({ text: "", type: null }), []);
 
   useEffect(() => {
+    // Build the app deep link immediately from URL (before sessionStorage is consumed)
+    setAppDeepLink(buildAppDeepLink());
+
     if (!sb) {
       setView("email");
       setMsg({ text: "Unable to connect. Please try again later.", type: "error" });
@@ -237,6 +259,34 @@ export default function ResetPassword() {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
+        {appDeepLink && (
+          <a
+            href={appDeepLink}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              width: "100%",
+              padding: "12px 16px",
+              marginBottom: "20px",
+              background: "linear-gradient(135deg, #EAC8CD 0%, #D5CDE4 50%, #B3CCB3 100%)",
+              borderRadius: "12px",
+              textDecoration: "none",
+              color: "#fff",
+              fontSize: "15px",
+              fontWeight: 600,
+              boxSizing: "border-box" as const,
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+              <line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+            Open in Ezras Nashim App
+          </a>
+        )}
+
         <h1 style={{ textAlign: "center", fontSize: "24px", color: "#000", marginBottom: "6px" }}>Ezras Nashim</h1>
         <p style={{ textAlign: "center", color: "#666", fontSize: "14px", marginBottom: "28px" }}>{subtitle}</p>
 
