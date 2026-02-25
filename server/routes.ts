@@ -22,6 +22,7 @@ import { registerContentRoutes } from "./routes/content";
 // Supabase Auth - replaces Replit Auth
 import { optionalAuth } from "./supabase-auth";
 import { z } from "zod";
+import { swaggerSpec } from "./swagger";
 
 // Input validation schemas for public endpoints
 const CalendarDownloadSchema = z.object({
@@ -240,6 +241,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Supabase Auth is handled client-side - no server setup needed
   // This endpoint returns the current user (if authenticated) or null
   // It uses optionalAuth to gracefully handle when auth is not configured
+  app.get("/api/spec.json", (_req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.json(swaggerSpec);
+  });
+
   app.get("/api/auth/user", optionalAuth, (req, res) => {
     // Return the user if authenticated, or null if not
     res.json(req.supabaseUser || null);
