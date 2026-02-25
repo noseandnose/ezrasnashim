@@ -30,6 +30,17 @@ export default function ResetPassword() {
 
     let ready = false;
 
+    // If auth-callback already exchanged the code and flagged recovery mode,
+    // skip all token detection and go straight to the password form.
+    const recoveryFlag = sessionStorage.getItem("passwordRecovery");
+    if (recoveryFlag) {
+      sessionStorage.removeItem("passwordRecovery");
+      ready = true;
+      setSubtitle("Set your new password");
+      setView("password");
+      return;
+    }
+
     const { data: { subscription } } = sb.auth.onAuthStateChange((event) => {
       if (event === "PASSWORD_RECOVERY" && !ready) {
         ready = true;
@@ -123,7 +134,7 @@ export default function ResetPassword() {
     setSubmitting(true);
     try {
       const { error } = await sb.auth.resetPasswordForEmail(emailAddr.trim(), {
-        redirectTo: "https://ezrasnashim.app/reset-password",
+        redirectTo: "https://ezrasnashim.app/auth/callback",
       });
       if (error) throw error;
       setMsg({ text: "We've sent a password reset link to " + emailAddr.trim() + ". Please check your email and click the link to reset your password.", type: "success" });

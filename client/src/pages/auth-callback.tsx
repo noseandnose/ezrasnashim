@@ -6,28 +6,46 @@ export default function AuthCallback() {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const handleCallback = async () => {
-      if (!isSupabaseConfigured() || !supabase) {
-        setLocation('/login?error=not_configured');
-        return;
-      }
+    if (!isSupabaseConfigured() || !supabase) {
+      setLocation('/login?error=not_configured');
+      return;
+    }
 
-      const { data: { session }, error } = await supabase.auth.getSession();
-      
-      if (error) {
-        console.error('Auth callback error:', error);
-        setLocation('/login?error=callback_failed');
-        return;
-      }
+    let handled = false;
 
-      if (session) {
+    // Listen for auth state changes FIRST — catches PASSWORD_RECOVERY before
+    // anything else so we can redirect to the reset-password page correctly.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (handled) return;
+
+      if (event === 'PASSWORD_RECOVERY') {
+        handled = true;
+        // Signal to the reset-password page that the session is ready
+        sessionStorage.setItem('passwordRecovery', '1');
+        setLocation('/reset-password');
+      } else if (event === 'SIGNED_IN') {
+        handled = true;
         setLocation('/');
-      } else {
-        setLocation('/login');
       }
-    };
+    });
 
-    handleCallback();
+    // Fallback: if no auth event fires within 3 s (e.g., session already
+    // established), check the session directly and navigate accordingly.
+    const fallback = setTimeout(async () => {
+      if (handled) return;
+      handled = true;
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        setLocation('/login?error=callback_failed');
+      } else {
+        setLocation('/');
+      }
+    }, 3000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallback);
+    };
   }, [setLocation]);
 
   return (
