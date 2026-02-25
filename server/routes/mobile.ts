@@ -457,14 +457,17 @@ export function registerMobileRoutes(app: Express, deps: MobileRouteDeps) {
   });
 
   // GET /api/mitzvah/global-total — total count across all users
+  // Combines: mobile app completions (mitzvah_completions) + web app completions (daily_stats.total_acts)
   app.get("/api/mitzvah/global-total", async (_req: Request, res: Response) => {
     try {
-      const [mitzvahRes, actsRes] = await Promise.all([
-        pool.query(`SELECT COUNT(*)::int AS count FROM mitzvah_completions`),
-        pool.query(`SELECT COUNT(*)::int AS count FROM acts`),
+      const [mobileRes, webRes] = await Promise.all([
+        pool.query(`SELECT COUNT(*)::bigint AS count FROM mitzvah_completions`),
+        pool.query(`SELECT COALESCE(SUM(total_acts), 0)::bigint AS count FROM daily_stats`),
       ]);
-      const total = (mitzvahRes.rows[0]?.count ?? 0) + (actsRes.rows[0]?.count ?? 0);
-      return res.json({ total, updatedAt: new Date().toISOString() });
+      const mobileTotal = parseInt(mobileRes.rows[0]?.count ?? "0", 10);
+      const webTotal = parseInt(webRes.rows[0]?.count ?? "0", 10);
+      const total = mobileTotal + webTotal;
+      return res.json({ total, mobileTotal, webTotal, updatedAt: new Date().toISOString() });
     } catch (err) {
       return res.status(500).json({ message: "Failed to fetch global total" });
     }
