@@ -532,13 +532,18 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
 
   app.get("/.well-known/apple-app-site-association", (_req, res) => {
     res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Cache-Control', 'no-cache');
     res.json({
       applinks: {
         apps: [],
         details: [
           {
             appIDs: ["R2W4PB95MA.com.ezrasnashim"],
-            paths: ["/c/*"]
+            components: [
+              { "/": "/c/*" },
+              { "/": "/challenge/*" },
+              { "/": "/reset-password*" }
+            ]
           }
         ]
       }
