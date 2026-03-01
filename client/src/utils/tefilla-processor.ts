@@ -441,14 +441,15 @@ export async function getCurrentTefillaConditions(
     if (latitude && longitude) {
       try {
         const zmanimResponse = await fetch(
-          `${apiUrl}/api/zmanim/${today}?lat=${latitude}&lng=${longitude}`
+          `${apiUrl}/api/zmanim/${latitude}/${longitude}`
         );
         if (zmanimResponse.ok) {
           const zmanimData = await zmanimResponse.json();
           if (zmanimData.shkia) {
             const now = new Date();
-            const sunsetTime = new Date(zmanimData.shkia);
-            isAfterSunset = now >= sunsetTime;
+            // Route returns formatted strings like "5:36 PM" — combine with today's date
+            const sunsetTime = new Date(`${now.toDateString()} ${zmanimData.shkia}`);
+            isAfterSunset = !isNaN(sunsetTime.getTime()) && now >= sunsetTime;
           }
         }
       } catch (error) {
