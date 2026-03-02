@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft, Sparkles, Calendar } from "lucide-react";
 import { formatTextContent } from "@/lib/text-formatter";
+import { FloatingSettings } from "@/components/ui/floating-settings";
 import type { TodaysSpecial } from "@shared/schema";
 
 type ChallengeWithExpiry = TodaysSpecial & { isExpired: boolean };
@@ -17,6 +19,9 @@ export default function ChallengePage() {
   const [, params] = useRoute("/challenge/:id");
   const [, setLocation] = useLocation();
   const id = params?.id || "";
+
+  const [fontSize, setFontSize] = useState(16);
+  const [language, setLanguage] = useState<"hebrew" | "english">("english");
 
   const { data: challenge, isLoading, error } = useQuery<ChallengeWithExpiry>({
     queryKey: ["/api/challenge", id],
@@ -58,6 +63,12 @@ export default function ChallengePage() {
     );
   }
 
+  const hasEnglish = !!challenge.contentEnglish;
+  const hasHebrew = !!challenge.contentHebrew;
+  const hasBoth = hasEnglish && hasHebrew;
+
+  const effectiveLang = hasBoth ? language : hasHebrew ? "hebrew" : "english";
+
   const progress =
     challenge.targetCount && challenge.currentCount !== null
       ? Math.min(100, Math.round(((challenge.currentCount ?? 0) / challenge.targetCount) * 100))
@@ -65,6 +76,7 @@ export default function ChallengePage() {
 
   return (
     <div className="fixed inset-0 bg-white flex flex-col z-50 overflow-hidden">
+      {/* Header */}
       <div className="flex items-center p-4 border-b border-blush/10 bg-white safe-area-top">
         <button
           onClick={() => setLocation("/")}
@@ -78,6 +90,7 @@ export default function ChallengePage() {
         <div className="w-10 flex-shrink-0" />
       </div>
 
+      {/* Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="p-4 space-y-4">
 
@@ -148,21 +161,23 @@ export default function ChallengePage() {
             </div>
           )}
 
-          {challenge.contentEnglish && (
+          {effectiveLang === "english" && hasEnglish && (
             <div className="bg-white rounded-2xl p-5 border border-blush/10">
               <div
-                className="platypi-regular text-sm text-black leading-relaxed"
-                dangerouslySetInnerHTML={{ __html: formatTextContent(challenge.contentEnglish) }}
+                className="platypi-regular text-black leading-relaxed"
+                style={{ fontSize: `${fontSize}px` }}
+                dangerouslySetInnerHTML={{ __html: formatTextContent(challenge.contentEnglish!) }}
               />
             </div>
           )}
 
-          {challenge.contentHebrew && (
+          {effectiveLang === "hebrew" && hasHebrew && (
             <div className="bg-white rounded-2xl p-5 border border-blush/10">
               <div
-                className="vc-koren-hebrew text-base text-black leading-relaxed text-right"
+                className="vc-koren-hebrew text-black leading-relaxed text-right"
+                style={{ fontSize: `${fontSize + 2}px` }}
                 dir="rtl"
-                dangerouslySetInnerHTML={{ __html: formatTextContent(challenge.contentHebrew) }}
+                dangerouslySetInnerHTML={{ __html: formatTextContent(challenge.contentHebrew!) }}
               />
             </div>
           )}
@@ -185,9 +200,21 @@ export default function ChallengePage() {
             Open Ezras Nashim
           </button>
 
-          <div className="h-8" />
+          <div className="h-24" />
         </div>
       </div>
+
+      {/* Floating settings — only shown when there's content to control */}
+      {(hasEnglish || hasHebrew) && (
+        <FloatingSettings
+          showFontControls
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          showLanguageControls={hasBoth}
+          language={effectiveLang}
+          onLanguageChange={setLanguage}
+        />
+      )}
     </div>
   );
 }
