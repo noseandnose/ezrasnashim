@@ -7,6 +7,7 @@ import { useTrackModalComplete, useAnalytics } from "@/hooks/use-analytics";
 import { FullscreenModal } from "@/components/ui/fullscreen-modal";
 import { formatTextContent } from "@/lib/text-formatter";
 import { useHomeSummary } from "@/hooks/use-home-summary";
+import { containsHebrew } from "@/lib/hebrewUtils";
 import { Users, Sparkles, Target, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import axiosClient from "@/lib/axiosClient";
@@ -408,7 +409,7 @@ export default function CommunityChallengeModal() {
     (challenge?.challengeType === 'parsha-vort') ||
     (challenge?.contentHebrew && challenge?.contentEnglish);
 
-  const shareButton = isChallenge ? (
+  const shareButton = challengeId ? (
     <button
       onClick={handleShare}
       className="px-4 py-2 flex items-center gap-2 rounded-full bg-gradient-to-r from-blush to-lavender hover:from-blush/90 hover:to-lavender/90 active:scale-95 transition-all shadow-md"
@@ -441,7 +442,7 @@ export default function CommunityChallengeModal() {
       ) : challenge ? (
         <div className="space-y-4">
           {challenge.subtitle && (
-            <p className="text-center text-black/70 platypi-regular">
+            <p className={`text-center text-black/70 ${containsHebrew(challenge.subtitle) ? 'vc-koren-hebrew' : 'platypi-regular'}`}>
               {challenge.subtitle}
             </p>
           )}

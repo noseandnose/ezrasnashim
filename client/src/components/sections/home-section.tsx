@@ -10,6 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 import HeartProgress from "@/components/heart-progress";
 import type { Section } from "@/pages/home";
 import { getLocalDateString } from "@/lib/dateUtils";
+import { containsHebrew } from "@/lib/hebrewUtils";
 import torahFlower from "@assets/Torah_1771759230839.png";
 import tefillaFlower from "@assets/Tefilla_1771759230840.png";
 import tzedakaFlower from "@assets/Tzedaka_1771759230839.png";
@@ -579,9 +580,9 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
                 
                 {/* Title and Subtitle */}
                 <div className="flex-grow">
-                  <h3 className="platypi-bold text-sm text-black">{replacePlaceholders(todaysSpecial.title) || "Today's Special"}</h3>
+                  <h3 className={`text-sm text-black ${containsHebrew(todaysSpecial.title || '') ? 'vc-koren-hebrew' : 'platypi-bold'}`}>{replacePlaceholders(todaysSpecial.title) || "Today's Special"}</h3>
                   {todaysSpecial.subtitle && (
-                    <p className="platypi-regular text-xs text-black/70">{replacePlaceholders(todaysSpecial.subtitle)}</p>
+                    <p className={`text-xs text-black/70 ${containsHebrew(todaysSpecial.subtitle) ? 'vc-koren-hebrew' : 'platypi-regular'}`}>{replacePlaceholders(todaysSpecial.subtitle)}</p>
                   )}
                   {/* Challenge progress preview */}
                   {todaysSpecial.challengeType && (
