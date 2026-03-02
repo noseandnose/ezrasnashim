@@ -227,14 +227,16 @@ export default function CommunityChallengeModal() {
 
   const handleShare = async () => {
     const challengeName = challenge?.title || "Community Challenge";
+    const url = challengeId
+      ? `https://ezrasnashim.app/challenge/${challengeId}`
+      : "https://ezrasnashim.app/";
     const text = hasTargetCount 
       ? `Join us in the Ezras Nashim Community Challenge! ${challengeName}. Let's reach ${targetCount.toLocaleString()} together. We're at ${currentCount.toLocaleString()} so far!`
       : `Join us in the Ezras Nashim Community Challenge! ${challengeName}. ${currentCount.toLocaleString()} have joined so far!`;
-    const url = "https://ezrasnashim.app/";
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Ezras Nashim Community Challenge", text, url });
+        await navigator.share({ title: challengeName, text, url });
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           console.error('Share failed:', err);
