@@ -1,19 +1,13 @@
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, Sparkles, Calendar } from "lucide-react";
+import { ChevronLeft, Sparkles } from "lucide-react";
 import { formatTextContent } from "@/lib/text-formatter";
 import { FloatingSettings } from "@/components/ui/floating-settings";
 import type { TodaysSpecial } from "@shared/schema";
 
 type ChallengeWithExpiry = TodaysSpecial & { isExpired: boolean };
 
-const formatDateRange = (from: string, until: string) => {
-  const opts: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
-  const f = new Date(from + "T00:00:00").toLocaleDateString("en-US", opts);
-  const u = new Date(until + "T00:00:00").toLocaleDateString("en-US", opts);
-  return from === until ? f : `${f} – ${u}`;
-};
 
 export default function ChallengePage() {
   const [, params] = useRoute("/challenge/:id");
@@ -21,7 +15,7 @@ export default function ChallengePage() {
   const id = params?.id || "";
 
   const [fontSize, setFontSize] = useState(16);
-  const [language, setLanguage] = useState<"hebrew" | "english">("english");
+  const [language, setLanguage] = useState<"hebrew" | "english">("hebrew");
 
   const { data: challenge, isLoading, error } = useQuery<ChallengeWithExpiry>({
     queryKey: ["/api/challenge", id],
@@ -116,14 +110,8 @@ export default function ChallengePage() {
             </div>
             <p className="platypi-bold text-lg text-black leading-snug">{challenge.title}</p>
             {challenge.subtitle && (
-              <p className="platypi-regular text-sm text-black/70">{challenge.subtitle}</p>
+              <p className={`text-sm text-black/70 ${/[\u0590-\u05FF]/.test(challenge.subtitle) ? 'vc-koren-hebrew' : 'platypi-regular'}`}>{challenge.subtitle}</p>
             )}
-            <div className="flex items-center gap-1.5 pt-1">
-              <Calendar size={12} className="text-black/40" />
-              <p className="platypi-regular text-xs text-black/40">
-                {formatDateRange(challenge.fromDate, challenge.untilDate)}
-              </p>
-            </div>
           </div>
 
           {challenge.isExpired && (
