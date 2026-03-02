@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useRoute, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronLeft, Sparkles, Calendar, Settings } from "lucide-react";
+import { ChevronLeft, Sparkles, Calendar } from "lucide-react";
 import { formatTextContent } from "@/lib/text-formatter";
+import { FloatingSettings } from "@/components/ui/floating-settings";
 import type { TodaysSpecial } from "@shared/schema";
 
 type ChallengeWithExpiry = TodaysSpecial & { isExpired: boolean };
-type Language = "english" | "hebrew" | "both";
 
 const formatDateRange = (from: string, until: string) => {
   const opts: Intl.DateTimeFormatOptions = { month: "long", day: "numeric", year: "numeric" };
@@ -21,8 +21,7 @@ export default function ChallengePage() {
   const id = params?.id || "";
 
   const [fontSize, setFontSize] = useState(16);
-  const [language, setLanguage] = useState<Language>("both");
-  const [showSettings, setShowSettings] = useState(false);
+  const [language, setLanguage] = useState<"hebrew" | "english">("english");
 
   const { data: challenge, isLoading, error } = useQuery<ChallengeWithExpiry>({
     queryKey: ["/api/challenge", id],
@@ -68,13 +67,12 @@ export default function ChallengePage() {
   const hasHebrew = !!challenge.contentHebrew;
   const hasBoth = hasEnglish && hasHebrew;
 
+  const effectiveLang = hasBoth ? language : hasHebrew ? "hebrew" : "english";
+
   const progress =
     challenge.targetCount && challenge.currentCount !== null
       ? Math.min(100, Math.round(((challenge.currentCount ?? 0) / challenge.targetCount) * 100))
       : null;
-
-  const showEnglish = hasEnglish && (language === "english" || language === "both");
-  const showHebrew = hasHebrew && (language === "hebrew" || language === "both");
 
   return (
     <div className="fixed inset-0 bg-white flex flex-col z-50 overflow-hidden">
@@ -89,64 +87,8 @@ export default function ChallengePage() {
         <div className="flex-1 text-center px-2">
           <h1 className="platypi-bold text-lg text-black truncate">Community Challenge</h1>
         </div>
-        {(hasEnglish || hasHebrew) ? (
-          <button
-            onClick={() => setShowSettings(s => !s)}
-            className={`p-2 rounded-full transition-colors flex-shrink-0 ${showSettings ? "bg-blush/20 text-blush" : "hover:bg-blush/10 text-black/60"}`}
-          >
-            <Settings size={20} />
-          </button>
-        ) : (
-          <div className="w-10 flex-shrink-0" />
-        )}
+        <div className="w-10 flex-shrink-0" />
       </div>
-
-      {/* Settings Panel */}
-      {showSettings && (
-        <div className="bg-white border-b border-blush/10 px-4 py-3 space-y-3">
-          {/* Font size */}
-          <div className="flex items-center justify-between">
-            <span className="platypi-medium text-sm text-black/60">Font size</span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setFontSize(s => Math.max(12, s - 2))}
-                className="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-black/60 hover:text-black transition-colors platypi-medium"
-              >
-                −
-              </button>
-              <span className="platypi-medium text-sm text-black w-6 text-center">{fontSize}</span>
-              <button
-                onClick={() => setFontSize(s => Math.min(32, s + 2))}
-                className="w-7 h-7 rounded-full bg-black/5 flex items-center justify-center text-black/60 hover:text-black transition-colors platypi-medium"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Language toggle — only shown if both exist */}
-          {hasBoth && (
-            <div className="flex items-center justify-between">
-              <span className="platypi-medium text-sm text-black/60">Language</span>
-              <div className="flex gap-1 bg-black/5 rounded-full p-1">
-                {(["english", "both", "hebrew"] as Language[]).map(lang => (
-                  <button
-                    key={lang}
-                    onClick={() => setLanguage(lang)}
-                    className={`px-3 py-1 rounded-full text-xs platypi-medium transition-colors ${
-                      language === lang
-                        ? "bg-white text-black shadow-sm"
-                        : "text-black/50 hover:text-black"
-                    }`}
-                  >
-                    {lang === "english" ? "EN" : lang === "hebrew" ? "עב" : "Both"}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
@@ -219,7 +161,7 @@ export default function ChallengePage() {
             </div>
           )}
 
-          {showEnglish && (
+          {effectiveLang === "english" && hasEnglish && (
             <div className="bg-white rounded-2xl p-5 border border-blush/10">
               <div
                 className="platypi-regular text-black leading-relaxed"
@@ -229,7 +171,7 @@ export default function ChallengePage() {
             </div>
           )}
 
-          {showHebrew && (
+          {effectiveLang === "hebrew" && hasHebrew && (
             <div className="bg-white rounded-2xl p-5 border border-blush/10">
               <div
                 className="vc-koren-hebrew text-black leading-relaxed text-right"
@@ -258,9 +200,21 @@ export default function ChallengePage() {
             Open Ezras Nashim
           </button>
 
-          <div className="h-8" />
+          <div className="h-24" />
         </div>
       </div>
+
+      {/* Floating settings — only shown when there's content to control */}
+      {(hasEnglish || hasHebrew) && (
+        <FloatingSettings
+          showFontControls
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          showLanguageControls={hasBoth}
+          language={effectiveLang}
+          onLanguageChange={setLanguage}
+        />
+      )}
     </div>
   );
 }
