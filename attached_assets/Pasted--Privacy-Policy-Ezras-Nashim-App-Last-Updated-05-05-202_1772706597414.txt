@@ -1,25 +1,4 @@
-import { useEffect } from "react";
-import { X } from "lucide-react";
-import { useLocation } from "wouter";
-import { sanitizeHTML } from "@/lib/sanitize";
-
-export default function Privacy() {
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    // Prevent scrolling on the background
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, []);
-
-  const handleClose = () => {
-    setLocation("/");
-  };
-
-  const privacyContent = `# Privacy Policy — Ezras Nashim App
+# Privacy Policy — Ezras Nashim App
 
 **Last Updated: 05/05/2026**
 
@@ -93,47 +72,4 @@ We may update this Privacy Policy from time to time. We will notify you of mater
 If you have questions about this Privacy Policy, please contact us at:
 
 **Email**: team@ezrasnashim.app
-**Website**: https://ezrasnashim.app`;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-gradient-to-r from-blush to-sand rounded-t-xl">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-xl font-playfair font-bold text-white">
-              Privacy Policy
-            </h2>
-          </div>
-
-          <button
-            onClick={handleClose}
-            className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
-          >
-            <X className="w-5 h-5 text-white" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-6">
-          <div className="prose prose-gray max-w-none">
-            <div
-              className="whitespace-pre-line leading-relaxed text-gray-800 text-base"
-              dangerouslySetInnerHTML={{
-                __html: sanitizeHTML(
-                  privacyContent
-                    .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blush underline">$1</a>')
-                    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-                    .replace(/^### (.+)$/gm, '<h3 class="text-lg font-semibold mt-4 mb-2 text-gray-800">$1</h3>')
-                    .replace(/^## (.+)$/gm, '<h2 class="text-xl font-bold mt-6 mb-3 text-gray-900">$1</h2>')
-                    .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mt-2 mb-4 text-gray-900">$1</h1>')
-                    .replace(/^- (.+)$/gm, '<div class="flex gap-2 my-0.5"><span class="text-blush flex-shrink-0">•</span><span>$1</span></div>')
-                ),
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+**Website**: https://ezrasnashim.app
