@@ -261,8 +261,12 @@ function HomeSectionComponent({ onSectionChange }: HomeSectionProps) {
   // Memoized backgrounds - depend on timePeriod which updates with currentMinute
   const sectionBackground = useMemo(() => getSectionBg(timePeriod), [timePeriod]);
 
+  // Parse today's shkia into a Date so we can use the Jewish halachic day boundary
+  const shkiaDate = useMemo(() => parseTimeToday(jewishTimesQuery.data?.shkia), [jewishTimesQuery.data?.shkia]);
+
   // Use batched home summary for better performance (message, sponsor, todaysSpecial in one call)
-  const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary();
+  // Pass shkia so the hook fetches for the correct halachic date (after sunset = next Jewish day)
+  const { data: homeSummary, isLoading: sponsorLoading } = useHomeSummary(shkiaDate);
   const sponsor = homeSummary?.sponsor;
   const todaysSpecial = homeSummary?.todaysSpecial;
   const todayMessage = homeSummary?.message;

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getLocalDateString } from "@/lib/dateUtils";
+import { getHalachicDateString } from "@/lib/dateUtils";
 
 interface Message {
   id: number;
@@ -50,14 +50,14 @@ interface HomeSummary {
   fetchedAt: string;
 }
 
-export function useHomeSummary() {
-  const today = getLocalDateString();
+export function useHomeSummary(shkia?: Date | null) {
+  const halachicDate = getHalachicDateString(shkia);
 
   return useQuery<HomeSummary>({
-    queryKey: ['/api/home-summary', today],
+    queryKey: ['/api/home-summary', halachicDate],
     queryFn: async () => {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/home-summary?date=${today}`
+        `${import.meta.env.VITE_API_URL}/api/home-summary?date=${halachicDate}`
       );
       if (!response.ok) {
         throw new Error('Failed to fetch home summary');
