@@ -575,22 +575,14 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             <div 
               className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
-                background: (isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon'))
-                  ? 'rgba(139, 169, 131, 0.35)'
-                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? (
-                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-              ) : (
-                <BookOpen className="text-black" size={12} />
-              )}
+              <BookOpen className="text-black" size={12} />
               <p className="platypi-bold text-xs text-black">Siddur</p>
             </div>
-            <p className="platypi-regular text-xs text-black leading-tight">
-              {(isModalComplete('al-hamichiya') || isModalComplete('birkat-hamazon')) ? 'Completed' : 'Tefillas & Brochas'}
-            </p>
+            <p className="platypi-regular text-xs text-black leading-tight">Tefillas & Brochas</p>
           </button>
 
           {/* Tehillim */}
