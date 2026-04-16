@@ -88,6 +88,21 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
     return false;
   };
 
+  // Helper function to check if any brocha (from the Siddur) has been completed
+  const hasAnyBrochaCompleted = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const todaysCompletions = completedModals[today];
+    if (!todaysCompletions) return false;
+
+    // Check for brocha-* keys in repeatables (set by IndividualBrochaFullscreenContent)
+    for (const modalId of Object.keys(todaysCompletions.repeatables)) {
+      if (modalId.startsWith('brocha-') && todaysCompletions.repeatables[modalId] > 0) return true;
+    }
+    // Also check named brocha modal keys (set by BirkatHamazonModal)
+    if ((todaysCompletions.repeatables['birkat-hamazon'] || 0) > 0) return true;
+    if ((todaysCompletions.repeatables['al-hamichiya'] || 0) > 0) return true;
+    return false;
+  };
 
   // Time-based prayer logic
   const getCurrentPrayer = () => {
@@ -575,14 +590,22 @@ function TefillaSectionComponent({ onSectionChange: _onSectionChange }: TefillaS
             <div 
               className="inline-flex items-center justify-center gap-1.5 px-2.5 py-1 rounded-full mb-1.5"
               style={{
-                background: 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
+                background: hasAnyBrochaCompleted()
+                  ? 'rgba(139, 169, 131, 0.35)'
+                  : 'linear-gradient(135deg, rgba(232, 180, 188, 0.35) 0%, rgba(200, 162, 200, 0.35) 100%)',
                 border: '1px solid rgba(255, 255, 255, 0.4)',
               }}
             >
-              <BookOpen className="text-black" size={12} />
+              {hasAnyBrochaCompleted() ? (
+                <svg className="text-black" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              ) : (
+                <BookOpen className="text-black" size={12} />
+              )}
               <p className="platypi-bold text-xs text-black">Siddur</p>
             </div>
-            <p className="platypi-regular text-xs text-black leading-tight">Tefillas & Brochas</p>
+            <p className="platypi-regular text-xs text-black leading-tight">
+              {hasAnyBrochaCompleted() ? 'Completed' : 'Tefillas & Brochas'}
+            </p>
           </button>
 
           {/* Tehillim */}
