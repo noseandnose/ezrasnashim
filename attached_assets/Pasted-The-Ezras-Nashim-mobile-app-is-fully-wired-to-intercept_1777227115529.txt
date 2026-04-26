@@ -1,0 +1,47 @@
+The Ezras Nashim mobile app is fully wired to intercept https://ezrasnashim.app/c/*, /challenge/*, and /reset-password* as Universal Links (iOS) and App Links (Android). The mobile side is complete — but iOS and Android won't intercept those URLs until this web server publishes two .well-known files.
+
+Please add these two files and serve them at the exact paths and content-types below. No redirects, no auth, must be HTTPS, must respond with Content-Type: application/json.
+
+File 1: https://ezrasnashim.app/.well-known/apple-app-site-association
+The URL must NOT have a .json extension. Contents:
+
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": ["R2W4PB95MA.com.mycompany.ezrasnashim"],
+        "components": [
+          { "/": "/c/*" },
+          { "/": "/challenge/*" },
+          { "/": "/reset-password" },
+          { "/": "/reset-password/*" }
+        ]
+      }
+    ]
+  }
+}
+File 2: https://ezrasnashim.app/.well-known/assetlinks.json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.mycompany.ezrasnashim",
+      "sha256_cert_fingerprints": [
+        "67:29:5A:C9:A7:96:D2:B3:A5:8A:DD:41:8A:D4:29:09:6E:01:FF:C9:07:6D:53:50:CA:E4:7A:6C:CB:8B:F4:71",
+        "58:16:BA:7C:74:E0:D6:AE:5B:D1:A3:3E:7A:E1:9D:3A:A5:75:4F:2F:AB:9C:6A:7B:B9:C6:62:7A:00:03:68:EA"
+      ]
+    }
+  }
+]
+Implementation guidance
+Whatever framework this project uses (Next.js / Express / Vercel static / Netlify / S3+CloudFront), the pattern is the same:
+
+Next.js: drop the files in public/.well-known/. If Content-Type ends up as text/html, add a headers() rule in next.config.js for source: '/.well-known/:path*' setting Content-Type: application/json.
+Express / Node server: add two routes that res.setHeader('Content-Type', 'application/json') and res.sendFile(...).
+Vercel / Netlify static: drop in public/.well-known/ — usually just works. Verify with curl -I after deploy.
+CDN-fronted static: make sure the CDN doesn't strip or mis-set Content-Type. Override at the edge if needed.
+Verify after deploy
+curl -I https://ezrasnashim.app/.well-known/apple-app-site-association
+curl -I https://ezrasnashim.app/.well-known/assetlinks.json
+Both must respond HTTP/2 200 with content-type: application/json and no Location: header (no redirects).
