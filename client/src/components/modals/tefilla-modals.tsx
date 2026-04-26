@@ -1167,6 +1167,15 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
     }
   };
 
+  // Per-brocha completion check: each brocha has its own key
+  // IndividualBrochaFullscreenContent sets 'brocha-{id}'; BirkatHamazonModal sets named keys
+  const isBrochaComplete = (brocha: any): boolean => {
+    if (isModalComplete(`brocha-${brocha.id}`)) return true;
+    if (brocha.title === "Birkat Hamazon" && isModalComplete('birkat-hamazon')) return true;
+    if (brocha.title === "Me'ein Shalosh" && isModalComplete('al-hamichiya')) return true;
+    return false;
+  };
+
   // Type the arrays properly and handle loading states
   const dailyArray = Array.isArray(dailyBrochas) ? dailyBrochas : [];
   const specialArray = Array.isArray(specialBrochas) ? specialBrochas : [];
@@ -1222,6 +1231,7 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
         {currentBrochas.length > 0 ? (
           currentBrochas.map((brocha: any) => {
             const IconComponent = getBrochaIcon(brocha.title);
+            const isComplete = isBrochaComplete(brocha);
             return (
               <TapButton
                 key={brocha.id}
@@ -1237,11 +1247,17 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                   });
                   window.dispatchEvent(openEvent);
                 }}
-                className="w-full bg-white rounded-2xl p-2 border border-blush/10 hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3"
+                className={`w-full rounded-2xl p-2 border hover:scale-105 transition-all duration-300 shadow-lg text-left flex items-center space-x-3 ${
+                  isComplete ? 'bg-sage/10 border-sage/30' : 'bg-white border-blush/10'
+                }`}
               >
                 {/* Icon with gradient circle */}
-                <div className="p-3 rounded-full bg-gradient-feminine flex-shrink-0">
-                  <IconComponent className="text-white" size={20} strokeWidth={1.5} />
+                <div className={`p-3 rounded-full flex-shrink-0 ${isComplete ? 'bg-sage' : 'bg-gradient-feminine'}`}>
+                  {isComplete ? (
+                    <svg className="text-white" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                  ) : (
+                    <IconComponent className="text-white" size={20} strokeWidth={1.5} />
+                  )}
                 </div>
                 
                 {/* Text content */}
@@ -1249,11 +1265,13 @@ function BrochasFullscreenContent({ language: _language, fontSize: _fontSize }: 
                   <h3 className="platypi-bold text-lg text-black mb-1">
                     {brocha.title}
                   </h3>
-                  {brocha.description && (
+                  {isComplete ? (
+                    <p className="platypi-regular text-sm text-sage">Completed Today</p>
+                  ) : brocha.description ? (
                     <p className="platypi-regular text-sm text-black/70">
                       {brocha.description}
                     </p>
-                  )}
+                  ) : null}
                 </div>
               </TapButton>
             );

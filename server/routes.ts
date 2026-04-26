@@ -535,11 +535,15 @@ $('pw-btn').disabled=false;$('pw-btn').textContent='Update Password';
     res.setHeader('Cache-Control', 'no-cache');
     res.json({
       applinks: {
-        apps: [],
         details: [
           {
-            appIDs: ["R2W4PB95MA.com.ezrasnashim"],
-            paths: ["/c/*", "/challenge/*", "/reset-password*"]
+            appIDs: ["R2W4PB95MA.com.mycompany.ezrasnashim"],
+            components: [
+              { "/": "/c/*" },
+              { "/": "/challenge/*" },
+              { "/": "/reset-password" },
+              { "/": "/reset-password/*" }
+            ]
           }
         ]
       }
